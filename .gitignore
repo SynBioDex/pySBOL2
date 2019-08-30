@@ -1,6 +1,7 @@
 # From: https://python-packaging.readthedocs.io/en/latest/minimal.html
 # Compiled python modules
 *.pyc
+venv/**
 
 # Setuptools distribution folder
 /dist/

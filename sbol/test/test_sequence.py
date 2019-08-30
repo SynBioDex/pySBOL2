@@ -1,7 +1,7 @@
 import unittest
-from sbol3.sequence import *
-from sbol3.document import *
-from sbol3.config import *
+from sbol.sequence import *
+from sbol.document import *
+from sbol.config import *
 import os, sys
 
 MODULE_LOCATION = os.path.dirname(os.path.abspath(__file__))

@@ -1,10 +1,10 @@
 import unittest
 import sys
-from sbol3.test.test_document import TestDocument
-from sbol3.test.test_identified import TestIdentified
-from sbol3.test.test_config import TestConfig
-from sbol3.test.test_property import TestProperty
-from sbol3.test.test_roundtrip import TestRoundTripSBOL2, TestRoundTripFailSBOL2
+from sbol.test.test_document import TestDocument
+from sbol.test.test_identified import TestIdentified
+from sbol.test.test_config import TestConfig
+from sbol.test.test_property import TestProperty
+from sbol.test.test_roundtrip import TestRoundTripSBOL2, TestRoundTripFailSBOL2
 
 
 def runTests(test_list = (TestDocument, TestIdentified, TestConfig, TestProperty)):

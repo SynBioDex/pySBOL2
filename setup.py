@@ -1,7 +1,7 @@
 from setuptools import setup
 
-setup(name='sbol3',
-      version='3.0.0-alpha',
+setup(name='sbol',
+      version='2.3.3-beta',
       description='Pure Python implementation of SBOL standard',
       url='https://github.com/llotneb/SBOL.git',
       author='Benjamin Toll',
@@ -13,7 +13,7 @@ setup(name='sbol3',
             #   3 - Alpha
             #   4 - Beta
             #   5 - Production/Stable
-            'Development Status :: 3 - Alpha',
+            'Development Status :: 4 - Beta',
 
             # Indicate who your project is intended for
             'Intended Audience :: Developers',
@@ -28,7 +28,7 @@ setup(name='sbol3',
       ],
       # What does your project relate to?
       keywords='synthetic biology',
-      packages=['sbol3'],
+      packages=['sbol'],
       install_requires=[
           'rdflib',
           'deprecated',

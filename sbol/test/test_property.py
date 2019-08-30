@@ -1,8 +1,8 @@
 import unittest
-from sbol3.componentdefinition import ComponentDefinition
-from sbol3.document import Document
-from sbol3.constants import *
-from sbol3.config import *
+from sbol.componentdefinition import ComponentDefinition
+from sbol.document import Document
+from sbol.constants import *
+from sbol.config import *
 import os
 
 MODULE_LOCATION = os.path.dirname(os.path.abspath(__file__))
