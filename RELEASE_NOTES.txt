@@ -1,0 +1,3 @@
+v2.3.3-beta
+- serialization/deserialization of SBOL documents
+- modifying properties and SBOL objects
