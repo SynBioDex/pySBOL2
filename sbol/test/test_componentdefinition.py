@@ -13,20 +13,11 @@ class TestComponentDefinitions(unittest.TestCase):
 
     def test_typesSet(self):
         cas9 = ComponentDefinition('Cas9', BIOPAX_PROTEIN)  # Constructs a protein component
-        self.assertEqual(BIOPAX_PROTEIN, cas9.types)
+        self.assertEqual([BIOPAX_PROTEIN.n3()[1:-1]], cas9.types)
 
     def test_typesNotSet(self):
         target_promoter = ComponentDefinition('target_promoter')
-        self.assertEqual(BIOPAX_DNA, target_promoter.types)
-
-    def test_multipleRoles(self):
-        """pysbol2 - 'Getting, Setting, and Editing Attributes"""
-        plasmid = ComponentDefinition('pBB1', BIOPAX_DNA, '1.0.0')
-        plasmid.roles = [SO_PLASMID]
-        plasmid.roles.append(SO_CIRCULAR)
-        self.assertEqual(len(plasmid.roles), 2)
-        self.assertTrue(SO_PLASMID in plasmid.roles)
-        self.assertTrue(SO_CIRCULAR in plasmid.roles)
+        self.assertEqual([BIOPAX_DNA.n3()[1:-1]], target_promoter.types)
 
     def testAddComponentDefinition(self):
         setHomespace('http://sbols.org/CRISPR_Example')
