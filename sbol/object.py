@@ -302,9 +302,9 @@ class SBOLObject:
 
     def apply(self, callback, user_data):
         """
-        TODO document
-        :param callback:
-        :param user_data:
+        Recursively call this callback function on the user_data provided
+        :param callback: the callback function
+        :param user_data: the input to the callback
         :return: None
         """
         raise NotImplementedError("Not yet implemented")

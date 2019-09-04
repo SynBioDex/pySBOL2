@@ -30,8 +30,9 @@ setup(name='sbol',
       keywords='synthetic biology',
       packages=['sbol'],
       install_requires=[
-          'rdflib',
-          'deprecated',
-          'lxml'
+            'rdflib',
+            'deprecated',
+            'lxml',
+            'requests'
       ],
       zip_safe=False)

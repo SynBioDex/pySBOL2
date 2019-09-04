@@ -94,7 +94,8 @@ class Document(Identified):
         # The Document's register of objects
         self.objectCache = {}  # Needed?
         self.SBOLObjects = {}  # Needed?
-        self.resource_namespaces = None
+        self._namespaces = {}
+        self.resource_namespaces = set()
         self.designs = OwnedObject(self, SYSBIO_DESIGN, '0', '*', [libsbol_rule_11])
         self.builds = OwnedObject(self, SYSBIO_BUILD, '0', '*', [libsbol_rule_12])
         self.tests = OwnedObject(self, SYSBIO_TEST, '0', '*', [libsbol_rule_13])
@@ -269,10 +270,10 @@ cas9 = ComponentDefinition('Cas9', BIOPAX_PROTEIN)
         return self.moduleDefinitions.get(uri)
 
     def getSequence(self, uri):
-        raise NotImplementedError("Not yet implemented")
+        return self.sequences.get(uri)
 
     def getModel(self, uri):
-        raise NotImplementedError("Not yet implemented")
+        return self.models.get(uri)
 
     # File I/O #
     def write(self, filename):
@@ -302,7 +303,16 @@ cas9 = ComponentDefinition('Cas9', BIOPAX_PROTEIN)
         :param sbol_str: A string formatted in SBOL.
         :return: None
         """
-        raise NotImplementedError("Not yet implemented")
+        if not self.graph:
+            self.graph = rdflib.Graph()
+        # Save any changes we've made to the graph.
+        self.update_graph()
+        # Use rdflib to automatically merge the graphs together
+        self.graph.parse(data=sbol_str, format="application/rdf+xml")
+        # Clean up our internal data structures. (There's probably a more efficient way to merge.)
+        self.clear(clear_graph=False)
+        # Base our internal representation on the new graph.
+        self.parse_all()
 
     def writeString(self):
         """
@@ -310,7 +320,13 @@ cas9 = ComponentDefinition('Cas9', BIOPAX_PROTEIN)
 
         :return: A string representation of the objects in this Document.
         """
-        raise NotImplementedError("Not yet implemented")
+        if not self.graph:
+            self.graph = rdflib.Graph()
+        # Save any changes we've made to the graph.
+        self.update_graph()
+        # Write graph to string
+        rdf = SBOL2Serialize.serialize_sboll2(self.graph).decode('utf-8')
+        return rdf
 
     def append(self, filename):
         self.logger.debug("Appending data from file: " + filename)
@@ -322,73 +338,83 @@ cas9 = ComponentDefinition('Cas9', BIOPAX_PROTEIN)
         :return: None
         """
         with open(filename, 'r') as f:
-            self.graph = rdflib.Graph()
+            if not self.graph:
+                self.graph = rdflib.Graph()
+            # Save any changes we've made to the graph.
+            self.update_graph()
+            # Use rdflib to automatically merge the graphs together
             self.graph.parse(f, format="application/rdf+xml")
-            # Parse namespaces
-            self.logger.debug("*** Reading in namespaces (graph): ")
-            for ns in self.graph.namespaces():
-                self.logger.debug(ns)
-                self._namespaces[ns[0]] = ns[1]
-            if self.logger.isEnabledFor(logging.DEBUG):
-                self.logger.debug("*** Internal namespaces data structure: ")
-                for ns in self._namespaces:
-                    self.logger.debug(ns)
-            # Find top-level objects
-            top_level_query = "PREFIX : <http://example.org/ns#> " \
-                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " \
-                "PREFIX sbol: <http://sbols.org/v2#> " \
-                "SELECT ?s ?o " \
-                "{ ?s a ?o }"
-            sparql_results = self.graph.query(top_level_query)
-            for result in sparql_results:
-                if self.logger.isEnabledFor(logging.DEBUG):
-                    self.logger.debug("Type of s: " + str(type(result.s)))  # DEBUG
-                    self.logger.debug("Type of o: " + str(type(result.o)))  # DEBUG
-                self.parse_objects_inner(result.s, result.o)
-            # Find everything in the triple store
-            all_query = "PREFIX : <http://example.org/ns#> " \
-                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " \
-                "PREFIX sbol: <http://sbols.org/v2#> " \
-                "SELECT ?s ?p ?o " \
-                "{ ?s ?p ?o }"
-            all_results = self.graph.query(all_query)
-            # Find the graph base uri.  This is the location of the sbol
-            # file, and begins with the "file://" scheme.  Any URI in the
-            # file without a scheme will appear relative to this URI, after
-            # the file is parsed.  Therefore, if the any URI property value
-            # begins with the graph base uri, the base part of the URI is removed.
-            graphBaseURIStr = "file://" + os.getcwd() # Not sure if this is correct...
-            # Remove the filename from the path
-            pos = graphBaseURIStr.rfind('/')
-            if pos != -1:
-                pos += 1
-            rdf_type = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
-            for result in all_results:
-                # Look for properties
-                if str(result.p) != rdf_type:
-                    obj = result.o
-                    lval = str(obj)
-                    if isinstance(result.o, URIRef) and pos != -1:
-                        if lval[:pos] == graphBaseURIStr:
-                            # This was a URI without a scheme.  Remove URI base
-                            lval = lval[pos:]
-                            obj = URIRef(lval)
-                    self.parse_properties_inner(result.s, result.p, obj)
+            # Clean up our internal data structures. (There's probably a more efficient way to merge.)
+            self.clear(clear_graph=False)
+            # Base our internal representation on the new graph.
+            self.parse_all()
 
-            # Additional step - python version, only. Remove anything that isn't meant to be at
-            # the top level.
-            for result in all_results:
-                if str(result.p) != rdf_type:
-                    obj = result.o
-                    lval = str(obj)
-                    if isinstance(result.o, URIRef) and pos != -1:
-                        if lval[:pos] == graphBaseURIStr:
-                            # This was a URI without a scheme.  Remove URI base
-                            lval = lval[pos:]
-                            obj = URIRef(lval)
-                    self.remove_descendants()
-            # TODO parse annotation objects
-            # TODO dress document
+    def parse_all(self):
+        # Parse namespaces
+        self.logger.debug("*** Reading in namespaces (graph): ")
+        for ns in self.graph.namespaces():
+            self.logger.debug(ns)
+            self._namespaces[ns[0]] = ns[1]
+        if self.logger.isEnabledFor(logging.DEBUG):
+            self.logger.debug("*** Internal namespaces data structure: ")
+            for ns in self._namespaces:
+                self.logger.debug(ns)
+        # Find top-level objects
+        top_level_query = "PREFIX : <http://example.org/ns#> " \
+                          "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " \
+                          "PREFIX sbol: <http://sbols.org/v2#> " \
+                          "SELECT ?s ?o " \
+                          "{ ?s a ?o }"
+        sparql_results = self.graph.query(top_level_query)
+        for result in sparql_results:
+            if self.logger.isEnabledFor(logging.DEBUG):
+                self.logger.debug("Type of s: " + str(type(result.s)))  # DEBUG
+                self.logger.debug("Type of o: " + str(type(result.o)))  # DEBUG
+            self.parse_objects_inner(result.s, result.o)
+        # Find everything in the triple store
+        all_query = "PREFIX : <http://example.org/ns#> " \
+                    "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " \
+                    "PREFIX sbol: <http://sbols.org/v2#> " \
+                    "SELECT ?s ?p ?o " \
+                    "{ ?s ?p ?o }"
+        all_results = self.graph.query(all_query)
+        # Find the graph base uri.  This is the location of the sbol
+        # file, and begins with the "file://" scheme.  Any URI in the
+        # file without a scheme will appear relative to this URI, after
+        # the file is parsed.  Therefore, if the any URI property value
+        # begins with the graph base uri, the base part of the URI is removed.
+        graphBaseURIStr = "file://" + os.getcwd()  # Not sure if this is correct...
+        # Remove the filename from the path
+        pos = graphBaseURIStr.rfind('/')
+        if pos != -1:
+            pos += 1
+        rdf_type = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+        for result in all_results:
+            # Look for properties
+            if str(result.p) != rdf_type:
+                obj = result.o
+                lval = str(obj)
+                if isinstance(result.o, URIRef) and pos != -1:
+                    if lval[:pos] == graphBaseURIStr:
+                        # This was a URI without a scheme.  Remove URI base
+                        lval = lval[pos:]
+                        obj = URIRef(lval)
+                self.parse_properties_inner(result.s, result.p, obj)
+
+        # Additional step - python version, only. Remove anything that isn't meant to be at
+        # the top level.
+        for result in all_results:
+            if str(result.p) != rdf_type:
+                obj = result.o
+                lval = str(obj)
+                if isinstance(result.o, URIRef) and pos != -1:
+                    if lval[:pos] == graphBaseURIStr:
+                        # This was a URI without a scheme.  Remove URI base
+                        lval = lval[pos:]
+                        obj = URIRef(lval)
+                self.remove_descendants()
+        # TODO parse annotation objects
+        # TODO dress document
 
     def parse_objects_inner(self, subject, obj):
         # Construct the top-level object if we haven't already done so and its type is something we know about.
@@ -480,7 +506,7 @@ cas9 = ComponentDefinition('Cas9', BIOPAX_PROTEIN)
         """
         raise NotImplementedError("Not yet implemented")
 
-    def clear(self):
+    def clear(self, clear_graph=True):
         """
         Delete all properties and objects in the Document.
 
@@ -492,7 +518,8 @@ cas9 = ComponentDefinition('Cas9', BIOPAX_PROTEIN)
         for object_store in self.owned_objects.values():
             object_store.clear()
         self._namespaces.clear()
-        self.graph = rdflib.Graph()  # create a new graph
+        if clear_graph:
+            self.graph = rdflib.Graph()  # create a new graph
 
     def query_repository(self, command):
         """
