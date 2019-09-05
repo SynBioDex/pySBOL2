@@ -4,11 +4,8 @@ import logging
 from logging.config import fileConfig
 from sbol.sbolerror import *
 from sbol.constants import *
-from sbol.config import Config, ConfigOptions
-from requests.exceptions import HTTPError
-import pprint
+from sbol.config import Config, ConfigOptions, parseURLDomain
 import getpass
-
 
 LOGGING_CONFIG = 'logging_config.ini'
 
@@ -66,17 +63,22 @@ class PartShop:
         else:
             raise TypeError('URIs must be str or list. Found: ' + str(type(uris)))
         for uri in endpoints:
-            uri += '/sbol'
+            if self.resource in uri:  # user has specified full URI
+                query = uri
+            elif len(self.spoofed_resource) > 0 and self.resource in uri:
+                query = uri.replace(self.resource, self.spoofed_resource)
+            else:
+                query = self.resource + '/' + uri  # Assume user has only specified displayId
+            query += '/sbol'
             if not recursive:
-                uri += 'nr'
+                query += 'nr'
             if Config.getOption(ConfigOptions.VERBOSE.value):
-                self.logger.debug('Issuing GET request ' + uri)
+                self.logger.debug('Issuing GET request ' + query)
             # Issue GET request
-            response = requests.get(uri)
-            pp = pprint.PrettyPrinter(indent=4)  # DEBUG
-            pp.pprint(str(response.content))  # DEBUG
+            response = requests.get(query,
+                                    headers={'X-authorization': self.key, 'Accept': 'text/plain'})
             if response.status_code == 404:
-                raise SBOLError(SBOLErrorCode.SBOL_ERROR_NOT_FOUND, 'Part not found. Unable to pull: ' + uri)
+                raise SBOLError(SBOLErrorCode.SBOL_ERROR_NOT_FOUND, 'Part not found. Unable to pull: ' + query)
             elif response.status_code == 401:
                 raise SBOLError(SBOLErrorCode.SBOL_ERROR_HTTP_UNAUTHORIZED, 'Please log in with valid credentials')
             elif not response:
@@ -94,54 +96,59 @@ class PartShop:
         :param overwrite: An integer code: 0 (default) - do not overwrite, 1 - overwrite, 2 - merge
         :return:
         """
-        raise NotImplementedError('Not yet implemented')
-        # if collection == '':
-        #     # If a Document is submitted as a new collection, then Document metadata must be specified
-        #     if len(doc.displayId) == 0 or len(doc.name) == 0 or len(doc.description) == 0:
-        #         raise SBOLError(SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT,
-        #                         'Cannot submit Document. The Document must be assigned a displayId, name, and ' +
-        #                         'description for upload.')
-        # else:
-        #     if Config.getOption(ConfigOptions.VERBOSE.value) is True:
-        #         self.logger.info('Submitting Document to an existing collection: ' + collection)
+        if collection == '':
+            # If a Document is submitted as a new collection, then Document metadata must be specified
+            if len(doc.displayId) == 0 or len(doc.name) == 0 or len(doc.description) == 0:
+                raise SBOLError(SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT,
+                                'Cannot submit Document. The Document must be assigned a displayId, name, and ' +
+                                'description for upload.')
+        else:
+            if len(self.spoofed_resource) > 0 and self.resource in collection:
+                # Correct collection URI in case a spoofed resource is being used
+                collection = collection.replace(self.resource, self.spoofed_resource)
+            if Config.getOption(ConfigOptions.VERBOSE.value) is True:
+                self.logger.info('Submitting Document to an existing collection: ' + collection)
         # if Config.getOption(ConfigOptions.SERIALIZATION_FORMAT.value) == 'rdfxml':
         #     self.addSynBioHubAnnotations(doc)
-        # data = {}
-        # if len(doc.displayId) > 0:
-        #     data['id'] = doc.displayId
-        # if len(doc.version) > 0:
-        #     data['version'] = doc.version
-        # if len(doc.name) > 0:
-        #     data['name'] = doc.name
-        # if len(doc.description) > 0:
-        #     data['description'] = doc.description
-        # citations = ''
-        # for citation in doc.citations:
-        #     citations += citation + ','
-        # citations = citations[0:-1]  # chop off final comma
-        # data['citations'] = citations
-        # keywords = ''
-        # for kw in doc.keywords:
-        #     keywords += kw + ','
-        # keywords = keywords[0:-1]
-        # data['keywords'] = keywords
-        # data['overwrite_merge'] = overwrite
-        # data['user'] = self.key
-        # data['file'] = doc.writeString()
-        # if collection != '':
-        #     data['rootCollections'] = collection
-        # # Send POST request
-        # response = requests.post(self.resource + '/submit',
-        #                          data=data,
-        #                          headers={'Accept': 'text/plain', 'X-authorization': self.key})
-        # if response:
-        #     return response
-        # elif response.status_code == 401:
-        #     raise SBOLError(SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST,
-        #                     'You must login with valid credentials before submitting')
-        # else:
-        #     raise SBOLError(SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST,
-        #                     'HTTP post request failed with: ' + str(response))
+        files = {}
+        if len(doc.displayId) > 0:
+            files['id'] = (None, doc.displayId)
+        if len(doc.version) > 0:
+            files['version'] = (None, doc.version)
+        if len(doc.name) > 0:
+            files['name'] = (None, doc.name)
+        if len(doc.description) > 0:
+            files['description'] = (None, doc.description)
+        citations = ''
+        for citation in doc.citations:
+            citations += citation + ','
+        citations = citations[0:-1]  # chop off final comma
+        files['citations'] = (None, citations)
+        keywords = ''
+        for kw in doc.keywords:
+            keywords += kw + ','
+        keywords = keywords[0:-1]
+        files['keywords'] = (None, keywords)
+        files['overwrite_merge'] = (None, str(overwrite))
+        files['user'] = (None, self.key)
+        files['file'] = (None, doc.writeString(), 'text/xml')
+        if collection != '':
+            files['rootCollections'] = (None, collection)
+        # Send POST request
+        print(files)
+        response = requests.post(self.resource + '/submit',
+                                 files=files,
+                                 headers={'Accept': 'text/plain', 'X-authorization': self.key})
+        print(response.text)
+        if response:
+            return response
+        elif response.status_code == 401:
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST,
+                            'You must login with valid credentials before submitting')
+        else:
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST,
+                            'HTTP post request failed with: ' + str(response.status_code) +
+                            ' - ' + str(response.content))
 
     def login(self, user_id, password=''):
         """In order to submit to a PartShop, you must login first.
@@ -152,16 +159,16 @@ class PartShop:
         """
         if password is None or password == '':
             password = getpass.getpass()
-        # SECURITY NOTE" Including the password in the query string as plaintext is bad practice,
-        # but HTTPS should encrypt it for us.
-        response = requests.get(
-            self.resource,
-            params={'email': user_id, 'password': password},
+        response = requests.post(
+            parseURLDomain(self.resource) + '/remoteLogin',
+            data={'email': user_id, 'password': password},
             headers={'Content-Type': 'application/x-www-form-urlencoded'}
         )
         if not response:
             raise SBOLError(SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST,
                             'Login failed due to an HTTP error: ' + str(response))
+        self.key = response.content.decode('utf-8')
+        return response
 
     # def addSynBioHubAnnotations(self, doc):
     #     doc.addNamespace("http://wiki.synbiohub.org/wiki/Terms/synbiohub#", "sbh")

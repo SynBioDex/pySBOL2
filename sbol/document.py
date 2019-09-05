@@ -329,7 +329,6 @@ cas9 = ComponentDefinition('Cas9', BIOPAX_PROTEIN)
         return rdf
 
     def append(self, filename):
-        self.logger.debug("Appending data from file: " + filename)
         """
         Read an RDF/XML file and attach the SBOL objects to this Document.
 
@@ -337,6 +336,7 @@ cas9 = ComponentDefinition('Cas9', BIOPAX_PROTEIN)
         :param filename: The full name of the file you want to read (including file extension).
         :return: None
         """
+        self.logger.debug("Appending data from file: " + filename)
         with open(filename, 'r') as f:
             if not self.graph:
                 self.graph = rdflib.Graph()

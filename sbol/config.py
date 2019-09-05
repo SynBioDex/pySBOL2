@@ -1,7 +1,7 @@
-from enum import Enum
 from .sbolerror import *
 import os
 import random
+
 
 class FileFormats(Enum):
     JSON = 'json'
@@ -278,7 +278,10 @@ def parseNamespace(uri):
 
 
 def parseURLDomain(url):
-    return url.split('://')[1].split('/')[0]
+    protocol, path = url.split('://')
+    path = path.split('/')[0]
+    url = '://'.join([protocol, path])
+    return url
 
 
 def parsePropertyName(uri):
