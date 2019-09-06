@@ -27,6 +27,7 @@ class PartShop:
             self.logger.setLevel(logging.INFO)
         # initialize member variables
         self.resource = url
+        self.user = ''
         self.key = ''
         self.spoofed_resource = spoofed_url
         if len(url) > 0 and url[-1] == '/':
@@ -41,15 +42,35 @@ class PartShop:
         raise NotImplementedError('Not yet implemented')
 
     def sparqlQuery(self, query):
-        """Issue a SPARQL query"""
-        raise NotImplementedError('Not yet implemented')
+        """
+        Issue a SPARQL query
+        :param query: the SPARQL query
+        :return: the HTTP response object
+        """
+        endpoint = parseURLDomain(self.resource) + '/sparql'
+        if self.spoofed_resource == '':
+            resource = self.resource
+        else:
+            resource = self.spoofed_resource
+        p = query.find('WHERE')
+        if p != -1:
+            from_clause = ' FROM <' + parseURLDomain(resource) + '/user/' + self.user + '> '
+            query = query[:p].rstrip() + from_clause + query[p:].lstrip()
+        headers = {'X-authorization': self.key, 'Accept': 'application/json'}
+        params = {'query': query}  # should handle encoding the query
+        if Config.getOption(ConfigOptions.VERBOSE.value) is True:
+            self.logger.debug('Issuing SPARQL: ' + query)
+        response = requests.get(endpoint, headers=headers, params=params)
+        if not response:
+                raise SBOLError(SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST, response)
+        return response
 
     def pull(self, uris, doc, recursive=True):
         """Retrieve an object from an online resource
         :param uris: A list of SBOL objects you want to retrieve, or a single SBOL object URI
         :param doc: A document to add the data to
         :param recursive: Whether the GET request should be recursive
-        :return:
+        :return: nothing (doc parameter is updated, or an exception is thrown)
         """
         # IMPLEMENTATION NOTE: rdflib.Graph.parse() actually lets you pass a URL as an argument.
         # I decided to not use this method, because I couldn't find an easy way to get the response
@@ -94,7 +115,7 @@ class PartShop:
         :param doc: The Document to submit
         :param collection: The URI of a SBOL Collection to which the Document contents will be uploaded
         :param overwrite: An integer code: 0 (default) - do not overwrite, 1 - overwrite, 2 - merge
-        :return:
+        :return: the HTTP response object
         """
         if collection == '':
             # If a Document is submitted as a new collection, then Document metadata must be specified
@@ -155,8 +176,9 @@ class PartShop:
         Register on [SynBioHub](http://synbiohub.org) to obtain account credentials.
         :param user_id: User ID
         :param password: User password
-        :return:
+        :return: the HTTP response object
         """
+        self.user = user_id
         if password is None or password == '':
             password = getpass.getpass()
         response = requests.post(
