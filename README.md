@@ -1,4 +1,5 @@
 # SBOL
+[![Build Status](https://travis-ci.com/llotneb/SBOL.svg?branch=master)](https://travis-ci.com/llotneb/SBOL)
 
 **SBOL** is a pure Python implementation of the SBOL standard [Synthetic Biology Open Language (SBOL)](http://www.sbolstandard.org/) - 
 an open standard for the representation of *in silico* biological designs. It draws from [libSBOL](https://github.com/SynBioDex/libSBOL)
@@ -26,6 +27,8 @@ To run the round-trip tests, execute the following command.
 import sbol
 sbol.testRoundTrip()
 ```
+If you are a developer, please install the scripts in the 'scripts' directory in your project's .git/hooks directory.
+This will ensure that unit tests are run before each commit.
 
 ## DOCUMENTATION
 
