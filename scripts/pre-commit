@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# Run unit tests
+python3 -c "import sbol; sbol.testSBOL()" # > /dev/null 2>&1
+if [ $? != 0 ]; then
+   cat <<\EOF
+Error: There were failing unit tests.
+
+Please make sure all unit tests are passing before making
+a commit.
+EOF
+    exit 1
+fi 
