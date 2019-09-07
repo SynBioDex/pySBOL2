@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# Run unit tests
+echo "Running unit tests..."
+python3 -c "import sbol; sbol.testSBOL()" # > /dev/null 2>&1
+if [ $? != 0 ]; then
+   cat <<\EOF
+Error: There were failing unit tests.
+
+Please make sure all unit tests are passing before making
+a commit.
+EOF
+    exit 1
+fi 
+
+# Run style checker
+echo "Checking style..."
+pycodestyle --exclude=./venv,./sbol/venv . > style.txt
+result=$(cat style.txt | grep '^[0-9][0-9]*' | awk '{print $1}')
+if [ "$result" -gt 100 ]; then
+    cat <<\EOF
+Error: Too many style violations.
+
+Please make sure there are fewer than 100 style violations
+before making a commit.
+EOF
+    exit 1
+else
+    echo "Found $result style violations"
+fi

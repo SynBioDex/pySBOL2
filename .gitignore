@@ -13,3 +13,4 @@ venv/**
 *.swp
 .idea/
 .pytest_cache/
+style.txt

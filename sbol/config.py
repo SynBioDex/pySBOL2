@@ -61,7 +61,8 @@ options = {
 valid_options = {
     ConfigOptions.SBOL_COMPLIANT_URIS.value: {True, False},
     ConfigOptions.SBOL_TYPED_URIS.value: {True, False},
-    ConfigOptions.SERIALIZATION_FORMAT.value: {'sbol', 'rdfxml', 'json', 'ntriples'},
+    ConfigOptions.SERIALIZATION_FORMAT.value: {'sbol', 'rdfxml',
+                                               'json', 'ntriples'},
     ConfigOptions.VALIDATE.value: {True, False},
     ConfigOptions.LANGUAGE.value: {'SBOL2', 'FASTA', 'GenBank'},
     ConfigOptions.TEST_EQUALITY.value: {True, False},
@@ -153,7 +154,7 @@ class Config:
         """
         Configure options for libSBOL. Access online validation and conversion.
 
-        | Option                       | Description                                                              | Values          |
+        | Option                       | Description                                                              | Values          |   # noqa
         | :--------------------------- | :----------------------------------------------------------------------- | :-------------- |
         | homespace                    | Enable validation and conversion requests through the online validator   | http://examples.org |
         | sbol_compliant_uris          | Enables autoconstruction of SBOL-compliant URIs from displayIds          | True or False   |
@@ -181,14 +182,17 @@ class Config:
                     options[option] = val
                 else:
                     raise SBOLError(SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT,
-                                    val + ' is not a valid value for this option. Valid options are ' +
+                                    val +
+                                    ' is not a valid value for '
+                                    'this option. Valid options are ' +
                                     str(valid_options[option]))
             else:
                 # Any argument is valid, eg. uriPrefix
                 options[option] = val
         else:
             raise SBOLError(SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT,
-                            option + ' is not a valid configuration option for libSBOL')
+                            option +
+                            ' is not a valid configuration option for libSBOL')
 
     @staticmethod
     def getOption(option):
@@ -201,7 +205,8 @@ class Config:
             return options[option]
         else:
             raise SBOLError(SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT,
-                            str(option) + ' not a valid configuration option for libSBOL')
+                            str(option) +
+                            ' not a valid configuration option for libSBOL')
 
 
 # Global methods
@@ -233,7 +238,8 @@ def constructCompliantURI(sbol_type, display_id, version):
         return ''
 
 
-def constructCompliantURI_parentChild(parent_type, child_type, display_id, version):
+def constructCompliantURI_parentChild(parent_type, child_type,
+                                      display_id, version):
     if Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS.value) is True:
         return getHomespace() + os.sep + parseClassName(parent_type) + \
                os.sep + parseClassName(child_type) + \
@@ -270,7 +276,8 @@ def autoconstructURI():
 
 
 def getCompliantURI(uri_prefix, sbol_class_name, display_id, version):
-    return uri_prefix + os.sep + sbol_class_name + os.sep + display_id + os.sep + version
+    return uri_prefix + os.sep + sbol_class_name + \
+           os.sep + display_id + os.sep + version
 
 
 def parseClassName(uri):

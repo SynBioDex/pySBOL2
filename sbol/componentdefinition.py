@@ -25,13 +25,13 @@ class ComponentDefinition(TopLevel):
     # from appropriate ontologies, such as the BioPAX ontology
     # or the ontology of Chemical Entities of Biological Interest.
     # See the table below for examples.
-    # | Type              | URI for BioPAX Term                                           | LibSBOL symbol        |
-    # | :---------------- | :------------------------------------------------------------ | :-------------------- |
-    # | DNA               | http://www.biopax.org/release/biopax-level3.owl#DnaRegion     | BIOPAX_DNA            |
-    # | RNA               | http://www.biopax.org/release/biopax-level3.owl#RnaRegion     | BIOPAX_RNA            |
-    # | Protein           | http://www.biopax.org/release/biopax-level3.owl#Protein       | BIOPAX_PROTEIN        |
-    # | Small Molecule    | http://www.biopax.org/release/biopax-level3.owl#SmallMolecule | BIOPAX_SMALL_MOLECULE |
-    # | Complex           | http://www.biopax.org/release/biopax-level3.owl#Complex       | BIOPAX_COMPLEX        |
+    # | Type              | URI for BioPAX Term                                           | LibSBOL symbol        |  # noqa
+    # | :---------------- | :------------------------------------------------------------ | :-------------------- |  # noqa
+    # | DNA               | http://www.biopax.org/release/biopax-level3.owl#DnaRegion     | BIOPAX_DNA            |  # noqa
+    # | RNA               | http://www.biopax.org/release/biopax-level3.owl#RnaRegion     | BIOPAX_RNA            |  # noqa
+    # | Protein           | http://www.biopax.org/release/biopax-level3.owl#Protein       | BIOPAX_PROTEIN        |  # noqa
+    # | Small Molecule    | http://www.biopax.org/release/biopax-level3.owl#SmallMolecule | BIOPAX_SMALL_MOLECULE |  # noqa
+    # | Complex           | http://www.biopax.org/release/biopax-level3.owl#Complex       | BIOPAX_COMPLEX        |  # noqa
     _types = None  # URIProperty
 
     # The roles property is an OPTIONAL set of URIs
@@ -44,18 +44,18 @@ class ComponentDefinition(TopLevel):
     # For example, the roles property of a DNA or RNA ComponentDefinition
     # could contain URIs identifying terms from the Sequence Ontology (SO).
     # See the table below for common examples.
-    # | Role              | URI for Sequence Ontology Term            | LibSBOL symbol    |
-    # | :---------------- | :---------------------------------------- | :---------------- |
-    # | Miscellaneous     | http://identifiers.org/so/SO:0000001      | SO_MISC           |
-    # | Promoter          | http://identifiers.org/so/SO:0000167      | SO_PROMOTER       |
-    # | RBS               | http://identifiers.org/so/SO:0000139      | SO_RBS            |
-    # | CDS               | http://identifiers.org/so/SO:0000316      | SO_CDS            |
-    # | Terminator        | http://identifiers.org/so/SO:0000141      | SO_TERMINATOR     |
-    # | Gene              | http://identifiers.org/so/SO:0000704      |                   |
-    # | Operator          | http://identifiers.org/so/SO:0000057      |                   |
-    # | Engineered Gene   | http://identifiers.org/so/SO:0000280      |                   |
-    # | mRNA              | http://identifiers.org/so/SO:0000234      |                   |
-    # | Effector          | http://identifiers.org/chebi/CHEBI:35224  |                   |
+    # | Role              | URI for Sequence Ontology Term            | LibSBOL symbol    |  # noqa
+    # | :---------------- | :---------------------------------------- | :---------------- |  # noqa
+    # | Miscellaneous     | http://identifiers.org/so/SO:0000001      | SO_MISC           |  # noqa
+    # | Promoter          | http://identifiers.org/so/SO:0000167      | SO_PROMOTER       |  # noqa
+    # | RBS               | http://identifiers.org/so/SO:0000139      | SO_RBS            |  # noqa
+    # | CDS               | http://identifiers.org/so/SO:0000316      | SO_CDS            |  # noqa
+    # | Terminator        | http://identifiers.org/so/SO:0000141      | SO_TERMINATOR     |  # noqa
+    # | Gene              | http://identifiers.org/so/SO:0000704      |                   |  # noqa
+    # | Operator          | http://identifiers.org/so/SO:0000057      |                   |  # noqa
+    # | Engineered Gene   | http://identifiers.org/so/SO:0000280      |                   |  # noqa
+    # | mRNA              | http://identifiers.org/so/SO:0000234      |                   |  # noqa
+    # | Effector          | http://identifiers.org/chebi/CHEBI:35224  |                   |  # noqa
     _roles = None  # URIProperty
 
     # The components property is OPTIONAL and MAY
@@ -87,8 +87,10 @@ class ComponentDefinition(TopLevel):
 
     sequenceConstraints = None  # OwnedObject<SequenceConstraint>
 
-    def __init__(self, uri=URIRef("example"), component_type=URIRef(BIOPAX_DNA),
-                 version=VERSION_STRING, rdf_type=SBOL_COMPONENT_DEFINITION):
+    def __init__(self, uri=URIRef("example"),
+                 component_type=URIRef(BIOPAX_DNA),
+                 version=VERSION_STRING,
+                 rdf_type=SBOL_COMPONENT_DEFINITION):
         """Construct a ComponentDefinition.
 
         :param uri: A full URI including a scheme, namespace, and identifier.
@@ -170,7 +172,8 @@ class ComponentDefinition(TopLevel):
         """
         raise NotImplementedError("Not yet implemented")
 
-    def assemblePrimaryStructure(self, primary_structure, assembly_standard="", doc=None):
+    def assemblePrimaryStructure(self, primary_structure,
+                                 assembly_standard="", doc=None):
         """Assembles ComponentDefinition into a linear primary structure.
 
         The resulting data structure is a partial design,

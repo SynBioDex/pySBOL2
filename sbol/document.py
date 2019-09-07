@@ -256,7 +256,8 @@ class Document(Identified):
 
     def create(self, uri):
         """
-        Creates another SBOL object derived from TopLevel and adds it to the Document.
+        Creates another SBOL object derived from TopLevel
+        and adds it to the Document.
         NOTE: originally from ReferencedObject
         :param uri: In "open world" mode, this is a full URI
         and the same as the returned URI.
@@ -272,7 +273,6 @@ class Document(Identified):
     def get(self, uri):
         """
         Retrieve an object from the Document.
-cas9 = ComponentDefinition('Cas9', BIOPAX_PROTEIN)
         :param uri: The identity of the SBOL object you want to retrieve.
         :return: The SBOL object.
         """
@@ -292,8 +292,8 @@ cas9 = ComponentDefinition('Cas9', BIOPAX_PROTEIN)
         raise NotImplementedError("Not yet implemented")
 
     def getComponentDefinition(self, uri):
-        # NOTE: I couldn't find this in the original libSBOL source, but they are
-        # heavily used in all the unit tests.
+        # NOTE: I couldn't find this in the original libSBOL source,
+        # but they are heavily used in all the unit tests.
         return self.componentDefinitions.get(uri)
 
     def getModuleDefinition(self, uri):
@@ -496,7 +496,7 @@ cas9 = ComponentDefinition('Cas9', BIOPAX_PROTEIN)
             found = predicate.rfind('/')
         if found != -1:
             # property_ns, property_name = property_uri.split[:found]  # <-- this line didn't appear to have any purpose
-            # Checks if the object to which this property belongs already exists
+            # Checks if the object's property already exists
             if subject in self.SBOLObjects:
                 parent = self.SBOLObjects[subject]
                 # Decide if this triple corresponds to a simple property,
@@ -684,7 +684,8 @@ cas9 = ComponentDefinition('Cas9', BIOPAX_PROTEIN)
         :param uri:
         :return: str
         """
-        if self._default_namespace is not None and len(self._default_namespace) > 0:
+        if self._default_namespace is not None and \
+                len(self._default_namespace) > 0:
             if self._default_namespace in uri:
                 uri.replace(self._default_namespace, '')
                 return uri
@@ -723,7 +724,8 @@ cas9 = ComponentDefinition('Cas9', BIOPAX_PROTEIN)
 
     def find(self, uri):
         """
-        Search recursively for an SBOLObject in this Document that matches the uri.
+        Search recursively for an SBOLObject in this Document
+        that matches the uri.
 
         :param uri: The identity of the object to search for.
         :return: A pointer to the SBOLObject,

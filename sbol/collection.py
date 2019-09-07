@@ -5,7 +5,8 @@ from .property import URIProperty
 
 class Collection(TopLevel):
 
-    def __init__(self, type_uri=SBOL_COLLECTION, uri=URIRef("example"), version=VERSION_STRING):
+    def __init__(self, type_uri=SBOL_COLLECTION,
+                 uri=URIRef("example"), version=VERSION_STRING):
         super().__init__(type_uri, uri, version)
         self._members = URIProperty(self, SBOL_MEMBERS, '0', '*', [])
 

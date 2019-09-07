@@ -8,7 +8,8 @@ class Measurement(Identified):
     """The purpose of the Measure class is to link a numerical value
     to a unit of measure."""
 
-    def __init__(self, uri=URIRef('example'), value=0.0, unit='', version=VERSION_STRING):
+    def __init__(self, uri=URIRef('example'), value=0.0,
+                 unit='', version=VERSION_STRING):
         super().__init__(SBOL_MEASURE, uri, version)
         self._value = LiteralProperty(self, SBOL_VALUE, '1', '1', [], value)
         self._unit = URIProperty(self, SBOL_UNIT, '1', '1', [], unit)
