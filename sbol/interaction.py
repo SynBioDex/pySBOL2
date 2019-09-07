@@ -1,7 +1,6 @@
 from .identified import Identified
-from .property import OwnedObject, URIProperty
 from .validation import *
-from .constants import *
+from .object import *
 
 
 class Interaction(Identified):

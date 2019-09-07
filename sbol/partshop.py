@@ -11,7 +11,8 @@ LOGGING_CONFIG = 'logging_config.ini'
 
 
 class PartShop:
-    """A class which provides an API front-end for online bioparts repositories"""
+    """A class which provides an API front-end for
+    online bioparts repositories"""
 
     def __init__(self, url, spoofed_url=''):
         """
@@ -32,10 +33,12 @@ class PartShop:
         self.spoofed_resource = spoofed_url
         if len(url) > 0 and url[-1] == '/':
             raise SBOLError(SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT,
-                            'PartShop initialization failed. The resource URL should not contain a terminal backlash')
+                            'PartShop initialization failed. The resource URL '
+                            'should not contain a terminal backlash')
         if len(spoofed_url) > 0 and spoofed_url[-1] == '/':
             raise SBOLError(SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT,
-                            'PartShop initialization failed. The spoofed URL should not contain a terminal backslash')
+                            'PartShop initialization failed. The spoofed URL '
+                            'should not contain a terminal backslash')
 
     def count(self):
         """Return the count of objects contained in a PartShop"""
@@ -54,7 +57,8 @@ class PartShop:
             resource = self.spoofed_resource
         p = query.find('WHERE')
         if p != -1:
-            from_clause = ' FROM <' + parseURLDomain(resource) + '/user/' + self.user + '> '
+            from_clause = ' FROM <' + parseURLDomain(resource) + \
+                          '/user/' + self.user + '> '
             query = query[:p].rstrip() + from_clause + query[p:].lstrip()
         headers = {'X-authorization': self.key, 'Accept': 'application/json'}
         params = {'query': query}  # should handle encoding the query
@@ -62,20 +66,23 @@ class PartShop:
             self.logger.debug('Issuing SPARQL: ' + query)
         response = requests.get(endpoint, headers=headers, params=params)
         if not response:
-                raise SBOLError(SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST, response)
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST,
+                            response)
         return response
 
     def pull(self, uris, doc, recursive=True):
         """Retrieve an object from an online resource
-        :param uris: A list of SBOL objects you want to retrieve, or a single SBOL object URI
+        :param uris: A list of SBOL objects you want to retrieve,
+        or a single SBOL object URI
         :param doc: A document to add the data to
         :param recursive: Whether the GET request should be recursive
         :return: nothing (doc parameter is updated, or an exception is thrown)
         """
-        # IMPLEMENTATION NOTE: rdflib.Graph.parse() actually lets you pass a URL as an argument.
-        # I decided to not use this method, because I couldn't find an easy way to get the response
-        # code, set HTTP headers, etc. In addition, I would need to use requests for submitting
-        # new SBOL data anyway.
+        # IMPLEMENTATION NOTE: rdflib.Graph.parse() actually lets you
+        # pass a URL as an argument. I decided to not use this method,
+        # because I couldn't find an easy way to get the response
+        # code, set HTTP headers, etc. In addition, I would need
+        # to use requests for submitting new SBOL data anyway.
         endpoints = []
         if type(uris) is str:
             endpoints.append(uris)
@@ -89,7 +96,8 @@ class PartShop:
             elif len(self.spoofed_resource) > 0 and self.resource in uri:
                 query = uri.replace(self.resource, self.spoofed_resource)
             else:
-                query = self.resource + '/' + uri  # Assume user has only specified displayId
+                # Assume user has only specified displayId
+                query = self.resource + '/' + uri
             query += '/sbol'
             if not recursive:
                 query += 'nr'
@@ -97,11 +105,14 @@ class PartShop:
                 self.logger.debug('Issuing GET request ' + query)
             # Issue GET request
             response = requests.get(query,
-                                    headers={'X-authorization': self.key, 'Accept': 'text/plain'})
+                                    headers={'X-authorization': self.key,
+                                             'Accept': 'text/plain'})
             if response.status_code == 404:
-                raise SBOLError(SBOLErrorCode.SBOL_ERROR_NOT_FOUND, 'Part not found. Unable to pull: ' + query)
+                raise SBOLError(SBOLErrorCode.SBOL_ERROR_NOT_FOUND,
+                                'Part not found. Unable to pull: ' + query)
             elif response.status_code == 401:
-                raise SBOLError(SBOLErrorCode.SBOL_ERROR_HTTP_UNAUTHORIZED, 'Please log in with valid credentials')
+                raise SBOLError(SBOLErrorCode.SBOL_ERROR_HTTP_UNAUTHORIZED,
+                                'Please log in with valid credentials')
             elif not response:
                 raise SBOLError(SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST, response)
             # Add content to document
@@ -113,20 +124,26 @@ class PartShop:
     def submit(self, doc, collection='', overwrite=0):
         """Submit a SBOL Document to SynBioHub
         :param doc: The Document to submit
-        :param collection: The URI of a SBOL Collection to which the Document contents will be uploaded
-        :param overwrite: An integer code: 0 (default) - do not overwrite, 1 - overwrite, 2 - merge
+        :param collection: The URI of a SBOL Collection to which the Document
+        contents will be uploaded
+        :param overwrite: An integer code: 0 (default) - do not overwrite,
+        1 - overwrite, 2 - merge
         :return: the HTTP response object
         """
         if collection == '':
-            # If a Document is submitted as a new collection, then Document metadata must be specified
-            if len(doc.displayId) == 0 or len(doc.name) == 0 or len(doc.description) == 0:
+            # If a Document is submitted as a new collection,
+            # then Document metadata must be specified
+            if len(doc.displayId) == 0 or len(doc.name) == 0 \
+                    or len(doc.description) == 0:
                 raise SBOLError(SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT,
-                                'Cannot submit Document. The Document must be assigned a displayId, name, and ' +
+                                'Cannot submit Document. The Document must be '
+                                'assigned a displayId, name, and ' +
                                 'description for upload.')
         else:
             if len(self.spoofed_resource) > 0 and self.resource in collection:
                 # Correct collection URI in case a spoofed resource is being used
-                collection = collection.replace(self.resource, self.spoofed_resource)
+                collection = collection.replace(self.resource,
+                                                self.spoofed_resource)
             if Config.getOption(ConfigOptions.VERBOSE.value) is True:
                 self.logger.info('Submitting Document to an existing collection: ' + collection)
         # if Config.getOption(ConfigOptions.SERIALIZATION_FORMAT.value) == 'rdfxml':
@@ -159,21 +176,25 @@ class PartShop:
         print(files)
         response = requests.post(self.resource + '/submit',
                                  files=files,
-                                 headers={'Accept': 'text/plain', 'X-authorization': self.key})
+                                 headers={'Accept': 'text/plain',
+                                          'X-authorization': self.key})
         print(response.text)
         if response:
             return response
         elif response.status_code == 401:
             raise SBOLError(SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST,
-                            'You must login with valid credentials before submitting')
+                            'You must login with valid credentials '
+                            'before submitting')
         else:
             raise SBOLError(SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST,
-                            'HTTP post request failed with: ' + str(response.status_code) +
+                            'HTTP post request failed with: ' +
+                            str(response.status_code) +
                             ' - ' + str(response.content))
 
     def login(self, user_id, password=''):
         """In order to submit to a PartShop, you must login first.
-        Register on [SynBioHub](http://synbiohub.org) to obtain account credentials.
+        Register on [SynBioHub](http://synbiohub.org) to
+        obtain account credentials.
         :param user_id: User ID
         :param password: User password
         :return: the HTTP response object
@@ -188,7 +209,8 @@ class PartShop:
         )
         if not response:
             raise SBOLError(SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST,
-                            'Login failed due to an HTTP error: ' + str(response))
+                            'Login failed due to an HTTP error: ' +
+                            str(response))
         self.key = response.content.decode('utf-8')
         return response
 
@@ -196,4 +218,3 @@ class PartShop:
     #     doc.addNamespace("http://wiki.synbiohub.org/wiki/Terms/synbiohub#", "sbh")
     #     for id, toplevel_obj in doc.SBOLObjects:
     #         toplevel_obj.apply(None, None)  # TODO
-

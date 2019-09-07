@@ -77,7 +77,8 @@ valid_options = {
 
 
 extension_namespaces = {}
-# The authoritative namespace for the Document. Setting the home namespace is like signing a piece of paper.
+# The authoritative namespace for the Document.
+# Setting the home namespace is like signing a piece of paper.
 home = None
 # Flag indicating whether an object's type is included in SBOL-compliant URIs.
 SBOLCompliantTypes = 1
@@ -86,16 +87,21 @@ file_format = 'rdfxml'
 
 
 class Config:
-    """A class which contains global configuration variables for the libSBOL environment.
+    """A class which contains global configuration variables
+    for the libSBOL environment.
 
-    Configuration variables are accessed through the setOptions and getOptions methods.
+    Configuration variables are accessed
+    through the setOptions and getOptions methods.
     """
 
     @staticmethod
     def setHomespace(ns):
-        """Setting the Homespace has several advantages. It simplifies object creation and retrieval from Documents.
-        In addition, it serves as a way for a user to claim ownership of new objects. Generally users will want to
-        specify a Homespace that corresponds to their organization's web domain.
+        """Setting the Homespace has several advantages.
+        It simplifies object creation and retrieval from Documents.
+        In addition, it serves as a way for a user
+        to claim ownership of new objects.
+        Generally users will want to specify a Homespace
+        that corresponds to their organization's web domain.
         :param ns: The namespace to use as the Homespace
         :return: None
         """
@@ -122,10 +128,11 @@ class Config:
     def setFileFormat(_file_format):
         """
 
-        :param file_format: The file format to use.
+        :param _file_format: The file format to use.
         :return: None
         """
-        global file_format  # must declare that we're assigning to a global variable
+        # must declare that we're assigning to a global variable
+        global file_format
         if _file_format == FileFormats.JSON.value:
             file_format = FileFormats.JSON.value
         elif _file_format == FileFormats.NTRIPLES.value:
@@ -220,15 +227,17 @@ def getFileFormat():
 
 def constructCompliantURI(sbol_type, display_id, version):
     if Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS.value) is True:
-        return getHomespace() + os.sep + parseClassName(sbol_type) + os.sep + display_id + os.sep + version
+        return getHomespace() + os.sep + parseClassName(sbol_type) + os.sep + \
+               display_id + os.sep + version
     else:
         return ''
 
 
 def constructCompliantURI_parentChild(parent_type, child_type, display_id, version):
     if Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS.value) is True:
-        return getHomespace() + os.sep + parseClassName(parent_type) + os.sep + parseClassName(child_type) + \
-            os.sep + display_id + os.sep + version
+        return getHomespace() + os.sep + parseClassName(parent_type) + \
+               os.sep + parseClassName(child_type) + \
+               os.sep + display_id + os.sep + version
     else:
         return ''
 
@@ -245,14 +254,19 @@ def randomIdentifier():
 
 
 def autoconstructURI():
-    if Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS) is False and hasHomespace():
+    if Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS) is False \
+            and hasHomespace():
         return getHomespace() + os.sep + randomIdentifier()
-    elif Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS) is False and not hasHomespace():
-        raise SBOLError('The autoconstructURI method requires a valid namespace authority. Use setHomespace().',
+    elif Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS) is False \
+            and not hasHomespace():
+        raise SBOLError('The autoconstructURI method requires '
+                        'a valid namespace authority. Use setHomespace().',
                         SBOLErrorCode.SBOL_ERROR_COMPLIANCE)
     else:
-        raise SBOLError('The autoconstructURI method only works when SBOLCompliance flag is false. '
-                        'Use setOption to disable SBOL-compliant URIs.', SBOLErrorCode.SBOL_ERROR_COMPLIANCE)
+        raise SBOLError('The autoconstructURI method only works '
+                        'when SBOLCompliance flag is false. '
+                        'Use setOption to disable SBOL-compliant URIs.',
+                        SBOLErrorCode.SBOL_ERROR_COMPLIANCE)
 
 
 def getCompliantURI(uri_prefix, sbol_class_name, display_id, version):

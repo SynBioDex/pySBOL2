@@ -1,5 +1,4 @@
 import unittest
-from sbol.config import *
 from sbol.moduledefinition import *
 
 
@@ -17,7 +16,8 @@ class TestIdentified(unittest.TestCase):
         Config.setOption('sbol_compliant_uris', True)
         Config.setOption('sbol_typed_uris', False)
         crispr_template = ModuleDefinition('CRISPR_Template')
-        self.assertEqual('http://sbols.org/CRISPR_Example/CRISPR_Template', crispr_template.persistentIdentity)
+        self.assertEqual('http://sbols.org/CRISPR_Example/CRISPR_Template',
+                         crispr_template.persistentIdentity)
 
     def test_getVersion_SBOLCompliant(self):
         setHomespace('http://sbols.org/CRISPR_Example')
@@ -62,7 +62,8 @@ class TestIdentified(unittest.TestCase):
         Config.setOption('sbol_compliant_uris', False)
         Config.setOption('sbol_typed_uris', False)
         crispr_template = ModuleDefinition('CRISPR_Template')
-        self.assertEqual('http://sbols.org/CRISPR_Example/CRISPR_Template', crispr_template.persistentIdentity)
+        self.assertEqual('http://sbols.org/CRISPR_Example/CRISPR_Template',
+                         crispr_template.persistentIdentity)
 
     def test_getVersion_hasHomespace(self):
         setHomespace('http://sbols.org/CRISPR_Example')

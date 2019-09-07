@@ -1,30 +1,35 @@
-from .constants import *
 from .identified import *
-import os
 from .config import *
 
 
 class TopLevel(Identified):
-    """All SBOL classes derived from TopLevel appear as top level nodes in the RDF/XML document tree and SBOL files."""
+    """All SBOL classes derived from TopLevel appear as top level nodes
+    in the RDF/XML document tree and SBOL files."""
 
     attachments = None
 
-    def __init__(self, type_uri=SBOL_TOP_LEVEL, uri=URIRef("example"), version=VERSION_STRING):
+    def __init__(self, type_uri=SBOL_TOP_LEVEL,
+                 uri=URIRef("example"), version=VERSION_STRING):
         super().__init__(type_uri, uri, version)
         # TODO could this be moved into 'identified' constructor?
         if Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS.value) is True:
             if Config.getOption(ConfigOptions.SBOL_TYPED_URIS.value) is True:
-                self._persistentIdentity.set(os.path.join(getHomespace(), self.getClassName(type_uri), self.displayId))
+                self._persistentIdentity.set(
+                    os.path.join(getHomespace(),
+                                 self.getClassName(type_uri),
+                                 self.displayId))
 
     def addToDocument(self, document):
         raise NotImplementedError("Not yet implemented")
 
     def generateTopLevel(self, uri, agent=None, plan=None, usages=None):
-        """ # TODO this originally was called 'generate' but it didn't override parent function of same name.
-
-        :param uri: A URI for the new object, or a displayId if operating in SBOLCompliant mode
+        """
+        :param uri: A URI for the new object, or a displayId if operating
+        in SBOLCompliant mode
         :return:
         """
+        # TODO this originally was called 'generate' but
+        # TODO it didn't override parent function of same name.
         raise NotImplementedError("Not yet implemented")
 
     def initialize(self, uri):

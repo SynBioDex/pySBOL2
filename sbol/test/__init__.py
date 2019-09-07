@@ -7,7 +7,7 @@ from sbol.test.test_property import TestProperty
 from sbol.test.test_roundtrip import TestRoundTripSBOL2, TestRoundTripFailSBOL2
 
 
-def runTests(test_list = (TestDocument, TestIdentified, TestConfig, TestProperty)):
+def runTests(test_list=(TestDocument, TestIdentified, TestConfig, TestProperty)):
     suite_list = []
     loader = unittest.TestLoader()
     for test_class in test_list:
@@ -21,5 +21,5 @@ def runTests(test_list = (TestDocument, TestIdentified, TestConfig, TestProperty
         exit(1)
 
 
-def runRoundTripTests(test_list = (TestRoundTripSBOL2, TestRoundTripFailSBOL2)):
+def runRoundTripTests(test_list=(TestRoundTripSBOL2, TestRoundTripFailSBOL2)):
     runTests(test_list)

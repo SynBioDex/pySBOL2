@@ -34,9 +34,12 @@ class Document(Identified):
     """
     The Document is a container for all SBOL data objects.
 
-    In a previous era, engineers might sit at a drafting board and draft a design by hand.
-    The engineer's drafting sheet in LibSBOL is called a Document. The Document serves as a container,
-    initially empty, for SBOL data objects. All file I/O operations are performed on the Document
+    In a previous era, engineers might sit at a drafting board
+    and draft a design by hand.
+    The engineer's drafting sheet in LibSBOL is called a Document.
+    The Document serves as a container,
+    initially empty, for SBOL data objects.
+    All file I/O operations are performed on the Document
     to populate it with SBOL objects representing design elements.
     """
 
@@ -96,26 +99,49 @@ class Document(Identified):
         self.SBOLObjects = {}  # Needed?
         self._namespaces = {}
         self.resource_namespaces = set()
-        self.designs = OwnedObject(self, SYSBIO_DESIGN, '0', '*', [libsbol_rule_11])
-        self.builds = OwnedObject(self, SYSBIO_BUILD, '0', '*', [libsbol_rule_12])
-        self.tests = OwnedObject(self, SYSBIO_TEST, '0', '*', [libsbol_rule_13])
-        self.analyses = OwnedObject(self, SYSBIO_ANALYSIS, '0', '*', [libsbol_rule_14])
-        self.componentDefinitions = OwnedObject(self, SBOL_COMPONENT_DEFINITION, '0', '*', None)
-        self.moduleDefinitions = OwnedObject(self, SBOL_MODULE_DEFINITION, '0', '*', None)
-        self.models = OwnedObject(self, SBOL_MODEL, '0', '*', None)
-        self.sequences = OwnedObject(self, SBOL_SEQUENCE, '0', '*', None)
-        self.collections = OwnedObject(self, SBOL_COLLECTION, '0', '*', None)
-        self.activities = OwnedObject(self, PROVO_ACTIVITY, '0', '*', None)
-        self.plans = OwnedObject(self, PROVO_PLAN, '0', '*', None)
-        self.agents = OwnedObject(self, PROVO_AGENT, '0', '*', None)
-        self.attachments = OwnedObject(self, SBOL_ATTACHMENT, '0', '*', None)
-        self.combinatorialderivations = OwnedObject(self, SBOL_COMBINATORIAL_DERIVATION, '0', '*', None)
-        self.implementations = OwnedObject(self, SBOL_IMPLEMENTATION, '0', '*', None)
-        self.sampleRosters = OwnedObject(self, SYSBIO_SAMPLE_ROSTER, '0', '*', [validation.libsbol_rule_16])
-        self.experiments = OwnedObject(self, SBOL_EXPERIMENT, '0', '*', None)
-        self.experimentalData = OwnedObject(self, SBOL_EXPERIMENTAL_DATA, '0', '*', None)
-        self._citations = URIProperty(self, PURL_URI + "bibliographicCitation", '0', '*', None)
-        self._keywords = URIProperty(self, PURL_URI + "elements/1.1/subject", '0', '*', None)
+        self.designs = OwnedObject(self, SYSBIO_DESIGN,
+                                   '0', '*', [libsbol_rule_11])
+        self.builds = OwnedObject(self, SYSBIO_BUILD,
+                                  '0', '*', [libsbol_rule_12])
+        self.tests = OwnedObject(self, SYSBIO_TEST,
+                                 '0', '*', [libsbol_rule_13])
+        self.analyses = OwnedObject(self, SYSBIO_ANALYSIS,
+                                    '0', '*', [libsbol_rule_14])
+        self.componentDefinitions = OwnedObject(self,
+                                                SBOL_COMPONENT_DEFINITION,
+                                                '0', '*', None)
+        self.moduleDefinitions = OwnedObject(self,
+                                             SBOL_MODULE_DEFINITION,
+                                             '0', '*', None)
+        self.models = OwnedObject(self, SBOL_MODEL,
+                                  '0', '*', None)
+        self.sequences = OwnedObject(self, SBOL_SEQUENCE,
+                                     '0', '*', None)
+        self.collections = OwnedObject(self, SBOL_COLLECTION,
+                                       '0', '*', None)
+        self.activities = OwnedObject(self, PROVO_ACTIVITY,
+                                      '0', '*', None)
+        self.plans = OwnedObject(self, PROVO_PLAN,
+                                 '0', '*', None)
+        self.agents = OwnedObject(self, PROVO_AGENT,
+                                  '0', '*', None)
+        self.attachments = OwnedObject(self, SBOL_ATTACHMENT,
+                                       '0', '*', None)
+        self.combinatorialderivations = OwnedObject(self,
+                                                    SBOL_COMBINATORIAL_DERIVATION,
+                                                    '0', '*', None)
+        self.implementations = OwnedObject(self, SBOL_IMPLEMENTATION,
+                                           '0', '*', None)
+        self.sampleRosters = OwnedObject(self, SYSBIO_SAMPLE_ROSTER,
+                                         '0', '*', [validation.libsbol_rule_16])
+        self.experiments = OwnedObject(self, SBOL_EXPERIMENT,
+                                       '0', '*', None)
+        self.experimentalData = OwnedObject(self, SBOL_EXPERIMENTAL_DATA,
+                                            '0', '*', None)
+        self._citations = URIProperty(self, PURL_URI + "bibliographicCitation",
+                                      '0', '*', None)
+        self._keywords = URIProperty(self, PURL_URI + "elements/1.1/subject",
+                                     '0', '*', None)
 
     @property
     def citations(self):
@@ -149,20 +175,24 @@ class Document(Identified):
         """
         Register an object in the Document.
 
-        :param sbol_obj: The SBOL object(s) you want to serialize. Either a single object or a list of objects.
+        :param sbol_obj: The SBOL object(s) you want to serialize.
+        Either a single object or a list of objects.
         :return: None
         """
         # Check for uniqueness of URI
         if sbol_obj.identity in self.SBOLObjects:
-            raise SBOLError('Cannot add ' + sbol_obj.identity + ' to Document. An object with this identity '
-                            'is already contained in the Document', SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE)
+            raise SBOLError('Cannot add ' + sbol_obj.identity +
+                            ' to Document. An object with this identity '
+                            'is already contained in the Document',
+                            SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE)
         else:
             # If TopLevel add to Document.
             if sbol_obj.is_top_level():
                 self.SBOLObjects[sbol_obj.identity] = sbol_obj
             if sbol_obj.getTypeURI() in self.owned_objects:
                 sbol_obj.parent = self  # Set back-pointer to parent object
-                # Add the object to the Document's property store, eg, componentDefinitions, moduleDefinitions, etc.
+                # Add the object to the Document's property store,
+                # eg. componentDefinitions, moduleDefinitions, etc.
                 self.owned_objects[sbol_obj.getTypeURI()].append(sbol_obj)
             sbol_obj.doc = self
             # Recurse into child objects and set their back-pointer to this Document
@@ -228,15 +258,15 @@ class Document(Identified):
         """
         Creates another SBOL object derived from TopLevel and adds it to the Document.
         NOTE: originally from ReferencedObject
-        :param uri: In "open world" mode, this is a full URI and the same as the returned URI.
-        If the default namespace for libSBOL has been configured, then this argument should simply be a
-        local identifier. If SBOL-compliance is enabled, this argument should be the intended
-        displayId of the new object. A full URI is automatically generated and returned.
+        :param uri: In "open world" mode, this is a full URI
+        and the same as the returned URI.
+        If the default namespace for libSBOL has been configured,
+        then this argument should simply be a local identifier.
+        If SBOL-compliance is enabled,
+        this argument should be the intended displayId of the new object.
+        A full URI is automatically generated and returned.
         :return: The full URI of the created object
         """
-        if Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS.value) is True:
-            obj = Identified()
-            #obj.identity = os.path.join(getHomespace(), )
         raise NotImplementedError("Not yet implemented")
 
     def get(self, uri):
@@ -280,8 +310,10 @@ cas9 = ComponentDefinition('Cas9', BIOPAX_PROTEIN)
         """
         Serialize all objects in this Document to an RDF/XML file.
 
-        :param filename: The full name of the file you want to write (including file extension).
-        :return: A string with the validation results, or empty string if validation is disabled.
+        :param filename: The full name of the file you want to write
+        (including file extension).
+        :return: A string with the validation results,
+        or empty string if validation is disabled.
         """
         self.doc_serialize_rdf2xml(filename)
 
@@ -290,7 +322,8 @@ cas9 = ComponentDefinition('Cas9', BIOPAX_PROTEIN)
         Read an RDF/XML file and attach the SBOL objects to this Document.
 
         Existing contents of the Document will be wiped.
-        :param filename: The full name of the file you want to read (including file extension).
+        :param filename: The full name of the file you want to read
+        (including file extension).
         :return: None
         """
         self.clear()
@@ -309,7 +342,8 @@ cas9 = ComponentDefinition('Cas9', BIOPAX_PROTEIN)
         self.update_graph()
         # Use rdflib to automatically merge the graphs together
         self.graph.parse(data=sbol_str, format="application/rdf+xml")
-        # Clean up our internal data structures. (There's probably a more efficient way to merge.)
+        # Clean up our internal data structures.
+        # (There's probably a more efficient way to merge.)
         self.clear(clear_graph=False)
         # Base our internal representation on the new graph.
         self.parse_all()
@@ -333,7 +367,8 @@ cas9 = ComponentDefinition('Cas9', BIOPAX_PROTEIN)
         Read an RDF/XML file and attach the SBOL objects to this Document.
 
         New objects will be added to the existing contents of the Document.
-        :param filename: The full name of the file you want to read (including file extension).
+        :param filename: The full name of the file you want to read
+        (including file extension).
         :return: None
         """
         self.logger.debug("Appending data from file: " + filename)
@@ -344,7 +379,8 @@ cas9 = ComponentDefinition('Cas9', BIOPAX_PROTEIN)
             self.update_graph()
             # Use rdflib to automatically merge the graphs together
             self.graph.parse(f, format="application/rdf+xml")
-            # Clean up our internal data structures. (There's probably a more efficient way to merge.)
+            # Clean up our internal data structures.
+            # (There's probably a more efficient way to merge.)
             self.clear(clear_graph=False)
             # Base our internal representation on the new graph.
             self.parse_all()
@@ -401,8 +437,8 @@ cas9 = ComponentDefinition('Cas9', BIOPAX_PROTEIN)
                         obj = URIRef(lval)
                 self.parse_properties_inner(result.s, result.p, obj)
 
-        # Additional step - python version, only. Remove anything that isn't meant to be at
-        # the top level.
+        # Additional step - python version, only.
+        # Remove anything that isn't meant to be at the top level.
         for result in all_results:
             if str(result.p) != rdf_type:
                 obj = result.o
@@ -417,7 +453,8 @@ cas9 = ComponentDefinition('Cas9', BIOPAX_PROTEIN)
         # TODO dress document
 
     def parse_objects_inner(self, subject, obj):
-        # Construct the top-level object if we haven't already done so and its type is something we know about.
+        # Construct the top-level object if we haven't already done so
+        # and its type is something we know about.
         if subject not in self.SBOLObjects and obj in self.SBOL_DATA_MODEL_REGISTER:
             # Call constructor for the appropriate SBOLObject
             new_obj = self.SBOL_DATA_MODEL_REGISTER[obj]()
@@ -433,9 +470,11 @@ cas9 = ComponentDefinition('Cas9', BIOPAX_PROTEIN)
             # Update document
             self.SBOLObjects[new_obj.identity] = new_obj
             new_obj.doc = self
-            # For now, set the parent to the Document. This may get overwritten later for child objects.
+            # For now, set the parent to the Document.
+            # This may get overwritten later for child objects.
             new_obj.parent = self
-            # If the new object is TopLevel, add to the Document's property store
+            # If the new object is TopLevel,
+            # add to the Document's property store
             if new_obj.is_top_level():
                 self.owned_objects[new_obj.rdf_type].append(new_obj)
         elif subject not in self.SBOLObjects and obj not in self.SBOL_DATA_MODEL_REGISTER:
@@ -448,7 +487,10 @@ cas9 = ComponentDefinition('Cas9', BIOPAX_PROTEIN)
 
     def parse_properties_inner(self, subject, predicate, obj):
         if self.logger.isEnabledFor(logging.DEBUG):
-            self.logger.debug("Adding: (" + str(subject) + " - " + str(type(subject)) + ", " + str(predicate) + " - " + str(type(predicate)) + ", " + str(obj) + " - " + str(type(obj)) + ")")
+            self.logger.debug("Adding: (" + str(subject) + " - " +
+                              str(type(subject)) + ", " + str(predicate) +
+                              " - " + str(type(predicate)) + ", " + str(obj) +
+                              " - " + str(type(obj)) + ")")
         found = predicate.rfind('#')
         if found == -1:
             found = predicate.rfind('/')
@@ -499,8 +541,8 @@ cas9 = ComponentDefinition('Cas9', BIOPAX_PROTEIN)
         """
         Perform comparison on Documents using the online validation tool.
 
-        This is for cross-validation of SBOL documents with libSBOLj. Document comparison can also be performed
-        using the built-in compare method.
+        This is for cross-validation of SBOL documents with libSBOLj.
+        Document comparison can also be performed using the built-in compare method.
         :param diff_file:
         :return: The comparison results
         """
@@ -550,7 +592,7 @@ cas9 = ComponentDefinition('Cas9', BIOPAX_PROTEIN)
         """
         self.update_graph()
         rdf = SBOL2Serialize.serialize_sboll2(self.graph).decode('utf-8')
-        self.logger.debug("RDF: "+ rdf)
+        self.logger.debug("RDF: " + rdf)
         self.logger.debug("TYPE: " + str(type(rdf)))
         with open(outfile, 'w') as out:
             out.write(rdf)
@@ -564,7 +606,7 @@ cas9 = ComponentDefinition('Cas9', BIOPAX_PROTEIN)
         self.graph = rdflib.Graph()
         for prefix, ns in self._namespaces.items():
             self.graph.bind(prefix, ns)
-        # # # ASSUMPTION: Document does not have properties. Is this a valid assumption?
+        # ASSUMPTION: Document does not have properties. Is this a valid assumption?
         for typeURI, objlist in self.owned_objects.items():
             for owned_obj in objlist:
                 owned_obj.build_graph(self.graph)
@@ -582,7 +624,8 @@ cas9 = ComponentDefinition('Cas9', BIOPAX_PROTEIN)
 
     def size(self):
         """
-        Get the total number of objects in the Document, including SBOL core object and custom annotation objects.
+        Get the total number of objects in the Document,
+        including SBOL core object and custom annotation objects.
 
         :return: The total number of objects in the Document.
         """
@@ -590,7 +633,8 @@ cas9 = ComponentDefinition('Cas9', BIOPAX_PROTEIN)
 
     def __len__(self):
         """
-        Get the total number of objects in the Document, including SBOL core object and custom annotation objects.
+        Get the total number of objects in the Document,
+        including SBOL core object and custom annotation objects.
 
         (Returns the same thing as size())
 
@@ -635,7 +679,8 @@ cas9 = ComponentDefinition('Cas9', BIOPAX_PROTEIN)
         raise NotImplementedError("Not yet implemented")
 
     def referenceNamespace(self, uri):
-        """Replaces the namespace with a reference and removes the default namespace, shortening the URI.
+        """Replaces the namespace with a reference
+        and removes the default namespace, shortening the URI.
         :param uri:
         :return: str
         """
@@ -681,7 +726,8 @@ cas9 = ComponentDefinition('Cas9', BIOPAX_PROTEIN)
         Search recursively for an SBOLObject in this Document that matches the uri.
 
         :param uri: The identity of the object to search for.
-        :return: A pointer to the SBOLObject, or NULL if an object with this identity doesn't exist.
+        :return: A pointer to the SBOLObject,
+        or NULL if an object with this identity doesn't exist.
         """
         for obj in self.SBOLObjects:
             match = obj.find(uri)

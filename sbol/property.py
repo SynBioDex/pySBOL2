@@ -13,28 +13,38 @@ def sort_version(obj):
 
 
 class Property(ABC):
-    """Member properties of all SBOL objects are defined using a Property object.
+    """Member properties of all SBOL objects are defined
+    using a Property object.
 
     The Property class provides a generic interface for accessing SBOL objects.
-    At a low level, the Property class converts SBOL data structures into RDF triples.
+    At a low level, the Property class converts SBOL data structures
+    into RDF triples.
     """
 
-    def __init__(self, property_owner, type_uri, lower_bound, upper_bound, validation_rules, initial_value=None):
+    def __init__(self, property_owner, type_uri, lower_bound, upper_bound,
+                 validation_rules, initial_value=None):
         """Construct a Property.
 
-        :param property_owner: All Property objects must have a pointer back to their parent SBOLObject.
-        :param type_uri: An RDF hash URI for this property, consisting of a namespace followed by an identifier.
-        For example, Properties of SBOLObjects use URIs of the form http://sbols.org/v2#somePropertyName,
-        where the identifier somePropertyName determines the appearance of XML nodes in an SBOL file.
-        Alternatively, annotations in a custom namespace can be provided using a similarly formed hash URI
+        :param property_owner: All Property objects must have a pointer back
+        to their parent SBOLObject.
+        :param type_uri: An RDF hash URI for this property, consisting
+        of a namespace followed by an identifier.
+        For example, Properties of SBOLObjects use URIs of the form
+        http://sbols.org/v2#somePropertyName, where the identifier
+        somePropertyName determines the appearance of XML nodes
+        in an SBOL file. Alternatively, annotations in a custom namespace
+        can be provided using a similarly formed hash URI
         in another namespace.
         :param lower_bound:
         :param upper_bound:
-        :param validation_rules: A vector of externally defined ValidationRules.
-        The vector contains pointers to functions which correspond to the validation rules listed in the appendix
-        of the formal SBOL specification document.  ValidationRules are automatically checked every time a setter
-        or adder method is called and when Documents are read and written.
-        :param initial_value: The initial value of the Property (int, str, float supported)
+        :param validation_rules: A vector of externally defined ValidationRules
+        The vector contains pointers to functions which correspond to
+        the validation rules listed in the appendix of the formal
+        SBOL specification document.  ValidationRules are automatically
+        checked every time a setter or adder method is called and
+        when Documents are read and written.
+        :param initial_value: The initial value of the Property
+        (int, str, float supported)
         """
         self.logger = logging.getLogger(__name__)
         if os.path.exists(LOGGING_CONFIG):
@@ -103,18 +113,20 @@ class Property(ABC):
 
     @abstractmethod
     def add(self, new_value):
-        """Appends the new value to a list of values, for properties that allow it."""
+        """Appends the new value to a list of values,
+        for properties that allow it."""
         raise NotImplementedError("add() is only implemented by subclasses")
 
     def remove(self, index):
-        """Remove a property value. By default, we assume this is a literal located
-        at index 0.
+        """Remove a property value. By default, we assume this is a literal
+        located at index 0.
         """
         if self._sbol_owner is not None:
             if self._rdf_type in self._sbol_owner.properties:
                 properties = self._sbol_owner.properties[self._rdf_type]
                 if index >= len(properties):
-                    raise SBOLError('Index out of range', SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
+                    raise SBOLError('Index out of range',
+                                    SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
                 if len(properties) == 1:
                     self.clear()
                 else:
@@ -160,7 +172,7 @@ class Property(ABC):
             validation_rule(self._sbol_owner, arg)
 
     def __contains__(self, item):
-        if self.find(item) != None:
+        if self.find(item) is not None:
             return True
         else:
             return False
@@ -227,7 +239,8 @@ class URIProperty(Property):
 
     def setSinglePropertyValue(self, new_value):
         if type(new_value) is list:
-            raise TypeError('The ' + self.getTypeURI() + ' property does not accept list arguments.')
+            raise TypeError('The ' + self.getTypeURI() +
+                            ' property does not accept list arguments.')
         if self._rdf_type not in self._sbol_owner.properties:
             self._sbol_owner.properties[self._rdf_type] = []
         if new_value is None:
@@ -246,17 +259,21 @@ class URIProperty(Property):
             if type(new_value_list) is list:
                 for value in new_value_list:
                     if not isinstance(value, URIRef):
-                        self.logger.warning('Value "' + str(value) + ' assigned to URIProperty ' +
-                                        ' is of type ' + str(type(value)) + '. Wrapping it in: ' + str(URIRef))
+                        self.logger.warning('Value "' + str(value) +
+                                            ' assigned to URIProperty ' +
+                                            ' is of type ' + str(type(value)) +
+                                            '. Wrapping it in: ' + str(URIRef))
                         value = URIRef(value)
                     self._sbol_owner.properties[self._rdf_type].append(value)
             else:
                 # the list is actually not a list, but a single element, even
                 # though lists are supported.
-                self._sbol_owner.properties[self._rdf_type].append(URIRef(new_value_list))
+                self._sbol_owner.properties[self._rdf_type].append(
+                    URIRef(new_value_list))
 
     def add(self, new_value):
-        """Appends the new value to a list of values, for properties that allow it."""
+        """Appends the new value to a list of values,
+        for properties that allow it."""
         if self._sbol_owner is not None:
             if self._rdf_type not in self._sbol_owner.properties:
                 self._sbol_owner.properties[self._rdf_type] = []
@@ -311,7 +328,8 @@ class LiteralProperty(Property):
 
     def setSinglePropertyValue(self, new_value):
         if type(new_value) is list:
-            raise TypeError('The ' + self.getTypeURI() + ' property does not accept list arguments.')
+            raise TypeError('The ' + self.getTypeURI() +
+                            ' property does not accept list arguments.')
         if self._rdf_type not in self._sbol_owner.properties:
             self._sbol_owner.properties[self._rdf_type] = []
         if new_value is None:
@@ -330,8 +348,10 @@ class LiteralProperty(Property):
             if type(new_value_list) is list:
                 for value in new_value_list:
                     if not isinstance(value, Literal):
-                        self.logger.warning('Value "' + str(value) + ' assigned to LiteralProperty ' +
-                                            ' is of type ' + str(type(value)) + '. Wrapping it in: ' + str(Literal))
+                        self.logger.warning('Value "' + str(value) +
+                                            ' assigned to LiteralProperty ' +
+                                            ' is of type ' + str(type(value)) +
+                                            '. Wrapping it in: ' + str(Literal))
                         value = Literal(value)
                     self._sbol_owner.properties[self._rdf_type].append(value)
             else:
@@ -350,15 +370,17 @@ class LiteralProperty(Property):
 
 
 class OwnedObject(URIProperty):
-    def __init__(self, property_owner, sbol_uri, lower_bound, upper_bound, validation_rules=None, first_object=None):
+    def __init__(self, property_owner, sbol_uri, lower_bound, upper_bound,
+                 validation_rules=None, first_object=None):
         """Initialize a container and optionally put the first object in it.
         If validation rules are specified, they will be checked upon initialization.
         """
-        super().__init__(property_owner, sbol_uri, lower_bound, upper_bound, validation_rules, first_object)
+        super().__init__(property_owner, sbol_uri, lower_bound, upper_bound,
+                         validation_rules, first_object)
         # Register Property in owner Object
         if self._sbol_owner is not None:
             self._sbol_owner.properties.pop(sbol_uri, None)
-            self._sbol_owner.owned_objects[sbol_uri] = [] # vector of SBOLObjects
+            self._sbol_owner.owned_objects[sbol_uri] = []  # vector of SBOLObjects
             if first_object is not None:
                 self._sbol_owner.owned_objects[sbol_uri].append(first_object)
 
@@ -369,17 +391,20 @@ class OwnedObject(URIProperty):
         else:
             object_store = self._sbol_owner.owned_objects[self._rdf_type]
             if sbol_obj in object_store:
-                raise SBOLError("The object " + sbol_obj.identity + " is already contained by the " +
-                                self._rdf_type + " property", SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE)
+                raise SBOLError("The object " + sbol_obj.identity +
+                                " is already contained by the " +
+                                self._rdf_type + " property",
+                                SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE)
             # Add to Document and check for uniqueness of URI
             if self._sbol_owner.doc is not None:
                 sbol_obj.doc = self._sbol_owner.doc
             # Add to parent object
             object_store.append(sbol_obj)
             sbol_obj.parent = self._sbol_owner
-            # Update URI for the argument object and all its children, if SBOL-compliance is enabled.
+            # Update URI for the argument object and all its children,
+            # if SBOL-compliance is enabled.
             sbol_obj.update_uri()
-            
+
             # Run validation rules
             # TODO
 
@@ -396,14 +421,17 @@ class OwnedObject(URIProperty):
     def get_int(self, id):
         object_store = self._sbol_owner.owned_objects[self._rdf_type]
         if id >= len(object_store):
-            # Note: for loops expect an IndexError to be raised to properly detect end of sequence
+            # Note: for loops expect an IndexError to be
+            # raised to properly detect end of sequence
             raise IndexError
         return object_store[id]
 
     def get_uri(self, id):
         if Config.getOption(ConfigOptions.VERBOSE.value) is True:
-            print('SBOL compliant URIs are set to ' + Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS.value))
-            print('SBOL typed URIs are set to ' + Config.getOption(ConfigOptions.SBOL_TYPED_URIS.value))
+            print('SBOL compliant URIs are set to ' +
+                  Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS.value))
+            print('SBOL typed URIs are set to ' +
+                  Config.getOption(ConfigOptions.SBOL_TYPED_URIS.value))
             print('Searching for ' + id)
         # Search this property's object store for the uri
         object_store = self._sbol_owner.owned_objects[self._rdf_type]
@@ -420,17 +448,21 @@ class OwnedObject(URIProperty):
             for ns in parent_obj.doc.resource_namespaces:
                 resource_namespaces.append(ns)
         # Check for regular, SBOL-compliant URIs
-        obj = self.find_resource(id, resource_namespaces, object_store, parent_obj, typedURI=False)
+        obj = self.find_resource(id, resource_namespaces,
+                                 object_store, parent_obj, typedURI=False)
         if obj is not None:
             return obj
         else:
-            obj = self.find_resource(id, resource_namespaces, object_store, parent_obj, typedURI=True)
+            obj = self.find_resource(id, resource_namespaces,
+                                     object_store, parent_obj, typedURI=True)
             if obj is not None:
                 return obj
             else:
-                raise SBOLError('Object ' + id + ' not found', SBOLErrorCode.NOT_FOUND_ERROR)
+                raise SBOLError('Object ' + id + ' not found',
+                                SBOLErrorCode.NOT_FOUND_ERROR)
 
-    def find_resource(self, uri, resource_namespaces, object_store, parent_obj, typedURI=False):
+    def find_resource(self, uri, resource_namespaces, object_store,
+                      parent_obj, typedURI=False):
         persistentIdentity = ''
         for ns in resource_namespaces:
             # Assume the parent object is TopLevel and form the compliant URI
@@ -449,10 +481,11 @@ class OwnedObject(URIProperty):
                 # Sort objects with same persistentIdentity by version
                 # TODO is this right?
                 persistent_id_matches.sort(key=sort_version)
-            # If objects matching the persistentIdentity were found, return the most recent version
+            # If objects matching the persistentIdentity were found,
+            # return the most recent version
             if len(persistent_id_matches) > 0:
                 return persistent_id_matches[-1]
-            # Assume the object is not TopLevel # TODO Not sure what this is for
+            # Assume the object is not TopLevel # TODO What is this for?
             if SBOL_PERSISTENT_IDENTITY in parent_obj.properties:
                 persistentIdentity = parent_obj.properties[SBOL_PERSISTENT_IDENTITY][0]
             if SBOL_VERSION in parent_obj.properties:
@@ -467,14 +500,15 @@ class OwnedObject(URIProperty):
                     return obj
 
     def get(self, uri):
-        # TODO: original getter contains a size check when the uri is a constant string
+        # TODO: orig getter contains a size check when uri is a constant string
         if uri == '':
             return self._sbol_owner.owned_objects[self._rdf_type][0]
         else:
             return self.__getitem__(uri)
 
     def __setitem__(self, rdf_type, sbol_obj):
-        # NOTE: custom implementation. Not sure where this is defined in the original code.
+        # NOTE: custom implementation. Not sure where this is defined
+        # in the original code.
         if self._sbol_owner.is_top_level():
             doc = self._sbol_owner.doc
             if self._isHidden() and doc.find(sbol_obj.identity):
@@ -487,11 +521,14 @@ class OwnedObject(URIProperty):
         if len(self._sbol_owner.owned_objects[rdf_type]) == 0:
             self._sbol_owner.owned_objects[rdf_type].append(sbol_obj)
         else:
-            raise SBOLError("Cannot set " + parsePropertyName(rdf_type) + " property. "
-                            "The property is already set. Call remove before attempting to overwrite the value.",
+            raise SBOLError("Cannot set " + parsePropertyName(rdf_type) +
+                            " property. The property is already set. "
+                            "Call remove before attempting to "
+                            "overwrite the value.",
                             SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
         sbol_obj.parent = self._sbol_owner
-        # Update URI for the argument object and all its children, if SBOL-compliance is enabled.
+        # Update URI for the argument object and all its children,
+        # if SBOL-compliance is enabled.
         sbol_obj.update_uri()
 
         # Run validation rules
@@ -528,40 +565,46 @@ class OwnedObject(URIProperty):
         if len(self._sbol_owner.owned_objects[self._rdf_type]) == 0:
             self._sbol_owner.owned_objects[self._rdf_type].append(sbol_obj)
         else:
-            raise SBOLError("Cannot set " + parsePropertyName(self._rdf_type) + " property. "
-                            "The property is already set. Call remove before attempting to overwrite the value.",
+            raise SBOLError("Cannot set " + parsePropertyName(self._rdf_type) +
+                            " property. The property is already set. "
+                            "Call remove before attempting to "
+                            "overwrite the value.",
                             SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
         sbol_obj.parent = self._sbol_owner
-        # Update URI for the argument object and all its children, if SBOL-compliance is enabled.
+        # Update URI for the argument object and all its children,
+        # if SBOL-compliance is enabled.
         sbol_obj.update_uri()
 
         # Run validation rules
         # TODO
 
-    def remove(self, id):
+    def remove(self, identifier):
         """id can be either an integer index or a string URI"""
-        if type(id) is int:
-            self.removeOwnedObject_int(id)
-        elif type(id) is str:
-            self.removeOwnedObject_str(id)
+        if type(identifier) is int:
+            self.removeOwnedObject_int(identifier)
+        elif type(identifier) is str:
+            self.removeOwnedObject_str(identifier)
         else:
-            raise TypeError('id parameter must be an integer index or a string uri')
+            raise TypeError('id parameter must be an integer index '
+                            'or a string uri')
 
     def removeOwnedObject_int(self, index):
         if self._sbol_owner is not None:
             if self._rdf_type in self._sbol_owner.owned_objects:
                 object_store = self._sbol_owner.owned_objects[self._rdf_type]
                 if index >= len(object_store):
-                    raise SBOLError("Index out of range", SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
+                    raise SBOLError("Index out of range",
+                                    SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
                 obj = object_store[index]
                 if self._sbol_owner.getTypeURI() == SBOL_DOCUMENT:
                     del obj.doc.SBOLObjects[obj.identity]
                 # Erase nested, hidden TopLevel objects from Document
                 if obj.doc is not None and obj.doc.find(obj.identity) is not None:
-                    obj.doc = None  # TODO not sure what this actually does
+                    obj.doc = None  # TODO not sure what this does
                 del object_store[index]
         else:
-            raise Exception('This property is not defined in the parent object')
+            raise Exception('This property is not defined in '
+                            'the parent object')
 
     def removeOwnedObject_str(self, uri):
         if self._sbol_owner is not None:
@@ -569,13 +612,13 @@ class OwnedObject(URIProperty):
                 object_store = self._sbol_owner.owned_objects[self._rdf_type]
                 for obj in object_store:
                     if uri == obj.identity:
-                        object_store.remove(obj) # TODO there is probably a better way to do this
+                        object_store.remove(obj)  # TODO is there a better way?
                         # Erase TopLevel objects from Document
                         if self._sbol_owner.getTypeURI() == SBOL_DOCUMENT:
                             del obj.doc.SBOLObjects[uri]
                         # Erase nested, hidden TopLevel objects from Document
                         if obj.doc is not None and obj.doc.find(uri) is not None:
-                            obj.doc = None # TODO not sure what this actually does
+                            obj.doc = None  # TODO not sure what this does
                         return obj
 
     def clear(self):
@@ -596,8 +639,11 @@ class OwnedObject(URIProperty):
 
 
 class ReferencedObject(Property):
-    def __init__(self, property_owner, type_uri, reference_type_uri, lower_bound, upper_bound, validation_rules, initial_value=None):
-        super().__init__(property_owner, type_uri, lower_bound, upper_bound, validation_rules, initial_value)
+    def __init__(self, property_owner, type_uri, reference_type_uri,
+                 lower_bound, upper_bound, validation_rules,
+                 initial_value=None):
+        super().__init__(property_owner, type_uri, lower_bound, upper_bound,
+                         validation_rules, initial_value)
         self.reference_type_uri = reference_type_uri
         if self._sbol_owner is not None:
             property_store = []
@@ -612,20 +658,22 @@ class ReferencedObject(Property):
 
     def set(self, uri):
         if self._sbol_owner is not None:
-            if not self._rdf_type in self._sbol_owner.properties:
+            if self._rdf_type not in self._sbol_owner.properties:
                 self._sbol_owner.properties[self._rdf_type] = []
                 self._sbol_owner.properties[self._rdf_type].append(uri)
             else:
                 self._sbol_owner.properties[self._rdf_type][0] = uri
         else:
-            # NOTE: we could raise an exception here, but the original code is not doing anything in this case.
+            # NOTE: we could raise an exception here, but the
+            # original code is not doing anything in this case.
             print('Unable to set item. SBOL owner was None.')
 
     def add(self, uri):
         if self._sbol_owner is not None:
             self._sbol_owner.properties[self._rdf_type].append(uri)
         else:
-            # NOTE: we could raise an exception here, but the original code is not doing anything in this case.
+            # NOTE: we could raise an exception here, but
+            # the original code is not doing anything in this case.
             print('Unable to set item. SBOL owner was None.')
 
     def addReference(self, uri):

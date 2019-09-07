@@ -1,6 +1,5 @@
 import unittest
 from sbol.document import *
-from sbol.config import *
 from sbol.moduledefinition import *
 from sbol.componentdefinition import *
 from sbol.constants import *
@@ -19,7 +18,8 @@ class TestDocument(unittest.TestCase):
 
     def test_addGetTopLevel_uri(self):
         doc = Document()
-        setHomespace('http://sbols.org/CRISPR_Example')  # Tutorial doesn't drop final forward slash, but this isn't right.
+        # Tutorial doesn't drop final forward slash, but this isn't right.
+        setHomespace('http://sbols.org/CRISPR_Example')
         Config.setOption('sbol_compliant_uris', True)
         Config.setOption('sbol_typed_uris', False)
         crispr_template = ModuleDefinition('CRISPR_Template')
@@ -27,7 +27,8 @@ class TestDocument(unittest.TestCase):
         doc.addModuleDefinition(crispr_template)
         doc.addComponentDefinition(cas9)
 
-        crispr_template_2 = doc.getModuleDefinition('http://sbols.org/CRISPR_Example/CRISPR_Template/1')  # Note: tutorial has 1.0.0 instead of 1 but this doesn't work
+        # Note: tutorial has 1.0.0 instead of 1 but this doesn't work
+        crispr_template_2 = doc.getModuleDefinition('http://sbols.org/CRISPR_Example/CRISPR_Template/1')
         cas9_2 = doc.getComponentDefinition('http://sbols.org/CRISPR_Example/Cas9/1')
         self.assertEqual(crispr_template, crispr_template_2)
         self.assertEqual(cas9, cas9_2)
@@ -49,7 +50,8 @@ class TestDocument(unittest.TestCase):
 
     def test_addGetTopLevel_indexing(self):
         doc = Document()
-        setHomespace('http://sbols.org/CRISPR_Example')  # Tutorial doesn't drop final forward slash, but this isn't right.
+        # Tutorial doesn't drop final forward slash, but this isn't right.
+        setHomespace('http://sbols.org/CRISPR_Example')
         Config.setOption('sbol_compliant_uris', True)
         Config.setOption('sbol_typed_uris', False)
         crispr_template = ModuleDefinition('CRISPR_Template')
@@ -71,6 +73,7 @@ class TestDocument(unittest.TestCase):
             print(obj)
         self.assertEqual(len(doc), 31)
         # print(doc)
+
 
 if __name__ == '__main__':
     unittest.main()

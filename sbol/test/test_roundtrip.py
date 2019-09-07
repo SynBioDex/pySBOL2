@@ -1,5 +1,6 @@
 import unittest
-import tempfile, shutil
+import tempfile
+import shutil
 import sys
 from sbol.document import *
 
@@ -28,11 +29,14 @@ class TestRoundTripSBOL2(unittest.TestCase):
         print(str(test_file))
         split_path = os.path.splitext(test_file)
         self.doc = Document()   # Document for read and write
-        self.doc.read(os.path.join(TEST_LOC_SBOL2, split_path[0] + split_path[1]))
-        self.doc.write(os.path.join(self.temp_out_dir, split_path[0] + '_out' + split_path[1]))
+        self.doc.read(os.path.join(TEST_LOC_SBOL2,
+                                   split_path[0] + split_path[1]))
+        self.doc.write(os.path.join(self.temp_out_dir, split_path[0] +
+                                    '_out' + split_path[1]))
 
         self.doc2 = Document()  # Document to compare for equality
-        self.doc2.read(os.path.join(self.temp_out_dir, split_path[0] + '_out' + split_path[1]))
+        self.doc2.read(os.path.join(self.temp_out_dir, split_path[0] +
+                                    '_out' + split_path[1]))
         self.assertTrue(self.doc.compare(self.doc2))
 
     def test_case000(self):
@@ -392,10 +396,12 @@ class TestRoundTripFailSBOL2(unittest.TestCase):
         split_path = os.path.splitext(test_file)
         self.doc = Document()   # Document for read and write
         self.doc.read(os.path.join(TEST_LOC_SBOL2, split_path[0] + split_path[1]))
-        self.doc.write(os.path.join(self.temp_out_dir, split_path[0] + '_out' + split_path[1]))
+        self.doc.write(os.path.join(self.temp_out_dir,
+                                    split_path[0] + '_out' + split_path[1]))
 
         self.doc2 = Document()  # Document to compare for equality
-        self.doc2.read(os.path.join(self.temp_out_dir, split_path[0] + '_out' + split_path[1]))
+        self.doc2.read(os.path.join(self.temp_out_dir,
+                                    split_path[0] + '_out' + split_path[1]))
         # Expected to fail
         self.assertRaises(AssertionError, lambda: self.assertEqual(self.doc.compare(self.doc2), 1))
 
@@ -410,7 +416,6 @@ class SimpleTest(unittest.TestCase):
 
 
 def runTests(test_list):
-    #exec(open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "CRISPR_example.py")).read())
     if test_list is None or test_list == []:
         return
     suite_list = []
@@ -421,7 +426,7 @@ def runTests(test_list):
 
     full_test_suite = unittest.TestSuite(suite_list)
 
-    unittest.TextTestRunner(verbosity=2,stream=sys.stderr).run(full_test_suite)
+    unittest.TextTestRunner(verbosity=2, stream=sys.stderr).run(full_test_suite)
 
 
 def runRoundTripTests():

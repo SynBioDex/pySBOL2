@@ -6,7 +6,8 @@ from sbol.config import *
 import os
 
 MODULE_LOCATION = os.path.dirname(os.path.abspath(__file__))
-TEST_LOCATION = os.path.join(MODULE_LOCATION, 'resources', 'crispr_example.xml')
+TEST_LOCATION = os.path.join(MODULE_LOCATION, 'resources',
+                             'crispr_example.xml')
 
 
 class TestProperty(unittest.TestCase):
@@ -44,7 +45,8 @@ class TestProperty(unittest.TestCase):
         d = Document()
         d.read(TEST_LOCATION)
         s1 = d.sequences['CRa_U6_seq']
-        self.assertEqual('http://sbols.org/CRISPR_Example/CRa_U6_seq/1.0.0', str(s1))
+        self.assertEqual('http://sbols.org/CRISPR_Example/CRa_U6_seq/1.0.0',
+                         str(s1))
 
 
 if __name__ == '__main__':

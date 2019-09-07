@@ -4,36 +4,53 @@ from . import validation
 
 
 class Identified(SBOLObject):
-    # The persistentIdentity property is OPTIONAL and has a data type of URI. This URI serves to uniquely refer to
-    # a set of SBOL objects that are different versions of each other. An Identified object MUST be referred to
+    # The persistentIdentity property is OPTIONAL and has a data type of URI.
+    # This URI serves to uniquely refer to a set of SBOL objects
+    # that are different versions of each other.
+    # An Identified object MUST be referred to
     # using either its identity URI or its persistentIdentity URI.
     _persistentIdentity = None
 
-    # The displayId property is an OPTIONAL identifier with a data type of String. This property is intended to be an
-    # intermediate between name and identity that is machine-readable, but more human-readable than the full URI
-    # of an identity. If the displayId property is used, then its String value SHOULD be locally unique
-    # (global uniqueness is not necessary) and MUST be composed of only alphanumeric or underscore characters
+    # The displayId property is an OPTIONAL identifier
+    # with a data type of String.
+    # This property is intended to be an intermediate
+    # between name and identity that is machine-readable,
+    # but more human-readable than the full URI
+    # of an identity. If the displayId property is used,
+    # then its String value SHOULD be locally unique
+    # (global uniqueness is not necessary)
+    # and MUST be composed of only alphanumeric or underscore characters
     # and MUST NOT begin with a digit.
     _displayId = None
 
-    # If the version property is used, then it is RECOMMENDED that version numbering follow the conventions
-    # of [semantic versioning](http://semver.org/), particularly as implemented by [Maven](http://maven.apache.org/).
-    # This convention represents versions as sequences of numbers and qualifiers that are separated
-    # by the characters '.' and '-' and are compared in lexicographical order (for example, 1 < 1.3.1 < 2.0-beta).
+    # If the version property is used,
+    # then it is RECOMMENDED that version numbering follow the conventions
+    # of [semantic versioning](http://semver.org/),
+    # particularly as implemented by [Maven](http://maven.apache.org/).
+    # This convention represents versions as sequences
+    # of numbers and qualifiers that are separated
+    # by the characters '.' and '-' and are compared in lexicographical order
+    # (for example, 1 < 1.3.1 < 2.0-beta).
     # For a full explanation, see the linked resources.
     _version = None
 
-    # The wasDerivedFrom property is OPTIONAL and has a data type of URI. An SBOL object with this property
-    # refers to another SBOL object or non-SBOL resource from which this object was derived. If the wasDerivedFrom
-    # property of an SBOL object A that refers to an SBOL object B has an identical persistentIdentity, and both
-    # A and B have a version, then the version of B MUST precede that of A. In addition, an SBOL object MUST NOT
-    # refer to itself via its own wasDerivedFrom property or form a cyclical chain of references via
-    # its wasDerivedFrom property and those of other SBOL objects. For example, the reference chain
+    # The wasDerivedFrom property is OPTIONAL and has a data type of URI.
+    # An SBOL object with this property refers to another SBOL object
+    # or non-SBOL resource from which this object was derived.
+    # If the wasDerivedFrom property of an SBOL object A
+    # that refers to an SBOL object B has an identical persistentIdentity,
+    # and both A and B have a version,
+    # then the version of B MUST precede that of A.
+    # In addition, an SBOL object MUST NOT refer to itself
+    # via its own wasDerivedFrom property
+    # or form a cyclical chain of references via its wasDerivedFrom property
+    # and those of other SBOL objects. For example, the reference chain
     # "A was derived from B and B was derived from A" is cyclical.
     _wasDerivedFrom = None
 
-    # An Activity which generated this ComponentDefinition, eg., a design process like
-    # codon-optimization or a construction process like Gibson Assembly
+    # An Activity which generated this ComponentDefinition,
+    # eg., a design process like codon-optimization
+    # or a construction process like Gibson Assembly
     _wasGeneratedBy = None
 
     # The name property is OPTIONAL and has a data type of String. This property is intended to be displayed to a human
@@ -44,7 +61,8 @@ class Identified(SBOLObject):
     _name = None
 
     # The description property is OPTIONAL and has a data type of String.
-    # This property is intended to contain a more thorough text description of an Identified object.
+    # This property is intended to contain a more thorough
+    # text description of an Identified object.
     _description = None
 
     def __init__(self, type_uri=SBOL_IDENTIFIED, uri=URIRef('example'), version=VERSION_STRING):
@@ -59,17 +77,28 @@ class Identified(SBOLObject):
             self._persistentIdentity.set(URIRef(os.path.join(getHomespace(), uri)))
             if Config.getOption(ConfigOptions.SBOL_TYPED_URIS.value) is True:
                 if version != '':
-                    self._identity.set(URIRef(os.path.join(getHomespace(), self.getClassName(type_uri), uri, version)))
+                    self._identity.set(
+                        URIRef(os.path.join(getHomespace(),
+                                            self.getClassName(type_uri),
+                                            uri, version))
+                    )
                 else:
-                    self._identity.set(URIRef(os.path.join(getHomespace(), self.getClassName(type_uri), uri)))
+                    self._identity.set(
+                        URIRef(os.path.join(getHomespace(),
+                                            self.getClassName(type_uri),
+                                            uri))
+                    )
             else:
                 if version != '':
-                    self._identity.set(URIRef(os.path.join(getHomespace(), uri, version)))
+                    self._identity.set(
+                        URIRef(os.path.join(getHomespace(), uri, version)))
                 else:
-                    self._identity.set(URIRef(os.path.join(getHomespace(), uri)))
+                    self._identity.set(
+                        URIRef(os.path.join(getHomespace(), uri)))
         elif hasHomespace():
             self._identity.set(URIRef(os.path.join(getHomespace(), uri)))
-            self._persistentIdentity.set(URIRef(os.path.join(getHomespace(), uri)))
+            self._persistentIdentity.set(
+                URIRef(os.path.join(getHomespace(), uri)))
         # self._identity.validate() # TODO
 
     @property
@@ -131,7 +160,8 @@ class Identified(SBOLObject):
             # Check for uniqueness of URI in local object properties
             matches = parent.find_property_value(SBOL_IDENTIFIED, obj_id)
             if len(matches) > 0:
-                raise SBOLError("Cannot update SBOL-compliant URI. The URI " + self.identity + " is not unique",
+                raise SBOLError("Cannot update SBOL-compliant URI. The URI " +
+                                self.identity + " is not unique",
                                 SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE)
             for rdf_type, store in self.owned_objects:
                 if rdf_type not in self._hidden_properties:
@@ -142,5 +172,6 @@ class Identified(SBOLObject):
             matches = parent.doc.find_property_value(SBOL_IDENTITY, self.identity)
             if len(matches) > 0:
                 raise SBOLError("Cannot update SBOL-compliant URI. "
-                                "An object with URI " + self.identity + " is already in the Document",
+                                "An object with URI " + self.identity +
+                                " is already in the Document",
                                 SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE)

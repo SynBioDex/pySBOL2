@@ -1,5 +1,4 @@
 import unittest
-from sbol.config import *
 from sbol.moduledefinition import *
 from sbol.componentdefinition import *
 from sbol.sbolerror import *
@@ -30,8 +29,10 @@ class TestConfig(unittest.TestCase):
         Config.setOption('sbol_typed_uris', False)
         crispr_template = ModuleDefinition('http://sbols.org/CRISPR_Example/CRISPR_Template')
         print(crispr_template)
-        self.assertEqual("http://sbols.org/CRISPR_Example/CRISPR_Template", str(crispr_template))
-        self.assertEqual("http://sbols.org/CRISPR_Example/CRISPR_Template", crispr_template.identity)
+        self.assertEqual("http://sbols.org/CRISPR_Example/CRISPR_Template",
+                         str(crispr_template))
+        self.assertEqual("http://sbols.org/CRISPR_Example/CRISPR_Template",
+                         crispr_template.identity)
 
     def test_openworld_useHomespace(self):
         """See: https://pysbol2.readthedocs.io/en/latest/getting_started.html"""
@@ -43,8 +44,10 @@ class TestConfig(unittest.TestCase):
         Config.setOption('sbol_typed_uris', False)
         crispr_template = ModuleDefinition('CRISPR_Template')
         print(crispr_template)
-        self.assertEqual("http://sbols.org/CRISPR_Example/CRISPR_Template", str(crispr_template))
-        self.assertEqual("http://sbols.org/CRISPR_Example/CRISPR_Template", crispr_template.identity)
+        self.assertEqual("http://sbols.org/CRISPR_Example/CRISPR_Template",
+                         str(crispr_template))
+        self.assertEqual("http://sbols.org/CRISPR_Example/CRISPR_Template",
+                         crispr_template.identity)
 
     def test_SBOLCompliant(self):
         """See: https://pysbol2.readthedocs.io/en/latest/getting_started.html"""
@@ -53,8 +56,10 @@ class TestConfig(unittest.TestCase):
         Config.setOption('sbol_typed_uris', False)
         crispr_template = ModuleDefinition('CRISPR_Template')
         print(crispr_template)
-        self.assertEqual("http://sbols.org/CRISPR_Example/CRISPR_Template/1", str(crispr_template))
-        self.assertEqual("http://sbols.org/CRISPR_Example/CRISPR_Template/1", crispr_template.identity)
+        self.assertEqual("http://sbols.org/CRISPR_Example/CRISPR_Template/1",
+                         str(crispr_template))
+        self.assertEqual("http://sbols.org/CRISPR_Example/CRISPR_Template/1",
+                         crispr_template.identity)
 
     def test_SBOLCompliant_typed(self):
         """See: https://pysbol2.readthedocs.io/en/latest/getting_started.html"""

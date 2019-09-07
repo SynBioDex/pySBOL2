@@ -2,12 +2,13 @@ from rdflib import URIRef
 
 LOGGING_CONFIG = 'logging_config.ini'
 
-# All SBOL objects will be created in the default namespace, unless otherwise specified
+# All SBOL objects will be created in the default namespace,
+# unless otherwise specified
 DEFAULT_NS = URIRef("http://examples.org/")
 
 # The URIs defined here determine the appearance of serialized RDF/XML nodes.
 # Change these URIs to change the appearance of an SBOL class or property name
-SBOL_URI = URIRef("http://sbols.org/v2")  #< Namespace for the SBOL standard.
+SBOL_URI = URIRef("http://sbols.org/v2")  # < Namespace for the SBOL standard.
 RDF_URI = URIRef("http://www.w3.org/1999/02/22-rdf-syntax-ns#")
 PURL_URI = URIRef("http://purl.org/dc/terms/")
 PROV_URI = URIRef("http://www.w3.org/ns/prov")
@@ -111,30 +112,56 @@ SBOL_UNIT = URIRef(SBOL_URI + "#unit")
 SBOL_VALUE = URIRef(SBOL_URI + "#hasNumericalValue")
 
 # SBOL internal ontologies
-SBOL_ACCESS_PRIVATE = URIRef(SBOL_URI + "#private")  # < Option for Component::access or FunctionalComponent::access property
-SBOL_ACCESS_PUBLIC = URIRef(SBOL_URI + "#public")    # < Option for Component::access or FunctionalComponent::access property
-SBOL_DIRECTION_IN = URIRef(SBOL_URI + "#in")         # < Option for FunctionalComponent::access property
-SBOL_DIRECTION_OUT = URIRef(SBOL_URI + "#out")       # < Option for FunctionalComponent::direction property
-SBOL_DIRECTION_IN_OUT = URIRef(SBOL_URI + "#inout")  # < Option for FunctionalComponent::direction property
-SBOL_DIRECTION_NONE = URIRef(SBOL_URI + "#none")     # < Option for FunctionalComponent::direction property
-SBOL_RESTRICTION_PRECEDES = URIRef(SBOL_URI + "#precedes")                     # < Option for SequenceConstraint::restriction property
-SBOL_RESTRICTION_SAME_ORIENTATION_AS = URIRef("#sameOrientationAs")          # < Option for SequenceConstraint::restriction property
-SBOL_RESTRICTION_OPPOSITE_ORIENTATION_AS = URIRef("#oppositeOrientationAs")  # < Option for SequenceConstraint::restriction property
-SBOL_ENCODING_IUPAC = URIRef("http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html")    # < Option for Sequence::encoding property
-SBOL_ENCODING_IUPAC_PROTEIN = URIRef("http://www.chem.qmul.ac.uk/iupac/AminoAcid/") # < Option for Sequence::encoding property
-SBOL_ENCODING_SMILES = URIRef("http://www.opensmiles.org/opensmiles.html")          # < Option for Sequence::encoding property
-SBOL_ORIENTATION_INLINE = URIRef(SBOL_URI + "#inline")                        # < Option for Location::orientation property
-SBOL_ORIENTATION_REVERSE_COMPLEMENT = URIRef(SBOL_URI + "#reverseComplement") # < Option for Location::orientation property
-SBOL_REFINEMENT_USE_REMOTE = URIRef(SBOL_URI + "#useRemote") # < Option for FunctionalComponent::refinement property
-SBOL_REFINEMENT_USE_LOCAL = URIRef(SBOL_URI + "#useLocal")   # < Option for FunctionalComponent::refinement property
-SBOL_REFINEMENT_VERIFY_IDENTICAL = URIRef(SBOL_URI + "#verifyIdentical") # < Option for MapsTo::refinement property
-SBOL_REFINEMENT_MERGE = URIRef(SBOL_URI + "#merge")                      # < Option for MapsTo::refinement property
-SBOL_ROLE_INTEGRATION_MERGE = URIRef(SBOL_URI + "#mergeRoles")           # < Option for SequenceAnnotation::roleIntegration or Component::roleIntegration property
-SBOL_ROLE_INTEGRATION_OVERRIDE = URIRef(SBOL_URI + "#overrideRoles")     # < Option for SequenceAnnotation::roleIntegration or Component::roleIntegration property
-SBOL_DESIGN = URIRef(SBOL_URI + "#design")  # < Option for Usage::roles or Association::roles
-SBOL_BUILD = URIRef(SBOL_URI + "#build")    # < Option for Usage::roles or Association::roles
-SBOL_TEST = URIRef(SBOL_URI + "#test")  # < Option for Usage::roles or Association::roles
-SBOL_LEARN = URIRef(SBOL_URI + "#learn")    # < Option for Usage::roles or Association::roles
+# Option for Component::access or FunctionalComponent::access property
+SBOL_ACCESS_PRIVATE = URIRef(SBOL_URI + "#private")
+# Option for Component::access or FunctionalComponent::access property
+SBOL_ACCESS_PUBLIC = URIRef(SBOL_URI + "#public")
+# Option for FunctionalComponent::access property
+SBOL_DIRECTION_IN = URIRef(SBOL_URI + "#in")
+# Option for FunctionalComponent::direction property
+SBOL_DIRECTION_OUT = URIRef(SBOL_URI + "#out")
+# Option for FunctionalComponent::direction property
+SBOL_DIRECTION_IN_OUT = URIRef(SBOL_URI + "#inout")
+# Option for FunctionalComponent::direction property
+SBOL_DIRECTION_NONE = URIRef(SBOL_URI + "#none")
+# Option for SequenceConstraint::restriction property
+SBOL_RESTRICTION_PRECEDES = URIRef(SBOL_URI + "#precedes")
+# Option for SequenceConstraint::restriction property
+SBOL_RESTRICTION_SAME_ORIENTATION_AS = URIRef("#sameOrientationAs")
+# Option for SequenceConstraint::restriction property
+SBOL_RESTRICTION_OPPOSITE_ORIENTATION_AS = URIRef("#oppositeOrientationAs")
+# Option for Sequence::encoding property
+SBOL_ENCODING_IUPAC = URIRef("http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html")
+# Option for Sequence::encoding property
+SBOL_ENCODING_IUPAC_PROTEIN = URIRef("http://www.chem.qmul.ac.uk/iupac/AminoAcid/")
+# Option for Sequence::encoding property
+SBOL_ENCODING_SMILES = URIRef("http://www.opensmiles.org/opensmiles.html")
+# Option for Location::orientation property
+SBOL_ORIENTATION_INLINE = URIRef(SBOL_URI + "#inline")
+# Option for Location::orientation property
+SBOL_ORIENTATION_REVERSE_COMPLEMENT = URIRef(SBOL_URI + "#reverseComplement")
+# Option for FunctionalComponent::refinement property
+SBOL_REFINEMENT_USE_REMOTE = URIRef(SBOL_URI + "#useRemote")
+# Option for FunctionalComponent::refinement property
+SBOL_REFINEMENT_USE_LOCAL = URIRef(SBOL_URI + "#useLocal")
+# Option for MapsTo::refinement property
+SBOL_REFINEMENT_VERIFY_IDENTICAL = URIRef(SBOL_URI + "#verifyIdentical")
+# Option for MapsTo::refinement property
+SBOL_REFINEMENT_MERGE = URIRef(SBOL_URI + "#merge")
+# Option for SequenceAnnotation::roleIntegration
+# or Component::roleIntegration property
+SBOL_ROLE_INTEGRATION_MERGE = URIRef(SBOL_URI + "#mergeRoles")
+# Option for SequenceAnnotation::roleIntegration
+# or Component::roleIntegration property
+SBOL_ROLE_INTEGRATION_OVERRIDE = URIRef(SBOL_URI + "#overrideRoles")
+# Option for Usage::roles or Association::roles
+SBOL_DESIGN = URIRef(SBOL_URI + "#design")
+# Option for Usage::roles or Association::roles
+SBOL_BUILD = URIRef(SBOL_URI + "#build")
+# Option for Usage::roles or Association::roles
+SBOL_TEST = URIRef(SBOL_URI + "#test")
+# Option for Usage::roles or Association::roles
+SBOL_LEARN = URIRef(SBOL_URI + "#learn")
 
 # PROVO ontology
 PROVO_ACTIVITY = URIRef(PROVO + "#Activity")
@@ -155,29 +182,50 @@ PROVO_ENTITY = URIRef(PROVO + "#entity")
 
 # Systems Biology Ontology
 # Interaction.types
-SBO = URIRef("http://identifiers.org/biomodels.sbo/SBO:")  # < Namespace for Systems Biology Ontology (SBO) terms
-SBO_INTERACTION = URIRef(SBO + "0000343")                  # < An SBO term and possible value for an Interaction::type property
-SBO_INHIBITION = URIRef(SBO + "0000169")                   # < An SBO term and possible value for an Interaction::type property
-SBO_GENETIC_PRODUCTION = URIRef(SBO + "0000589")           # < An SBO term and possible value for an Interaction::type property
-SBO_NONCOVALENT_BINDING = URIRef(SBO + "0000177")          # < An SBO term and possible value for an Interaction::type property
-SBO_STIMULATION = URIRef(SBO + "0000170")                  # < An SBO term and possible value for an Interaction::type property
-SBO_DEGRADATION = URIRef(SBO + "0000179")                  # < An SBO term and possible value for an Interaction::type property
-SBO_CONTROL = URIRef(SBO + "0000168")                      # < An SBO term and possible value for an Interaction::type property
-SBO_BIOCHEMICAL_REACTION = URIRef(SBO + "0000176")         # < An SBO term and possible value for an Interaction::type property
-SBO_STIMULATED = URIRef(SBO + "0000643")                   # < An SBO term and possible value for an Interaction::type property
-SBO_CONVERSION = URIRef(SBO + "0000182")                   # < An SBO term and possible value for an Interaction::type property
+# Namespace for Systems Biology Ontology (SBO) terms
+SBO = URIRef("http://identifiers.org/biomodels.sbo/SBO:")
+# An SBO term and possible value for an Interaction::type property
+SBO_INTERACTION = URIRef(SBO + "0000343")
+# An SBO term and possible value for an Interaction::type property
+SBO_INHIBITION = URIRef(SBO + "0000169")
+# An SBO term and possible value for an Interaction::type property
+SBO_GENETIC_PRODUCTION = URIRef(SBO + "0000589")
+# An SBO term and possible value for an Interaction::type property
+SBO_NONCOVALENT_BINDING = URIRef(SBO + "0000177")
+# An SBO term and possible value for an Interaction::type property
+SBO_STIMULATION = URIRef(SBO + "0000170")
+# An SBO term and possible value for an Interaction::type property
+SBO_DEGRADATION = URIRef(SBO + "0000179")
+# An SBO term and possible value for an Interaction::type property
+SBO_CONTROL = URIRef(SBO + "0000168")
+# An SBO term and possible value for an Interaction::type property
+SBO_BIOCHEMICAL_REACTION = URIRef(SBO + "0000176")
+# An SBO term and possible value for an Interaction::type property
+SBO_STIMULATED = URIRef(SBO + "0000643")
+# An SBO term and possible value for an Interaction::type property
+SBO_CONVERSION = URIRef(SBO + "0000182")
 
 # Participant.roles
-SBO_PROMOTER = URIRef(SBO + "0000598")             # < An SBO term and possible value for an Participant::role property
-SBO_GENE = URIRef(SBO + "0000243")                 # < An SBO term and possible value for an Participant::role property
-SBO_INHIBITOR = URIRef(SBO + "0000020")            # < An SBO term and possible value for an Participant::role property
-SBO_INHIBITED = URIRef(SBO + "0000642")            # < An SBO term and possible value for an Participant::role property
-SBO_STIMULATOR = URIRef(SBO + "0000459")           # < An SBO term and possible value for an Participant::role property
-SBO_REACTANT = URIRef(SBO + "0000010")             # < An SBO term and possible value for an Participant::role property
-SBO_PRODUCT = URIRef(SBO + "0000011")              # < An SBO term and possible value for an Participant::role property
-SBO_LIGAND = URIRef(SBO + "0000280")               # < An SBO term and possible value for an Participant::role property
-SBO_NONCOVALENT_COMPLEX = URIRef(SBO + "0000253")  # < An SBO term and possible value for an Participant::role property
-SBO_BINDING_SITE = URIRef(SBO + "0000494")         # < An SBO term and possible value for an Participant::role property
+# An SBO term and possible value for an Participant::role property
+SBO_PROMOTER = URIRef(SBO + "0000598")
+# An SBO term and possible value for an Participant::role property
+SBO_GENE = URIRef(SBO + "0000243")
+# An SBO term and possible value for an Participant::role property
+SBO_INHIBITOR = URIRef(SBO + "0000020")
+# An SBO term and possible value for an Participant::role property
+SBO_INHIBITED = URIRef(SBO + "0000642")
+# An SBO term and possible value for an Participant::role property
+SBO_STIMULATOR = URIRef(SBO + "0000459")
+# An SBO term and possible value for an Participant::role property
+SBO_REACTANT = URIRef(SBO + "0000010")
+# An SBO term and possible value for an Participant::role property
+SBO_PRODUCT = URIRef(SBO + "0000011")
+# An SBO term and possible value for an Participant::role property
+SBO_LIGAND = URIRef(SBO + "0000280")
+# An SBO term and possible value for an Participant::role property
+SBO_NONCOVALENT_COMPLEX = URIRef(SBO + "0000253")
+# An SBO term and possible value for an Participant::role property
+SBO_BINDING_SITE = URIRef(SBO + "0000494")
 SBO_SUBSTRATE = URIRef(SBO + "0000015")
 SBO_COFACTOR = URIRef(SBO + "0000604")
 SBO_SIDEPRODUCT = URIRef(SBO + "0000603")
@@ -185,38 +233,59 @@ SBO_SIDEPRODUCT = URIRef(SBO + "0000603")
 SBO_ENZYME = URIRef(SBO + "0000014")
 
 # URIs for common Sequence Ontology terms
-SO = URIRef("http://identifiers.org/so/SO:")  # < Namespace for Sequence Ontology (SO) terms
-SO_MISC = URIRef(SO + "0000001")              # < An SO term and possible value for ComponentDefinition::role property
-SO_GENE = URIRef(SO + "0000704")              # < An SO term and possible value for ComponentDefinition::role property
-SO_PROMOTER = URIRef(SO + "0000167")          # < An SO term and possible value for ComponentDefinition::role property
-SO_CDS = URIRef(SO + "0000316")               # < An SO term and possible value for ComponentDefinition::role property
-SO_RBS = URIRef(SO + "0000139")               # < An SO term and possible value for ComponentDefinition::role property
-SO_TERMINATOR = URIRef(SO + "0000141")        # < An SO term and possible value for ComponentDefinition::role property
-SO_SGRNA = URIRef(SO + "0001998")             # < An SO term and possible value for ComponentDefinition::role property
-SO_LINEAR = URIRef(SO + "0000987")            # < An SO term and possible value for ComponentDefinition::role property
-SO_CIRCULAR = URIRef(SO + "0000988")          # < An SO term and possible value for ComponentDefinition::role property
-SO_PLASMID = URIRef(SO + "0000155")           # < An SO term and possible value for ComponentDefinition::role property
+# Namespace for Sequence Ontology (SO) terms
+SO = URIRef("http://identifiers.org/so/SO:")
+# An SO term and possible value for ComponentDefinition::role property
+SO_MISC = URIRef(SO + "0000001")
+# An SO term and possible value for ComponentDefinition::role property
+SO_GENE = URIRef(SO + "0000704")
+# An SO term and possible value for ComponentDefinition::role property
+SO_PROMOTER = URIRef(SO + "0000167")
+# An SO term and possible value for ComponentDefinition::role property
+SO_CDS = URIRef(SO + "0000316")
+# An SO term and possible value for ComponentDefinition::role property
+SO_RBS = URIRef(SO + "0000139")
+# An SO term and possible value for ComponentDefinition::role property
+SO_TERMINATOR = URIRef(SO + "0000141")
+# An SO term and possible value for ComponentDefinition::role property
+SO_SGRNA = URIRef(SO + "0001998")
+# An SO term and possible value for ComponentDefinition::role property
+SO_LINEAR = URIRef(SO + "0000987")
+# An SO term and possible value for ComponentDefinition::role property
+SO_CIRCULAR = URIRef(SO + "0000988")
+# An SO term and possible value for ComponentDefinition::role property
+SO_PLASMID = URIRef(SO + "0000155")
 
 # BioPAX is used to indicate macromolecular and molecular types
 # DNA
-BIOPAX_DNA = URIRef("http://www.biopax.org/release/biopax-level3.owl#DnaRegion")  # < A BioPax term and possible value for ComponentDefinition::type property
+# A BioPax term and possible value for ComponentDefinition::type property
+BIOPAX_DNA = URIRef("http://www.biopax.org/release/biopax-level3.owl#DnaRegion")
 # RNA
-BIOPAX_RNA = URIRef("http://www.biopax.org/release/biopax-level3.owl#RnaRegion")  # < A BioPax term and possible value for ComponentDefinition::type property
+# A BioPax term and possible value for ComponentDefinition::type property
+BIOPAX_RNA = URIRef("http://www.biopax.org/release/biopax-level3.owl#RnaRegion")
 # PROTEIN
-BIOPAX_PROTEIN = URIRef("http://www.biopax.org/release/biopax-level3.owl#Protein")  # < A BioPax term and possible value for ComponentDefinition::type property
+# A BioPax term and possible value for ComponentDefinition::type property
+BIOPAX_PROTEIN = URIRef("http://www.biopax.org/release/biopax-level3.owl#Protein")
 # SMALL_MOLECULE
-BIOPAX_SMALL_MOLECULE = URIRef("http://www.biopax.org/release/biopax-level3.owl#SmallMolecule")  # < A BioPax term and possible value for ComponentDefinition::type property
+# A BioPax term and possible value for ComponentDefinition::type property
+BIOPAX_SMALL_MOLECULE = URIRef("http://www.biopax.org/release/biopax-level3.owl#SmallMolecule")
 # COMPLEX
-BIOPAX_COMPLEX = URIRef("http://www.biopax.org/release/biopax-level3.owl#Complex")  # < A BioPax term and possible value for ComponentDefinition::type property
+# A BioPax term and possible value for ComponentDefinition::type property
+BIOPAX_COMPLEX = URIRef("http://www.biopax.org/release/biopax-level3.owl#Complex")
 
 # EDAM ontology is used for Model.languages
-EDAM_SBML = URIRef("http://identifiers.org/edam/format_2585")    # < An EDAM ontology term and option for Model::language
-EDAM_CELLML = URIRef("http://identifiers.org/edam/format_3240")  # < An EDAM ontology term and option for Model::language
-EDAM_BIOPAX = URIRef("http://identifiers.org/edam/format_3156")  # < An EDAM ontology term and option for Model::language
+# An EDAM ontology term and option for Model::language
+EDAM_SBML = URIRef("http://identifiers.org/edam/format_2585")
+# An EDAM ontology term and option for Model::language
+EDAM_CELLML = URIRef("http://identifiers.org/edam/format_3240")
+# An EDAM ontology term and option for Model::language
+EDAM_BIOPAX = URIRef("http://identifiers.org/edam/format_3156")
 
 # Model.frameworks
-SBO_CONTINUOUS = URIRef(SBO + "0000062")  # < SBO term and option for Model::framework
-SBO_DISCRETE = URIRef(SBO + "0000063")    # < SBO term and option for Model::framework
+# SBO term and option for Model::framework
+SBO_CONTINUOUS = URIRef(SBO + "0000062")
+# SBO term and option for Model::framework
+SBO_DISCRETE = URIRef(SBO + "0000063")
 
 # URIs for SBOL extension objects
 SYSBIO_DESIGN = URIRef(SYSBIO_URI + "#Design")
