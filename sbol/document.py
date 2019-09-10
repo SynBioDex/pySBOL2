@@ -497,8 +497,8 @@ class Document(Identified):
         if found != -1:
             # property_ns, property_name = property_uri.split[:found]  # <-- this line didn't appear to have any purpose
             # Checks if the object's property already exists
-            if subject in self.SBOLObjects:
-                parent = self.SBOLObjects[subject]
+            if str(subject) in self.SBOLObjects:
+                parent = self.SBOLObjects[str(subject)]
                 # Decide if this triple corresponds to a simple property,
                 # a list property, an owned property or a referenced property
                 if predicate in parent.properties:
@@ -506,7 +506,7 @@ class Document(Identified):
                     parent.properties[predicate].append(obj)
                 elif predicate in parent.owned_objects:
                     # triple is an owned object
-                    owned_obj = self.SBOLObjects[obj]
+                    owned_obj = self.SBOLObjects[str(obj)]
                     if owned_obj is not None:
                         parent.owned_objects[predicate].append(owned_obj)
                         owned_obj.parent = parent
