@@ -48,6 +48,17 @@ class TestProperty(unittest.TestCase):
         self.assertEqual('http://sbols.org/CRISPR_Example/CRa_U6_seq/1.0.0',
                          str(s1))
 
+    def test_readProperties(self):
+        d = Document()
+        d.read(TEST_LOCATION)
+        cd2 = d.componentDefinitions['http://sbols.org/CRISPR_Example/EYFP_gene/1.0.0']
+        self.assertEqual(2, len(cd2.components))
+        self.assertEqual(1, len(cd2.roles))
+        md = d.moduleDefinitions['http://sbols.org/CRISPR_Example/CRISPR_Template/1.0.0']
+        self.assertEqual(5, len(md.functionalComponents))
+        self.assertEqual(3, len(md.interactions))
+        self.assertEqual(0, len(md.roles))
+
 
 if __name__ == '__main__':
     unittest.main()
