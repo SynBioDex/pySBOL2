@@ -27,8 +27,8 @@ To run the round-trip tests, execute the following command.
 import sbol
 sbol.testRoundTrip()
 ```
-If you are a developer, please install the scripts in the 'scripts' directory in your project's .git/hooks directory.
-This will ensure that unit tests are run before each commit.
+If you are a developer, please run ./dev/bootstrap.sh to set up the pre-commit hooks.
+This will ensure that unit tests and style checking is performed before each commit.
 
 ## DOCUMENTATION
 

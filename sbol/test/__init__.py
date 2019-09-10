@@ -15,11 +15,9 @@ def runTests(test_list=(TestDocument, TestIdentified, TestConfig, TestProperty))
         suite_list.append(suite)
     full_test_suite = unittest.TestSuite(suite_list)
     result = unittest.TextTestRunner(verbosity=2, stream=sys.stderr).run(full_test_suite)
-    if result.wasSuccessful():
-        exit(0)
-    else:
-        exit(1)
+    return result
 
 
 def runRoundTripTests(test_list=(TestRoundTripSBOL2, TestRoundTripFailSBOL2)):
-    runTests(test_list)
+    result = runTests(test_list)
+    return result

@@ -2,7 +2,7 @@
 
 # Run unit tests
 echo "Running unit tests..."
-python3 -c "import sbol; sbol.testSBOL()" # > /dev/null 2>&1
+python3 -c "import sbol; sbol.testSBOLHook()" # > /dev/null 2>&1
 if [ $? != 0 ]; then
    cat <<\EOF
 Error: There were failing unit tests.
