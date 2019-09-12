@@ -360,7 +360,7 @@ class SBOLObject:
         for typeURI, objlist in self.owned_objects.items():
             for owned_obj in objlist:
                 graph.add((self._identity.getRawValue(),
-                           typeURI, owned_obj.identity))
+                           typeURI, URIRef(owned_obj.identity)))
                 owned_obj.build_graph(graph)
 
     def serialize_rdf2xml(self, graph):
