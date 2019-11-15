@@ -74,6 +74,14 @@ class TestDocument(unittest.TestCase):
         self.assertEqual(len(doc), 31)
         # print(doc)
 
+    def test_identity(self):
+        # The sbol:identity relation should not be written out when
+        # serializing SBOL.
+        doc = Document()
+        doc.read(TEST_LOCATION)
+        result = doc.writeString()
+        self.assertNotIn('sbol:identity', result)
+
 
 if __name__ == '__main__':
     unittest.main()

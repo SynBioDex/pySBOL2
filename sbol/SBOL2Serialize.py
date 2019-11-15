@@ -33,12 +33,15 @@ from rdflib import URIRef, Literal
 rdfNS = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 sbolNS = "http://sbols.org/v2#"
 
+SBOL_IDENTITY = sbolNS + 'identity'
+
 
 def is_ownership_relation(g, triple):
     # subject = triple[0].toPython()
     predicate = triple[1].toPython()
     # obj = triple[2]
 
+    # TODO: Extract this constant so we don't build it on every call
     ownership_predicates = {
         sbolNS + 'module',
         sbolNS + 'mapsTo',
@@ -100,6 +103,9 @@ def serialize_sboll2(g):
         obj = triple[2]
         element = subject_to_element[subject]
         if predicate == RDF.type.toPython():
+            continue
+        if predicate == SBOL_IDENTITY:
+            # Do not output identity predicates. In SBOL they are redundant.
             continue
         if is_ownership_relation(g, triple):
             owned_element = subject_to_element[obj.toPython()]
