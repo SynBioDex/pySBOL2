@@ -80,10 +80,6 @@ class TestRoundTripSBOL2(unittest.TestCase):
     def test_sbol2_files(self):
         subtest = 1
         for f in TEST_FILES_SBOL2:
-            if os.path.basename(f) == 'pICSL50014.xml':
-                # This one is UTF-8. Skip it here, and test it below
-                # in a controlled environment.
-                continue
             if os.path.basename(f) == 'test_source_location.xml':
                 # This one has an error. Temporarily give it its own
                 # test and expect the failure.
@@ -97,7 +93,6 @@ class TestRoundTripSBOL2(unittest.TestCase):
     def test_source_location(self):
         self.run_round_trip(os.path.join(TEST_LOC_SBOL2, 'test_source_location.xml'))
 
-    @unittest.expectedFailure
     def test_utf8_roundtrip(self):
         # Test loading a utf-8 SBOL file without LANG set. This was a
         # bug at one time, and only shows itself when LANG is unset.
