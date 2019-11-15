@@ -372,18 +372,17 @@ class Document(Identified):
         :return: None
         """
         self.logger.debug("Appending data from file: " + filename)
-        with open(filename, 'r') as f:
-            if not self.graph:
-                self.graph = rdflib.Graph()
-            # Save any changes we've made to the graph.
-            self.update_graph()
-            # Use rdflib to automatically merge the graphs together
-            self.graph.parse(f, format="application/rdf+xml")
-            # Clean up our internal data structures.
-            # (There's probably a more efficient way to merge.)
-            self.clear(clear_graph=False)
-            # Base our internal representation on the new graph.
-            self.parse_all()
+        if not self.graph:
+            self.graph = rdflib.Graph()
+        # Save any changes we've made to the graph.
+        self.update_graph()
+        # Use rdflib to automatically merge the graphs together
+        self.graph.parse(filename, format="application/rdf+xml")
+        # Clean up our internal data structures.
+        # (There's probably a more efficient way to merge.)
+        self.clear(clear_graph=False)
+        # Base our internal representation on the new graph.
+        self.parse_all()
 
     def parse_all(self):
         # Parse namespaces
