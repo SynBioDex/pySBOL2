@@ -91,7 +91,7 @@ class TestRoundTripSBOL2(unittest.TestCase):
 
     @unittest.expectedFailure
     def test_source_location(self):
-        self.run_round_trip(os.path.join(TEST_LOC_SBOL2, 'test_source_location.xml'))
+        self.run_round_trip('test_source_location.xml')
 
     def test_utf8_roundtrip(self):
         # Test loading a utf-8 SBOL file without LANG set. This was a
@@ -101,7 +101,7 @@ class TestRoundTripSBOL2(unittest.TestCase):
         loc = locale.getlocale()
         try:
             locale.setlocale(locale.LC_ALL, 'C')
-            self.run_round_trip(os.path.join(TEST_LOC_SBOL2, 'pICSL50014.xml'))
+            self.run_round_trip('pICSL50014.xml')
         finally:
             locale.setlocale(locale.LC_ALL, loc)
 
