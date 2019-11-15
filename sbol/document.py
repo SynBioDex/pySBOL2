@@ -494,7 +494,6 @@ class Document(Identified):
         if found == -1:
             found = predicate.rfind('/')
         if found != -1:
-            # property_ns, property_name = property_uri.split[:found]  # <-- this line didn't appear to have any purpose
             # Checks if the object's property already exists
             if str(subject) in self.SBOLObjects:
                 parent = self.SBOLObjects[str(subject)]
