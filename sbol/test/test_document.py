@@ -1,9 +1,9 @@
+import locale
+import os
 import unittest
+# Needed for setHomespace and maybe Config and some other things
 from sbol.document import *
-from sbol.moduledefinition import *
-from sbol.componentdefinition import *
-from sbol.constants import *
-
+import sbol
 
 MODULE_LOCATION = os.path.dirname(os.path.abspath(__file__))
 TEST_LOCATION = os.path.join(MODULE_LOCATION, 'resources', 'crispr_example.xml')
@@ -12,12 +12,12 @@ TEST_LOCATION = os.path.join(MODULE_LOCATION, 'resources', 'crispr_example.xml')
 class TestDocument(unittest.TestCase):
 
     def test_empty_len0(self):
-        doc = Document()
+        doc = sbol.Document()
         # print(doc)
         self.assertEqual(0, len(doc), "Length of document should be 0")
 
     def test_addGetTopLevel_uri(self):
-        doc = Document()
+        doc = sbol.Document()
         # Tutorial doesn't drop final forward slash, but this isn't right.
         setHomespace('http://sbols.org/CRISPR_Example')
         Config.setOption('sbol_compliant_uris', True)
@@ -34,7 +34,7 @@ class TestDocument(unittest.TestCase):
         self.assertEqual(cas9, cas9_2)
 
     def test_addGetTopLevel_displayId(self):
-        doc = Document()
+        doc = sbol.Document()
         setHomespace('http://sbols.org/CRISPR_Example')
         Config.setOption('sbol_compliant_uris', True)
         Config.setOption('sbol_typed_uris', False)
@@ -49,7 +49,7 @@ class TestDocument(unittest.TestCase):
         self.assertEqual(cas9, cas9_2)
 
     def test_addGetTopLevel_indexing(self):
-        doc = Document()
+        doc = sbol.Document()
         # Tutorial doesn't drop final forward slash, but this isn't right.
         setHomespace('http://sbols.org/CRISPR_Example')
         Config.setOption('sbol_compliant_uris', True)
@@ -65,22 +65,60 @@ class TestDocument(unittest.TestCase):
         self.assertEqual(cas9, cas9_2)
 
     def test_iteration(self):
-        doc = Document()
+        doc = sbol.Document()
         doc.read(TEST_LOCATION)
         i = 0
         for obj in doc:
             i += 1
-            print(obj)
+            # print(obj)
         self.assertEqual(len(doc), 31)
         # print(doc)
 
     def test_identity(self):
         # The sbol:identity relation should not be written out when
         # serializing SBOL.
-        doc = Document()
+        doc = sbol.Document()
         doc.read(TEST_LOCATION)
         result = doc.writeString()
         self.assertNotIn('sbol:identity', result)
+
+    def test_utf8_append(self):
+        utf8_path = os.path.join(MODULE_LOCATION, 'SBOLTestSuite', 'SBOL2', 'pICSL50014.xml')
+        doc = sbol.Document()
+        doc.append(utf8_path)
+
+    def test_utf8_append_no_locale(self):
+        # Test loading a utf-8 SBOL file without LANG set. This was a
+        # bug at one time, and only shows itself when LANG is unset.
+        # Here we simulate that by temporarily setting the locale to
+        # the generic 'C' locale.
+        utf8_path = os.path.join(MODULE_LOCATION, 'SBOLTestSuite', 'SBOL2', 'pICSL50014.xml')
+        loc = locale.getlocale()
+        try:
+            locale.setlocale(locale.LC_ALL, 'C')
+            doc = sbol.Document()
+            doc.append(utf8_path)
+        finally:
+            locale.setlocale(locale.LC_ALL, loc)
+
+    def test_utf8_read(self):
+        utf8_path = os.path.join(MODULE_LOCATION, 'SBOLTestSuite', 'SBOL2', 'pICSL50014.xml')
+        doc = sbol.Document()
+        doc.read(utf8_path)
+
+    def test_utf8_read_no_locale(self):
+        # Test loading a utf-8 SBOL file without LANG set. This was a
+        # bug at one time, and only shows itself when LANG is unset.
+        # Here we simulate that by temporarily setting the locale to
+        # the generic 'C' locale.
+        utf8_path = os.path.join(MODULE_LOCATION, 'SBOLTestSuite', 'SBOL2', 'pICSL50014.xml')
+        loc = locale.getlocale()
+        try:
+            locale.setlocale(locale.LC_ALL, 'C')
+            doc = sbol.Document()
+            doc.read(utf8_path)
+        finally:
+            locale.setlocale(locale.LC_ALL, loc)
 
 
 if __name__ == '__main__':
