@@ -27,7 +27,8 @@ class TestDocument(unittest.TestCase):
         doc.addComponentDefinition(cas9)
 
         # Note: tutorial has 1.0.0 instead of 1 but this doesn't work
-        crispr_template_2 = doc.getModuleDefinition('http://sbols.org/CRISPR_Example/CRISPR_Template/1')
+        crispr_template_uri = 'http://sbols.org/CRISPR_Example/CRISPR_Template/1'
+        crispr_template_2 = doc.getModuleDefinition(crispr_template_uri)
         cas9_2 = doc.getComponentDefinition('http://sbols.org/CRISPR_Example/Cas9/1')
         self.assertEqual(crispr_template, crispr_template_2)
         self.assertEqual(cas9, cas9_2)
@@ -82,7 +83,8 @@ class TestDocument(unittest.TestCase):
         self.assertNotIn('sbol:identity', result)
 
     def test_utf8_append(self):
-        utf8_path = os.path.join(MODULE_LOCATION, 'SBOLTestSuite', 'SBOL2', 'pICSL50014.xml')
+        utf8_path = os.path.join(MODULE_LOCATION, 'SBOLTestSuite', 'SBOL2',
+                                 'pICSL50014.xml')
         doc = sbol.Document()
         doc.append(utf8_path)
 
@@ -91,7 +93,8 @@ class TestDocument(unittest.TestCase):
         # bug at one time, and only shows itself when LANG is unset.
         # Here we simulate that by temporarily setting the locale to
         # the generic 'C' locale.
-        utf8_path = os.path.join(MODULE_LOCATION, 'SBOLTestSuite', 'SBOL2', 'pICSL50014.xml')
+        utf8_path = os.path.join(MODULE_LOCATION, 'SBOLTestSuite', 'SBOL2',
+                                 'pICSL50014.xml')
         loc = locale.getlocale()
         try:
             locale.setlocale(locale.LC_ALL, 'C')
@@ -101,7 +104,8 @@ class TestDocument(unittest.TestCase):
             locale.setlocale(locale.LC_ALL, loc)
 
     def test_utf8_read(self):
-        utf8_path = os.path.join(MODULE_LOCATION, 'SBOLTestSuite', 'SBOL2', 'pICSL50014.xml')
+        utf8_path = os.path.join(MODULE_LOCATION, 'SBOLTestSuite', 'SBOL2',
+                                 'pICSL50014.xml')
         doc = sbol.Document()
         doc.read(utf8_path)
 
@@ -110,7 +114,8 @@ class TestDocument(unittest.TestCase):
         # bug at one time, and only shows itself when LANG is unset.
         # Here we simulate that by temporarily setting the locale to
         # the generic 'C' locale.
-        utf8_path = os.path.join(MODULE_LOCATION, 'SBOLTestSuite', 'SBOL2', 'pICSL50014.xml')
+        utf8_path = os.path.join(MODULE_LOCATION, 'SBOLTestSuite', 'SBOL2',
+                                 'pICSL50014.xml')
         loc = locale.getlocale()
         try:
             locale.setlocale(locale.LC_ALL, 'C')
