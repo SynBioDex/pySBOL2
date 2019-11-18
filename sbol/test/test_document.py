@@ -1,9 +1,8 @@
 import locale
 import os
 import unittest
-# Needed for setHomespace and maybe Config and some other things
-from sbol.document import *
 import sbol
+from sbol import *
 
 MODULE_LOCATION = os.path.dirname(os.path.abspath(__file__))
 TEST_LOCATION = os.path.join(MODULE_LOCATION, 'resources', 'crispr_example.xml')

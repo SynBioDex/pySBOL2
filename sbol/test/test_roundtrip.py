@@ -7,7 +7,7 @@ import shutil
 import sys
 import rdflib
 import rdflib.compare
-from sbol.document import *
+import sbol
 
 MODULE_LOCATION = os.path.dirname(os.path.abspath(__file__))
 TEST_LOC_SBOL2 = os.path.join(MODULE_LOCATION, 'SBOLTestSuite', 'SBOL2')
@@ -43,13 +43,13 @@ class TestRoundTripSBOL2(unittest.TestCase):
 
     def run_round_trip(self, test_file):
         split_path = os.path.splitext(test_file)
-        self.doc = Document()   # Document for read and write
+        self.doc = sbol.Document()   # Document for read and write
         self.doc.read(os.path.join(TEST_LOC_SBOL2,
                                    split_path[0] + split_path[1]))
         self.doc.write(os.path.join(self.temp_out_dir, split_path[0] +
                                     '_out' + split_path[1]))
 
-        self.doc2 = Document()  # Document to compare for equality
+        self.doc2 = sbol.Document()  # Document to compare for equality
         self.doc2.read(os.path.join(self.temp_out_dir, split_path[0] +
                                     '_out' + split_path[1]))
         self.assertTrue(self.doc.compare(self.doc2))
@@ -117,12 +117,12 @@ class TestRoundTripFailSBOL2(unittest.TestCase):
 
     def run_round_trip_assert_fail(self, test_file):
         split_path = os.path.splitext(test_file)
-        self.doc = Document()   # Document for read and write
+        self.doc = sbol.Document()   # Document for read and write
         self.doc.read(os.path.join(TEST_LOC_SBOL2, split_path[0] + split_path[1]))
         self.doc.write(os.path.join(self.temp_out_dir,
                                     split_path[0] + '_out' + split_path[1]))
 
-        self.doc2 = Document()  # Document to compare for equality
+        self.doc2 = sbol.Document()  # Document to compare for equality
         self.doc2.read(os.path.join(self.temp_out_dir,
                                     split_path[0] + '_out' + split_path[1]))
         # Expected to fail
@@ -134,7 +134,7 @@ class SimpleTest(unittest.TestCase):
     def test_read(self):
         test_file = str(TEST_FILES_SBOL2[0])
         split_path = os.path.splitext(test_file)
-        self.doc = Document()   # Document for read and write
+        self.doc = sbol.Document()   # Document for read and write
         self.doc.read(os.path.join(TEST_LOC_SBOL2, split_path[0] + split_path[1]))
 
 
