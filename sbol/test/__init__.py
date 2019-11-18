@@ -7,6 +7,7 @@ from .test_property import TestProperty
 from .test_roundtrip import TestRoundTripSBOL2, TestRoundTripFailSBOL2
 from .test_tutorial import TestSbolTutorial
 
+
 def runTests(test_list=(TestDocument, TestIdentified, TestConfig, TestProperty,
                         TestSbolTutorial)):
     suite_list = []
