@@ -1,13 +1,14 @@
 import unittest
 import sys
-from sbol.test.test_document import TestDocument
-from sbol.test.test_identified import TestIdentified
-from sbol.test.test_config import TestConfig
-from sbol.test.test_property import TestProperty
-from sbol.test.test_roundtrip import TestRoundTripSBOL2, TestRoundTripFailSBOL2
+from .test_document import TestDocument
+from .test_identified import TestIdentified
+from .test_config import TestConfig
+from .test_property import TestProperty
+from .test_roundtrip import TestRoundTripSBOL2, TestRoundTripFailSBOL2
+from .test_tutorial import TestSbolTutorial
 
-
-def runTests(test_list=(TestDocument, TestIdentified, TestConfig, TestProperty)):
+def runTests(test_list=(TestDocument, TestIdentified, TestConfig, TestProperty,
+                        TestSbolTutorial)):
     suite_list = []
     loader = unittest.TestLoader()
     for test_class in test_list:
