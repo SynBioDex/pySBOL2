@@ -1,13 +1,20 @@
 __version__ = '3.0.0'
 
-# NOTE: I have to manually specify 'sbol'. Why?
-from sbol.document import Document
-from sbol.componentdefinition import ComponentDefinition
-from sbol.moduledefinition import ModuleDefinition
-from sbol.sequence import Sequence
-
-# NOTE: I have to manually include all of these, which is quite a pain.
-__all__ = ['Document', 'ComponentDefinition', 'ModuleDefinition', 'Sequence']
+# Anything imported here is part of the public API. Limit what gets
+# imported to only those things that are actually needed.
+#
+# We should be using `__all__` for the list of exported items for this
+# module, but the list of items in `constants.py` is extensive. So
+# instead of `__all__`, we will try to be careful about what gets
+# imported into this file. In the absence of __all__, all imported
+# symbols are also exported.
+from .config import Config, ConfigOptions, hasHomespace, setHomespace
+from .constants import *
+from .document import Document
+from .componentdefinition import ComponentDefinition
+from .moduledefinition import ModuleDefinition
+from .sbolerror import SBOLError
+from .sequence import Sequence
 
 
 def testSBOL():
