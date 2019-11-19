@@ -1,5 +1,6 @@
 import unittest
 import sys
+from .test_componentdefinition import TestComponentDefinitions
 from .test_document import TestDocument
 from .test_identified import TestIdentified
 from .test_config import TestConfig
@@ -9,7 +10,7 @@ from .test_tutorial import TestSbolTutorial
 
 
 def runTests(test_list=(TestDocument, TestIdentified, TestConfig, TestProperty,
-                        TestSbolTutorial)):
+                        TestSbolTutorial, TestComponentDefinitions)):
     suite_list = []
     loader = unittest.TestLoader()
     for test_class in test_list:
