@@ -123,6 +123,11 @@ class TestDocument(unittest.TestCase):
         finally:
             locale.setlocale(locale.LC_ALL, loc)
 
+    def test_constructor(self):
+        doc = sbol.Document(TEST_LOCATION)
+        self.assertEqual(len(doc), 31)
+        self.assertEqual(len(doc.componentDefinitions), 25)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -142,6 +142,8 @@ class Document(Identified):
                                       '0', '*', None)
         self._keywords = URIProperty(self, PURL_URI + "elements/1.1/subject",
                                      '0', '*', None)
+        if filename is not None:
+            self.read(filename)
 
     @property
     def citations(self):
