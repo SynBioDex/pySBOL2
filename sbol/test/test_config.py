@@ -1,7 +1,5 @@
 import unittest
-from sbol.moduledefinition import *
-from sbol.componentdefinition import *
-from sbol.sbolerror import *
+from sbol import *
 
 
 class TestConfig(unittest.TestCase):

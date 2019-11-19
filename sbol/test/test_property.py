@@ -1,9 +1,7 @@
 import unittest
-from sbol.componentdefinition import ComponentDefinition
-from sbol.document import Document
-from sbol.constants import *
-from sbol.config import *
 import os
+import sbol
+from sbol import *
 
 MODULE_LOCATION = os.path.dirname(os.path.abspath(__file__))
 TEST_LOCATION = os.path.join(MODULE_LOCATION, 'resources',
