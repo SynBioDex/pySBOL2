@@ -2,7 +2,6 @@ import locale
 import os
 import unittest
 import sbol
-from sbol import *
 
 MODULE_LOCATION = os.path.dirname(os.path.abspath(__file__))
 TEST_LOCATION = os.path.join(MODULE_LOCATION, 'resources', 'crispr_example.xml')
@@ -18,11 +17,11 @@ class TestDocument(unittest.TestCase):
     def test_addGetTopLevel_uri(self):
         doc = sbol.Document()
         # Tutorial doesn't drop final forward slash, but this isn't right.
-        setHomespace('http://sbols.org/CRISPR_Example')
-        Config.setOption('sbol_compliant_uris', True)
-        Config.setOption('sbol_typed_uris', False)
-        crispr_template = ModuleDefinition('CRISPR_Template')
-        cas9 = ComponentDefinition('Cas9', BIOPAX_PROTEIN)
+        sbol.setHomespace('http://sbols.org/CRISPR_Example')
+        sbol.Config.setOption('sbol_compliant_uris', True)
+        sbol.Config.setOption('sbol_typed_uris', False)
+        crispr_template = sbol.ModuleDefinition('CRISPR_Template')
+        cas9 = sbol.ComponentDefinition('Cas9', sbol.BIOPAX_PROTEIN)
         doc.addModuleDefinition(crispr_template)
         doc.addComponentDefinition(cas9)
 
@@ -35,11 +34,11 @@ class TestDocument(unittest.TestCase):
 
     def test_addGetTopLevel_displayId(self):
         doc = sbol.Document()
-        setHomespace('http://sbols.org/CRISPR_Example')
-        Config.setOption('sbol_compliant_uris', True)
-        Config.setOption('sbol_typed_uris', False)
-        crispr_template = ModuleDefinition('CRISPR_Template')
-        cas9 = ComponentDefinition('Cas9', BIOPAX_PROTEIN)
+        sbol.setHomespace('http://sbols.org/CRISPR_Example')
+        sbol.Config.setOption('sbol_compliant_uris', True)
+        sbol.Config.setOption('sbol_typed_uris', False)
+        crispr_template = sbol.ModuleDefinition('CRISPR_Template')
+        cas9 = sbol.ComponentDefinition('Cas9', sbol.BIOPAX_PROTEIN)
         doc.addModuleDefinition(crispr_template)
         doc.addComponentDefinition(cas9)
 
@@ -51,11 +50,11 @@ class TestDocument(unittest.TestCase):
     def test_addGetTopLevel_indexing(self):
         doc = sbol.Document()
         # Tutorial doesn't drop final forward slash, but this isn't right.
-        setHomespace('http://sbols.org/CRISPR_Example')
-        Config.setOption('sbol_compliant_uris', True)
-        Config.setOption('sbol_typed_uris', False)
-        crispr_template = ModuleDefinition('CRISPR_Template')
-        cas9 = ComponentDefinition('Cas9', BIOPAX_PROTEIN)
+        sbol.setHomespace('http://sbols.org/CRISPR_Example')
+        sbol.Config.setOption('sbol_compliant_uris', True)
+        sbol.Config.setOption('sbol_typed_uris', False)
+        crispr_template = sbol.ModuleDefinition('CRISPR_Template')
+        cas9 = sbol.ComponentDefinition('Cas9', sbol.BIOPAX_PROTEIN)
         doc.addModuleDefinition(crispr_template)
         doc.addComponentDefinition(cas9)
 
