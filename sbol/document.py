@@ -84,11 +84,6 @@ class Document(Identified):
         :param filename: (optional) a file to initialize the Document.
         """
         super().__init__(SBOL_DOCUMENT, URIRef(""), VERSION_STRING)
-        if os.path.exists(LOGGING_CONFIG):
-            fileConfig(LOGGING_CONFIG)
-        else:
-            self.logger.setLevel(logging.INFO)
-        self.logger = logging.getLogger(__name__)
 
         # A RDFLib representation of the triples.
         # Initialized when parsing a graph.
