@@ -731,7 +731,7 @@ class Document(Identified):
         :return: A pointer to the SBOLObject,
         or NULL if an object with this identity doesn't exist.
         """
-        for obj in self.SBOLObjects:
+        for obj in self.SBOLObjects.values():
             match = obj.find(uri)
             if match is not None:
                 return match
