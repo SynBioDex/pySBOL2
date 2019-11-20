@@ -128,6 +128,15 @@ class TestDocument(unittest.TestCase):
         self.assertEqual(len(doc), 31)
         self.assertEqual(len(doc.componentDefinitions), 25)
 
+    def test_find(self):
+        doc = sbol.Document(TEST_LOCATION)
+        found = doc.find('http://sbols.org/CRISPR_Example/CRISPR_Template')
+        # At one point Document.find was returning -1 because it was calling str.find
+        self.assertNotEqual(found, -1)
+        self.assertIsNone(found)
+        found = doc.find('http://sbols.org/CRISPR_Example/CRISPR_Template/1.0.0')
+        self.assertNotEqual(found, -1)
+        self.assertIsNotNone(found)
 
 if __name__ == '__main__':
     unittest.main()

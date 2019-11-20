@@ -14,7 +14,7 @@ class SBOLObject:
     # 'Protected' members
     _namespaces = None
     _default_namespace = None
-    _hidden_properties = None
+    _hidden_properties = []
 
     # def _init(self, rdf_type, uri):
     #     raise NotImplementedError("Not yet implemented")
@@ -206,7 +206,6 @@ class SBOLObject:
         """
         # TODO This may work differently than the original method...
         if type(comparand) != type(self):
-            self.logger.warning("TYPES ARE NOT EQUAL!!!")
             return False
         is_equal = True
         if self.rdf_type != comparand.rdf_type:
