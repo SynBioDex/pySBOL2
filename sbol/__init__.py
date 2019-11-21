@@ -8,11 +8,13 @@ __version__ = '3.0.0'
 # instead of `__all__`, we will try to be careful about what gets
 # imported into this file. In the absence of __all__, all imported
 # symbols are also exported.
-from .config import Config, ConfigOptions, hasHomespace, setHomespace
+from .config import Config, ConfigOptions
+from .config import getHomespace, hasHomespace, setHomespace
 from .constants import *
 from .document import Document
 from .componentdefinition import ComponentDefinition
 from .moduledefinition import ModuleDefinition
+from .partshop import PartShop
 from .sbolerror import SBOLError
 from .sequence import Sequence
 
