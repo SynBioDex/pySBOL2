@@ -57,3 +57,17 @@ class TestSbolTutorial(unittest.TestCase):
         self.assertEqual(len(doc), 32)
         self.assertEqual(len(list(doc.componentDefinitions)), 14)
         self.assertEqual(len(list(doc.moduleDefinitions)), 0)
+
+    @unittest.expectedFailure
+    def test_partshop(self):
+        # Start an interface to igem’s public part shop on
+        # SynBioHub. Located at `https://synbiohub.org/public/igem`
+        partshop = sbol.PartShop('https://synbiohub.org/public/igem')
+
+        # Search the part shop for parts from the iGEM interlab study
+        # using the search term `interlab`
+        records = partshop.search('interlab')
+
+        # Import the medium strength device into your document
+        medium_device_uri = records[0].identity
+        partshop.pull(medium_device_uri, doc)
