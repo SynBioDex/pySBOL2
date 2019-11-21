@@ -66,11 +66,6 @@ class SBOLObject:
 
     def __init__(self, _rdf_type=URIRef(UNDEFINED), uri=URIRef("example")):
         """Open-world constructor."""
-        if os.path.exists(LOGGING_CONFIG):
-            fileConfig(LOGGING_CONFIG)
-        self.logger = logging.getLogger(__name__)
-        if not os.path.exists(LOGGING_CONFIG):
-            self.logger.setLevel(logging.INFO)
         self.owned_objects = {}  # map<rdf_type, vector<SBOLObject>>
         self.properties = {}  # map<rdf_type, vector<SBOLObject>>
         if type(_rdf_type) is str:
@@ -90,6 +85,16 @@ class SBOLObject:
             uri = os.path.join(getHomespace(), uri)
             self._identity = URIProperty(self, SBOL_IDENTITY,
                                          '0', '1', [sbol_rule_10202], uri)
+
+    @property
+    def logger(self):
+        logger = logging.getLogger('sbol')
+        if not logger.hasHandlers():
+            # If there are no handlers, nobody has initialized
+            # logging.  Configure logging here so we have a chance of
+            # seeing the messages.
+            logging.basicConfig()
+        return logger
 
     @property
     def identity(self):

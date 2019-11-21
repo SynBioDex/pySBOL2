@@ -46,11 +46,6 @@ class Property(ABC):
         :param initial_value: The initial value of the Property
         (int, str, float supported)
         """
-        self.logger = logging.getLogger(__name__)
-        if os.path.exists(LOGGING_CONFIG):
-            fileConfig(LOGGING_CONFIG)
-        else:
-            self.logger.setLevel(logging.INFO)
         self._sbol_owner = property_owner
         if isinstance(type_uri, URIRef):
             self._rdf_type = type_uri
@@ -63,6 +58,16 @@ class Property(ABC):
         self._validation_rules = []
         self._validation_rules = validation_rules
         self.value = initial_value
+
+    @property
+    def logger(self):
+        logger = logging.getLogger('sbol')
+        if not logger.hasHandlers():
+            # If there are no handlers, nobody has initialized
+            # logging.  Configure logging here so we have a chance of
+            # seeing the messages.
+            logging.basicConfig()
+        return logger
 
     def getTypeURI(self):
         """

@@ -7,8 +7,6 @@ from sbol.constants import *
 from sbol.config import Config, ConfigOptions, parseURLDomain
 import getpass
 
-LOGGING_CONFIG = 'logging_config.ini'
-
 
 class PartShop:
     """A class which provides an API front-end for
@@ -20,12 +18,6 @@ class PartShop:
         :param url: The URL of the online repository (as a str)
         :param spoofed_url:
         """
-        self.logger = logging.getLogger(__name__)
-        # set up logger
-        if os.path.exists(LOGGING_CONFIG):
-            fileConfig(LOGGING_CONFIG)
-        else:
-            self.logger.setLevel(logging.INFO)
         # initialize member variables
         self.resource = url
         self.user = ''
@@ -39,6 +31,16 @@ class PartShop:
             raise SBOLError(SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT,
                             'PartShop initialization failed. The spoofed URL '
                             'should not contain a terminal backslash')
+
+    @property
+    def logger(self):
+        logger = logging.getLogger('sbol')
+        if not logger.hasHandlers():
+            # If there are no handlers, nobody has initialized
+            # logging.  Configure logging here so we have a chance of
+            # seeing the messages.
+            logging.basicConfig()
+        return logger
 
     def count(self):
         """Return the count of objects contained in a PartShop"""
