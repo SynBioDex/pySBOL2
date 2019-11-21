@@ -1,3 +1,4 @@
+import collections.abc
 from .identified import *
 from .config import *
 from .constants import *
@@ -231,7 +232,11 @@ class Document(Identified):
         :param sbol_obj: module definition
         :return: None
         """
-        self.add(sbol_obj)
+        if isinstance(sbol_obj, collections.abc.Iterable):
+            for obj in sbol_obj:
+                self.add(obj)
+        else:
+            self.add(sbol_obj)
 
     def addSequence(self, sbol_obj):
         """
