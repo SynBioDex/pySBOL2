@@ -194,7 +194,18 @@ class ModuleDefinition(TopLevel):
         of the callback as an argument.
         :return: A list of all ModuleDefinitions in the hierarchy.
         """
-        raise NotImplementedError("Not yet implemented")
+        if callback:
+            callback(self, user_data)
+        result = [self]
+        if self.modules:
+            # I have child modules
+            for m in self.modules:
+                self.logger.warning('type(m): %r', type(m))
+                self.logger.warning('m.definition: %r', m.definition.get(0))
+                md = self.doc.find(str(m.definition.get(0)))
+                self.logger.info('Found %r', md)
+                result.extend(md.applyToModuleHierarchy(callback, user_data))
+        return result
 
     def assemble(self, list_of_modules):
         """Assemble a high-level ModuleDefinition from lower-level submodules.
