@@ -1,6 +1,8 @@
-from .identified import Identified
-from .constants import *
 from rdflib import URIRef
+
+from .constants import *
+from .identified import Identified
+from .measurement import Measurement
 from .property import URIProperty, ReferencedObject, OwnedObject
 
 
@@ -13,7 +15,8 @@ class Participation(Identified):
         self.participant = ReferencedObject(self, SBOL_PARTICIPANT,
                                             SBOL_FUNCTIONAL_COMPONENT,
                                             '1', '1', [], participant)
-        self.measurements = OwnedObject(self, SBOL_MEASUREMENTS, '0', '*', [])
+        self.measurements = OwnedObject(self, SBOL_MEASUREMENTS,
+                                        Measurement, '0', '*', [])
 
     @property
     def roles(self):

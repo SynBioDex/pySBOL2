@@ -1,6 +1,9 @@
-from .identified import Identified
-from .property import URIProperty, OwnedObject, ReferencedObject
 from .constants import *
+from .identified import Identified
+from .location import Location
+from .mapsto import MapsTo
+from .measurement import Measurement
+from .property import URIProperty, OwnedObject, ReferencedObject
 
 
 class ComponentInstance(Identified):
@@ -10,8 +13,10 @@ class ComponentInstance(Identified):
                                            SBOL_COMPONENT_DEFINITION,
                                            '1', '1', [], definition)
         self._access = URIProperty(self, SBOL_ACCESS, '0', '1', [], access)
-        self.mapsTos = OwnedObject(self, SBOL_MAPS_TOS, '0', '*', [])
-        self.measurements = OwnedObject(self, SBOL_MEASUREMENTS, '0', '*', [])
+        self.mapsTos = OwnedObject(self, SBOL_MAPS_TOS, MapsTo,
+                                   '0', '*', [])
+        self.measurements = OwnedObject(self, SBOL_MEASUREMENTS, Measurement,
+                                        '0', '*', [])
 
     @property
     def access(self):
@@ -30,7 +35,8 @@ class Component(ComponentInstance):
         self._roleIntegration = URIProperty(self, SBOL_ROLE_INTEGRATION,
                                             '0', '1', [],
                                             SBOL_ROLE_INTEGRATION_MERGE)
-        self.sourceLocations = OwnedObject(self, SBOL_LOCATIONS, '0', '*', [])
+        self.sourceLocations = OwnedObject(self, SBOL_LOCATIONS, Location,
+                                           '0', '*', [])
 
     @property
     def roles(self):

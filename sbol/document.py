@@ -18,7 +18,7 @@ from .provo import Plan, Activity, Agent, Usage, Association
 from .attachment import Attachment
 from .combinatorialderivation import CombinatorialDerivation
 from .implementation import Implementation
-from .dbtl import Design, Analysis, SampleRoster
+from .dbtl import Analysis, Build, Design, SampleRoster, Test
 from .experiment import Experiment, ExperimentalData
 from .object import SBOLObject
 from .property import OwnedObject, URIProperty
@@ -94,44 +94,50 @@ class Document(Identified):
         self.SBOLObjects = {}  # Needed?
         self._namespaces = {}
         self.resource_namespaces = set()
-        self.designs = OwnedObject(self, SYSBIO_DESIGN,
+        self.designs = OwnedObject(self, SYSBIO_DESIGN, Design,
                                    '0', '*', [libsbol_rule_11])
-        self.builds = OwnedObject(self, SYSBIO_BUILD,
+        self.builds = OwnedObject(self, SYSBIO_BUILD, Build,
                                   '0', '*', [libsbol_rule_12])
-        self.tests = OwnedObject(self, SYSBIO_TEST,
+        self.tests = OwnedObject(self, SYSBIO_TEST, Test,
                                  '0', '*', [libsbol_rule_13])
-        self.analyses = OwnedObject(self, SYSBIO_ANALYSIS,
+        self.analyses = OwnedObject(self, SYSBIO_ANALYSIS, Analysis,
                                     '0', '*', [libsbol_rule_14])
         self.componentDefinitions = OwnedObject(self,
                                                 SBOL_COMPONENT_DEFINITION,
+                                                ComponentDefinition,
                                                 '0', '*', None)
         self.moduleDefinitions = OwnedObject(self,
                                              SBOL_MODULE_DEFINITION,
+                                             ModuleDefinition,
                                              '0', '*', None)
-        self.models = OwnedObject(self, SBOL_MODEL,
+        self.models = OwnedObject(self, SBOL_MODEL, Model,
                                   '0', '*', None)
-        self.sequences = OwnedObject(self, SBOL_SEQUENCE,
+        self.sequences = OwnedObject(self, SBOL_SEQUENCE, Sequence,
                                      '0', '*', None)
-        self.collections = OwnedObject(self, SBOL_COLLECTION,
+        self.collections = OwnedObject(self, SBOL_COLLECTION, Collection,
                                        '0', '*', None)
-        self.activities = OwnedObject(self, PROVO_ACTIVITY,
+        self.activities = OwnedObject(self, PROVO_ACTIVITY, Activity,
                                       '0', '*', None)
-        self.plans = OwnedObject(self, PROVO_PLAN,
+        self.plans = OwnedObject(self, PROVO_PLAN, Plan,
                                  '0', '*', None)
-        self.agents = OwnedObject(self, PROVO_AGENT,
+        self.agents = OwnedObject(self, PROVO_AGENT, Agent,
                                   '0', '*', None)
-        self.attachments = OwnedObject(self, SBOL_ATTACHMENT,
+        self.attachments = OwnedObject(self, SBOL_ATTACHMENT, Attachment,
                                        '0', '*', None)
         self.combinatorialderivations = OwnedObject(self,
                                                     SBOL_COMBINATORIAL_DERIVATION,
+                                                    CombinatorialDerivation,
                                                     '0', '*', None)
         self.implementations = OwnedObject(self, SBOL_IMPLEMENTATION,
+                                           Implementation,
                                            '0', '*', None)
         self.sampleRosters = OwnedObject(self, SYSBIO_SAMPLE_ROSTER,
+                                         SampleRoster,
                                          '0', '*', [validation.libsbol_rule_16])
-        self.experiments = OwnedObject(self, SBOL_EXPERIMENT,
+        self.experiments = OwnedObject(self, SBOL_EXPERIMENT, Experiment,
                                        '0', '*', None)
         self.experimentalData = OwnedObject(self, SBOL_EXPERIMENTAL_DATA,
+                                            ExperimentalData,
                                             '0', '*', None)
         self._citations = URIProperty(self, PURL_URI + "bibliographicCitation",
                                       '0', '*', None)

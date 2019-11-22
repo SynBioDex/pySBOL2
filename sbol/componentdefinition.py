@@ -1,6 +1,10 @@
+from .component import Component
 from .toplevel import *
 from . import validation
 from .property import URIProperty
+from .sequence import Sequence
+from .sequenceannotation import SequenceAnnotation
+from .sequenceconstraint import SequenceConstraint
 
 
 class ComponentDefinition(TopLevel):
@@ -112,14 +116,18 @@ class ComponentDefinition(TopLevel):
         self._roles = URIProperty(self, SBOL_ROLES,
                                   '0', '*', None)
         self.sequence = OwnedObject(self, SBOL_SEQUENCE,
+                                    Sequence,
                                     '0', '1', [validation.libsbol_rule_20])
         self.sequences = ReferencedObject(self, SBOL_SEQUENCE_PROPERTY,
                                           SBOL_SEQUENCE, '0', '*',
                                           [validation.libsbol_rule_21])
         self.sequenceAnnotations = OwnedObject(self, SBOL_SEQUENCE_ANNOTATIONS,
+                                               SequenceAnnotation,
                                                '0', '*', None)
-        self.components = OwnedObject(self, SBOL_COMPONENTS, '0', '*', None)
+        self.components = OwnedObject(self, SBOL_COMPONENTS, Component,
+                                      '0', '*', None)
         self.sequenceConstraints = OwnedObject(self, SBOL_SEQUENCE_CONSTRAINTS,
+                                               SequenceConstraint,
                                                '0', '*', None)
 
     @property

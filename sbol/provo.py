@@ -106,7 +106,8 @@ class Agent(TopLevel):
     These agents should be annotated with additional information,
     such as software version needed to be able to run the same software again.
     """
-    def __init__(self, uri=URIRef("example"), version=VERSION_STRING, rdf_type=PROVO_AGENT):
+    def __init__(self, uri=URIRef("example"), version=VERSION_STRING,
+                 rdf_type=PROVO_AGENT):
         """Constructor.
 
         :param uri: A full URI including a scheme, namespace, and identifier.
@@ -187,8 +188,9 @@ class Activity(TopLevel):
         derived from this one.
         """
         super().__init__(rdf_type, uri, version)
-        self.plan = OwnedObject(self, PROVO_PLAN, '0', '1', [libsbol_rule_22])
-        self.agent = OwnedObject(self, PROVO_AGENT,
+        self.plan = OwnedObject(self, PROVO_PLAN, Plan,
+                                '0', '1', [libsbol_rule_22])
+        self.agent = OwnedObject(self, PROVO_AGENT, Agent,
                                  '0', '1', [libsbol_rule_22])
         self._types = URIProperty(self, SBOL_TYPES, '0', '1', [])
         self._startedAtTime = LiteralProperty(self, PROVO_STARTED_AT_TIME,
@@ -197,9 +199,10 @@ class Activity(TopLevel):
                                             '0', '1', [])
         self.wasInformedBy = ReferencedObject(self, PROVO_WAS_INFORMED_BY,
                                               PROVO_ACTIVITY, '0', '*', [])
-        self.usages = OwnedObject(self, PROVO_QUALIFIED_USAGE, '0', '*', [])
+        self.usages = OwnedObject(self, PROVO_QUALIFIED_USAGE, Usage,
+                                  '0', '*', [])
         self.associations = OwnedObject(self, PROVO_QUALIFIED_ASSOCIATION,
-                                        '0', '*', [])
+                                        Association, '0', '*', [])
 
     @property
     def types(self):
