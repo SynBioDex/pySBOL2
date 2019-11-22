@@ -375,19 +375,38 @@ class LiteralProperty(Property):
 
 
 class OwnedObject(URIProperty):
-    def __init__(self, property_owner, sbol_uri, lower_bound, upper_bound,
+    def __init__(self, property_owner, sbol_uri, builder, lower_bound, upper_bound,
                  validation_rules=None, first_object=None):
         """Initialize a container and optionally put the first object in it.
         If validation rules are specified, they will be checked upon initialization.
+
+        builder is a function that takes a single argument, a string,
+        and constructs an object of appropriate type for this
+        OwnedObject instance. For instance, if this OwnedObject is
+        intended to hold ComponentDefinitions, then the builder should
+        return an object of type ComponentDefinition.
+
         """
         super().__init__(property_owner, sbol_uri, lower_bound, upper_bound,
                          validation_rules, first_object)
+        if not callable(builder):
+            msg = '{!r} object is not callable'
+            raise TypeError(msg.format(type(builder)))
+        self.builder = builder
         # Register Property in owner Object
         if self._sbol_owner is not None:
             self._sbol_owner.properties.pop(sbol_uri, None)
             self._sbol_owner.owned_objects[sbol_uri] = []  # vector of SBOLObjects
             if first_object is not None:
                 self._sbol_owner.owned_objects[sbol_uri].append(first_object)
+
+    def create(self, uri):
+        """Creates an instance appropriate for this owned object collection.
+
+        uri - the name of the object
+
+        """
+        return self.builder(uri)
 
     def add(self, sbol_obj):
         if self._sbol_owner is not None:

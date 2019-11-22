@@ -47,6 +47,7 @@ class CombinatorialDerivation(TopLevel):
                                                SBOL_COMBINATORIAL_DERIVATION,
                                                '0', '1', [])
         self.variableComponents = OwnedObject(self, SBOL_VARIABLE_COMPONENTS,
+                                              VariableComponent,
                                               '0', '*', [])
 
     @property

@@ -1,16 +1,28 @@
 import unittest
 import sys
 from .test_componentdefinition import TestComponentDefinitions
+from .test_design import TestDesign
 from .test_document import TestDocument
 from .test_identified import TestIdentified
 from .test_config import TestConfig
+from .test_ownedobject import TestOwnedObject
 from .test_property import TestProperty
 from .test_roundtrip import TestRoundTripSBOL2, TestRoundTripFailSBOL2
 from .test_tutorial import TestSbolTutorial
 
 
-def runTests(test_list=(TestDocument, TestIdentified, TestConfig, TestProperty,
-                        TestSbolTutorial, TestComponentDefinitions)):
+def runTests(test_list=None):
+    if test_list is None:
+        test_list = [
+            TestComponentDefinitions,
+            TestConfig,
+            TestDesign,
+            TestDocument,
+            TestIdentified,
+            TestOwnedObject,
+            TestProperty,
+            TestSbolTutorial,
+        ]
     suite_list = []
     loader = unittest.TestLoader()
     for test_class in test_list:

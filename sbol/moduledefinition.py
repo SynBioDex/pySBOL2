@@ -1,5 +1,8 @@
-from .toplevel import *
+from .component import FunctionalComponent
+from .interaction import Interaction
+from .module import Module
 from .property import *
+from .toplevel import *
 
 
 class ModuleDefinition(TopLevel):
@@ -84,10 +87,14 @@ class ModuleDefinition(TopLevel):
         self._roles = URIProperty(self, SBOL_ROLES, '0', '*', None)
         self.models = ReferencedObject(self, SBOL_MODELS,
                                        SBOL_MODEL, '0', '*', [])
-        self.functionalComponents = OwnedObject(self, SBOL_FUNCTIONAL_COMPONENTS,
+        self.functionalComponents = OwnedObject(self,
+                                                SBOL_FUNCTIONAL_COMPONENTS,
+                                                FunctionalComponent,
                                                 '0', '*', [])
-        self.modules = OwnedObject(self, SBOL_MODULES, '0', '*', [])
+        self.modules = OwnedObject(self, SBOL_MODULES, Module,
+                                   '0', '*', [])
         self.interactions = OwnedObject(self, SBOL_INTERACTIONS,
+                                        Interaction,
                                         '0', '*', [libsbol_rule_17])
 
     @property
