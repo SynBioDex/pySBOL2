@@ -1,6 +1,9 @@
+from .component import FunctionalComponent
 from .identified import Identified
-from .validation import *
+from .measurement import Measurement
 from .object import *
+from .participation import Participation
+from .validation import *
 
 
 class Interaction(Identified):
@@ -9,12 +12,15 @@ class Interaction(Identified):
         super().__init__(rdf_type, uri)
         self.functionalComponents = OwnedObject(self,
                                                 SBOL_FUNCTIONAL_COMPONENTS,
+                                                FunctionalComponent,
                                                 '0', '*', [libsbol_rule_18])
         self._types = URIProperty(self, SBOL_TYPES,
                                   '1', '*', [], interaction_type)
         self.participations = OwnedObject(self, SBOL_PARTICIPATIONS,
+                                          Participation,
                                           '0', '*', [])
         self.measurements = OwnedObject(self, SBOL_MEASUREMENTS,
+                                        Measurement,
                                         '0', '*', [])
         # TODO hidden properties
 

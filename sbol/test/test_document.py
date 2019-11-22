@@ -138,5 +138,6 @@ class TestDocument(unittest.TestCase):
         self.assertNotEqual(found, -1)
         self.assertIsNotNone(found)
 
+
 if __name__ == '__main__':
     unittest.main()
