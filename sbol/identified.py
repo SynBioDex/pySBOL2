@@ -145,7 +145,7 @@ class Identified(SBOLObject):
         if self.parent is None:
             raise Exception('update_uri: Parent cannot be None')
         parent = self.parent
-        if Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS) is True:
+        if Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS.value) is True:
             # Form compliant URI for child object
             persistent_id = parent.properties[SBOL_PERSISTENT_IDENTITY][0]
             persistent_id = os.path.join(persistent_id, self.displayId)
@@ -163,7 +163,7 @@ class Identified(SBOLObject):
                 raise SBOLError("Cannot update SBOL-compliant URI. The URI " +
                                 self.identity + " is not unique",
                                 SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE)
-            for rdf_type, store in self.owned_objects:
+            for rdf_type, store in self.owned_objects.items():
                 if rdf_type not in self._hidden_properties:
                     for nested_obj in store:
                         nested_obj.update_uri()

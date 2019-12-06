@@ -183,9 +183,13 @@ class SBOLObject:
                 continue
             for obj in store:
                 matches += obj.find_property_value(uri, value)
-        value_store = self.properties[uri]
-        for val in value_store:
-            matches.append(val)
+        try:
+            value_store = self.properties[uri]
+            for val in value_store:
+                matches.append(val)
+        except KeyError:
+            # It is ok that uri is not in properties
+            pass
         return matches
 
     def find_reference(self, uri):
