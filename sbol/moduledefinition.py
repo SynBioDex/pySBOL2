@@ -207,10 +207,7 @@ class ModuleDefinition(TopLevel):
         if self.modules:
             # I have child modules
             for m in self.modules:
-                self.logger.warning('type(m): %r', type(m))
-                self.logger.warning('m.definition: %r', m.definition.get(0))
                 md = self.doc.find(str(m.definition.get(0)))
-                self.logger.info('Found %r', md)
                 result.extend(md.applyToModuleHierarchy(callback, user_data))
         return result
 
@@ -222,7 +219,12 @@ class ModuleDefinition(TopLevel):
         :param list_of_modules: A list of submodule ModuleDefinitions.
         :return: None
         """
-        raise NotImplementedError("Not yet implemented")
+        if not Config.getOption('sbol_compliant_uris'):
+            msg = 'This method only works when SBOL-compliance is enabled'
+            raise SBOLError(msg, SBOLError.SBOL_ERROR_COMPLIANCE)
+        for mdef in list_of_modules:
+            m = self.modules.create(mdef.displayId)
+            m.definition.set(mdef.identity)
 
     def getTypeURI(self):
         return SBOL_MODULE_DEFINITION
