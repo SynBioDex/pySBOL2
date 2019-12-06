@@ -406,31 +406,33 @@ class OwnedObject(URIProperty):
         uri - the name of the object
 
         """
-        return self.builder(uri)
+        obj = self.builder(uri=uri)
+        self.add(obj)
+        return obj
 
     def add(self, sbol_obj):
         if self._sbol_owner is not None:
             if sbol_obj.is_top_level() and self._sbol_owner.doc is not None:
                 self._sbol_owner.doc.add(sbol_obj)
-        else:
-            object_store = self._sbol_owner.owned_objects[self._rdf_type]
-            if sbol_obj in object_store:
-                raise SBOLError("The object " + sbol_obj.identity +
-                                " is already contained by the " +
-                                self._rdf_type + " property",
-                                SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE)
-            # Add to Document and check for uniqueness of URI
-            if self._sbol_owner.doc is not None:
-                sbol_obj.doc = self._sbol_owner.doc
-            # Add to parent object
-            object_store.append(sbol_obj)
-            sbol_obj.parent = self._sbol_owner
-            # Update URI for the argument object and all its children,
-            # if SBOL-compliance is enabled.
-            sbol_obj.update_uri()
+            else:
+                object_store = self._sbol_owner.owned_objects[self._rdf_type]
+                if sbol_obj in object_store:
+                    raise SBOLError("The object " + sbol_obj.identity +
+                                    " is already contained by the " +
+                                    self._rdf_type + " property",
+                                    SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE)
+                # Add to Document and check for uniqueness of URI
+                if self._sbol_owner.doc is not None:
+                    sbol_obj.doc = self._sbol_owner.doc
+                # Add to parent object
+                object_store.append(sbol_obj)
+                sbol_obj.parent = self._sbol_owner
+                # Update URI for the argument object and all its children,
+                # if SBOL-compliance is enabled.
+                sbol_obj.update_uri()
 
-            # Run validation rules
-            # TODO
+                # Run validation rules
+                # TODO
 
     def __getitem__(self, id):
         if type(id) is int:
