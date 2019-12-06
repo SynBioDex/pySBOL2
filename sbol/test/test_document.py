@@ -1,4 +1,5 @@
 import locale
+import logging
 import os
 import unittest
 import sbol
@@ -145,6 +146,18 @@ class TestDocument(unittest.TestCase):
         md2 = doc.moduleDefinitions[md.displayId]
         self.assertEqual(md.identity, md2.identity)
 
+    def test_find_property_value(self):
+        # find_property_value wasn't comparing against the passed
+        # `value` parameter, so it was returning all identities in the
+        # document.
+        sbol.setHomespace('http://examples.org')
+        sbol.Config.setOption('sbol_compliant_uris', True)
+        sbol.Config.setOption('sbol_typed_uris', True)
+        doc = sbol.Document()
+        md = doc.moduleDefinitions.create('foo')
+        test_uri = 'http://examples.org/does/not/exist/1'
+        matches = doc.find_property_value(sbol.SBOL_IDENTITY, test_uri)
+        self.assertEqual(len(matches), 0)
 
 if __name__ == '__main__':
     unittest.main()

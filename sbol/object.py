@@ -186,7 +186,8 @@ class SBOLObject:
         try:
             value_store = self.properties[uri]
             for val in value_store:
-                matches.append(val)
+                if val == value:
+                    matches.append(val)
         except KeyError:
             # It is ok that uri is not in properties
             pass
