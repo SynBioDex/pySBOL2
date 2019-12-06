@@ -14,3 +14,4 @@ venv/**
 .idea/
 .pytest_cache/
 style.txt
+*~

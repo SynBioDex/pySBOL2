@@ -687,9 +687,7 @@ class ReferencedObject(Property):
         if self._sbol_owner is not None:
             if self._rdf_type not in self._sbol_owner.properties:
                 self._sbol_owner.properties[self._rdf_type] = []
-                self._sbol_owner.properties[self._rdf_type].append(uri)
-            else:
-                self._sbol_owner.properties[self._rdf_type][0] = uri
+            self._sbol_owner.properties[self._rdf_type].append(uri)
         else:
             # NOTE: we could raise an exception here, but the
             # original code is not doing anything in this case.
