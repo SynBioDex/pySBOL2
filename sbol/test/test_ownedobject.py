@@ -61,23 +61,23 @@ class TestOwnedObject(unittest.TestCase):
         m = md.modules.create('bar')
         self.assertEqual(m.identity, 'http://examples.org/ModuleDefinition/foo/bar/1')
 
-    # def test_displayId_lookup(self):
-    #     # Test lookup of an object by its display Id via the
-    #     # __getitem__() method.
-    #     doc = sbol.Document()
-    #     md = doc.moduleDefinitions.create('foo')
-    #     m = md.modules.create('bar')
-    #     m2 = md.modules['bar']
-    #     self.assertEqual(m.identity, m2.identity)
+    def test_displayId_lookup(self):
+        # Test lookup of an object by its display Id via the
+        # __getitem__() method.
+        doc = sbol.Document()
+        md = doc.moduleDefinitions.create('foo')
+        m = md.modules.create('bar')
+        m2 = md.modules['bar']
+        self.assertEqual(m.identity, m2.identity)
 
-    # def test_uri_lookup(self):
-    #     # Test lookup of an object by its URI via the
-    #     # __getitem__() method.
-    #     doc = sbol.Document()
-    #     md = doc.moduleDefinitions.create('foo')
-    #     m = md.modules.create('bar')
-    #     m2 = md.modules[m.identity]
-    #     self.assertEqual(m.identity, m2.identity)
+    def test_uri_lookup(self):
+        # Test lookup of an object by its URI via the
+        # __getitem__() method.
+        doc = sbol.Document()
+        md = doc.moduleDefinitions.create('foo')
+        m = md.modules.create('bar')
+        m2 = md.modules[m.identity]
+        self.assertEqual(m.identity, m2.identity)
 
 
 if __name__ == '__main__':

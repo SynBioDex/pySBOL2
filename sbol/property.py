@@ -516,13 +516,14 @@ class OwnedObject(URIProperty):
                 persistentIdentity = parent_obj.properties[SBOL_PERSISTENT_IDENTITY][0]
             if SBOL_VERSION in parent_obj.properties:
                 version = parent_obj.properties[SBOL_VERSION][0]
-                compliant_uri = URIRef(os.path.join(persistentIdentity, uri, version))
+                compliant_uri = os.path.join(persistentIdentity, uri, version)
             else:
-                compliant_uri = URIRef(os.path.join(persistentIdentity, uri))
+                compliant_uri = os.path.join(persistentIdentity, uri)
             if Config.getOption(ConfigOptions.VERBOSE.value) is True:
                 print('Searching for non-TopLevel: ' + compliant_uri)
             for obj in object_store:
-                if obj.identity == compliant_uri:
+                # identity is a string, so cast the URIRef compliant_uri to a string
+                if obj.identity == str(compliant_uri):
                     return obj
 
     def get(self, uri):

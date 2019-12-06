@@ -138,6 +138,13 @@ class TestDocument(unittest.TestCase):
         self.assertNotEqual(found, -1)
         self.assertIsNotNone(found)
 
+    def test_lookup(self):
+        # Test simple key lookup via the __getitem__() method
+        doc = sbol.Document()
+        md = doc.moduleDefinitions.create('foo')
+        md2 = doc.moduleDefinitions[md.displayId]
+        self.assertEqual(md.identity, md2.identity)
+
 
 if __name__ == '__main__':
     unittest.main()
