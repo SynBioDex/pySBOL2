@@ -216,6 +216,13 @@ class PartShop:
         self.key = response.content.decode('utf-8')
         return response
 
+    def getKey(self):
+        return self.key
+
+    def getURL(self):
+        return self.resource
+
+
     # def addSynBioHubAnnotations(self, doc):
     #     doc.addNamespace("http://wiki.synbiohub.org/wiki/Terms/synbiohub#", "sbh")
     #     for id, toplevel_obj in doc.SBOLObjects:
