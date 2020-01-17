@@ -67,8 +67,8 @@ class TestRoundTripSBOL2(unittest.TestCase):
         iso2 = rdflib.compare.to_isomorphic(g2)
         rdf_diff = rdflib.compare.graph_diff(iso1, iso2)
         if rdf_diff[1] or rdf_diff[2]:
-            self.logger.warning('Detected %d differences in RDF',
-                                len(rdf_diff[1]) + len(rdf_diff[2]))
+            self.logger.warning('Detected %d different RDF triples in %s' %
+                                (len(rdf_diff[1]) + len(rdf_diff[2]), test_file))
             if not self.logger.isEnabledFor(logging.DEBUG):
                 self.logger.warning('Set environment variable %s to see details',
                                     DEBUG_ENV_VAR)
