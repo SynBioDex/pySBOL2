@@ -12,7 +12,7 @@ from .interaction import Interaction
 from .participation import Participation
 from .model import Model
 from .sequenceconstraint import SequenceConstraint
-from .location import Range, Cut, GenericLocation
+from .location import Location, Range, Cut, GenericLocation
 from .mapsto import MapsTo
 from .collection import Collection
 from .provo import Plan, Activity, Agent, Usage, Association
@@ -62,6 +62,7 @@ class Document(Identified):
         URIRef(SBOL_MAPS_TO): MapsTo,
         URIRef(SBOL_CUT): Cut,
         URIRef(SBOL_COLLECTION): Collection,
+        URIRef(SBOL_LOCATION): Location,
         URIRef(SBOL_GENERIC_LOCATION): GenericLocation,
         URIRef(PROVO_PLAN): Plan,
         URIRef(PROVO_ACTIVITY): Activity,
