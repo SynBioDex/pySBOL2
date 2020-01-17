@@ -6,8 +6,7 @@ from rdflib import URIRef
 
 class Location(Identified):
     """The Location class specifies the strand orientation of a Component."""
-    def __init__(self, type_uri=SBOL_LOCATION, uri=URIRef('example'),
-                 orientation=SBOL_ORIENTATION_INLINE):
+    def __init__(self, uri=URIRef('example'), orientation=SBOL_ORIENTATION_INLINE, type_uri=SBOL_LOCATION):
         super().__init__(type_uri, uri)
         self._orientation = URIProperty(self, SBOL_ORIENTATION,
                                         '1', '1', [], orientation)
@@ -30,8 +29,8 @@ class Range(Location):
     Note that the index of the first location is 1,
     as is typical practice in biology, rather than 0,
     as is typical practice in computer science."""
-    def __init__(self, uri=URIRef('example'), start=1, end=2):
-        super().__init__(uri=uri)
+    def __init__(self, uri=URIRef('example'), start=1, end=2, type_uri=SBOL_RANGE):
+        super().__init__(uri=uri, type_uri=type_uri)
         self.start = start
         self.end = end
 
@@ -81,8 +80,8 @@ class Range(Location):
 class Cut(Location):
     """The Cut class specifies a location between
     two coordinates of a Sequence's elements."""
-    def _init__(self, rdf_type, uri, at):
-        super().__init__(rdf_type, uri)
+    def __init__(self, uri=URIRef('example'), at=1, type_uri=SBOL_CUT):
+        super().__init__(uri=uri, type_uri=type_uri)
         self._at = LiteralProperty(self, SBOL_AT, '1', '1', [], at)
 
     @property
@@ -101,5 +100,5 @@ class GenericLocation(Location):
     This class can also be used to set the orientation of a SequenceAnnotation
     and any associated Component when their parent ComponentDefinition is
     a partial design that lacks a Sequence."""
-    def __init__(self, uri=URIRef('example')):
-        super().__init__(SBOL_GENERIC_LOCATION, uri)
+    def __init__(self, uri=URIRef('example'), type_uri=SBOL_GENERIC_LOCATION):
+        super().__init__(uri=uri, type_uri=type_uri)
