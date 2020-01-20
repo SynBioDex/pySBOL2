@@ -3,6 +3,8 @@ import logging
 import os
 import unittest
 import sbol
+from rdflib import URIRef
+from rdflib.namespace import NamespaceManager
 
 MODULE_LOCATION = os.path.dirname(os.path.abspath(__file__))
 TEST_LOCATION = os.path.join(MODULE_LOCATION, 'resources', 'crispr_example.xml')
@@ -158,6 +160,18 @@ class TestDocument(unittest.TestCase):
         test_uri = 'http://examples.org/does/not/exist/1'
         matches = doc.find_property_value(sbol.SBOL_IDENTITY, test_uri)
         self.assertEqual(len(matches), 0)
+
+    def test_add_namespace(self):
+        doc = sbol.Document()
+        cd = doc.componentDefinitions.create('cd')
+        cd.foo = sbol.property.LiteralProperty(cd, 'http://examples.org#', '0', '1', 'bar')
+        doc.readString(doc.writeString())
+        namespaces = [n[1] for n in doc.graph.namespace_manager.namespaces()]
+        self.assertFalse('http://examples.org#' in namespaces)
+        doc.addNamespace('http://examples.org#', 'foo')
+        doc.readString(doc.writeString())
+        namespaces = [n for n in doc.graph.namespace_manager.namespaces()]
+        self.assertTrue('foo', URIRef('http://examples.org#') in namespaces)
 
 if __name__ == '__main__':
     unittest.main()
