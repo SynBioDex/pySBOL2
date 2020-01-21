@@ -133,6 +133,14 @@ class Identified(SBOLObject):
     def description(self, new_description):
         self._description.set(new_description)
 
+    @property
+    def name(self):
+        return self._name.value
+
+    @name.setter
+    def name(self, new_name):
+        self._name.set(new_name)
+
     def generate(self):
         raise NotImplementedError("Not yet implemented")
 

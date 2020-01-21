@@ -6,6 +6,7 @@ from .test_document import TestDocument
 from .test_identified import TestIdentified
 from .test_config import TestConfig
 from .test_moduledefinition import TestModuleDefinition
+from .test_object import TestObject
 from .test_ownedobject import TestOwnedObject
 from .test_property import TestProperty
 from .test_roundtrip import TestRoundTripSBOL2, TestRoundTripFailSBOL2
@@ -21,6 +22,7 @@ def runTests(test_list=None):
             TestDocument,
             TestIdentified,
             TestModuleDefinition,
+            TestObject,
             TestOwnedObject,
             TestProperty,
             TestSbolTutorial,

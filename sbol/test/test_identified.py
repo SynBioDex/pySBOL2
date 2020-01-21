@@ -1,6 +1,11 @@
+import os
 import unittest
 import sbol
 from sbol import *
+
+MODULE_LOCATION = os.path.dirname(os.path.abspath(__file__))
+PARTS_LOCATION = os.path.join(MODULE_LOCATION, 'resources', 'tutorial',
+                              'parts.xml')
 
 
 class TestIdentified(unittest.TestCase):
@@ -88,6 +93,13 @@ class TestIdentified(unittest.TestCase):
         crispr_template = ModuleDefinition('CRISPR_Template')
         crispr_template.version = '2'
         self.assertEqual('2', crispr_template.version)
+
+    def test_name(self):
+        d = sbol.Document()
+        d.read(PARTS_LOCATION)
+        cd = d.componentDefinitions['http://examples.org/ComponentDefinition/AmeR/1']
+        expected_name = 'AmeR'
+        self.assertEqual(cd.name, expected_name)
 
 
 if __name__ == '__main__':

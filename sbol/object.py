@@ -5,6 +5,8 @@ from rdflib import RDF
 import logging
 from logging.config import fileConfig
 
+import rdflib
+
 
 class SBOLObject:
     """An SBOLObject converts a Python data structure into an RDF triple store
@@ -282,7 +284,8 @@ class SBOLObject:
         :param property_uri: The URI for the property.
         :return: The value of the property or SBOL_ERROR_NOT_FOUND.
         """
-        raise NotImplementedError("Not yet implemented")
+        values = self.getPropertyValues(property_uri)
+        return str(values[0])
 
     def getPropertyValues(self, property_uri):
         """Get all values of a custom annotation property by its URI.
@@ -290,7 +293,13 @@ class SBOLObject:
         :param property_uri: The URI for the property.
         :return: A vector of property values or SBOL_ERROR_NOT_FOUND.
         """
-        raise NotImplementedError("Not yet implemented")
+        key = rdflib.URIRef(property_uri)
+        try:
+            return self.properties[key]
+        except KeyError as e:
+            # no property by this name
+            raise SBOLError('Property {} not found'.format(property_uri),
+                            SBOLErrorCode.SBOL_ERROR_NOT_FOUND)
 
     def getProperties(self):
         """Gets URIs for all properties contained by this object.
