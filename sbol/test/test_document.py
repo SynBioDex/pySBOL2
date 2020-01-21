@@ -171,7 +171,7 @@ class TestDocument(unittest.TestCase):
         doc.addNamespace('http://examples.org#', 'foo')
         doc.readString(doc.writeString())
         namespaces = [n for n in doc.graph.namespace_manager.namespaces()]
-        self.assertTrue('foo', URIRef('http://examples.org#') in namespaces)
+        self.assertTrue(('foo', URIRef('http://examples.org#')) in namespaces)
 
 if __name__ == '__main__':
     unittest.main()
