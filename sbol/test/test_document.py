@@ -159,5 +159,6 @@ class TestDocument(unittest.TestCase):
         matches = doc.find_property_value(sbol.SBOL_IDENTITY, test_uri)
         self.assertEqual(len(matches), 0)
 
+
 if __name__ == '__main__':
     unittest.main()
