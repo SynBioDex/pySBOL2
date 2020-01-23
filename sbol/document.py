@@ -91,7 +91,6 @@ class Document(Identified):
         # Initialized when parsing a graph.
         # Updated when writing a graph.
         self.graph = rdflib.Graph()
-        self.graph.namespace_manager = rdflib.namespace.NamespaceManager(self.graph)
         # The Document's register of objects
         self.objectCache = {}  # Needed?
         self.SBOLObjects = {}  # Needed?
@@ -218,8 +217,13 @@ class Document(Identified):
         :param prefix: The namespace prefix, eg. sbol
         :return:
         """
-        namespace = rdflib.namespace.Namespace(namespace)
-        self.graph.namespace_manager.bind(prefix, namespace, override=False)
+        if namespace[-1] != '#' and namespace[-1] != '/':
+            raise ValueError('Invalid namespace. Namespace must end with # or /')
+        namespace = rdflib.term.URIRef(namespace)
+        # Overwrite the prefix, if the namespace already has a conflicting one
+        inv_namespace_map = {ns: p for p, ns in self._namespaces.items()}
+        inv_namespace_map[namespace] = prefix
+        self._namespaces = {p: ns for ns, p in inv_namespace_map.items()}
 
     def addComponentDefinition(self, sbol_obj):
         """

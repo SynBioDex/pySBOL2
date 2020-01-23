@@ -164,14 +164,22 @@ class TestDocument(unittest.TestCase):
     def test_add_namespace(self):
         doc = sbol.Document()
         cd = doc.componentDefinitions.create('cd')
-        cd.foo = sbol.property.LiteralProperty(cd, 'http://examples.org#', '0', '1', 'bar')
+        cd.foo = sbol.property.LiteralProperty(cd, 'http://examples.org#foo', '0', '1', None, 'bar')
         doc.readString(doc.writeString())
         namespaces = [n[1] for n in doc.graph.namespace_manager.namespaces()]
         self.assertFalse('http://examples.org#' in namespaces)
-        doc.addNamespace('http://examples.org#', 'foo')
+        doc.addNamespace('http://examples.org#', 'examples')
+        cd.foo = sbol.property.LiteralProperty(cd, 'http://examples.org#foo', '0', '1', None, 'bar')
+        namespaces = [n for n in doc.graph.namespace_manager.namespaces()]
         doc.readString(doc.writeString())
         namespaces = [n for n in doc.graph.namespace_manager.namespaces()]
-        self.assertTrue(('foo', URIRef('http://examples.org#')) in namespaces)
+        self.assertTrue(('examples', URIRef('http://examples.org#')) in namespaces)
+
+    def test_namespace_fail(self):
+        doc = sbol.Document()
+        with self.assertRaises(ValueError):
+            doc.addNamespace('http://examples.org', 'foo')
+
 
 if __name__ == '__main__':
     unittest.main()
