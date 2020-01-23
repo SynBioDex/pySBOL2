@@ -11,7 +11,7 @@ from .test_object import TestObject
 from .test_ownedobject import TestOwnedObject
 from .test_partshop import TestPartShop
 from .test_property import TestProperty
-from .test_referencedobjects import TestReferencedObjects
+from .test_referencedobject import TestReferencedObjects
 from .test_roundtrip import TestRoundTripSBOL2, TestRoundTripFailSBOL2
 from .test_tutorial import TestSbolTutorial
 
