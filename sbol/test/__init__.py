@@ -1,6 +1,7 @@
 import unittest
 import sys
 from .test_componentdefinition import TestComponentDefinitions
+from .test_constants import TestConstants
 from .test_design import TestDesign
 from .test_document import TestDocument
 from .test_identified import TestIdentified
@@ -19,6 +20,7 @@ def runTests(test_list=None):
     if test_list is None:
         test_list = [
             TestComponentDefinitions,
+            TestConstants,
             TestConfig,
             TestDesign,
             TestDocument,
