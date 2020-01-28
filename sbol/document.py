@@ -25,6 +25,7 @@ from .object import SBOLObject
 from .property import OwnedObject, URIProperty
 import rdflib
 from rdflib import URIRef
+import rdflib.namespace
 import os
 from . import SBOL2Serialize
 import logging
@@ -90,7 +91,7 @@ class Document(Identified):
         # A RDFLib representation of the triples.
         # Initialized when parsing a graph.
         # Updated when writing a graph.
-        self.graph = None
+        self.graph = rdflib.Graph()
         # The Document's register of objects
         self.objectCache = {}  # Needed?
         self.SBOLObjects = {}  # Needed?
@@ -210,14 +211,20 @@ class Document(Identified):
         for obj in sbol_objs:
             self.add(obj)
 
-    def addNamespace(self, ns, prefix):
+    def addNamespace(self, namespace, prefix):
         """Add a new namespace to the Document.
 
-        :param ns: The namespace, eg. http://sbols.org/v2#
+        :param namespace: The namespace, eg. http://sbols.org/v2#
         :param prefix: The namespace prefix, eg. sbol
         :return:
         """
-        raise NotImplementedError("Not yet implemented")
+        if namespace[-1] != '#' and namespace[-1] != '/':
+            raise ValueError('Invalid namespace. Namespace must end with # or /')
+        namespace = rdflib.term.URIRef(namespace)
+        # Overwrite the prefix, if the namespace already has a conflicting one
+        inv_namespace_map = {ns: p for p, ns in self._namespaces.items()}
+        inv_namespace_map[namespace] = prefix
+        self._namespaces = {p: ns for ns, p in inv_namespace_map.items()}
 
     def addComponentDefinition(self, sbol_obj):
         """

@@ -291,6 +291,16 @@ class URIProperty(Property):
 
 
 class LiteralProperty(Property):
+
+    def __init__(self, property_owner, type_uri, lower_bound, upper_bound,
+                 validation_rules, initial_value=None):
+        super().__init__(property_owner, type_uri, lower_bound, upper_bound,
+                 validation_rules, initial_value)
+        if self.value:
+            self.set(self.value)
+        #     self._sbol_owner.properties[type_uri] = [initial_value]
+        # else:
+        #     self._sbol_owner.properties[type_uri] = []
     @property
     def value(self):
         if self._upperBound == '1':
