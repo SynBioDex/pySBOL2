@@ -14,15 +14,17 @@ EOF
 fi 
 
 # Run style checker
+MAX_VIOLATIONS=35
 echo "Checking style..."
 pycodestyle --exclude=./venv,./sbol/venv . > style.txt
 result=$(cat style.txt | wc -l)
-if [ "$result" -gt 100 ]; then
-    cat <<\EOF
-Error: Too many style violations.
+if [ "$result" -gt $MAX_VIOLATIONS ]; then
+    cat <<EOF
+Error: Too many style violations. Found $result violations and
+expected fewer than $MAX_VIOLATIONS. Please make sure there are fewer
+than $MAX_VIOLATIONS style violations before making a commit.
 
-Please make sure there are fewer than 100 style violations
-before making a commit.
+See style.txt for all style issues.
 EOF
     exit 1
 else
