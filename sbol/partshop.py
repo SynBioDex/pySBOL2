@@ -222,7 +222,6 @@ class PartShop:
     def getURL(self):
         return self.resource
 
-
     # def addSynBioHubAnnotations(self, doc):
     #     doc.addNamespace("http://wiki.synbiohub.org/wiki/Terms/synbiohub#", "sbh")
     #     for id, toplevel_obj in doc.SBOLObjects:
