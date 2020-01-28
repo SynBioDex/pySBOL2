@@ -419,3 +419,27 @@ class SBOLObject:
 
     def is_top_level(self):
         return False
+
+    def __getattribute__(self, name):
+        # Call the default method
+        result = object.__getattribute__(self, name)
+        if isinstance(result, ReferencedObject):
+            # Convert the ReferencedObject to a value instead of
+            # returning the ReferencedObject itself
+            result = result.value
+        return result
+
+    def _is_referenced_object(self, name):
+        try:
+            return isinstance(self.__dict__[name], ReferencedObject)
+        except KeyError:
+            return False
+
+    def _set_referenced_object(self, name, value):
+        self.__dict__[name].set(value)
+
+    def __setattr__(self, name, value):
+        if self._is_referenced_object(name):
+            self._set_referenced_object(name, value)
+            return
+        object.__setattr__(self, name, value)

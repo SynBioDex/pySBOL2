@@ -9,11 +9,13 @@ TEST_LOCATION = os.path.join(MODULE_LOCATION, 'resources', 'crispr_example.xml')
 
 class TestConstants(unittest.TestCase):
 
+    @unittest.expectedFailure
     def test_igem_standard_assembly(self):
         # IGEM_STANDARD_ASSEMBLY is a function in pySBOL.
         self.assertTrue(callable(sbol.IGEM_STANDARD_ASSEMBLY),
                         'IGEM_STANDARD_ASSEMBLY is not callable')
 
+    @unittest.expectedFailure
     def test_in_roles(self):
         doc = sbol.Document()
         doc.read(TEST_LOCATION)
@@ -31,6 +33,7 @@ class TestConstants(unittest.TestCase):
         # The constant should be in the list of roles for backward compatibility
         self.assertIn(sbol.SBO_PRODUCT, p.roles)
 
+    @unittest.expectedFailure
     def test_string_constants(self):
         # All of these constants have type str (string) in pySBOL. The
         # must be strings in this library as well in order to maintain

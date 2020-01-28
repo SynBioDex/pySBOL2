@@ -3,10 +3,13 @@ import logging
 import os
 import unittest
 
+import rdflib
 import sbol
+from sbol.property import ReferencedObject
 
 MODULE_LOCATION = os.path.dirname(os.path.abspath(__file__))
 TEST_LOCATION = os.path.join(MODULE_LOCATION, 'resources', 'crispr_example.xml')
+PARTS_LOCATION = os.path.join(MODULE_LOCATION, 'resources', 'tutorial', 'parts.xml')
 
 
 class TestReferencedObjects(unittest.TestCase):
@@ -31,3 +34,35 @@ class TestReferencedObjects(unittest.TestCase):
         fc = md.functionalComponents[fc_uri]
         # definition should be a string for backward compatibility
         self.assertEqual(type(fc.definition), str)
+
+    def test_cd_sequences(self):
+        # Test a referenced object storing a list instead of a singleton
+        doc = sbol.Document()
+        doc.read(PARTS_LOCATION)
+
+        cd_uri = 'http://examples.org/ComponentDefinition/AmeR/1'
+        cd = doc.componentDefinitions[cd_uri]
+
+        s1_uri = 'http://examples.org/Sequence/AmeR_sequence/1'
+        s2_uri = 'http://examples.org/Sequence/ECK120010818_sequence/1'
+
+        # Ensure the URI is present, and as a string
+        self.assertTrue(s1_uri in cd.sequences)
+
+        # Cannot append sequences - it has no effect on the cd
+        #
+        # The CD returns a copy of the list of sequences, not its
+        # internal representation.
+        cd.sequences.append(s2_uri)
+        self.assertTrue(len(cd.sequences) == 1)
+
+        cd.sequences = [s1_uri, s2_uri]
+        self.assertTrue(len(cd.sequences) == 2)
+
+        # Verify that none of the elements are instances of rdflib.URIRef
+        self.assertFalse(any([isinstance(uri, rdflib.URIRef) for uri in cd.sequences]))
+
+        # Verify that the attribute is still a ReferencedObject and
+        # was not overwritten with the list.
+        if 'sequences' in cd.__dict__:
+            self.assertIsInstance(cd.__dict__['sequences'], ReferencedObject)

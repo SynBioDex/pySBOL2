@@ -7,6 +7,8 @@ import logging
 from logging.config import fileConfig
 from abc import ABC, abstractmethod
 
+import rdflib
+
 
 def sort_version(obj):
     return obj.version
@@ -703,3 +705,23 @@ class ReferencedObject(Property):
 
     def addReference(self, uri):
         self._sbol_owner.properties[self._rdf_type].append(uri)
+
+    def _uri_ref_to_str(self, thing):
+        if isinstance(thing, rdflib.URIRef):
+            return str(thing)
+        else:
+            return thing
+
+    @property
+    def value(self):
+        raw_value = self.getRawValue()
+        if self._upperBound == '1':
+            return self._uri_ref_to_str(raw_value)
+        else:
+            result = [self._uri_ref_to_str(rval) for rval in raw_value]
+            # Return a list, not a generator. Consumers are expecting a list.
+            return list(result)
+
+    @value.setter
+    def value(self, new_value):
+        self.set(new_value)
