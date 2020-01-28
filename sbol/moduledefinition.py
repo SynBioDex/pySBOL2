@@ -207,7 +207,7 @@ class ModuleDefinition(TopLevel):
         if self.modules:
             # I have child modules
             for m in self.modules:
-                md = self.doc.find(str(m.definition.get(0)))
+                md = self.doc.find(m.definition)
                 result.extend(md.applyToModuleHierarchy(callback, user_data))
         return result
 
@@ -224,7 +224,7 @@ class ModuleDefinition(TopLevel):
             raise SBOLError(msg, SBOLError.SBOL_ERROR_COMPLIANCE)
         for mdef in list_of_modules:
             m = self.modules.create(mdef.displayId)
-            m.definition.set(mdef.identity)
+            m.definition = mdef.identity
 
     def getTypeURI(self):
         return SBOL_MODULE_DEFINITION

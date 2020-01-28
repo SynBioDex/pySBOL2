@@ -1,7 +1,8 @@
+import os
 import unittest
+
 from sbol.partshop import PartShop
 from sbol.document import Document
-import os
 from sbol.sbolerror import SBOLError
 
 
@@ -17,7 +18,7 @@ else:
 
 class TestPartShop(unittest.TestCase):
     def test_pull_00(self):
-        """Based on tutorial: https://pysbol2.readthedocs.io/en/latest/repositories.html"""
+        # Based on tutorial: https://pysbol2.readthedocs.io/en/latest/repositories.html
         doc = Document()
         igem = PartShop('https://synbiohub.org')
         igem.pull('https://synbiohub.org/public/igem/BBa_R0010/1', doc)
@@ -27,7 +28,7 @@ class TestPartShop(unittest.TestCase):
         self.assertEqual(3, len(doc))
 
     def test_pull_01(self):
-        """Based on tutorial: https://pysbol2.readthedocs.io/en/latest/repositories.html"""
+        # Based on tutorial: https://pysbol2.readthedocs.io/en/latest/repositories.html
         doc = Document()
         igem = PartShop('https://synbiohub.org/public/igem')
         igem.pull('BBa_B0032', doc)
@@ -59,6 +60,7 @@ class TestPartShop(unittest.TestCase):
             igem = PartShop('https://synbiohub.org')
             igem.login('johndoe@example.org', 'test1')
 
+    @unittest.skipIf(password is None, "No password supplied")
     def test_submit_00(self):
         doc = Document()
         doc.displayId = 'test_collection'
@@ -92,3 +94,8 @@ WHERE {
         response = ps.sparqlQuery(query)
         print(response.text)
         self.assertEqual(response.status_code, 200)
+
+    def test_getURL(self):
+        expected_url = 'https://example.org'
+        partShop = PartShop(expected_url)
+        self.assertEqual(partShop.getURL(), expected_url)

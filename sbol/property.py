@@ -7,6 +7,8 @@ import logging
 from logging.config import fileConfig
 from abc import ABC, abstractmethod
 
+import rdflib
+
 
 def sort_version(obj):
     return obj.version
@@ -293,12 +295,13 @@ class LiteralProperty(Property):
     def __init__(self, property_owner, type_uri, lower_bound, upper_bound,
                  validation_rules, initial_value=None):
         super().__init__(property_owner, type_uri, lower_bound, upper_bound,
-                 validation_rules, initial_value)
+                         validation_rules, initial_value)
         if self.value:
             self.set(self.value)
         #     self._sbol_owner.properties[type_uri] = [initial_value]
         # else:
         #     self._sbol_owner.properties[type_uri] = []
+
     @property
     def value(self):
         if self._upperBound == '1':
@@ -713,3 +716,23 @@ class ReferencedObject(Property):
 
     def addReference(self, uri):
         self._sbol_owner.properties[self._rdf_type].append(uri)
+
+    def _uri_ref_to_str(self, thing):
+        if isinstance(thing, rdflib.URIRef):
+            return str(thing)
+        else:
+            return thing
+
+    @property
+    def value(self):
+        raw_value = self.getRawValue()
+        if self._upperBound == '1':
+            return self._uri_ref_to_str(raw_value)
+        else:
+            result = [self._uri_ref_to_str(rval) for rval in raw_value]
+            # Return a list, not a generator. Consumers are expecting a list.
+            return list(result)
+
+    @value.setter
+    def value(self, new_value):
+        self.set(new_value)

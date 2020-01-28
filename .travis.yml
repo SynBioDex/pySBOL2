@@ -9,7 +9,7 @@ install:
 # tests to run
 script:
     - python3 -c "import sbol; sbol.testSBOL()"
-    - python3 -c "import sbol; sbol.testRoundTrip()"
+    - travis_wait python3 -c "import sbol; sbol.testRoundTrip()"
 
 notifications:
     email:

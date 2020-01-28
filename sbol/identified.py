@@ -53,11 +53,14 @@ class Identified(SBOLObject):
     # or a construction process like Gibson Assembly
     _wasGeneratedBy = None
 
-    # The name property is OPTIONAL and has a data type of String. This property is intended to be displayed to a human
-    #  when visualizing an Identified object. If an Identified object lacks a name, then software tools SHOULD
-    # instead display the object's displayId or identity. It is RECOMMENDED that software tools give users
-    # the ability to switch perspectives between name properties that are human-readable and displayId properties
-    # that are less human-readable, but are more likely to be unique.
+    # The name property is OPTIONAL and has a data type of
+    # String. This property is intended to be displayed to a human
+    # when visualizing an Identified object. If an Identified object
+    # lacks a name, then software tools SHOULD instead display the
+    # object's displayId or identity. It is RECOMMENDED that software
+    # tools give users the ability to switch perspectives between name
+    # properties that are human-readable and displayId properties that
+    # are less human-readable, but are more likely to be unique.
     _name = None
 
     # The description property is OPTIONAL and has a data type of String.
@@ -65,10 +68,13 @@ class Identified(SBOLObject):
     # text description of an Identified object.
     _description = None
 
-    def __init__(self, type_uri=SBOL_IDENTIFIED, uri=URIRef('example'), version=VERSION_STRING):
+    def __init__(self, type_uri=SBOL_IDENTIFIED, uri=URIRef('example'),
+                 version=VERSION_STRING):
         super().__init__(type_uri, uri)
-        self._persistentIdentity = URIProperty(self, SBOL_PERSISTENT_IDENTITY, '0', '1', None, URIRef(uri))
-        self._displayId = LiteralProperty(self, SBOL_DISPLAY_ID, '0', '1', [validation.sbol_rule_10204])
+        self._persistentIdentity = URIProperty(self, SBOL_PERSISTENT_IDENTITY,
+                                               '0', '1', None, URIRef(uri))
+        self._displayId = LiteralProperty(self, SBOL_DISPLAY_ID, '0', '1',
+                                          [validation.sbol_rule_10204])
         self._version = LiteralProperty(self, SBOL_VERSION, '0', '1', None, version)
         self._name = LiteralProperty(self, SBOL_NAME, '0', '1', None)
         self._description = LiteralProperty(self, SBOL_DESCRIPTION, '0', '1', None)
@@ -132,6 +138,14 @@ class Identified(SBOLObject):
     @description.setter
     def description(self, new_description):
         self._description.set(new_description)
+
+    @property
+    def name(self):
+        return self._name.value
+
+    @name.setter
+    def name(self, new_name):
+        self._name.set(new_name)
 
     def generate(self):
         raise NotImplementedError("Not yet implemented")
