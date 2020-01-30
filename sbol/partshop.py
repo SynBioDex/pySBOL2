@@ -7,6 +7,9 @@ from sbol.constants import *
 from sbol.config import Config, ConfigOptions, parseURLDomain
 import getpass
 
+# For backward compatible HTTPError
+import urllib3.exceptions
+
 
 class PartShop:
     """A class which provides an API front-end for
@@ -184,14 +187,14 @@ class PartShop:
         if response:
             return response
         elif response.status_code == 401:
-            raise SBOLError(SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST,
-                            'You must login with valid credentials '
-                            'before submitting')
+            # Raise a urllib3 HTTPError exception to be backward compatible with pySBOL
+            raise urllib3.exceptions.HTTPError('You must login with valid credentials '
+                                               'before submitting')
         else:
-            raise SBOLError(SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST,
-                            'HTTP post request failed with: ' +
-                            str(response.status_code) +
-                            ' - ' + str(response.content))
+            # Raise a urllib3 HTTPError exception to be backward compatible with pySBOL
+            raise urllib3.exceptions.HTTPError('HTTP post request failed with: ' +
+                                               str(response.status_code) +
+                                               ' - ' + str(response.content))
 
     def login(self, user_id, password=''):
         """In order to submit to a PartShop, you must login first.
