@@ -252,6 +252,19 @@ class Document(Identified):
         else:
             self.add(sbol_obj)
 
+    def addCollection(self, sbol_obj):
+        """
+        Convenience method for adding a collection.
+
+        :param sbol_obj: a Collection
+        :return: None
+        """
+        if isinstance(sbol_obj, collections.abc.Iterable):
+            for obj in sbol_obj:
+                self.add(obj)
+        else:
+            self.add(sbol_obj)
+
     def addSequence(self, sbol_obj):
         """
         Convenience method for adding a sequence.
