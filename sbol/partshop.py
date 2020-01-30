@@ -158,9 +158,9 @@ class PartShop:
             files['id'] = (None, doc.displayId)
         if len(doc.version) > 0:
             files['version'] = (None, doc.version)
-        if len(doc.name) > 0:
+        if doc.name and len(doc.name) > 0:
             files['name'] = (None, doc.name)
-        if len(doc.description) > 0:
+        if doc.description and len(doc.description) > 0:
             files['description'] = (None, doc.description)
         citations = ''
         for citation in doc.citations:
@@ -178,12 +178,12 @@ class PartShop:
         if collection != '':
             files['rootCollections'] = (None, collection)
         # Send POST request
-        print(files)
+        # print(files)
         response = requests.post(self.resource + '/submit',
                                  files=files,
                                  headers={'Accept': 'text/plain',
                                           'X-authorization': self.key})
-        print(response.text)
+        # print(response.text)
         if response:
             return response
         elif response.status_code == 401:
