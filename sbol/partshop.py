@@ -7,6 +7,9 @@ from sbol.constants import *
 from sbol.config import Config, ConfigOptions, parseURLDomain
 import getpass
 
+# For backward compatible HTTPError
+import urllib3.exceptions
+
 
 class PartShop:
     """A class which provides an API front-end for
@@ -155,9 +158,9 @@ class PartShop:
             files['id'] = (None, doc.displayId)
         if len(doc.version) > 0:
             files['version'] = (None, doc.version)
-        if len(doc.name) > 0:
+        if doc.name and len(doc.name) > 0:
             files['name'] = (None, doc.name)
-        if len(doc.description) > 0:
+        if doc.description and len(doc.description) > 0:
             files['description'] = (None, doc.description)
         citations = ''
         for citation in doc.citations:
@@ -175,23 +178,23 @@ class PartShop:
         if collection != '':
             files['rootCollections'] = (None, collection)
         # Send POST request
-        print(files)
+        # print(files)
         response = requests.post(self.resource + '/submit',
                                  files=files,
                                  headers={'Accept': 'text/plain',
                                           'X-authorization': self.key})
-        print(response.text)
+        # print(response.text)
         if response:
             return response
         elif response.status_code == 401:
-            raise SBOLError(SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST,
-                            'You must login with valid credentials '
-                            'before submitting')
+            # Raise a urllib3 HTTPError exception to be backward compatible with pySBOL
+            raise urllib3.exceptions.HTTPError('You must login with valid credentials '
+                                               'before submitting')
         else:
-            raise SBOLError(SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST,
-                            'HTTP post request failed with: ' +
-                            str(response.status_code) +
-                            ' - ' + str(response.content))
+            # Raise a urllib3 HTTPError exception to be backward compatible with pySBOL
+            raise urllib3.exceptions.HTTPError('HTTP post request failed with: ' +
+                                               str(response.status_code) +
+                                               ' - ' + str(response.content))
 
     def login(self, user_id, password=''):
         """In order to submit to a PartShop, you must login first.

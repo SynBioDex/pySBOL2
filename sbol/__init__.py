@@ -8,6 +8,7 @@ __version__ = '3.0.0'
 # instead of `__all__`, we will try to be careful about what gets
 # imported into this file. In the absence of __all__, all imported
 # symbols are also exported.
+from .collection import Collection
 from .combinatorialderivation import CombinatorialDerivation
 from .component import Component
 from .config import Config, ConfigOptions
