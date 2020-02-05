@@ -95,7 +95,7 @@ class ModuleDefinition(TopLevel):
                                    '0', '*', [])
         self.interactions = OwnedObject(self, SBOL_INTERACTIONS,
                                         Interaction,
-                                        '0', '*', [libsbol_rule_17])
+                                        '0', '*', [validation.libsbol_rule_17])
 
     @property
     def roles(self):

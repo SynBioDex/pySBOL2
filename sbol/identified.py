@@ -1,5 +1,12 @@
-from .object import *
+import os
+
+from .object import SBOLObject
+from .config import Config
+from .config import ConfigOptions
+from .config import getHomespace
+from .config import hasHomespace
 from .constants import *
+from .property import LiteralProperty, URIProperty
 from . import validation
 
 
