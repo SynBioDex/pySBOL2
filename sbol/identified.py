@@ -1,4 +1,4 @@
-import os
+import posixpath
 
 from .object import SBOLObject
 from .config import Config
@@ -87,31 +87,31 @@ class Identified(SBOLObject):
         self._description = LiteralProperty(self, SBOL_DESCRIPTION, '0', '1', None)
         if Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS.value) is True:
             self._displayId.set(uri)
-            self._persistentIdentity.set(URIRef(os.path.join(getHomespace(), uri)))
+            self._persistentIdentity.set(URIRef(posixpath.join(getHomespace(), uri)))
             if Config.getOption(ConfigOptions.SBOL_TYPED_URIS.value) is True:
                 if version != '':
                     self._identity.set(
-                        URIRef(os.path.join(getHomespace(),
+                        URIRef(posixpath.join(getHomespace(),
                                             self.getClassName(type_uri),
                                             uri, version))
                     )
                 else:
                     self._identity.set(
-                        URIRef(os.path.join(getHomespace(),
+                        URIRef(posixpath.join(getHomespace(),
                                             self.getClassName(type_uri),
                                             uri))
                     )
             else:
                 if version != '':
                     self._identity.set(
-                        URIRef(os.path.join(getHomespace(), uri, version)))
+                        URIRef(posixpath.join(getHomespace(), uri, version)))
                 else:
                     self._identity.set(
-                        URIRef(os.path.join(getHomespace(), uri)))
+                        URIRef(posixpath.join(getHomespace(), uri)))
         elif hasHomespace():
-            self._identity.set(URIRef(os.path.join(getHomespace(), uri)))
+            self._identity.set(URIRef(posixpath.join(getHomespace(), uri)))
             self._persistentIdentity.set(
-                URIRef(os.path.join(getHomespace(), uri)))
+                URIRef(posixpath.join(getHomespace(), uri)))
         # self._identity.validate() # TODO
 
     @property
@@ -169,12 +169,12 @@ class Identified(SBOLObject):
         if Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS.value) is True:
             # Form compliant URI for child object
             persistent_id = parent.properties[SBOL_PERSISTENT_IDENTITY][0]
-            persistent_id = os.path.join(persistent_id, self.displayId)
+            persistent_id = posixpath.join(persistent_id, self.displayId)
             if len(parent.properties[SBOL_VERSION]) > 0:
                 version = parent.properties[SBOL_VERSION][0]
             else:
                 version = VERSION_STRING
-            obj_id = os.path.join(persistent_id, version)
+            obj_id = posixpath.join(persistent_id, version)
             # Reset SBOLCompliant properties
             self._identity.set(obj_id)
             self._persistentIdentity.set(persistent_id)
