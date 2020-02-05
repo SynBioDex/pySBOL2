@@ -92,14 +92,14 @@ class Identified(SBOLObject):
                 if version != '':
                     self._identity.set(
                         URIRef(posixpath.join(getHomespace(),
-                                            self.getClassName(type_uri),
-                                            uri, version))
+                                              self.getClassName(type_uri),
+                                              uri, version))
                     )
                 else:
                     self._identity.set(
                         URIRef(posixpath.join(getHomespace(),
-                                            self.getClassName(type_uri),
-                                            uri))
+                                              self.getClassName(type_uri),
+                                              uri))
                     )
             else:
                 if version != '':
