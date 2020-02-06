@@ -1,13 +1,19 @@
-from rdflib import Literal
-from .sbolerror import *
-from .config import Config, ConfigOptions, getHomespace, parseClassName, parsePropertyName
-from .constants import *
-import os
-import logging
-from logging.config import fileConfig
 from abc import ABC, abstractmethod
+import logging
+import os
+import posixpath
 
 import rdflib
+from rdflib import Literal
+
+from .config import Config
+from .config import ConfigOptions
+from .config import getHomespace
+from .config import parseClassName
+from .config import parsePropertyName
+from .constants import *
+from .sbolerror import SBOLError
+from .sbolerror import SBOLErrorCode
 
 
 def sort_version(obj):
@@ -506,9 +512,9 @@ class OwnedObject(URIProperty):
         for ns in resource_namespaces:
             # Assume the parent object is TopLevel and form the compliant URI
             if typedURI is True:
-                compliant_uri = os.path.join(ns, parseClassName(self._rdf_type), uri)
+                compliant_uri = posixpath.join(ns, parseClassName(self._rdf_type), uri)
             else:
-                compliant_uri = os.path.join(ns, uri)
+                compliant_uri = posixpath.join(ns, uri)
             compliant_uri += os.sep
             compliant_uri = URIRef(compliant_uri)
             persistent_id_matches = []
@@ -529,9 +535,9 @@ class OwnedObject(URIProperty):
                 persistentIdentity = parent_obj.properties[SBOL_PERSISTENT_IDENTITY][0]
             if SBOL_VERSION in parent_obj.properties:
                 version = parent_obj.properties[SBOL_VERSION][0]
-                compliant_uri = os.path.join(persistentIdentity, uri, version)
+                compliant_uri = posixpath.join(persistentIdentity, uri, version)
             else:
-                compliant_uri = os.path.join(persistentIdentity, uri)
+                compliant_uri = posixpath.join(persistentIdentity, uri)
             if Config.getOption(ConfigOptions.VERBOSE.value) is True:
                 print('Searching for non-TopLevel: ' + compliant_uri)
             for obj in object_store:

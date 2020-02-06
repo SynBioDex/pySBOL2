@@ -1,12 +1,15 @@
-from .identified import *
-from .config import *
+import posixpath
+
+from .config import Config
+from .config import ConfigOptions
+from .config import getHomespace
+from .constants import *
+from .identified import Identified
 
 
 class TopLevel(Identified):
     """All SBOL classes derived from TopLevel appear as top level nodes
     in the RDF/XML document tree and SBOL files."""
-
-    attachments = None
 
     def __init__(self, type_uri=SBOL_TOP_LEVEL,
                  uri=URIRef("example"), version=VERSION_STRING):
@@ -15,9 +18,9 @@ class TopLevel(Identified):
         if Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS.value) is True:
             if Config.getOption(ConfigOptions.SBOL_TYPED_URIS.value) is True:
                 self._persistentIdentity.set(
-                    os.path.join(getHomespace(),
-                                 self.getClassName(type_uri),
-                                 self.displayId))
+                    posixpath.join(getHomespace(),
+                                   self.getClassName(type_uri),
+                                   self.displayId))
 
     def addToDocument(self, document):
         raise NotImplementedError("Not yet implemented")

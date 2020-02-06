@@ -98,13 +98,13 @@ class Document(Identified):
         self._namespaces = {}
         self.resource_namespaces = set()
         self.designs = OwnedObject(self, SYSBIO_DESIGN, Design,
-                                   '0', '*', [libsbol_rule_11])
+                                   '0', '*', [validation.libsbol_rule_11])
         self.builds = OwnedObject(self, SYSBIO_BUILD, Build,
-                                  '0', '*', [libsbol_rule_12])
+                                  '0', '*', [validation.libsbol_rule_12])
         self.tests = OwnedObject(self, SYSBIO_TEST, Test,
-                                 '0', '*', [libsbol_rule_13])
+                                 '0', '*', [validation.libsbol_rule_13])
         self.analyses = OwnedObject(self, SYSBIO_ANALYSIS, Analysis,
-                                    '0', '*', [libsbol_rule_14])
+                                    '0', '*', [validation.libsbol_rule_14])
         self.componentDefinitions = OwnedObject(self,
                                                 SBOL_COMPONENT_DEFINITION,
                                                 ComponentDefinition,

@@ -1,5 +1,10 @@
-from .toplevel import *
 from deprecated import deprecated
+
+from rdflib import URIRef
+
+from .constants import *
+from .property import LiteralProperty
+from .toplevel import TopLevel
 
 
 class Sequence(TopLevel):

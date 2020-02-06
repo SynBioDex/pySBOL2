@@ -1,11 +1,12 @@
+import logging
+import posixpath
+
+from rdflib import RDF
+import rdflib
+
 from .property import *
 from .validation import *
 from .config import *
-from rdflib import RDF
-import logging
-from logging.config import fileConfig
-
-import rdflib
 
 
 class SBOLObject:
@@ -84,7 +85,7 @@ class SBOLObject:
             self._identity = URIProperty(self, SBOL_IDENTITY,
                                          '0', '1', [sbol_rule_10202], uri)
         if hasHomespace():
-            uri = os.path.join(getHomespace(), uri)
+            uri = posixpath.join(getHomespace(), uri)
             self._identity = URIProperty(self, SBOL_IDENTITY,
                                          '0', '1', [sbol_rule_10202], uri)
 

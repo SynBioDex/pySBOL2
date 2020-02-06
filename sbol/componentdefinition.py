@@ -1,7 +1,10 @@
+from rdflib import URIRef
+
 from .component import Component
-from .toplevel import *
+from .constants import *
+from .toplevel import TopLevel
 from . import validation
-from .property import URIProperty
+from .property import OwnedObject, ReferencedObject, URIProperty
 from .sequence import Sequence
 from .sequenceannotation import SequenceAnnotation
 from .sequenceconstraint import SequenceConstraint
