@@ -1,6 +1,13 @@
+from rdflib import URIRef
+
+from . import validation
+from .constants import *
+from .identified import Identified
+from .property import LiteralProperty
 from .property import OwnedObject
 from .property import ReferencedObject
-from .toplevel import *
+from .property import URIProperty
+from .toplevel import TopLevel
 
 
 class Association(Identified):

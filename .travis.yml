@@ -1,3 +1,6 @@
+# Thanks to https://github.com/joerick/cibuildwheel for windows build
+# commands
+
 language: generic
 
 matrix:

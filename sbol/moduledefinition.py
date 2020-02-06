@@ -1,3 +1,4 @@
+from . import validation
 from .component import FunctionalComponent
 from .interaction import Interaction
 from .module import Module
