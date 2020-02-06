@@ -16,7 +16,7 @@ matrix:
     - os: windows
       language: shell
       before_install:
-       - choco install python3 --version 3.7.6 --no-progress -y
+       - choco install python3 --version=3.7.6 --no-progress -y
       install:
        - C:\\Python37\\python -m pip install .
       script:
