@@ -27,10 +27,8 @@ class TestConstants(unittest.TestCase):
         p_uri = ('http://sbols.org/CRISPR_Example/CRISPR_Template' +
                  '/cas9_complex_formation/cas9_gRNA_complex/1.0.0')
         p = i.participations[p_uri]
-        # p.roles is a list of strings
-        # The constant converted to a string should be in the list of roles
-        self.assertIn(str(sbol.SBO_PRODUCT), p.roles)
-        # The constant should be in the list of roles for backward compatibility
+        # p.roles is a list of URIs
+        # The constant should be in the list of roles
         self.assertIn(sbol.SBO_PRODUCT, p.roles)
 
     @unittest.expectedFailure

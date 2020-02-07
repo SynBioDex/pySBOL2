@@ -321,24 +321,14 @@ class LiteralProperty(Property):
         properties = self._sbol_owner.properties[self._rdf_type]
         if len(properties) == 0:
             return None
-        else:
-            # Just return the object by itself (not a list)
-            p = self._sbol_owner.properties[self._rdf_type][-1]
-            return p.value
+        # Just return the object by itself (not a list)
+        return properties[-1]
 
     def getPropertyValueList(self):
         if self._rdf_type not in self._sbol_owner.properties:
             return None
         properties = self._sbol_owner.properties[self._rdf_type]
-        if len(properties) == 0:
-            return []
-        else:
-            # Return the whole list
-            plist = self._sbol_owner.properties[self._rdf_type]
-            new_plist = []
-            for p in plist:
-                new_plist.append(p.value)
-            return new_plist
+        return properties.copy()
 
     @value.setter
     def value(self, new_value):
@@ -456,12 +446,13 @@ class OwnedObject(URIProperty):
     def __getitem__(self, id):
         if type(id) is int:
             return self.get_int(id)
-        elif type(id) is URIRef:
-            return self.get_uri(id.n3())
-        elif type(id) is str:
-            return self.get_uri(id)
-        else:
-            raise TypeError('id must be str or int')
+        if isinstance(id, str):
+            # Convert to str so that rdflib.URIRef and rdflib.Literal
+            # are cast to actual strings
+            return self.get_uri(str(id))
+        # Anything other than int and str, covered above, is a problem
+        errmsg = 'id must be str or int, got {!r}'.format(type(id))
+        raise TypeError(errmsg)
 
     def get_int(self, id):
         object_store = self._sbol_owner.owned_objects[self._rdf_type]
