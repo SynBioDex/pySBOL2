@@ -149,6 +149,15 @@ class Document(Identified):
         if filename is not None:
             self.read(filename)
 
+    def __eq__(self, other):
+        if not super().__eq__(other):
+            return False
+        # super().__eq__ will have checked the types so we know other
+        # is a Document at this point.
+        if self._namespaces != other._namespaces:
+            return False
+        return True
+
     @property
     def citations(self):
         return self._citations.value

@@ -211,6 +211,7 @@ class SBOLObject:
         """
         raise NotImplementedError("Not yet implemented")
 
+    # TODO: Can we deprecate this method?
     def compare(self, comparand):
         """Compare two SBOL objects or Documents. The behavior
         is currently undefined for objects with custom annotations
@@ -221,66 +222,25 @@ class SBOLObject:
         False if they are different.
         """
         # TODO This may work differently than the original method...
-        if type(comparand) != type(self):
-            return False
-        is_equal = True
-        if self.rdf_type != comparand.rdf_type:
-            self.logger.warning(self.identity + ' does not match type of ' + comparand.rdf_type)
-            return False
-        if self.rdf_type == SBOL_DOCUMENT:
-            ns_set = set(())
-            comparand_ns_set = set(())
-            for val in self._namespaces.values():
-                ns_set.add(val)
-            for val in comparand._namespaces.values():
-                comparand_ns_set.add(val)
-            if ns_set != comparand_ns_set:
-                self.logger.warning("NAMESPACES ARE NOT EQUAL!!!")
-                is_equal = False
-        self.logger.debug("Here are my properties: "
-                          + str(self.properties))
-        self.logger.debug("Here are their properties: "
-                          + str(comparand.properties))
-        if self.compare_unordered_lists(self.properties, comparand.properties) is False:
-            self.logger.warning("PROPERTIES ARE NOT EQUAL!!!")
-            is_equal = False
-        self.logger.debug("Here are my owned objects: "
-                          + str(self.owned_objects))
-        self.logger.debug("Here are their owned objects: "
-                          + str(comparand.owned_objects))
-        if self.compare_unordered_lists(self.owned_objects, comparand.owned_objects) is False:
-            self.logger.warning("OWNED OBJECTS ARE NOT EQUAL!!!")
-            is_equal = False
-        return is_equal
-
-    def compare_unordered_lists(self, mine, theirs):
-        """This is a very inefficient hack for comparing two unordered mutable lists.
-
-        We could make some small improvements to this approach,
-        or consider alternatives."""
-        for my_obj in mine:
-            found = False
-            for their_obj in theirs:
-                if my_obj == their_obj:
-                    found = True
-                    break
-            if found is False:
-                return False
-        return True
+        return self == comparand
 
     def __eq__(self, other):
-        """Compare two SBOL objects or Documents. The behavior
-        is currently undefined for objects
-        with custom annotations or extension classes.
+        """Compare two SBOLObjects. The behavior is currently undefined for
+        objects with custom annotations or extension classes.
 
         :param other: The object being compared to this one.
         :return: True if the objects are identical, False if they are different.
+
         """
-        # if other is None or not isinstance(other, SBOLObject):
-        #     return False
-        # if self.rdf_type != other.rdf_type:
-        #     print(self.identity.get() + ' does not match type of ' + other.type())
-        return self.compare(other)
+        if type(other) != type(self):
+            return False
+        if self.rdf_type != other.rdf_type:
+            return False
+        if self.properties != other.properties:
+            return False
+        if self.owned_objects != other.owned_objects:
+            return False
+        return True
 
     def getPropertyValue(self, property_uri):
         """Get the value of a custom annotation property by its URI.
