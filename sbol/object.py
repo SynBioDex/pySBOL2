@@ -1,12 +1,14 @@
 import logging
 import posixpath
 
-from rdflib import RDF
 import rdflib
 
-from .property import *
-from .validation import *
-from .config import *
+from .config import getHomespace
+from .config import hasHomespace
+from .constants import *
+from .property import ReferencedObject
+from .property import URIProperty
+from . import validation
 
 
 class SBOLObject:
@@ -67,7 +69,8 @@ class SBOLObject:
     # [SBOL specification document](http://sbolstandard.org/wp-content/uploads/2015/08/SBOLv2.0.1.pdf).
     _identity = None
 
-    def __init__(self, _rdf_type=URIRef(UNDEFINED), uri=URIRef("example")):
+    def __init__(self, _rdf_type=rdflib.URIRef(UNDEFINED),
+                 uri=rdflib.URIRef("example")):
         """Open-world constructor."""
         self.owned_objects = {}  # map<rdf_type, vector<SBOLObject>>
         self.properties = {}  # map<rdf_type, vector<SBOLObject>>
@@ -80,14 +83,14 @@ class SBOLObject:
             self.logger.debug("Property was not a URIRef: '" +
                               str(uri) + "', " + str(type(uri)))
             self._identity = URIProperty(self, SBOL_IDENTITY,
-                                         '0', '1', [sbol_rule_10202], URIRef(uri))
+                                         '0', '1', [validation.sbol_rule_10202], URIRef(uri))
         else:
             self._identity = URIProperty(self, SBOL_IDENTITY,
-                                         '0', '1', [sbol_rule_10202], uri)
+                                         '0', '1', [validation.sbol_rule_10202], uri)
         if hasHomespace():
             uri = posixpath.join(getHomespace(), uri)
             self._identity = URIProperty(self, SBOL_IDENTITY,
-                                         '0', '1', [sbol_rule_10202], uri)
+                                         '0', '1', [validation.sbol_rule_10202], uri)
 
     @property
     def logger(self):
@@ -371,7 +374,8 @@ class SBOLObject:
         raise NotImplementedError("Implemented by child classes")
 
     def build_graph(self, graph):
-        graph.add((self._identity.getRawValue(), RDF.type, self.rdf_type))
+        graph.add((self._identity.getRawValue(), rdflib.RDF.type,
+                   self.rdf_type))
         for typeURI, proplist in self.properties.items():
             for prop in proplist:
                 graph.add((self._identity.getRawValue(),
