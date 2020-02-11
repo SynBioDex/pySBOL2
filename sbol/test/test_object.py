@@ -25,6 +25,24 @@ class TestObject(unittest.TestCase):
         name = cd.getPropertyValue(sbol.SBOL_NAME)
         self.assertEqual(name, expected)
 
+    def test_compare(self):
+        # This didn't work because the SBOLObject.__eq__ method was
+        # broken.  See issue https://github.com/llotneb/SBOL/issues/62
+        sbol.setHomespace('http://example.org/Unit_Test')
+        doc = sbol.Document()
+        md1 = doc.moduleDefinitions.create('Foo1')
+        self.assertEqual(len(doc.moduleDefinitions), 1)
+        md2 = doc.moduleDefinitions.create('Foo2')
+        self.assertEqual(len(doc.moduleDefinitions), 2)
+
+    def test_eq(self):
+        sbol.setHomespace('http://example.org/Unit_Test')
+        doc = sbol.Document()
+        md1 = doc.moduleDefinitions.create('Foo1')
+        self.assertEqual(len(doc.moduleDefinitions), 1)
+        md2 = sbol.ModuleDefinition(uri='Foo2')
+        self.assertNotEqual(md1, md2)
+
 
 if __name__ == '__main__':
     unittest.main()
