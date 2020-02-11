@@ -1,35 +1,36 @@
 import collections.abc
-from .identified import *
-from .config import *
-from .constants import *
-from .componentdefinition import ComponentDefinition
-from .sequenceannotation import SequenceAnnotation
-from .sequence import Sequence
-from .component import Component, FunctionalComponent
-from .moduledefinition import ModuleDefinition
-from .module import Module
-from .interaction import Interaction
-from .participation import Participation
-from .model import Model
-from .sequenceconstraint import SequenceConstraint
-from .location import Location, Range, Cut, GenericLocation
-from .mapsto import MapsTo
-from .collection import Collection
-from .provo import Plan, Activity, Agent, Usage, Association
-from .attachment import Attachment
-from .combinatorialderivation import CombinatorialDerivation
-from .implementation import Implementation
-from .dbtl import Analysis, Build, Design, SampleRoster, Test
-from .experiment import Experiment, ExperimentalData
-from .object import SBOLObject
-from .property import OwnedObject, URIProperty
+import logging
+import os
+
 import rdflib
 from rdflib import URIRef
-import rdflib.namespace
-import os
+
 from . import SBOL2Serialize
-import logging
-from logging.config import fileConfig
+from . import validation
+from .attachment import Attachment
+from .collection import Collection
+from .combinatorialderivation import CombinatorialDerivation
+from .component import Component, FunctionalComponent
+from .componentdefinition import ComponentDefinition
+from .config import parsePropertyName
+from .constants import *
+from .dbtl import Analysis, Build, Design, SampleRoster, Test
+from .experiment import Experiment, ExperimentalData
+from .identified import Identified
+from .implementation import Implementation
+from .interaction import Interaction
+from .location import Location, Range, Cut, GenericLocation
+from .mapsto import MapsTo
+from .model import Model
+from .module import Module
+from .moduledefinition import ModuleDefinition
+from .object import SBOLObject
+from .participation import Participation
+from .property import OwnedObject, URIProperty
+from .provo import Plan, Activity, Agent, Usage, Association
+from .sequence import Sequence
+from .sequenceannotation import SequenceAnnotation
+from .sequenceconstraint import SequenceConstraint
 
 
 class Document(Identified):
@@ -507,7 +508,8 @@ class Document(Identified):
             # add to the Document's property store
             if new_obj.is_top_level():
                 self.owned_objects[new_obj.rdf_type].append(new_obj)
-        elif subject not in self.SBOLObjects and obj not in self.SBOL_DATA_MODEL_REGISTER:
+        elif (subject not in self.SBOLObjects
+              and obj not in self.SBOL_DATA_MODEL_REGISTER):
             # Generic TopLevels
             new_obj = SBOLObject()
             new_obj.identity = subject

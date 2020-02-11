@@ -14,7 +14,7 @@ EOF
 fi 
 
 # Run style checker
-MAX_VIOLATIONS=34
+MAX_VIOLATIONS=33
 echo "Checking style..."
 pycodestyle --exclude=./venv,./sbol/venv . > style.txt
 result=$(cat style.txt | wc -l)

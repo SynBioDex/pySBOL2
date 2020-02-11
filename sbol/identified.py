@@ -19,7 +19,7 @@ class Identified(SBOLObject):
     # that are different versions of each other.
     # An Identified object MUST be referred to
     # using either its identity URI or its persistentIdentity URI.
-    _persistentIdentity = None
+    # _persistentIdentity = None
 
     # The displayId property is an OPTIONAL identifier
     # with a data type of String.
@@ -31,7 +31,7 @@ class Identified(SBOLObject):
     # (global uniqueness is not necessary)
     # and MUST be composed of only alphanumeric or underscore characters
     # and MUST NOT begin with a digit.
-    _displayId = None
+    # _displayId = None
 
     # If the version property is used,
     # then it is RECOMMENDED that version numbering follow the conventions
@@ -42,7 +42,7 @@ class Identified(SBOLObject):
     # by the characters '.' and '-' and are compared in lexicographical order
     # (for example, 1 < 1.3.1 < 2.0-beta).
     # For a full explanation, see the linked resources.
-    _version = None
+    # _version = None
 
     # The wasDerivedFrom property is OPTIONAL and has a data type of URI.
     # An SBOL object with this property refers to another SBOL object
@@ -56,12 +56,12 @@ class Identified(SBOLObject):
     # or form a cyclical chain of references via its wasDerivedFrom property
     # and those of other SBOL objects. For example, the reference chain
     # "A was derived from B and B was derived from A" is cyclical.
-    _wasDerivedFrom = None
+    # _wasDerivedFrom = None
 
     # An Activity which generated this ComponentDefinition,
     # eg., a design process like codon-optimization
     # or a construction process like Gibson Assembly
-    _wasGeneratedBy = None
+    # _wasGeneratedBy = None
 
     # The name property is OPTIONAL and has a data type of
     # String. This property is intended to be displayed to a human
@@ -71,12 +71,12 @@ class Identified(SBOLObject):
     # tools give users the ability to switch perspectives between name
     # properties that are human-readable and displayId properties that
     # are less human-readable, but are more likely to be unique.
-    _name = None
+    # _name = None
 
     # The description property is OPTIONAL and has a data type of String.
     # This property is intended to contain a more thorough
     # text description of an Identified object.
-    _description = None
+    # _description = None
 
     def __init__(self, type_uri=SBOL_IDENTIFIED, uri=URIRef('example'),
                  version=VERSION_STRING):
@@ -115,6 +115,9 @@ class Identified(SBOLObject):
             self._identity.set(URIRef(posixpath.join(getHomespace(), uri)))
             self._persistentIdentity.set(
                 URIRef(posixpath.join(getHomespace(), uri)))
+        # Provo hooks
+        self._wasDerivedFrom = None
+        self._wasGeneratedBy = None
         # self._identity.validate() # TODO
 
     @property
