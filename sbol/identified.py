@@ -6,7 +6,10 @@ from .config import ConfigOptions
 from .config import getHomespace
 from .config import hasHomespace
 from .constants import *
-from .property import LiteralProperty, URIProperty
+from .property import LiteralProperty
+from .property import URIProperty
+from .sbolerror import SBOLError
+from .sbolerror import SBOLErrorCode
 from . import validation
 
 
@@ -182,7 +185,7 @@ class Identified(SBOLObject):
             matches = parent.find_property_value(SBOL_IDENTIFIED, obj_id)
             if len(matches) > 0:
                 raise SBOLError("Cannot update SBOL-compliant URI. The URI " +
-                                self.identity + " is not unique",
+                                str(self.identity) + " is not unique",
                                 SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE)
             for rdf_type, store in self.owned_objects.items():
                 if rdf_type not in self._hidden_properties:
@@ -193,6 +196,6 @@ class Identified(SBOLObject):
             matches = parent.doc.find_property_value(SBOL_IDENTITY, self.identity)
             if len(matches) > 0:
                 raise SBOLError("Cannot update SBOL-compliant URI. "
-                                "An object with URI " + self.identity +
+                                "An object with URI " + str(self.identity) +
                                 " is already in the Document",
                                 SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE)

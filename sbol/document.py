@@ -146,6 +146,8 @@ class Document(Identified):
                                       '0', '*', None)
         self._keywords = URIProperty(self, PURL_URI + "elements/1.1/subject",
                                      '0', '*', None)
+        # I am my own document
+        self.doc = self
         if filename is not None:
             self.read(filename)
 
@@ -524,8 +526,8 @@ class Document(Identified):
             found = predicate.rfind('/')
         if found != -1:
             # Checks if the object's property already exists
-            if str(subject) in self.SBOLObjects:
-                parent = self.SBOLObjects[str(subject)]
+            if subject in self.SBOLObjects:
+                parent = self.SBOLObjects[subject]
                 # Decide if this triple corresponds to a simple property,
                 # a list property, an owned property or a referenced property
                 if predicate in parent.properties:
@@ -533,7 +535,7 @@ class Document(Identified):
                     parent.properties[predicate].append(obj)
                 elif predicate in parent.owned_objects:
                     # triple is an owned object
-                    owned_obj = self.SBOLObjects[str(obj)]
+                    owned_obj = self.SBOLObjects[obj]
                     if owned_obj is not None:
                         parent.owned_objects[predicate].append(owned_obj)
                         owned_obj.parent = parent
@@ -545,6 +547,10 @@ class Document(Identified):
                         parent.properties[predicate].append(obj)
                     else:
                         parent.properties[predicate].append(obj)
+            else:
+                msg = 'Subject {} ({}) not found in my SBOLObjects'
+                msg = msg.format(subject, type(subject))
+                self.logger.debug(msg)
 
     def remove_descendants(self):
         to_delete = []

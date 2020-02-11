@@ -221,10 +221,7 @@ class URIProperty(Property):
         properties = self._sbol_owner.properties[self._rdf_type]
         if len(properties) == 0:
             return None
-        else:
-            # Just return the object by itself (not a list)
-            p = self._sbol_owner.properties[self._rdf_type][-1]
-            return p.n3()[1:-1]
+        return properties[-1]
 
     def getPropertyValueList(self):
         if self._rdf_type not in self._sbol_owner.properties:
@@ -252,7 +249,7 @@ class URIProperty(Property):
 
     def setSinglePropertyValue(self, new_value):
         if type(new_value) is list:
-            raise TypeError('The ' + self.getTypeURI() +
+            raise TypeError('The ' + str(self.getTypeURI()) +
                             ' property does not accept list arguments.')
         if self._rdf_type not in self._sbol_owner.properties:
             self._sbol_owner.properties[self._rdf_type] = []
@@ -342,7 +339,7 @@ class LiteralProperty(Property):
 
     def setSinglePropertyValue(self, new_value):
         if type(new_value) is list:
-            raise TypeError('The ' + self.getTypeURI() +
+            raise TypeError('The ' + str(self.getTypeURI()) +
                             ' property does not accept list arguments.')
         if self._rdf_type not in self._sbol_owner.properties:
             self._sbol_owner.properties[self._rdf_type] = []
@@ -433,13 +430,12 @@ class OwnedObject(URIProperty):
                 # Add to Document and check for uniqueness of URI
                 if self._sbol_owner.doc is not None:
                     sbol_obj.doc = self._sbol_owner.doc
-                # Add to parent object
-                object_store.append(sbol_obj)
                 sbol_obj.parent = self._sbol_owner
                 # Update URI for the argument object and all its children,
                 # if SBOL-compliance is enabled.
                 sbol_obj.update_uri()
-
+                # Add to parent object
+                object_store.append(sbol_obj)
                 # Run validation rules
                 # TODO
 
@@ -447,9 +443,7 @@ class OwnedObject(URIProperty):
         if type(id) is int:
             return self.get_int(id)
         if isinstance(id, str):
-            # Convert to str so that rdflib.URIRef and rdflib.Literal
-            # are cast to actual strings
-            return self.get_uri(str(id))
+            return self.get_uri(rdflib.URIRef(id))
         # Anything other than int and str, covered above, is a problem
         errmsg = 'id must be str or int, got {!r}'.format(type(id))
         raise TypeError(errmsg)
@@ -532,8 +526,7 @@ class OwnedObject(URIProperty):
             if Config.getOption(ConfigOptions.VERBOSE.value) is True:
                 print('Searching for non-TopLevel: ' + compliant_uri)
             for obj in object_store:
-                # identity is a string, so cast the URIRef compliant_uri to a string
-                if obj.identity == str(compliant_uri):
+                if obj.identity == compliant_uri:
                     return obj
 
     def get(self, uri):

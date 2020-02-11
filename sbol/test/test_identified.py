@@ -4,7 +4,6 @@ import unittest
 import rdflib
 
 import sbol
-# from sbol import *
 
 MODULE_LOCATION = os.path.dirname(os.path.abspath(__file__))
 PARTS_LOCATION = os.path.join(MODULE_LOCATION, 'resources', 'tutorial',
@@ -27,8 +26,9 @@ class TestIdentified(unittest.TestCase):
         sbol.Config.setOption('sbol_compliant_uris', True)
         sbol.Config.setOption('sbol_typed_uris', False)
         crispr_template = sbol.ModuleDefinition('CRISPR_Template')
-        self.assertEqual('http://sbols.org/CRISPR_Example/CRISPR_Template',
-                         crispr_template.persistentIdentity)
+        expected = 'http://sbols.org/CRISPR_Example/CRISPR_Template'
+        self.assertEqual(crispr_template.persistentIdentity,
+                         rdflib.URIRef(expected))
 
     def test_getVersion_SBOLCompliant(self):
         sbol.setHomespace('http://sbols.org/CRISPR_Example')
@@ -52,8 +52,10 @@ class TestIdentified(unittest.TestCase):
         sbol.Config.setOption('sbol_compliant_uris', True)
         sbol.Config.setOption('sbol_typed_uris', False)
         crispr_template = sbol.ModuleDefinition('CRISPR_Template')
-        crispr_template.persistentIdentity = 'test'
-        self.assertEqual('test', crispr_template.persistentIdentity)
+        expected = 'test'
+        crispr_template.persistentIdentity = expected
+        self.assertEqual(crispr_template.persistentIdentity,
+                         rdflib.URIRef(expected))
 
     def test_setVersion_SBOLCompliant(self):
         sbol.setHomespace('http://sbols.org/CRISPR_Example')
@@ -76,8 +78,9 @@ class TestIdentified(unittest.TestCase):
         sbol.Config.setOption('sbol_compliant_uris', False)
         sbol.Config.setOption('sbol_typed_uris', False)
         crispr_template = sbol.ModuleDefinition('CRISPR_Template')
-        self.assertEqual('http://sbols.org/CRISPR_Example/CRISPR_Template',
-                         crispr_template.persistentIdentity)
+        expected = 'http://sbols.org/CRISPR_Example/CRISPR_Template'
+        self.assertEqual(crispr_template.persistentIdentity,
+                         rdflib.URIRef(expected))
 
     def test_getVersion_hasHomespace(self):
         sbol.setHomespace('http://sbols.org/CRISPR_Example')
@@ -92,8 +95,10 @@ class TestIdentified(unittest.TestCase):
         sbol.Config.setOption('sbol_compliant_uris', False)
         sbol.Config.setOption('sbol_typed_uris', False)
         crispr_template = sbol.ModuleDefinition('CRISPR_Template')
-        crispr_template.persistentIdentity = 'test'
-        self.assertEqual('test', crispr_template.persistentIdentity)
+        expected = 'test'
+        crispr_template.persistentIdentity = expected
+        self.assertEqual(crispr_template.persistentIdentity,
+                         rdflib.URIRef(expected))
 
     def test_setVersion_hasHomespace(self):
         sbol.setHomespace('http://sbols.org/CRISPR_Example')
