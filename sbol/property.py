@@ -474,8 +474,8 @@ class OwnedObject(URIProperty):
             if obj is not None:
                 return obj
             else:
-                raise SBOLError('Object ' + id + ' not found',
-                                SBOLErrorCode.NOT_FOUND_ERROR)
+                msg = 'Object {} not found'.format(id)
+                raise SBOLError(msg, SBOLErrorCode.NOT_FOUND_ERROR)
 
     def find_resource(self, uri, resource_namespaces, object_store,
                       parent_obj, typedURI=False):

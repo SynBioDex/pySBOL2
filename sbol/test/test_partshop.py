@@ -22,9 +22,9 @@ class TestPartShop(unittest.TestCase):
         doc = Document()
         igem = PartShop('https://synbiohub.org')
         igem.pull('https://synbiohub.org/public/igem/BBa_R0010/1', doc)
-        print(doc)
-        for obj in doc:
-            print(obj)
+        # print(doc)
+        # for obj in doc:
+        #     print(obj)
         self.assertEqual(3, len(doc))
 
     def test_pull_01(self):
@@ -34,18 +34,18 @@ class TestPartShop(unittest.TestCase):
         igem.pull('BBa_B0032', doc)
         igem.pull('BBa_E0040', doc)
         igem.pull('BBa_B0012', doc)
-        print(doc)
-        for obj in doc:
-            print(obj)
+        # print(doc)
+        # for obj in doc:
+        #     print(obj)
         self.assertEqual(7, len(doc))
 
     def test_pull_02(self):
         doc = Document()
         ps = PartShop('https://synbiohub.utah.edu/public/RepressionModel')
         ps.pull('CRPb_characterization_Circuit', doc)
-        print(doc)
-        for obj in doc:
-            print(obj)
+        # print(doc)
+        # for obj in doc:
+        #     print(obj)
         self.assertEqual(31, len(doc))
 
     def test_login(self):
@@ -92,7 +92,7 @@ WHERE {
 }
 '''
         response = ps.sparqlQuery(query)
-        print(response.text)
+        # print(response.text)
         self.assertEqual(response.status_code, 200)
 
     def test_getURL(self):
