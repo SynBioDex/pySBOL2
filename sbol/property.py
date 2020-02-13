@@ -221,15 +221,7 @@ class URIProperty(Property):
         if self._rdf_type not in self._sbol_owner.properties:
             return []
         properties = self._sbol_owner.properties[self._rdf_type]
-        if len(properties) == 0:
-            return []
-        else:
-            # Return the whole list
-            plist = self._sbol_owner.properties[self._rdf_type]
-            new_plist = []
-            for p in plist:
-                new_plist.append(p.n3()[1:-1])
-            return new_plist
+        return properties.copy()
 
     @value.setter
     def value(self, new_value):

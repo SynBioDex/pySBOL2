@@ -17,11 +17,11 @@ class TestComponentDefinitions(unittest.TestCase):
     def test_typesSet(self):
         # Constructs a protein component
         cas9 = ComponentDefinition('Cas9', BIOPAX_PROTEIN)
-        self.assertEqual([BIOPAX_PROTEIN.n3()[1:-1]], cas9.types)
+        self.assertEqual([BIOPAX_PROTEIN], cas9.types)
 
     def test_typesNotSet(self):
         target_promoter = ComponentDefinition('target_promoter')
-        self.assertEqual([BIOPAX_DNA.n3()[1:-1]], target_promoter.types)
+        self.assertEqual([BIOPAX_DNA], target_promoter.types)
 
     def testAddComponentDefinition(self):
         setHomespace('http://sbols.org/CRISPR_Example')
@@ -78,7 +78,8 @@ class TestComponentDefinitions(unittest.TestCase):
             expected = [rdflib.Literal(x) for x in list_cd]
             self.assertCountEqual(list_cd_read, expected)
 
-    @unittest.expectedFailure
+    # See Issue #64, CD.assemblePrimaryStructure is not implemented
+    @unittest.expectedFailure  # See issue 64
     def testPrimaryStructureIteration(self):
         list_cd = []
         list_cd_true = ["R0010", "E0040", "B0032", "B0012"]
