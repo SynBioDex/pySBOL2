@@ -88,6 +88,9 @@ class SBOLObject:
             logging.basicConfig()
         return logger
 
+    def __uri__(self):
+        return self.identity
+
     @property
     def identity(self):
         # Return the value associated with the identity property

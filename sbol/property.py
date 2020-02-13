@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+import collections
 import logging
 import os
 import posixpath
@@ -65,7 +66,8 @@ class Property(ABC):
         self._upperBound = upper_bound
         self._validation_rules = []
         self._validation_rules = validation_rules
-        self.value = initial_value
+        if initial_value is not None:
+            self.value = initial_value
 
     @property
     def logger(self):
@@ -92,25 +94,17 @@ class Property(ABC):
         return self._sbol_owner
 
     def getRawValue(self):
+        if self._rdf_type not in self._sbol_owner.properties:
+            return None
+        properties = self._sbol_owner.properties[self._rdf_type]
         if self._upperBound == '1':
-            if self._rdf_type not in self._sbol_owner.properties:
+            try:
+                return properties[-1]
+            except IndexError:
+                # List is empty
                 return None
-            properties = self._sbol_owner.properties[self._rdf_type]
-            if len(properties) == 0:
-                return None
-            else:
-                # Just return the object by itself (not a list)
-                p = self._sbol_owner.properties[self._rdf_type][-1]
-                return p
-        else:
-            if self._rdf_type not in self._sbol_owner.properties:
-                return None
-            properties = self._sbol_owner.properties[self._rdf_type]
-            if len(properties) == 0:
-                return []
-            else:
-                # Return the whole list
-                return self._sbol_owner.properties[self._rdf_type]
+        # upperbound is not 1, just return the list
+        return properties
 
     @property
     def value(self):
@@ -225,7 +219,7 @@ class URIProperty(Property):
 
     def getPropertyValueList(self):
         if self._rdf_type not in self._sbol_owner.properties:
-            return None
+            return []
         properties = self._sbol_owner.properties[self._rdf_type]
         if len(properties) == 0:
             return []
@@ -686,17 +680,51 @@ class ReferencedObject(Property):
         reference_store = self._sbol_owner.properties[self._rdf_type]
         return reference_store[item]
 
-    def set(self, uri):
-        if self._sbol_owner is not None:
-            if self._rdf_type not in self._sbol_owner.properties:
-                self._sbol_owner.properties[self._rdf_type] = []
-            self._sbol_owner.properties[self._rdf_type].append(uri)
+    def set(self, new_value):
+        if self._sbol_owner is None:
+            # Not sure we should raise this, but I'm guessing it would
+            # be good to know.
+            # TODO: convert this to a better Python exception or to an
+            # SBOL exception
+            raise Exception('No owner for referenced value')
+        if self.getUpperBound() == '1':
+            self.setSinglePropertyValue(new_value)
         else:
-            # NOTE: we could raise an exception here, but the
-            # original code is not doing anything in this case.
-            print('Unable to set item. SBOL owner was None.')
+            self.setPropertyValueList(new_value)
+
+    def _to_uri(self, obj):
+        """Converts strings, URIRefs, and sbol.Identified instances into
+        rdflib.URIRefs.
+
+        """
+        if isinstance(obj, str):
+            return rdflib.URIRef(obj)
+        if hasattr(obj, '__uri__'):
+            # SBOLObjects have a __uri__ method, and others can too
+            return obj.__uri__()
+        errmsg = 'Cannot convert {} of type {} to a referenced object'
+        raise TypeError(errmsg.format(obj, type(obj)))
+
+    def setSinglePropertyValue(self, new_value):
+        self._sbol_owner.properties[self._rdf_type] = [self._to_uri(new_value)]
+
+    def setPropertyValueList(self, new_value):
+        if hasattr(new_value, '__uri__'):
+            # Convert to URI
+            # SBOLObjects have a __uri__ method, and others can too
+            new_value = new_value.__uri__()
+        if isinstance(new_value, str):
+            # Turn it into a list
+            new_value = [new_value]
+        if isinstance(new_value, collections.Iterable):
+            # Convert the items to URIRefs
+            new_value = list([self._to_uri(x) for x in new_value])
+        self._sbol_owner.properties[self._rdf_type] = new_value
 
     def add(self, uri):
+        # Does anyone call this method? If so, it needs to be properly
+        # implemented.
+        raise Exception('Should ReferencedObject.add be deprecated?')
         if self._sbol_owner is not None:
             self._sbol_owner.properties[self._rdf_type].append(uri)
         else:
@@ -705,21 +733,30 @@ class ReferencedObject(Property):
             print('Unable to set item. SBOL owner was None.')
 
     def addReference(self, uri):
+        # Does anyone call this method? If so, it needs to be properly
+        # implemented.
+        raise Exception('Should ReferencedObject.addReference be deprecated?')
         self._sbol_owner.properties[self._rdf_type].append(uri)
 
-    def _uri_ref_to_str(self, thing):
+    def _ensure_uri_ref(self, thing):
+        """This method ensures that what gets returned is an rdflib.URIRef. If
+        the set methods are working properly, this should be
+        unnecessary. Hence the warning message if what it finds is not
+        a URIRef. The goal is to remove this method eventually.
+
+        """
         if isinstance(thing, rdflib.URIRef):
-            return str(thing)
-        else:
             return thing
+        self.logger.warning('ReferencedObject was not a URIRef: {}'.format(thing))
+        return rdflib.URIRef(thing)
 
     @property
     def value(self):
         raw_value = self.getRawValue()
         if self._upperBound == '1':
-            return self._uri_ref_to_str(raw_value)
+            return self._ensure_uri_ref(raw_value)
         else:
-            result = [self._uri_ref_to_str(rval) for rval in raw_value]
+            result = [self._ensure_uri_ref(rval) for rval in raw_value]
             # Return a list, not a generator. Consumers are expecting a list.
             return list(result)
 
