@@ -191,6 +191,13 @@ class TestDocument(unittest.TestCase):
         m = md.modules.create('bar')
         self.assertEqual(doc, m.doc)
 
+    def test_eq(self):
+        doc = sbol.Document()
+        doc2 = sbol.Document()
+        self.assertEqual(doc, doc2)
+        doc.addNamespace('http://example.org#', 'bar')
+        self.assertNotEqual(doc, doc2)
+
 
 if __name__ == '__main__':
     unittest.main()
