@@ -3,6 +3,8 @@ import os
 import sbol
 from sbol import *
 
+import rdflib
+
 MODULE_LOCATION = os.path.dirname(os.path.abspath(__file__))
 TEST_LOCATION = os.path.join(MODULE_LOCATION, 'resources',
                              'crispr_example.xml')
@@ -39,12 +41,12 @@ class TestProperty(unittest.TestCase):
         self.assertEqual(4, len(d.sequences))
 
     def test_getitem(self):
-        setHomespace('http://sbols.org/CRISPR_Example/')
-        d = Document()
+        sbol.setHomespace('http://sbols.org/CRISPR_Example/')
+        d = sbol.Document()
         d.read(TEST_LOCATION)
         s1 = d.sequences['CRa_U6_seq']
-        self.assertEqual('http://sbols.org/CRISPR_Example/CRa_U6_seq/1.0.0',
-                         str(s1))
+        expected = 'http://sbols.org/CRISPR_Example/CRa_U6_seq/1.0.0'
+        self.assertEqual(expected, str(s1))
 
     def test_readProperties(self):
         d = Document()

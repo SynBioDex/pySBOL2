@@ -182,12 +182,22 @@ class TestDocument(unittest.TestCase):
         with self.assertRaises(ValueError):
             doc.addNamespace('http://examples.org', 'foo')
 
+    def test_doc(self):
+        doc = sbol.Document()
+        # This was actually broken, so don't laugh at it
+        self.assertEqual(doc.doc, doc)
+        md = doc.moduleDefinitions.create('foo')
+        self.assertEqual(doc, md.doc)
+        m = md.modules.create('bar')
+        self.assertEqual(doc, m.doc)
+
     def test_eq(self):
         doc = sbol.Document()
         doc2 = sbol.Document()
         self.assertEqual(doc, doc2)
         doc.addNamespace('http://example.org#', 'bar')
         self.assertNotEqual(doc, doc2)
+
 
 if __name__ == '__main__':
     unittest.main()

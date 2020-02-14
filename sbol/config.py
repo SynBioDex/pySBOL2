@@ -1,6 +1,9 @@
-from .sbolerror import *
+from enum import Enum
 import os
 import random
+
+from .sbolerror import SBOLError
+from .sbolerror import SBOLErrorCode
 
 
 class FileFormats(Enum):

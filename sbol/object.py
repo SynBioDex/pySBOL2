@@ -16,14 +16,6 @@ class SBOLObject:
      and contains methods for serializing and parsing RDF triples.
     """
 
-    # 'Protected' members
-    _namespaces = None
-    _default_namespace = None
-    _hidden_properties = []
-
-    # def _init(self, rdf_type, uri):
-    #     raise NotImplementedError("Not yet implemented")
-
     def _serialize(self):
         # Convert and SBOL object into RDF triples.
         raise NotImplementedError("Not yet implemented")
@@ -50,13 +42,6 @@ class SBOLObject:
         """
         raise NotImplementedError("Not yet implemented")
 
-    # 'Public' members
-    doc = None
-    rdf_type = None
-    parent = None
-    properties = None
-    owned_objects = None
-
     # TODO Docstrings on variables isn't a thing in Python. Consider using Epydoc.
     # The identity property is REQUIRED by all Identified objects
     # and has a data type of URI. A given Identified object's identity
@@ -67,13 +52,17 @@ class SBOLObject:
     # within this domain. For other best practices regarding URIs
     # see Section 11.2 of the
     # [SBOL specification document](http://sbolstandard.org/wp-content/uploads/2015/08/SBOLv2.0.1.pdf).
-    _identity = None
+    # _identity = None
 
     def __init__(self, _rdf_type=rdflib.URIRef(UNDEFINED),
                  uri=rdflib.URIRef("example")):
         """Open-world constructor."""
         self.owned_objects = {}  # map<rdf_type, vector<SBOLObject>>
         self.properties = {}  # map<rdf_type, vector<SBOLObject>>
+        self.doc = None
+        self.parent = None
+        self._default_namespace = None
+        self._hidden_properties = []
         if type(_rdf_type) is str:
             self.rdf_type = URIRef(_rdf_type)
         else:
@@ -101,6 +90,9 @@ class SBOLObject:
             # seeing the messages.
             logging.basicConfig()
         return logger
+
+    def __uri__(self):
+        return self.identity
 
     @property
     def identity(self):
@@ -133,6 +125,7 @@ class SBOLObject:
         :return: The SBOLObject associated with this URI if it exists,
         None otherwise.
         """
+        uri = rdflib.URIRef(uri)
         if self.identity == uri:
             return self
         for rdf_type, object_store in self.owned_objects.items():
@@ -380,7 +373,7 @@ class SBOLObject:
                 obj.serialize_rdf2xml(graph)  # recursive
 
     def __str__(self):
-        return self.identity  # identity should be a URIRef``
+        return str(self.identity)
 
     def is_top_level(self):
         return False

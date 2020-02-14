@@ -1,4 +1,7 @@
 import unittest
+
+import rdflib
+
 import sbol
 
 
@@ -57,9 +60,11 @@ class TestOwnedObject(unittest.TestCase):
     def test_uri_generation(self):
         doc = sbol.Document()
         md = doc.moduleDefinitions.create('foo')
-        self.assertEqual(md.identity, 'http://examples.org/ModuleDefinition/foo/1')
+        expected = 'http://examples.org/ModuleDefinition/foo/1'
+        self.assertEqual(md.identity, rdflib.URIRef(expected))
         m = md.modules.create('bar')
-        self.assertEqual(m.identity, 'http://examples.org/ModuleDefinition/foo/bar/1')
+        expected = 'http://examples.org/ModuleDefinition/foo/bar/1'
+        self.assertEqual(m.identity, rdflib.URIRef(expected))
 
     def test_displayId_lookup(self):
         # Test lookup of an object by its display Id via the
