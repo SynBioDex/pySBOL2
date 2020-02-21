@@ -1,5 +1,6 @@
 import os
 import sys
+import tempfile
 import unittest
 
 import rdflib
@@ -44,7 +45,7 @@ class TestSequence(unittest.TestCase):
         sbol.setHomespace('http://sbols.org/CRISPR_Example')
         sbol.Config.setOption('sbol_typed_uris', False)
         doc = sbol.Document()
-        doc.read(os.path.join(MODULE_LOCATION, 'resources/crispr_example.xml'))
+        doc.read(CRISPR_EXAMPLE)
         # Sequence to test against
         seq = ('GCTCCGAATTTCTCGACAGATCTCATGTGATTACGCCAAGCTACGGGCGGAGTACTGTCCTC'
                'CGAGCGGAGTACTGTCCTCCGAGCGGAGTACTGTCCTCCGAGCGGAGTACTGTCCTCCGAGC'
@@ -53,35 +54,37 @@ class TestSequence(unittest.TestCase):
                'TACCTCATCAGGAACATGTTGGATCCAATTCGACC')
 
         seq_read = doc.sequences.get('CRP_b_seq').elements
-        self.assertEquals(seq_read, seq)
+        self.assertEqual(seq_read, seq)
 
     def testUpdateSequenceElement(self):
         sbol.setHomespace('http://sbols.org/CRISPR_Example')
         sbol.Config.setOption('sbol_typed_uris', False)
         doc = sbol.Document()
-        doc.read(os.path.join(MODULE_LOCATION, 'resources/crispr_example.xml'))
+        doc.read(CRISPR_EXAMPLE)
         # Sequence to test against
         seq = 'AAAAA'
         doc.sequences.get('CRP_b_seq').elements = seq
         seq_read = doc.sequences.get('CRP_b_seq').elements
-        self.assertEquals(seq_read, seq)
+        self.assertEqual(seq_read, seq)
 
     # File I/O Tests
     def testUpdateWrite(self):
         sbol.setHomespace('http://sbols.org/CRISPR_Example')
         sbol.Config.setOption('sbol_typed_uris', False)
         doc = sbol.Document()
-        doc.read(os.path.join(MODULE_LOCATION, 'resources/crispr_example.xml'))
+        doc.read(CRISPR_EXAMPLE)
         # Sequence to test against
         seq = 'AAAAA'
         doc.sequences.get('CRP_b_seq').elements = seq
-        # Write to disk
-        doc.write('test.xml')
-        # Compare
         doc2 = sbol.Document()  # Document to compare for equality
-        doc2.read('test.xml')
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            test_file = os.path.join(tmpdirname, 'test.xml')
+            # Write to disk
+            doc.write(test_file)
+            # Compare
+            doc2.read(test_file)
         seq_read = doc2.sequences.get('CRP_b_seq').elements
-        self.assertEquals(seq_read, seq)
+        self.assertEqual(seq_read, seq)
 
 
 if __name__ == '__main__':
