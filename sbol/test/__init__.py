@@ -13,6 +13,7 @@ from .test_partshop import TestPartShop
 from .test_property import TestProperty
 from .test_referencedobject import TestReferencedObjects
 from .test_roundtrip import TestRoundTripSBOL2, TestRoundTripFailSBOL2
+from .test_sequence import TestSequence
 from .test_tutorial import TestSbolTutorial
 
 
@@ -31,6 +32,7 @@ def runTests(test_list=None):
             TestPartShop,
             TestProperty,
             TestReferencedObjects,
+            TestSequence,
             TestSbolTutorial,
         ]
     suite_list = []

@@ -5,9 +5,9 @@ import os
 import sys
 
 MODULE_LOCATION = os.path.dirname(os.path.abspath(__file__))
+CRISPR_EXAMPLE = os.path.join(MODULE_LOCATION, 'resources', 'crispr_example.xml')
 
-
-class TestSequences(unittest.TestCase):
+class TestSequence(unittest.TestCase):
 
     def setUp(self):
         pass
@@ -25,24 +25,19 @@ class TestSequences(unittest.TestCase):
         doc = Document()
         doc.addSequence(test_seq)
         doc.sequences.remove(0)
-        self.assertRaises(RuntimeError, lambda: doc.sequences.get("R0010"))
+        self.assertRaises(SBOLError, lambda: doc.sequences.get("R0010"))
 
     def testSeqDisplayId(self):
-        listseq_read = []
         doc = Document()
-        doc.read(os.path.join(MODULE_LOCATION, 'crispr_example.xml'))
+        doc.read(CRISPR_EXAMPLE)
 
         # List of displayIds
         listseq = ['CRP_b_seq', 'CRa_U6_seq', 'gRNA_b_seq', 'mKate_seq']
+        listseq = [rdflib.Literal(x) for x in listseq]
 
-        for seq in doc.sequences:
-            listseq_read.append(seq.displayId)
+        listseq_read = [seq.displayId for seq in doc.sequences]
 
-        # Python 3 compatability
-        if sys.version_info[0] < 3:
-            self.assertItemsEqual(listseq_read, listseq)
-        else:
-            self.assertCountEqual(listseq_read, listseq)
+        self.assertCountEqual(listseq_read, listseq)
 
     def testSequenceElement(self):
         setHomespace('http://sbols.org/CRISPR_Example')
@@ -80,10 +75,8 @@ class TestSequences(unittest.TestCase):
         seq = 'AAAAA'
         doc.sequences.get('CRP_b_seq').elements = seq
         # Write to disk
-        print('WRITING MODIFIED FILE TO DISK')
         doc.write('test.xml')
         # Compare
-        print('READING MODIFIED FILE FROM DISK')
         doc2 = Document()  # Document to compare for equality
         doc2.read('test.xml')
         seq_read = doc2.sequences.get('CRP_b_seq').elements
