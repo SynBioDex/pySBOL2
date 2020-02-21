@@ -41,6 +41,12 @@ class TestSequence(unittest.TestCase):
 
         self.assertCountEqual(listseq_read, listseq)
 
+    def testSequenceEncoding(self):
+        doc = sbol.Document()
+        doc.read(CRISPR_EXAMPLE)
+        seq = doc.sequences.get('CRP_b_seq')
+        self.assertEqual(seq.encoding, sbol.SBOL_ENCODING_IUPAC)
+
     def testSequenceElement(self):
         sbol.setHomespace('http://sbols.org/CRISPR_Example')
         sbol.Config.setOption('sbol_typed_uris', False)

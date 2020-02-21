@@ -73,7 +73,7 @@ class Sequence(TopLevel):
     # | Small Molecule            | SMILES         | SBOL_ENCODING_SMILES        | http://www.opensmiles.org/opensmiles.html        |
     @property
     def encoding(self):
-        return str(self._encoding.value)
+        return self._encoding.value
 
     @encoding.setter
     def encoding(self, new_encoding):
