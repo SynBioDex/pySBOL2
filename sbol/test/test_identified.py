@@ -8,6 +8,8 @@ import sbol
 MODULE_LOCATION = os.path.dirname(os.path.abspath(__file__))
 PARTS_LOCATION = os.path.join(MODULE_LOCATION, 'resources', 'tutorial',
                               'parts.xml')
+CRISPR_LOCATION = os.path.join(MODULE_LOCATION, 'resources',
+                               'crispr_example.xml')
 
 
 class TestIdentified(unittest.TestCase):
@@ -116,6 +118,36 @@ class TestIdentified(unittest.TestCase):
         expected_name = 'AmeR'
         self.assertEqual(str(cd.name), expected_name)
         self.assertEqual(cd.name, rdflib.Literal(expected_name))
+
+    def test_was_derived_from(self):
+        d = sbol.Document()
+        d.read(PARTS_LOCATION)
+        cd = d.componentDefinitions['http://examples.org/ComponentDefinition/AmeR/1']
+        uri = 'https://synbiohub.programmingbiology.org/public/Cello_Parts/AmeR/1'
+        expected = [rdflib.term.URIRef(uri)]
+        self.assertEqual(cd.wasDerivedFrom, expected)
+
+    def test_was_derived_from2(self):
+        d = sbol.Document()
+        d.read(CRISPR_LOCATION)
+        cd = d.componentDefinitions['http://sbols.org/CRISPR_Example/CRP_b/1.0.0']
+        expected = []
+        self.assertEqual(cd.wasDerivedFrom, expected)
+
+    def test_was_generated_by(self):
+        d = sbol.Document()
+        d.read(PARTS_LOCATION)
+        cd = d.componentDefinitions['http://examples.org/ComponentDefinition/AmeR/1']
+        uri = 'http://examples.org/Activity/CelloUCF2sbol_Activity/1'
+        expected = [rdflib.term.URIRef(uri)]
+        self.assertEqual(cd.wasGeneratedBy, expected)
+
+    def test_was_generated_by2(self):
+        d = sbol.Document()
+        d.read(CRISPR_LOCATION)
+        cd = d.componentDefinitions['http://sbols.org/CRISPR_Example/CRP_b/1.0.0']
+        expected = []
+        self.assertEqual(cd.wasGeneratedBy, expected)
 
 
 if __name__ == '__main__':

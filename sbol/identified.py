@@ -7,6 +7,7 @@ from .config import getHomespace
 from .config import hasHomespace
 from .constants import *
 from .property import LiteralProperty
+from .property import ReferencedObject
 from .property import URIProperty
 from .sbolerror import SBOLError
 from .sbolerror import SBOLErrorCode
@@ -116,8 +117,10 @@ class Identified(SBOLObject):
             self._persistentIdentity.set(
                 URIRef(posixpath.join(getHomespace(), uri)))
         # Provo hooks
-        self._wasDerivedFrom = None
-        self._wasGeneratedBy = None
+        self._wasDerivedFrom = URIProperty(self, SBOL_WAS_DERIVED_FROM,
+                                           '0', '*', None)
+        self.wasGeneratedBy = ReferencedObject(self, PROVO_WAS_GENERATED_BY,
+                                               PROVO_WAS_GENERATED_BY, '0', '*', [])
         # self._identity.validate() # TODO
 
     @property
@@ -159,6 +162,14 @@ class Identified(SBOLObject):
     @name.setter
     def name(self, new_name):
         self._name.set(new_name)
+
+    @property
+    def wasDerivedFrom(self):
+        return self._wasDerivedFrom.value
+
+    @wasDerivedFrom.setter
+    def wasDerivedFrom(self, new_wasDerivedFrom):
+        self._wasDerivedFrom.set(new_wasDerivedFrom)
 
     def generate(self):
         raise NotImplementedError("Not yet implemented")
