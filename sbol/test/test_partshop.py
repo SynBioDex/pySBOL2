@@ -1,6 +1,9 @@
 import os
 import unittest
 
+import requests
+
+import sbol
 from sbol.partshop import PartShop
 from sbol.document import Document
 from sbol.sbolerror import SBOLError
@@ -99,3 +102,21 @@ WHERE {
         expected_url = 'https://example.org'
         partShop = PartShop(expected_url)
         self.assertEqual(partShop.getURL(), expected_url)
+
+    def test_getUser(self):
+        url = 'https://example.org'
+        partShop = sbol.PartShop(url)
+        self.assertTrue(hasattr(partShop, 'getUser'))
+        self.assertEqual(partShop.getUser(), '')
+        user = 'scott'
+        password = 'tiger'
+        with self.assertRaises(requests.exceptions.ConnectionError):
+            partShop.login(user, password)
+        self.assertEqual(partShop.getUser(), user)
+
+    def test_getSpoofedURL(self):
+        url = 'https://example.org'
+        spoofed_url = 'https://synbiohub.org'
+        partShop = sbol.PartShop(url, spoofed_url=spoofed_url)
+        self.assertTrue(hasattr(partShop, 'getSpoofedURL'))
+        self.assertEqual(partShop.getSpoofedURL(), spoofed_url)
