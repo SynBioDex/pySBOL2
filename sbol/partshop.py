@@ -225,6 +225,14 @@ class PartShop:
     def getURL(self):
         return self.resource
 
+    # For backward compatibility with pySBOL
+    def getUser(self):
+        return self.user
+
+    # For backward compatibility with pySBOL
+    def getSpoofedURL(self):
+        return self.spoofed_resource
+
     # def addSynBioHubAnnotations(self, doc):
     #     doc.addNamespace("http://wiki.synbiohub.org/wiki/Terms/synbiohub#", "sbh")
     #     for id, toplevel_obj in doc.SBOLObjects:
