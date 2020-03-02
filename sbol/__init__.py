@@ -25,7 +25,8 @@ from .provo import Activity
 from .sbolerror import SBOLError
 from .sequence import Sequence
 from .sequenceannotation import SequenceAnnotation
-
+from .identified import Identified
+from .property import *
 
 def testSBOL():
     """
