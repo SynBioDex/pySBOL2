@@ -1,6 +1,7 @@
 import unittest
 
 import sbol
+from sbol.validation import sbol_rule_10202
 
 
 class TestValidation(unittest.TestCase):
@@ -26,3 +27,7 @@ class TestValidation(unittest.TestCase):
         # More to ensure the function is exported than anything else
         self.assertTrue(sbol.is_not_alphanumeric_or_underscore('-'))
         self.assertFalse(sbol.is_not_alphanumeric_or_underscore('A'))
+
+    def test_sbol_rule_10202(self):
+        with self.assertRaises(TypeError):
+            sbol_rule_10202(None, None)
