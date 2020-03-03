@@ -107,8 +107,18 @@ WHERE {
         self.assertEqual(partShop.getUser(), '')
         user = 'scott'
         password = 'tiger'
-        with self.assertRaises(requests.exceptions.ConnectionError):
+        # Depending on DNS we might get one of two errors. Detect both
+        # and handle them gracefully. If neither of the expected
+        # errors is raised, then fail the test.
+        try:
             partShop.login(user, password)
+        except requests.exceptions.ConnectionError:
+            pass
+        except sbol.sbolerror.SBOLError as err:
+            self.assertEqual(err.error_code(),
+                             sbol.SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST)
+        except Throwable:
+            self.fail("Unknown exception raised")
         self.assertEqual(partShop.getUser(), user)
 
     def test_getSpoofedURL(self):
@@ -117,3 +127,23 @@ WHERE {
         partShop = sbol.PartShop(url, spoofed_url=spoofed_url)
         self.assertTrue(hasattr(partShop, 'getSpoofedURL'))
         self.assertEqual(partShop.getSpoofedURL(), spoofed_url)
+
+    @unittest.skipIf(password is None, "No password supplied")
+    def test_submit(self):
+        # This test is derived from an etl-to-synbiohub_pipeline test
+        # case that was failing.
+        doc = sbol.Document()
+        doc.version = '1'
+        doc.displayId = 'sbol_test'
+        doc.name = "SBOL Test Collection"
+        doc.description = "A scratch collection for automated testing of the sbol."
+        sbh = sbol.PartShop('https://hub-staging.sd2e.org', 'https://hub.sd2e.org')
+        sbh.login(username, password)
+        try:
+            sbh.submit(doc)
+        except Throwable:
+            # What exception type should we really be expecting? The
+            # original test had a bare except.
+            uri_template = 'https://hub.sd2e.org/user/sd2e/{0}/{0}_collection/1'
+            target_collection = uri_template.format(doc.displayId)
+            sbh.submit(doc, target_collection, 1)
