@@ -117,3 +117,22 @@ WHERE {
         partShop = sbol.PartShop(url, spoofed_url=spoofed_url)
         self.assertTrue(hasattr(partShop, 'getSpoofedURL'))
         self.assertEqual(partShop.getSpoofedURL(), spoofed_url)
+
+    def test_submit(self):
+        # This test is derived from an etl-to-synbiohub_pipeline test
+        # case that was failing.
+        doc = sbol.Document()
+        doc.version = '1'
+        doc.displayId = 'sbol_test'
+        doc.name = "SBOL Test Collection"
+        doc.description = "A scratch collection for automated testing of the sbol."
+        sbh = sbol.PartShop('https://hub-staging.sd2e.org', 'https://hub.sd2e.org')
+        sbh.login(username, password)
+        try:
+            sbh.submit(doc)
+        except Throwable:
+            # What exception type should we really be expecting? The
+            # original test had a bare except.
+            uri_template = 'https://hub.sd2e.org/user/sd2e/{0}/{0}_collection/1'
+            target_collection = uri_template.format(doc.displayId)
+            sbh.submit(doc, target_collection, 1)
