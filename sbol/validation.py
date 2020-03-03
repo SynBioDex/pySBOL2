@@ -4,16 +4,7 @@ from .identified import *
 
 
 def is_alphanumeric_or_underscore(c):
-    i = ord(c)
-    if i >= 48 and i <= 57:
-        return True
-    if i >= 65 and i <= 90:
-        return True
-    if i >= 97 and i <= 122:
-        return True
-    if i == 95:
-        return True
-    return False
+    return c.isalnum() or c == '_'
 
 
 def is_not_alphanumeric_or_underscore(c):
