@@ -14,6 +14,7 @@ from .test_property import TestProperty
 from .test_referencedobject import TestReferencedObjects
 from .test_roundtrip import TestRoundTripSBOL2, TestRoundTripFailSBOL2
 from .test_sequence import TestSequence
+from .test_style import TestStyle
 from .test_tutorial import TestSbolTutorial
 
 
@@ -21,8 +22,8 @@ def runTests(test_list=None):
     if test_list is None:
         test_list = [
             TestComponentDefinitions,
-            TestConstants,
             TestConfig,
+            TestConstants,
             TestDesign,
             TestDocument,
             TestIdentified,
@@ -32,8 +33,9 @@ def runTests(test_list=None):
             TestPartShop,
             TestProperty,
             TestReferencedObjects,
-            TestSequence,
             TestSbolTutorial,
+            TestSequence,
+            TestStyle,
         ]
     suite_list = []
     loader = unittest.TestLoader()
