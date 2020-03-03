@@ -26,6 +26,8 @@ from .provo import Activity
 from .sbolerror import SBOLError, SBOLErrorCode
 from .sequence import Sequence
 from .sequenceannotation import SequenceAnnotation
+from .validation import is_alphanumeric_or_underscore
+from .validation import is_not_alphanumeric_or_underscore
 
 
 def testSBOL():
