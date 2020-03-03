@@ -107,8 +107,18 @@ WHERE {
         self.assertEqual(partShop.getUser(), '')
         user = 'scott'
         password = 'tiger'
-        with self.assertRaises(requests.exceptions.ConnectionError):
+        # Depending on DNS we might get one of two errors. Detect both
+        # and handle them gracefully. If neither of the expected
+        # errors is raised, then fail the test.
+        try:
             partShop.login(user, password)
+        except requests.exceptions.ConnectionError:
+            pass
+        except sbol.sbolerror.SBOLError as err:
+            self.assertEqual(err.error_code(),
+                             sbol.SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST)
+        except Throwable:
+            self.fail("Unknown exception raised")
         self.assertEqual(partShop.getUser(), user)
 
     def test_getSpoofedURL(self):
@@ -118,6 +128,7 @@ WHERE {
         self.assertTrue(hasattr(partShop, 'getSpoofedURL'))
         self.assertEqual(partShop.getSpoofedURL(), spoofed_url)
 
+    @unittest.skipIf(password is None, "No password supplied")
     def test_submit(self):
         # This test is derived from an etl-to-synbiohub_pipeline test
         # case that was failing.
