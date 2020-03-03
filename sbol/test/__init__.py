@@ -17,6 +17,7 @@ from .test_roundtrip import TestRoundTripSBOL2, TestRoundTripFailSBOL2
 from .test_sequence import TestSequence
 from .test_style import TestStyle
 from .test_tutorial import TestSbolTutorial
+from .test_validation import TestValidation
 
 
 def runTests(test_list=None):
@@ -38,6 +39,7 @@ def runTests(test_list=None):
             TestSbolTutorial,
             TestSequence,
             TestStyle,
+            TestValidation,
         ]
     suite_list = []
     loader = unittest.TestLoader()
