@@ -4,9 +4,11 @@ import unittest
 
 import rdflib
 
+import sbol
 from sbol import *
 
 MODULE_LOCATION = os.path.dirname(os.path.abspath(__file__))
+CRISPR_EXAMPLE = os.path.join(MODULE_LOCATION, 'resources', 'crispr_example.xml')
 
 
 class TestComponentDefinitions(unittest.TestCase):
@@ -48,7 +50,7 @@ class TestComponentDefinitions(unittest.TestCase):
     def testCDDisplayId(self):
         list_cd_read = []
         doc = Document()
-        doc.read(os.path.join(MODULE_LOCATION, 'resources', 'crispr_example.xml'))
+        doc.read(CRISPR_EXAMPLE)
 
         # List of displayIds
         list_cd = ['CRP_b', 'CRa_U6', 'EYFP', 'EYFP_cds', 'EYFP_gene',
@@ -103,6 +105,62 @@ class TestComponentDefinitions(unittest.TestCase):
         else:
             self.assertCountEqual(list_cd, list_cd_true)
 
+    @unittest.expectedFailure
+    def testInsertDownstream(self):
+        doc = Document()
+        gene = ComponentDefinition("BB0001")
+        promoter = ComponentDefinition("R0010")
+        rbs = ComponentDefinition("B0032")
+        cds = ComponentDefinition("E0040")
+        terminator = ComponentDefinition("B0012")
 
-if __name__ == '__main__':
-    unittest.main()
+        doc.addComponentDefinition([gene, promoter, rbs, cds, terminator])
+        gene.assemblePrimaryStructure([promoter, rbs, cds])
+        primary_structure_components = gene.getPrimaryStructureComponents()
+        c_promoter = primary_structure_components[0]
+        c_rbs = primary_structure_components[1]
+        c_cds = primary_structure_components[2]
+        gene.insertDownstreamComponent(c_cds, terminator)
+        primary_structure = gene.getPrimaryStructure()
+        primary_structure = [cd.identity for cd in primary_structure]
+        valid_primary_structure = [promoter.identity, rbs.identity,
+                                   cds.identity, terminator.identity]
+        self.assertListEqual(primary_structure, valid_primary_structure)
+
+    @unittest.expectedFailure
+    def testInsertUpstream(self):
+        doc = Document()
+        gene = ComponentDefinition("BB0001")
+        promoter = ComponentDefinition("R0010")
+        rbs = ComponentDefinition("B0032")
+        cds = ComponentDefinition("E0040")
+        terminator = ComponentDefinition("B0012")
+
+        doc.addComponentDefinition([gene, promoter, rbs, cds, terminator])
+        gene.assemblePrimaryStructure([rbs, cds, terminator])
+        primary_structure_components = gene.getPrimaryStructureComponents()
+        c_rbs = primary_structure_components[0]
+        c_cds = primary_structure_components[1]
+        c_terminator = primary_structure_components[2]
+        gene.insertUpstreamComponent(c_rbs, promoter)
+        primary_structure = gene.getPrimaryStructure()
+        primary_structure = [cd.identity for cd in primary_structure]
+        valid_primary_structure = [promoter.identity, rbs.identity,
+                                   cds.identity, terminator.identity]
+        self.assertListEqual(primary_structure, valid_primary_structure)
+
+    @unittest.expectedFailure
+    def testHasUpstreamComponent(self):
+        uri = 'http://sbols.org/CRISPR_Example/gRNA_b_gene/1.0.0'
+        doc = sbol.Document()
+        doc.read(CRISPR_EXAMPLE)
+        cd = doc.componentDefinitions.get(uri)
+        self.assertIsNotNone(cd)
+        comps = {
+            'http://sbols.org/CRISPR_Example/gRNA_b_gene/CRa_U6/1.0.0': True,
+            'http://sbols.org/CRISPR_Example/gRNA_b_gene/CRa_U6/1.0.0': True,
+            'http://sbols.org/CRISPR_Example/gRNA_b_gene/CRa_U6/1.0.0': False
+        }
+        uri = 'http://sbols.org/CRISPR_Example/gRNA_b_gene/CRa_U6/1.0.0'
+        c = cd.components.get(uri)
+        self.assertTrue(cd.hasUpstreamComponent(c))
