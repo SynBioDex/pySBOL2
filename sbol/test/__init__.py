@@ -4,6 +4,7 @@ from .test_componentdefinition import TestComponentDefinitions
 from .test_constants import TestConstants
 from .test_design import TestDesign
 from .test_document import TestDocument
+from .test_error import TestError
 from .test_identified import TestIdentified
 from .test_config import TestConfig
 from .test_moduledefinition import TestModuleDefinition
@@ -26,6 +27,7 @@ def runTests(test_list=None):
             TestConstants,
             TestDesign,
             TestDocument,
+            TestError,
             TestIdentified,
             TestModuleDefinition,
             TestObject,
