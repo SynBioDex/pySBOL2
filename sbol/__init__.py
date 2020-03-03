@@ -23,7 +23,7 @@ from .moduledefinition import ModuleDefinition
 from .participation import Participation
 from .partshop import PartShop
 from .provo import Activity
-from .sbolerror import SBOLError
+from .sbolerror import SBOLError, SBOLErrorCode
 from .sequence import Sequence
 from .sequenceannotation import SequenceAnnotation
 
