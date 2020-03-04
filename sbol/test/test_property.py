@@ -59,6 +59,16 @@ class TestProperty(unittest.TestCase):
         self.assertEqual(3, len(md.interactions))
         self.assertEqual(0, len(md.roles))
 
+    def test_literal_property_constructor(self):
+        with self.assertRaises(AttributeError):
+            sbol.property.LiteralProperty(None, sbol.SBOL_NAME, '0', '*', [], 'foo')
+        with self.assertRaises(AttributeError):
+            sbol.property.LiteralProperty('foo', sbol.SBOL_NAME, '0', '*', [], 'foo')
+        with self.assertRaises(TypeError):
+            md = sbol.ModuleDefinition()
+            md.properties = []
+            sbol.property.LiteralProperty(md, sbol.SBOL_NAME, '0', '*', [], 'foo')
+
 
 if __name__ == '__main__':
     unittest.main()

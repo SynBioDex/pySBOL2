@@ -55,6 +55,10 @@ class Property(ABC):
         :param initial_value: The initial value of the Property
         (int, str, float supported)
         """
+        # Ensure property_owner has a properties attribute of type
+        # dict.
+        if not isinstance(property_owner.properties, dict):
+            raise TypeError('property_owner.properties must be a dict')
         self._sbol_owner = property_owner
         if isinstance(type_uri, URIRef):
             self._rdf_type = type_uri
