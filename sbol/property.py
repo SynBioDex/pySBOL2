@@ -697,6 +697,8 @@ class ReferencedObject(Property):
         return reference_store[item]
 
     def set(self, uri):
+        # TODO for parity with Property, this should perhaps be split into calls to two 
+        # subordinate methods for setSinglePropertyValue and setPropertyValueList
         if self._sbol_owner is not None:
             if self._upperBound == '1':
                 self._sbol_owner.properties[self._rdf_type] = uri
