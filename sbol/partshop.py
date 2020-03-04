@@ -254,9 +254,9 @@ class PartShop:
             headers={'Content-Type': 'application/x-www-form-urlencoded'}
         )
         if not response:
-            raise SBOLError(SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST,
-                            'Login failed due to an HTTP error: ' +
-                            str(response))
+            msg = 'Login failed due to an HTTP error: {}'
+            msg = msg.format(response)
+            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST)
         self.key = response.content.decode('utf-8')
         return response
 
