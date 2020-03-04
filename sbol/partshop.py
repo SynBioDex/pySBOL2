@@ -1,14 +1,14 @@
-import requests
-import os
+import getpass
 import logging
-from logging.config import fileConfig
+import os
+
+import requests
+# For backward compatible HTTPError
+import urllib3.exceptions
+
 from sbol.sbolerror import *
 from sbol.constants import *
 from sbol.config import Config, ConfigOptions, parseURLDomain
-import getpass
-
-# For backward compatible HTTPError
-import urllib3.exceptions
 
 
 class PartShop:
