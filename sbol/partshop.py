@@ -6,9 +6,12 @@ import requests
 # For backward compatible HTTPError
 import urllib3.exceptions
 
-from sbol.sbolerror import *
-from sbol.constants import *
-from sbol.config import Config, ConfigOptions, parseURLDomain
+from .config import Config
+from .config import ConfigOptions
+from .config import parseURLDomain
+from .constants import *
+from .sbolerror import SBOLError
+from .sbolerror import SBOLErrorCode
 
 
 class PartShop:
