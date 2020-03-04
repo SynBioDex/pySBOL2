@@ -1,14 +1,17 @@
-import requests
-import os
-import logging
-from logging.config import fileConfig
-from sbol.sbolerror import *
-from sbol.constants import *
-from sbol.config import Config, ConfigOptions, parseURLDomain
 import getpass
+import logging
+import os
 
+import requests
 # For backward compatible HTTPError
 import urllib3.exceptions
+
+from .config import Config
+from .config import ConfigOptions
+from .config import parseURLDomain
+from .constants import *
+from .sbolerror import SBOLError
+from .sbolerror import SBOLErrorCode
 
 
 class PartShop:
@@ -22,18 +25,23 @@ class PartShop:
         :param spoofed_url:
         """
         # initialize member variables
-        self.resource = url
+        self.resource = self._validate_url(url, 'resource')
         self.user = ''
         self.key = ''
-        self.spoofed_resource = spoofed_url
+        self.spoofed_resource = self._validate_url(spoofed_url, 'spoofed')
+
+    def _validate_url(self, url, url_name):
+        # This feels like a weak validation
+        # Should we verify that it is a string?
+        #   [1, 2, 3] will pass this test, and surely break something else later.
+        # Should we use urllib.parse.urlparse?
+        #   It doesn't do a whole lot, but catches some things this code doesn't
         if len(url) > 0 and url[-1] == '/':
-            raise SBOLError(SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT,
-                            'PartShop initialization failed. The resource URL '
-                            'should not contain a terminal backlash')
-        if len(spoofed_url) > 0 and spoofed_url[-1] == '/':
-            raise SBOLError(SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT,
-                            'PartShop initialization failed. The spoofed URL '
-                            'should not contain a terminal backslash')
+            msg = ('PartShop initialization failed. The {} URL '
+                   + 'should not contain a terminal backlash')
+            msg = msg.format(url_name)
+            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
+        return url
 
     @property
     def logger(self):
@@ -48,6 +56,9 @@ class PartShop:
     def count(self):
         """Return the count of objects contained in a PartShop"""
         raise NotImplementedError('Not yet implemented')
+
+    def spoof(self, spoofed_url):
+        self.spoofed_resource = self._validate_url(spoofed_url, 'spoofed')
 
     def sparqlQuery(self, query):
         """
@@ -150,7 +161,8 @@ class PartShop:
                 collection = collection.replace(self.resource,
                                                 self.spoofed_resource)
             if Config.getOption(ConfigOptions.VERBOSE.value) is True:
-                self.logger.info('Submitting Document to an existing collection: ' + collection)
+                self.logger.info('Submitting Document to an existing collection: %s',
+                                 collection)
         # if Config.getOption(ConfigOptions.SERIALIZATION_FORMAT.value) == 'rdfxml':
         #     self.addSynBioHubAnnotations(doc)
         files = {}
@@ -242,9 +254,9 @@ class PartShop:
             headers={'Content-Type': 'application/x-www-form-urlencoded'}
         )
         if not response:
-            raise SBOLError(SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST,
-                            'Login failed due to an HTTP error: ' +
-                            str(response))
+            msg = 'Login failed due to an HTTP error: {}'
+            msg = msg.format(response)
+            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST)
         self.key = response.content.decode('utf-8')
         return response
 

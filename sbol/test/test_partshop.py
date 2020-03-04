@@ -56,9 +56,13 @@ class TestPartShop(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_login_bad(self):
-        with self.assertRaises(sbol.SBOLError):
-            igem = sbol.PartShop('https://synbiohub.org')
+        igem = sbol.PartShop('https://synbiohub.org')
+        try:
             igem.login('johndoe@example.org', 'test1')
+            self.fail('SBOLError not raised')
+        except sbol.SBOLError as sbol_error:
+            self.assertEqual(sbol_error.error_code(),
+                             sbol.SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST)
 
     @unittest.skipIf(password is None, "No password supplied")
     def test_submit_00(self):
@@ -127,6 +131,14 @@ WHERE {
         partShop = sbol.PartShop(url, spoofed_url=spoofed_url)
         self.assertTrue(hasattr(partShop, 'getSpoofedURL'))
         self.assertEqual(partShop.getSpoofedURL(), spoofed_url)
+
+    def test_spoof(self):
+        url = 'https://example.org'
+        part_shop = sbol.PartShop(url)
+        self.assertEqual(part_shop.getSpoofedURL(), '')
+        spoofed_url = 'https://synbiohub.org'
+        part_shop.spoof(spoofed_url)
+        self.assertEqual(part_shop.getSpoofedURL(), spoofed_url)
 
     @unittest.skipIf(password is None, "No password supplied")
     def test_submit(self):
