@@ -196,6 +196,35 @@ class PartShop:
                                                str(response.status_code) +
                                                ' - ' + str(response.content))
 
+    def remove(self, uri):
+        if self.resource in uri:
+            query = uri
+        elif parseURLDomain(self.resource) in uri:
+            query = uri
+        elif self.spoofed_resource and self.spoofed_resource in uri:
+            query = uri.replace(self.spoofed_resource, self.resource)
+            print('Got {}, replaced to {}'.format(uri, query))
+        else:
+            msg = ('Removal of {} failed.'
+                   + ' The object does not exist in the resource namespace')
+            msg = msg.format(uri)
+            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
+
+        url = '{}/remove'.format(query)
+        headers = {
+            'X-authorization': self.key,
+            'Accept': 'application/json'
+        }
+        response = requests.get(url, headers=headers)
+        if response.ok:
+            return True
+        if response.status_code == 401:
+            # TODO: Is there a symbol we can use instead of 401?
+            msg = 'You must login with valid credentials before removing'
+            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_HTTP_UNAUTHORIZED)
+        # Not sure what went wrong
+        raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST)
+
     def login(self, user_id, password=''):
         """In order to submit to a PartShop, you must login first.
         Register on [SynBioHub](http://synbiohub.org) to
