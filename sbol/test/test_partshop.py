@@ -128,6 +128,14 @@ WHERE {
         self.assertTrue(hasattr(partShop, 'getSpoofedURL'))
         self.assertEqual(partShop.getSpoofedURL(), spoofed_url)
 
+    def test_spoof(self):
+        url = 'https://example.org'
+        part_shop = sbol.PartShop(url)
+        self.assertEqual(part_shop.getSpoofedURL(), '')
+        spoofed_url = 'https://synbiohub.org'
+        part_shop.spoof(spoofed_url)
+        self.assertEqual(part_shop.getSpoofedURL(), spoofed_url)
+
     @unittest.skipIf(password is None, "No password supplied")
     def test_submit(self):
         # This test is derived from an etl-to-synbiohub_pipeline test

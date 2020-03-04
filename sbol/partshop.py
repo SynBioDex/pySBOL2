@@ -57,6 +57,9 @@ class PartShop:
         """Return the count of objects contained in a PartShop"""
         raise NotImplementedError('Not yet implemented')
 
+    def spoof(self, spoofed_url):
+        self.spoofed_resource = self._validate_url(spoofed_url, 'spoofed')
+
     def sparqlQuery(self, query):
         """
         Issue a SPARQL query
