@@ -69,6 +69,14 @@ class TestProperty(unittest.TestCase):
             md.properties = []
             sbol.property.LiteralProperty(md, sbol.SBOL_NAME, '0', '*', [], 'foo')
 
+    def test_literal_property_properties(self):
+        md = sbol.ModuleDefinition()
+        self.assertNotIn(sbol.UNDEFINED, md.properties)
+        sbol.property.LiteralProperty(md, sbol.UNDEFINED, '0', '*', [], 'foo')
+        # Creating the property should also create the entry in the
+        # parent properties dict
+        self.assertIn(sbol.UNDEFINED, md.properties)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -288,12 +288,11 @@ class LiteralProperty(Property):
     def __init__(self, property_owner, type_uri, lower_bound, upper_bound,
                  validation_rules, initial_value=None):
         super().__init__(property_owner, type_uri, lower_bound, upper_bound,
-                         validation_rules, initial_value)
-        if self.value:
-            self.set(self.value)
-        #     self._sbol_owner.properties[type_uri] = [initial_value]
-        # else:
-        #     self._sbol_owner.properties[type_uri] = []
+                         validation_rules)
+        if self._rdf_type not in self._sbol_owner.properties:
+            self._sbol_owner.properties[self._rdf_type] = []
+        if initial_value is not None:
+            self.value = initial_value
 
     @property
     def value(self):
@@ -303,8 +302,6 @@ class LiteralProperty(Property):
             return self.getPropertyValueList()
 
     def getSinglePropertyValue(self):
-        if self._rdf_type not in self._sbol_owner.properties:
-            return None
         properties = self._sbol_owner.properties[self._rdf_type]
         if len(properties) == 0:
             return None
@@ -312,8 +309,6 @@ class LiteralProperty(Property):
         return properties[-1]
 
     def getPropertyValueList(self):
-        if self._rdf_type not in self._sbol_owner.properties:
-            return None
         properties = self._sbol_owner.properties[self._rdf_type]
         return properties.copy()
 
@@ -331,8 +326,6 @@ class LiteralProperty(Property):
         if type(new_value) is list:
             raise TypeError('The ' + str(self.getTypeURI()) +
                             ' property does not accept list arguments.')
-        if self._rdf_type not in self._sbol_owner.properties:
-            self._sbol_owner.properties[self._rdf_type] = []
         if new_value is None:
             return
         elif len(self._sbol_owner.properties[self._rdf_type]) == 0:
@@ -341,8 +334,6 @@ class LiteralProperty(Property):
             self._sbol_owner.properties[self._rdf_type][-1] = Literal(new_value)
 
     def setPropertyValueList(self, new_value_list):
-        if self._rdf_type not in self._sbol_owner.properties:
-            self._sbol_owner.properties[self._rdf_type] = []
         if new_value_list is None:
             return
         else:
@@ -362,8 +353,6 @@ class LiteralProperty(Property):
 
     def add(self, new_value):
         if self._sbol_owner is not None:
-            if self._rdf_type not in self._sbol_owner.properties:
-                self._sbol_owner.properties[self._rdf_type] = []
             properties = self._sbol_owner.properties[self._rdf_type]
             properties.append(Literal(new_value))
         else:
