@@ -161,7 +161,8 @@ class PartShop:
                 collection = collection.replace(self.resource,
                                                 self.spoofed_resource)
             if Config.getOption(ConfigOptions.VERBOSE.value) is True:
-                self.logger.info('Submitting Document to an existing collection: ' + collection)
+                self.logger.info('Submitting Document to an existing collection: %s',
+                                 collection)
         # if Config.getOption(ConfigOptions.SERIALIZATION_FORMAT.value) == 'rdfxml':
         #     self.addSynBioHubAnnotations(doc)
         files = {}
