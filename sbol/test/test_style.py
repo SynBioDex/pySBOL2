@@ -8,7 +8,7 @@ MODULE_LOCATION = os.path.dirname(os.path.abspath(__file__))
 SBOL_PATH = os.path.dirname(MODULE_LOCATION)
 
 # Please don't increase this number!
-MAX_WILDCARD_IMPORTS = 7
+MAX_WILDCARD_IMPORTS = 6
 
 
 class TestStyle(unittest.TestCase):
