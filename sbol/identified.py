@@ -207,40 +207,75 @@ class Identified(SBOLObject):
         if target_doc:
             new_obj.doc = target_doc
 
-        # Use this namespace map later when copying namespaces over to
+        # This namespace map will be used later when copying namespaces over to
         # the new Document
         if self.doc:
             namespace_map = {ns: p for p, ns in self.doc._namespaces.items()}
-            print(namespace_map)
 
         # Copy properties
         for property_uri, value_store in self.properties.items():
             new_obj.properties[property_uri] = value_store.copy()
 
-            # TODO: Copy nondefault namespace and prefix to target_doc
+            # Add a non-default namespace to the target document if not present
+            # (This can happen when copying extension properties not in the
+            # SBOL namespace, for example.)
+            if self.doc and target_doc != None:
+                property_namespace = URIRef(parseNamespace(property_uri))
+                if property_namespace in namespace_map.keys():
+                    prefix = namespace_map[property_namespace]
+                    target_doc.addNamespace(property_namespace, prefix)
 
-            # If caller specified a namespace argument, then replace namespace in URIs
-            # Don't overwrite namespaces for the wasDerivedFrom field, which points back to the original object
-            if target_namespace:
-                for i_val, val in enumerate(new_obj.properties[property_uri]):
+        # If caller specified a target_namespace argument, then import objects into this new namespace
+        # This involves replacing the target_namespace in ReferenceObject URIs with the current Homespace
+        # Don't overwrite namespaces for the wasDerivedFrom field, which points back to the original object
+        if target_namespace:
+
+            # Collect ReferencedObject attributes
+            reference_properties = [p for p in new_obj.__dict__.values() if isinstance(p, ReferencedObject)]
+
+            # These URIProperty attributes should be treated like ReferencedObject attributes
+            if '_identity' in new_obj.__dict__.keys():
+                reference_properties.append(new_obj.__dict__['_identity'])
+            if '_persistentIdentity' in new_obj.__dict__.keys():
+                reference_properties.append(new_obj.__dict__['_persistentIdentity'])
+
+            for reference_property in reference_properties:
+                if reference_property._upperBound == '1':
+                    values = [reference_property.value]
+                else:
+                    values = reference_property.value
+                for i_val, val in enumerate(values):
                     if target_namespace in val:
                         replacement_target = target_namespace
                         replacement = getHomespace()
                         new_val = val.replace(replacement_target, replacement)
-                        if type(val) == URIRef:
-                            new_val = URIRef(new_val)
-                        new_obj.properties[property_uri][i_val] = new_val
+                        values[i_val] = new_val
+                if reference_property._upperBound == '1':
+                    reference_property.value = values[0]
+                else:
+                    reference_property.value = values
+                print(reference_property._rdf_type, reference_property.value)
+            # if target_namespace:
+            #     for i_val, val in enumerate(new_obj.properties[property_uri]):
+            #         if target_namespace in val:
+            #             if property_uri == SBOL_PERSISTENT_IDENTITY:
+            #                 pass
+            #             elif self.dict:
+            #                 referenced_object = 
+            #                 # If the value is an SBOL-typed URI, replace both the namespace and class name
+            #                 class_name = parseClassName(val)
+            #                 replacement_target = target_namespace + '/' + class_name
+                            
+            #                 # If not an sbol typed URI, then just replace the namespace
+            #                 if not replacement_target in val:
+            #                     replacement_target = target_namespace
 
-            # Add the property namespace to the target document if not present
-            # (This can happen when copying extension properties not in the
-            # SBOL namespace, for example.)
-
-            if self.doc and target_doc != None:
-                property_namespace = URIRef(parseNamespace(property_uri))
-                print(property_namespace)
-                if property_namespace in namespace_map.keys():
-                    prefix = namespace_map[property_namespace]
-                    target_doc.addNamespace(property_namespace, prefix)
+            #             # If SBOL-typed URIs are enabled, replace with
+            #             replacement = getHomespace()
+            #             new_val = val.replace(replacement_target, replacement)
+            #             if type(val) == URIRef:
+            #                 new_val = URIRef(new_val)
+            #             new_obj.properties[property_uri][i_val] = new_val
 
 
         return new_obj

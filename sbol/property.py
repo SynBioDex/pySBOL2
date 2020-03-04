@@ -698,9 +698,13 @@ class ReferencedObject(Property):
 
     def set(self, uri):
         if self._sbol_owner is not None:
-            if self._rdf_type not in self._sbol_owner.properties:
-                self._sbol_owner.properties[self._rdf_type] = []
-            self._sbol_owner.properties[self._rdf_type].append(uri)
+            if self._upperBound == '1':
+                self._sbol_owner.properties[self._rdf_type] = uri
+            else:
+                if type(uri) == list:
+                    self._sbol_owner.properties[self._rdf_type] = uri
+                else:
+                    self._sbol_owner.properties[self._rdf_type] = [uri]
         else:
             # NOTE: we could raise an exception here, but the
             # original code is not doing anything in this case.
@@ -708,6 +712,8 @@ class ReferencedObject(Property):
 
     def add(self, uri):
         if self._sbol_owner is not None:
+            if self._rdf_type not in self._sbol_owner.properties:
+                self._sbol_owner.properties[self._rdf_type] = []
             self._sbol_owner.properties[self._rdf_type].append(uri)
         else:
             # NOTE: we could raise an exception here, but
