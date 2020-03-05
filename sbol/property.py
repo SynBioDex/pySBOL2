@@ -389,6 +389,16 @@ class LiteralProperty(Property):
         return Literal(value)
 
 
+class TextProperty(LiteralProperty):
+
+    # In the future, pull the convert_to_user and convert_from_user
+    # methods out of LiteralProperty and into TextProperty. Then make
+    # LiteralProperty an abstract base class.
+
+    # For now, this class is just an alias to LiteralProperty
+    pass
+
+
 class OwnedObject(URIProperty):
     def __init__(self, property_owner, sbol_uri, builder, lower_bound, upper_bound,
                  validation_rules=None, first_object=None):

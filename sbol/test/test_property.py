@@ -59,15 +59,18 @@ class TestProperty(unittest.TestCase):
         self.assertEqual(3, len(md.interactions))
         self.assertEqual(0, len(md.roles))
 
-    def test_literal_property_constructor(self):
+    def test_text_property_constructor(self):
+        # Test None as parent object
         with self.assertRaises(AttributeError):
-            sbol.property.LiteralProperty(None, sbol.SBOL_NAME, '0', '*', [], 'foo')
+            sbol.TextProperty(None, sbol.SBOL_NAME, '0', '*', [], 'foo')
+        # Test string as parent object
         with self.assertRaises(AttributeError):
-            sbol.property.LiteralProperty('foo', sbol.SBOL_NAME, '0', '*', [], 'foo')
+            sbol.TextProperty('foo', sbol.SBOL_NAME, '0', '*', [], 'foo')
+        # Test with object whose properties attribute is not a dict
         with self.assertRaises(TypeError):
             md = sbol.ModuleDefinition()
             md.properties = []
-            sbol.property.LiteralProperty(md, sbol.SBOL_NAME, '0', '*', [], 'foo')
+            sbol.TextProperty(md, sbol.SBOL_NAME, '0', '*', [], 'foo')
 
     def test_literal_property_properties(self):
         md = sbol.ModuleDefinition()
@@ -77,46 +80,46 @@ class TestProperty(unittest.TestCase):
         # parent properties dict
         self.assertIn(sbol.UNDEFINED, md.properties)
 
-    def test_literal_property_setting_single(self):
+    def test_text_property_setting_single(self):
         md = sbol.ModuleDefinition()
         testing_uri = URIRef(SBOL_URI + "#Testing")
-        lp = sbol.property.LiteralProperty(md, testing_uri, '0', '1', [])
+        tp = sbol.TextProperty(md, testing_uri, '0', '1', [])
         # Test setting to string
         expected = 'foo'
-        lp.value = expected
-        self.assertEqual(lp.value, rdflib.Literal(expected))
+        tp.value = expected
+        self.assertEqual(tp.value, rdflib.Literal(expected))
         # Test setting to None
-        lp.value = None
-        self.assertIsNone(lp.value)
+        tp.value = None
+        self.assertIsNone(tp.value)
         # Test integer
         with self.assertRaises(TypeError):
-            lp.value = 3
+            tp.value = 3
         # Test setting to list
         with self.assertRaises(TypeError):
-            lp.value = ['foo', 'bar']
+            tp.value = ['foo', 'bar']
 
-    def test_literal_property_setting_list(self):
+    def test_text_property_setting_list(self):
         md = sbol.ModuleDefinition()
         testing_uri = URIRef(SBOL_URI + "#Testing")
-        lp = sbol.property.LiteralProperty(md, testing_uri, '0', '*', [])
+        tp = sbol.TextProperty(md, testing_uri, '0', '*', [])
         # Test setting to string
         expected = 'foo'
-        lp.value = expected
-        self.assertEqual(lp.value, [rdflib.Literal(expected)])
+        tp.value = expected
+        self.assertEqual(tp.value, [rdflib.Literal(expected)])
         # Test setting to None
         with self.assertRaises(TypeError):
-            lp.value = None
+            tp.value = None
         # Test setting to list
         expected = ['foo', 'bar']
-        lp.value = expected
-        self.assertEqual(lp.value, [rdflib.Literal(x) for x in expected])
+        tp.value = expected
+        self.assertEqual(tp.value, [rdflib.Literal(x) for x in expected])
         # Test setting to list of integers
         with self.assertRaises(TypeError):
-            lp.value = [1, 2, 3]
+            tp.value = [1, 2, 3]
         # Test setting to empty list
         expected = []
-        lp.value = expected
-        self.assertEqual(lp.value, [])
+        tp.value = expected
+        self.assertEqual(tp.value, [])
 
 
 if __name__ == '__main__':
