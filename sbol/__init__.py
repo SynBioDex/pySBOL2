@@ -22,6 +22,7 @@ from .module import Module
 from .moduledefinition import ModuleDefinition
 from .participation import Participation
 from .partshop import PartShop
+from .property import TextProperty
 from .provo import Activity
 from .sbolerror import SBOLError, SBOLErrorCode
 from .sequence import Sequence

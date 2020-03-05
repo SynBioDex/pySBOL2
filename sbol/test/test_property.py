@@ -59,6 +59,68 @@ class TestProperty(unittest.TestCase):
         self.assertEqual(3, len(md.interactions))
         self.assertEqual(0, len(md.roles))
 
+    def test_text_property_constructor(self):
+        # Test None as parent object
+        with self.assertRaises(AttributeError):
+            sbol.TextProperty(None, sbol.SBOL_NAME, '0', '*', [], 'foo')
+        # Test string as parent object
+        with self.assertRaises(AttributeError):
+            sbol.TextProperty('foo', sbol.SBOL_NAME, '0', '*', [], 'foo')
+        # Test with object whose properties attribute is not a dict
+        with self.assertRaises(TypeError):
+            md = sbol.ModuleDefinition()
+            md.properties = []
+            sbol.TextProperty(md, sbol.SBOL_NAME, '0', '*', [], 'foo')
+
+    def test_literal_property_properties(self):
+        md = sbol.ModuleDefinition()
+        self.assertNotIn(sbol.UNDEFINED, md.properties)
+        sbol.property.LiteralProperty(md, sbol.UNDEFINED, '0', '*', [], 'foo')
+        # Creating the property should also create the entry in the
+        # parent properties dict
+        self.assertIn(sbol.UNDEFINED, md.properties)
+
+    def test_text_property_setting_single(self):
+        md = sbol.ModuleDefinition()
+        testing_uri = URIRef(SBOL_URI + "#Testing")
+        tp = sbol.TextProperty(md, testing_uri, '0', '1', [])
+        # Test setting to string
+        expected = 'foo'
+        tp.value = expected
+        self.assertEqual(tp.value, rdflib.Literal(expected))
+        # Test setting to None
+        tp.value = None
+        self.assertIsNone(tp.value)
+        # Test integer
+        with self.assertRaises(TypeError):
+            tp.value = 3
+        # Test setting to list
+        with self.assertRaises(TypeError):
+            tp.value = ['foo', 'bar']
+
+    def test_text_property_setting_list(self):
+        md = sbol.ModuleDefinition()
+        testing_uri = URIRef(SBOL_URI + "#Testing")
+        tp = sbol.TextProperty(md, testing_uri, '0', '*', [])
+        # Test setting to string
+        expected = 'foo'
+        tp.value = expected
+        self.assertEqual(tp.value, [rdflib.Literal(expected)])
+        # Test setting to None
+        with self.assertRaises(TypeError):
+            tp.value = None
+        # Test setting to list
+        expected = ['foo', 'bar']
+        tp.value = expected
+        self.assertEqual(tp.value, [rdflib.Literal(x) for x in expected])
+        # Test setting to list of integers
+        with self.assertRaises(TypeError):
+            tp.value = [1, 2, 3]
+        # Test setting to empty list
+        expected = []
+        tp.value = expected
+        self.assertEqual(tp.value, [])
+
 
 if __name__ == '__main__':
     unittest.main()

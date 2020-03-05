@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 import collections
 import logging
+import math
 import os
 import posixpath
 
@@ -55,6 +56,10 @@ class Property(ABC):
         :param initial_value: The initial value of the Property
         (int, str, float supported)
         """
+        # Ensure property_owner has a properties attribute of type
+        # dict.
+        if not isinstance(property_owner.properties, dict):
+            raise TypeError('property_owner.properties must be a dict')
         self._sbol_owner = property_owner
         if isinstance(type_uri, URIRef):
             self._rdf_type = type_uri
@@ -168,8 +173,26 @@ class Property(ABC):
     def getLowerBound(self):
         return self._lowerBound
 
+    @property
+    def lower_bound(self):
+        """Return the lower bound of the property as an integer.
+
+        """
+        return int(self._lowerBound)
+
     def getUpperBound(self):
         return self._upperBound
+
+    @property
+    def upper_bound(self):
+        """Return the upper bound of the property as a number.  If the upper
+        bound is '*', this value is math.inf. Otherwise the upper
+        bound is converted to an integer and returned.
+
+        """
+        if self._upperBound == '*':
+            return math.inf
+        return int(self._upperBound)
 
     def validate(self, arg):
         if arg is None:
@@ -284,12 +307,11 @@ class LiteralProperty(Property):
     def __init__(self, property_owner, type_uri, lower_bound, upper_bound,
                  validation_rules, initial_value=None):
         super().__init__(property_owner, type_uri, lower_bound, upper_bound,
-                         validation_rules, initial_value)
-        if self.value:
-            self.set(self.value)
-        #     self._sbol_owner.properties[type_uri] = [initial_value]
-        # else:
-        #     self._sbol_owner.properties[type_uri] = []
+                         validation_rules)
+        if self._rdf_type not in self._sbol_owner.properties:
+            self._sbol_owner.properties[self._rdf_type] = []
+        if initial_value is not None:
+            self.value = initial_value
 
     @property
     def value(self):
@@ -299,19 +321,15 @@ class LiteralProperty(Property):
             return self.getPropertyValueList()
 
     def getSinglePropertyValue(self):
-        if self._rdf_type not in self._sbol_owner.properties:
-            return None
         properties = self._sbol_owner.properties[self._rdf_type]
         if len(properties) == 0:
             return None
         # Just return the object by itself (not a list)
-        return properties[-1]
+        return self.convert_to_user(properties[0])
 
     def getPropertyValueList(self):
-        if self._rdf_type not in self._sbol_owner.properties:
-            return None
         properties = self._sbol_owner.properties[self._rdf_type]
-        return properties.copy()
+        return [self.convert_to_user(v) for v in properties]
 
     @value.setter
     def value(self, new_value):
@@ -324,46 +342,61 @@ class LiteralProperty(Property):
             self.setPropertyValueList(new_value)
 
     def setSinglePropertyValue(self, new_value):
-        if type(new_value) is list:
-            raise TypeError('The ' + str(self.getTypeURI()) +
-                            ' property does not accept list arguments.')
-        if self._rdf_type not in self._sbol_owner.properties:
-            self._sbol_owner.properties[self._rdf_type] = []
+        new_value = self.convert_from_user(new_value)
+        # clear out any old value
+        self._sbol_owner.properties[self._rdf_type].clear()
         if new_value is None:
+            # We've already cleared the value, do nothing else.
             return
-        elif len(self._sbol_owner.properties[self._rdf_type]) == 0:
-            self._sbol_owner.properties[self._rdf_type].append(Literal(new_value))
-        else:
-            self._sbol_owner.properties[self._rdf_type][-1] = Literal(new_value)
+        self._sbol_owner.properties[self._rdf_type].append(new_value)
 
-    def setPropertyValueList(self, new_value_list):
-        if self._rdf_type not in self._sbol_owner.properties:
-            self._sbol_owner.properties[self._rdf_type] = []
-        if new_value_list is None:
-            return
-        else:
-            if type(new_value_list) is list:
-                for value in new_value_list:
-                    if not isinstance(value, Literal):
-                        self.logger.warning('Value "' + str(value) +
-                                            ' assigned to LiteralProperty ' +
-                                            ' is of type ' + str(type(value)) +
-                                            '. Wrapping it in: ' + str(Literal))
-                        value = Literal(value)
-                    self._sbol_owner.properties[self._rdf_type].append(value)
-            else:
-                # the list is actually not a list, but a single element, even
-                # though lists are supported.
-                self._sbol_owner.properties[self._rdf_type].append(URIRef(new_value_list))
+    def setPropertyValueList(self, new_value):
+        if not isinstance(new_value, collections.Iterable):
+            raise TypeError('{} must be an iterable'.format(self.getTypeURI()))
+        # Special case. Should we really support this?
+        # Convert a string to a list of that string
+        if isinstance(new_value, str):
+            new_value = [new_value]
+        new_value = [self.convert_from_user(v) for v in new_value]
+        # should we filter out None in the list? I don't think so. If
+        # the user put them there, then that's what they're going to
+        # get.
+        self._sbol_owner.properties[self._rdf_type] = new_value
 
     def add(self, new_value):
-        if self._sbol_owner is not None:
-            if self._rdf_type not in self._sbol_owner.properties:
-                self._sbol_owner.properties[self._rdf_type] = []
-            properties = self._sbol_owner.properties[self._rdf_type]
-            properties.append(Literal(new_value))
-        else:
-            self.logger.error("Unable to update property: SBOL owner not set.")
+        property = self._sbol_owner.properties[self._rdf_type]
+        if len(property) >= self.upper_bound:
+            msg = 'Property {} has reached the upper bound of {}'
+            msg = msg.format(self._rdf_type, self.upper_bound)
+            raise ValueError(msg)
+        new_value = self.convert_from_user(new_value)
+        property.append(new_value)
+
+    def convert_to_user(self, value):
+        # Stored as a Literal, which is a str, which is what the user
+        # wants. This is a no-op.
+        return value
+
+    def convert_from_user(self, value):
+        # None is ok iff upper bound is 1 and lower bound is 0.
+        # If upper bound > 1, attribute is a list and None is not a valid list
+        # If lower bound > 0, attribute must have a value, so None is unacceptable
+        if value is None and self.upper_bound == 1 and self.lower_bound == 0:
+            return None
+        if not isinstance(value, str):
+            msg = '{} values must have type str'.format(self.getTypeURI())
+            raise TypeError(msg)
+        return Literal(value)
+
+
+class TextProperty(LiteralProperty):
+
+    # In the future, pull the convert_to_user and convert_from_user
+    # methods out of LiteralProperty and into TextProperty. Then make
+    # LiteralProperty an abstract base class.
+
+    # For now, this class is just an alias to LiteralProperty
+    pass
 
 
 class OwnedObject(URIProperty):
