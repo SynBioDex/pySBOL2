@@ -77,6 +77,47 @@ class TestProperty(unittest.TestCase):
         # parent properties dict
         self.assertIn(sbol.UNDEFINED, md.properties)
 
+    def test_literal_property_setting_single(self):
+        md = sbol.ModuleDefinition()
+        testing_uri = URIRef(SBOL_URI + "#Testing")
+        lp = sbol.property.LiteralProperty(md, testing_uri, '0', '1', [])
+        # Test setting to string
+        expected = 'foo'
+        lp.value = expected
+        self.assertEqual(lp.value, rdflib.Literal(expected))
+        # Test setting to None
+        lp.value = None
+        self.assertIsNone(lp.value)
+        # Test integer
+        with self.assertRaises(TypeError):
+            lp.value = 3
+        # Test setting to list
+        with self.assertRaises(TypeError):
+            lp.value = ['foo', 'bar']
+
+    def test_literal_property_setting_list(self):
+        md = sbol.ModuleDefinition()
+        testing_uri = URIRef(SBOL_URI + "#Testing")
+        lp = sbol.property.LiteralProperty(md, testing_uri, '0', '*', [])
+        # Test setting to string
+        expected = 'foo'
+        lp.value = expected
+        self.assertEqual(lp.value, [rdflib.Literal(expected)])
+        # Test setting to None
+        with self.assertRaises(TypeError):
+            lp.value = None
+        # Test setting to list
+        expected = ['foo', 'bar']
+        lp.value = expected
+        self.assertEqual(lp.value, [rdflib.Literal(x) for x in expected])
+        # Test setting to list of integers
+        with self.assertRaises(TypeError):
+            lp.value = [1, 2, 3]
+        # Test setting to empty list
+        expected = []
+        lp.value = expected
+        self.assertEqual(lp.value, [])
+
 
 if __name__ == '__main__':
     unittest.main()
