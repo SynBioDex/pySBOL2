@@ -198,6 +198,20 @@ class TestDocument(unittest.TestCase):
         doc.addNamespace('http://example.org#', 'bar')
         self.assertNotEqual(doc, doc2)
 
-
-if __name__ == '__main__':
-    unittest.main()
+    def test_get_top_level(self):
+        doc = sbol.Document()
+        self.assertTrue(hasattr(doc, 'getTopLevel'))
+        # Expect a not found error in an empty document
+        try:
+            doc.getTopLevel('foo')
+        except sbol.SBOLError as err:
+            self.assertEqual(err.error_code(),
+                             sbol.SBOLErrorCode.SBOL_ERROR_NOT_FOUND)
+        else:
+            self.fail('Expected SBOLError')
+        cd = doc.componentDefinitions.create('foo')
+        cd2 = doc.getTopLevel(cd.identity)
+        self.assertEqual(cd, cd2)
+        # Test access via string. Above was via URIRef.
+        cd2 = doc.getTopLevel(str(cd.identity))
+        self.assertEqual(cd, cd2)
