@@ -28,6 +28,8 @@ from .object import SBOLObject
 from .participation import Participation
 from .property import OwnedObject, URIProperty
 from .provo import Plan, Activity, Agent, Usage, Association
+from .sbolerror import SBOLError
+from .sbolerror import SBOLErrorCode
 from .sequence import Sequence
 from .sequenceannotation import SequenceAnnotation
 from .sequenceconstraint import SequenceConstraint
@@ -783,3 +785,19 @@ class Document(Identified):
 
     def getTypeURI(self):
         return URIRef(SBOL_DOCUMENT)
+
+    def getTopLevel(self, uri):
+        # Ensure it's a URI Ref
+        uri = rdflib.URIRef(uri)
+        if uri not in self.SBOLObjects:
+            msg = 'Top level object {} is not in document'
+            msg = msg.format(uri)
+            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_NOT_FOUND)
+        sbol_obj = self.SBOLObjects[uri]
+        # Verify object is top level
+        if sbol_obj.is_top_level():
+            return sbol_obj
+        # Not top level, raise error
+        msg = '{} is not a top level object'
+        msg = msg.format(uri)
+        raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
