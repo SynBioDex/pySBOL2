@@ -107,13 +107,14 @@ class PartShop:
         else:
             raise TypeError('URIs must be str or list. Found: ' + str(type(uris)))
         for uri in endpoints:
-            if self.resource in uri:  # user has specified full URI
-                query = uri
-            elif len(self.spoofed_resource) > 0 and self.resource in uri:
-                query = uri.replace(self.resource, self.spoofed_resource)
-            else:
-                # Assume user has only specified displayId
-                query = self.resource + '/' + uri
+            try:
+                query = self._uri2url(uri)
+            except SBOLError as err:
+                if err.error_code() == SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT:
+                    # Assume user has only specified displayId
+                    query = self.resource + '/' + uri
+                else:
+                    raise
             query += '/sbol'
             if not recursive:
                 query += 'nr'
@@ -208,20 +209,23 @@ class PartShop:
                                                str(response.status_code) +
                                                ' - ' + str(response.content))
 
-    def remove(self, uri):
-        if self.resource in uri:
-            query = uri
-        elif parseURLDomain(self.resource) in uri:
-            query = uri
-        elif self.spoofed_resource and self.spoofed_resource in uri:
-            query = uri.replace(self.spoofed_resource, self.resource)
-            print('Got {}, replaced to {}'.format(uri, query))
-        else:
-            msg = ('Removal of {} failed.'
-                   + ' The object does not exist in the resource namespace')
-            msg = msg.format(uri)
-            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
+    def _uri2url(self, uri):
+        """Converts an SBOL URI to a URL for running queries to a SynBioHub
+        endpoint.
 
+        """
+        if self.resource in uri:
+            return uri
+        if parseURLDomain(self.resource) in uri:
+            return uri
+        if self.spoofed_resource and self.spoofed_resource in uri:
+            return uri.replace(self.spoofed_resource, self.resource)
+        msg = ('{} does not exist in the resource namespace')
+        msg = msg.format(uri)
+        raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
+
+    def remove(self, uri):
+        query = self._uri2url(uri)
         url = '{}/remove'.format(query)
         headers = {
             'X-authorization': self.key,

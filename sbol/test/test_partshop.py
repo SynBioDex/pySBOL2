@@ -159,3 +159,44 @@ WHERE {
             uri_template = 'https://hub.sd2e.org/user/sd2e/{0}/{0}_collection/1'
             target_collection = uri_template.format(doc.displayId)
             sbh.submit(doc, target_collection, 1)
+
+    def test_uri2url(self):
+        # This tests an internal method that underlies `remove` and
+        # `pull`. No spoofing in these tests.
+        part_shop = sbol.PartShop('https://synbiohub.org')
+        uri = 'https://synbiohub.org/design/CAT_C0378/1'
+        url = part_shop._uri2url(uri)
+        self.assertEqual(url, uri)
+        uri = 'https://example.org/design/CAT_C0378/1'
+        try:
+            url = part_shop._uri2url(uri)
+        except sbol.SBOLError as err:
+            self.assertEqual(err.error_code(),
+                             sbol.SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
+        else:
+            self.fail('Expected SBOLError')
+
+    def test_uri2url_spoofed(self):
+        # Test with a spoofed url
+        #
+        # Spoofed URLs had been an issue in `pull` before extracting
+        # the `_uri2url` method
+        part_shop = sbol.PartShop('https://synbiohub.org',
+                                  spoofed_url='https://example.org')
+        uri = 'https://synbiohub.org/design/CAT_C0378/1'
+        url = part_shop._uri2url(uri)
+        self.assertEqual(url, uri)
+        # _uri2url should change the spoofed URI to the resource URL
+        uri = 'https://example.org/design/CAT_C0378/1'
+        expected = 'https://synbiohub.org/design/CAT_C0378/1'
+        url = part_shop._uri2url(uri)
+        self.assertEqual(url, expected)
+        # URI is not in spoofed or resource domains
+        uri = 'https://example.com/design/CAT_C0378/1'
+        try:
+            url = part_shop._uri2url(uri)
+        except sbol.SBOLError as err:
+            self.assertEqual(err.error_code(),
+                             sbol.SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
+        else:
+            self.fail('Expected SBOLError')
