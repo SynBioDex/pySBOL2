@@ -103,6 +103,10 @@ class SBOLObject:
     def identity(self, new_identity):
         self._identity.value = new_identity
 
+    @property
+    def type(self):
+        return self.rdf_type
+
     def getTypeURI(self):
         """
         :return: The uniform resource identifier that describes
