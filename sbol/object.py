@@ -121,6 +121,15 @@ class SBOLObject:
         else:
             return rdf_type
 
+    def cast(self, cls):
+        if not isinstance(self, cls):
+            msg = 'Cannot cast instance of {} to class {}'
+            msg = msg.format(type(self).__name__, cls.__name__)
+            raise TypeError(msg)
+        # TODO: libSBOL does a copy here. I don't think that's needed
+        # in Python.
+        return self
+
     def find(self, uri):
         """Search this object recursively to see if an object or
         any child object with URI already exists.
