@@ -51,3 +51,10 @@ class TestObject(unittest.TestCase):
         md = doc.moduleDefinitions.create('bar')
         expected = sbol.SBOL_MODULE_DEFINITION
         self.assertEqual(md.type, expected)
+
+    def test_cast(self):
+        cd = sbol.ComponentDefinition('foo')
+        cd2 = cd.cast(sbol.ComponentDefinition)
+        self.assertEqual(cd, cd2)
+        with self.assertRaises(TypeError):
+            cd.cast(sbol.ModuleDefinition)
