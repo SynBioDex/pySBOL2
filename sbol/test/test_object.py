@@ -43,6 +43,11 @@ class TestObject(unittest.TestCase):
         md2 = sbol.ModuleDefinition(uri='Foo2')
         self.assertNotEqual(md1, md2)
 
-
-if __name__ == '__main__':
-    unittest.main()
+    def test_type(self):
+        cd = sbol.ComponentDefinition('foo')
+        expected = sbol.SBOL_COMPONENT_DEFINITION
+        self.assertEqual(cd.type, expected)
+        doc = sbol.Document()
+        md = doc.moduleDefinitions.create('bar')
+        expected = sbol.SBOL_MODULE_DEFINITION
+        self.assertEqual(md.type, expected)
