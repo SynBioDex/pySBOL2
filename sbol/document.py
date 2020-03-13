@@ -297,6 +297,15 @@ class Document(Identified):
         """
         self.add(sbol_obj)
 
+    def addImplementation(self, implementation):
+        """ Convenience method for adding an implementation.
+        """
+        if isinstance(implementation, collections.abc.Iterable):
+            for impl in implementation:
+                self.add(impl)
+        else:
+            self.add(implementation)
+
     def create(self, uri):
         """
         Creates another SBOL object derived from TopLevel
@@ -347,6 +356,9 @@ class Document(Identified):
 
     def getModel(self, uri):
         return self.models.get(uri)
+
+    def getImplementation(self, uri):
+        return self.implementations.get(uri)
 
     # File I/O #
     def write(self, filename):

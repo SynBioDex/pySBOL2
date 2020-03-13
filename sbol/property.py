@@ -535,9 +535,11 @@ class OwnedObject(URIProperty):
             if len(persistent_id_matches) > 0:
                 return persistent_id_matches[-1]
             # Assume the object is not TopLevel # TODO What is this for?
-            if SBOL_PERSISTENT_IDENTITY in parent_obj.properties:
+            if (SBOL_PERSISTENT_IDENTITY in parent_obj.properties
+                    and parent_obj.properties[SBOL_PERSISTENT_IDENTITY]):
                 persistentIdentity = parent_obj.properties[SBOL_PERSISTENT_IDENTITY][0]
-            if SBOL_VERSION in parent_obj.properties:
+            if (SBOL_VERSION in parent_obj.properties
+                    and parent_obj.properties[SBOL_VERSION]):
                 version = parent_obj.properties[SBOL_VERSION][0]
                 compliant_uri = posixpath.join(persistentIdentity, uri, version)
             else:

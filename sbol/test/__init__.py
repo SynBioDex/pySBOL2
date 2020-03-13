@@ -6,6 +6,7 @@ from .test_design import TestDesign
 from .test_document import TestDocument
 from .test_error import TestError
 from .test_identified import TestIdentified
+from .test_implementation import TestImplementation
 from .test_config import TestConfig
 from .test_moduledefinition import TestModuleDefinition
 from .test_object import TestObject
@@ -30,6 +31,7 @@ def runTests(test_list=None):
             TestDocument,
             TestError,
             TestIdentified,
+            TestImplementation,
             TestModuleDefinition,
             TestObject,
             TestOwnedObject,
