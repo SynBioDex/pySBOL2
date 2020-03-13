@@ -168,7 +168,9 @@ class Property(ABC):
 
     def find(self, query):
         """Check if a value in this property matches the query."""
-        raise NotImplementedError("Not yet implemented")
+        msg = '{}.find() not yet implemented for query {} of type {}'
+        msg = msg.format(type(self).__name__, query, type(query))
+        raise NotImplementedError(msg)
 
     def getLowerBound(self):
         return self._lowerBound
@@ -202,10 +204,15 @@ class Property(ABC):
             validation_rule(self._sbol_owner, arg)
 
     def __contains__(self, item):
-        if self.find(item) is not None:
-            return True
+        try:
+            obj = self.find(item)
+        except SBOLError as err:
+            if err.error_code() == SBOLErrorCode.NOT_FOUND_ERROR:
+                return None
+            if err.error_code() == SBOLErrorCode.SBOL_ERROR_NOT_FOUND:
+                return None
         else:
-            return False
+            return bool(obj)
 
     def _isHidden(self):
         return self._rdf_type in self._sbol_owner.hidden_properties
@@ -474,6 +481,13 @@ class OwnedObject(URIProperty):
             # raised to properly detect end of sequence
             raise IndexError
         return object_store[id]
+
+    def find(self, query):
+        if isinstance(query, str):
+            return self.get_uri(rdflib.URIRef(query))
+        errmsg = 'Invalid find query {} of type {}'
+        errmsg = errmsg.format(query, type(query).__name__)
+        raise TypeError(errmsg)
 
     def get_uri(self, id):
         if Config.getOption(ConfigOptions.VERBOSE.value) is True:
