@@ -12,6 +12,10 @@ and [pySBOL](https://github.com/SynBioDex/pySBOL).
 
 We recommend installing with a virtual environment.
 
+Please note that this project uses
+[git submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules),
+so please use the `--recurse-submodules` option when cloning.
+
 ```shell
 git clone --recurse-submodules https://github.com/llotneb/SBOL.git 
 python3 -m venv myenv
