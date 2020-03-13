@@ -121,6 +121,23 @@ class TestProperty(unittest.TestCase):
         tp.value = expected
         self.assertEqual(tp.value, [])
 
-
-if __name__ == '__main__':
-    unittest.main()
+    def test_owned_object_find(self):
+        doc = sbol.Document()
+        md = doc.moduleDefinitions.create('foo')
+        # find() underlies __contains__ so test `in`
+        self.assertIn('foo', doc.moduleDefinitions)
+        self.assertNotIn('bar', doc.moduleDefinitions)
+        # find something that is in the collection
+        md2 = doc.moduleDefinitions.find('foo')
+        self.assertEqual(md, md2)
+        # find something that is not in the collection
+        with self.assertRaises(sbol.SBOLError):
+            doc.moduleDefinitions.find('bar')
+        # confirm we get the expected error code
+        try:
+            doc.moduleDefinitions.find('bar')
+        except sbol.SBOLError as err:
+            self.assertEqual(err.error_code(),
+                             sbol.SBOLErrorCode.NOT_FOUND_ERROR)
+        else:
+            self.fail('Expected SBOLError')
