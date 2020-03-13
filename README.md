@@ -12,29 +12,18 @@ For developers, please see [CONTRIBUTING.md](CONTRIBUTING.md).
 This library is currently under development. Please consider using a
 virtual environment for your installation.
 
-1. Create a [Python 3 virtual environment](https://docs.python.org/3/library/venv.html)
-
-    ```shell
-    python3 -m venv <DIR>
-    ```
-
-1. Activate the virtual environment
-
-    ```shell
-    source <DIR>/bin/activate
-    ```
-
-1. (Recommended) Upgrade pip within the virtual environment
-
-    ```shell
-    pip install -U pip
-    ```
-
-1. Install the SBOL module in the virtual environment
-
-    ```shell
-    pip install git+https://github.com/llotneb/SBOL.git
-    ```
+```shell
+# Name the virtual environment
+DIR=myenv
+# Create the virtual environment
+python3 -m venv "${DIR}"
+# Activate the virtual environment
+source "${DIR}"/bin/activate
+# Recommended: upgrade pip
+pip install -U pip
+# Install the sbol module
+pip install git+https://github.com/llotneb/SBOL.git
+```
 
 ## DOCUMENTATION
 
@@ -42,7 +31,6 @@ To be updated.
 
 This module should be largely compatible with
 [pySBOL](https://github.com/SynBioDex/pySBOL).
-
 The [pySBOL documentation](https://pysbol2.readthedocs.io/en/latest/index.html)
 should be used until this module has its own documentation.
 
