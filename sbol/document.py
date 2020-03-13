@@ -201,7 +201,7 @@ class Document(Identified):
         """
         # Check for uniqueness of URI
         if sbol_obj.identity in self.SBOLObjects:
-            raise SBOLError('Cannot add ' + sbol_obj.identity +
+            raise SBOLError('Cannot add ' + str(sbol_obj.identity) +
                             ' to Document. An object with this identity '
                             'is already contained in the Document',
                             SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE)
