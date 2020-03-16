@@ -700,6 +700,11 @@ class Document(Identified):
         """
         return self.size()
 
+    def __bool__(self):
+        # Ignore list semantics for boolean conversion.
+        # A document is True if it exists.
+        return True
+
     def __str__(self):
         """
         Produce a string representation of the Document.
