@@ -187,7 +187,7 @@ class PartShop:
         files['keywords'] = (None, keywords)
         files['overwrite_merge'] = (None, str(overwrite))
         files['user'] = (None, self.key)
-        files['file'] = (None, doc.writeString(), 'text/xml')
+        files['file'] = ('file', doc.writeString(), 'text/xml')
         if collection != '':
             files['rootCollections'] = (None, collection)
         # Send POST request
