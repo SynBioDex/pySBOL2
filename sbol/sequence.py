@@ -117,6 +117,11 @@ class Sequence(TopLevel):
         """
         return len(self.elements)
 
+    def __bool__(self):
+        # Ignore list semantics for boolean conversion.
+        # A sequence is True if it exists.
+        return True
+
     @deprecated(version='3.0.0', reason='Use len(sequence) instead')
     def length(self):
         """

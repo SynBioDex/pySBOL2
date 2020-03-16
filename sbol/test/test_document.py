@@ -273,3 +273,7 @@ class TestDocument(unittest.TestCase):
         self.assertEqual(doc.getImplementation(uri), impl)
         uri = rdflib.URIRef(uri_template.format(homespace, 'bar'))
         self.assertEqual(doc.getImplementation(uri), impl2)
+
+    def test_bool(self):
+        doc = sbol.Document()
+        self.assertTrue(doc)
