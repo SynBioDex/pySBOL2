@@ -284,13 +284,7 @@ class URIProperty(Property):
         else:
             if type(new_value_list) is list:
                 for value in new_value_list:
-                    if not isinstance(value, URIRef):
-                        self.logger.warning('Value "' + str(value) +
-                                            ' assigned to URIProperty ' +
-                                            ' is of type ' + str(type(value)) +
-                                            '. Wrapping it in: ' + str(URIRef))
-                        value = URIRef(value)
-                    self._sbol_owner.properties[self._rdf_type].append(value)
+                    self._sbol_owner.properties[self._rdf_type].append(URIRef(value))
             else:
                 # the list is actually not a list, but a single element, even
                 # though lists are supported.
