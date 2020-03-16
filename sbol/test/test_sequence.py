@@ -92,6 +92,6 @@ class TestSequence(unittest.TestCase):
         seq_read = doc2.sequences.get('CRP_b_seq').elements
         self.assertEqual(seq_read, seq)
 
-
-if __name__ == '__main__':
-    unittest.main()
+    def test_bool(self):
+        seq = sbol.Sequence()
+        self.assertTrue(seq)
