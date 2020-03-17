@@ -192,15 +192,6 @@ class Identified(SBOLObject):
 
     def copy(self, target_doc = None, target_namespace = None, version = None):
 
-        def parseNamespace(uri):
-            rlimit = uri.rfind('#') + 1
-            if rlimit:
-                return uri[:rlimit]
-            rlimit = uri.rfind('/') + 1
-            if rlimit:
-                return uri[:rlimit]
-            return ''
-
         new_obj = self.__class__()
 
         # Assign the new object to the target Document
@@ -230,53 +221,44 @@ class Identified(SBOLObject):
         # Don't overwrite namespaces for the wasDerivedFrom field, which points back to the original object
         if target_namespace:
 
-            # Collect ReferencedObject attributes
-            reference_properties = [p for p in new_obj.__dict__.values() if isinstance(p, ReferencedObject)]
-
-            # These URIProperty attributes should be treated like ReferencedObject attributes
+            # Map the identity of self into the target namespace
             if '_identity' in new_obj.__dict__.keys():
-                reference_properties.append(new_obj.__dict__['_identity'])
+                new_obj.__dict__['_identity'].value = replace_namespace(self, target_namespace)
+
             if '_persistentIdentity' in new_obj.__dict__.keys():
-                reference_properties.append(new_obj.__dict__['_persistentIdentity'])
+                new_obj.__dict__['_persistentIdentity'].value = replace_namespace(self, target_namespace)
 
-            for reference_property in reference_properties:
-                if reference_property._upperBound == '1':
-                    values = [reference_property.value]
-                else:
-                    values = reference_property.value
-                for i_val, val in enumerate(values):
-                    if target_namespace in val:
-                        replacement_target = target_namespace
-                        replacement = getHomespace()
-                        new_val = val.replace(replacement_target, replacement)
-                        values[i_val] = new_val
-                if reference_property._upperBound == '1':
-                    reference_property.value = values[0]
-                else:
-                    reference_property.value = values
-                print(reference_property._rdf_type, reference_property.value)
-            # if target_namespace:
-            #     for i_val, val in enumerate(new_obj.properties[property_uri]):
-            #         if target_namespace in val:
-            #             if property_uri == SBOL_PERSISTENT_IDENTITY:
-            #                 pass
-            #             elif self.dict:
-            #                 referenced_object = 
-            #                 # If the value is an SBOL-typed URI, replace both the namespace and class name
-            #                 class_name = parseClassName(val)
-            #                 replacement_target = target_namespace + '/' + class_name
+            # Map any references to other SBOL objects in the Document into the new namespace
+            if self.doc != None:
+
+                # Collect ReferencedObject attributes
+                reference_properties = [p for p in new_obj.__dict__.values() if isinstance(p, ReferencedObject)]
+
+                # These URIProperty attributes should be treated like ReferencedObject attributes
+                if '_built' in new_obj.__dict__.keys():
+                    reference_properties.append(new_obj.__dict__['_built'])
+
+                for reference_property in reference_properties:
+                    # TODO extract this into property.py
+                    if reference_property._upperBound == '1':
+                        values = [reference_property.value]
+                    else:
+                        values = reference_property.value
+
+                    for i_uri, uri in enumerate(values):
+                        if target_namespace in uri:
                             
-            #                 # If not an sbol typed URI, then just replace the namespace
-            #                 if not replacement_target in val:
-            #                     replacement_target = target_namespace
+                            referenced_object = self.doc.find(uri) 
+                            if referenced_object == None:
+                                continue
+                            new_uri = replace_namespace(referenced_object, target_namespace)
+                            values[i_uri] = new_uri
+                            print(uri, new_uri)
 
-            #             # If SBOL-typed URIs are enabled, replace with
-            #             replacement = getHomespace()
-            #             new_val = val.replace(replacement_target, replacement)
-            #             if type(val) == URIRef:
-            #                 new_val = URIRef(new_val)
-            #             new_obj.properties[property_uri][i_val] = new_val
-
+                    if reference_property._upperBound == '1':
+                        reference_property.value = values[0]
+                    else:
+                        reference_property.value = values
 
         return new_obj
 
@@ -437,3 +419,31 @@ class Identified(SBOLObject):
     return new_obj;
 };
 '''
+
+def parseNamespace(uri):
+    rlimit = uri.rfind('#') + 1
+    if rlimit:
+        return uri[:rlimit]
+    rlimit = uri.rfind('/') + 1
+    if rlimit:
+        return uri[:rlimit]
+    return ''
+
+def replace_namespace(sbol_obj, target_namespace):
+    
+    # If the value is an SBOL-typed URI, replace both the namespace and class name
+    class_name = parseClassName(sbol_obj.getTypeURI())
+    replacement_target = target_namespace + '/' + class_name
+    
+    # If not an sbol typed URI, then just replace the namespace
+    if not replacement_target in sbol_obj.identity:
+        replacement_target = target_namespace
+
+    if Config.getOption('sbol_typed_uris'):
+        # Map into a typed namespace
+        replacement = getHomespace() + '/' + class_name
+    else:
+        # Map into a non-typed namespace
+        replacement = getHomespace()
+
+    return sbol_obj.identity.replace(replacement_target, replacement)

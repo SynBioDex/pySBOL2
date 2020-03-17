@@ -116,9 +116,13 @@ class TestCopy(unittest.TestCase):
         # are also copied into the new namespace
 
         setHomespace('http://examples.org')
+        Config.setOption('sbol_compliant_uris', True)
         Config.setOption('sbol_typed_uris', False)
+        doc = Document()
         comp = ComponentDefinition('cd')
         seq = Sequence('seq')
+        doc.addComponentDefinition(comp)
+        doc.addSequence(seq)
         comp.sequences = seq.identity
 
         # Import the object into a new namespace
@@ -127,6 +131,49 @@ class TestCopy(unittest.TestCase):
         comp_copy = comp.copy(None, old_homespace)  # Import from old homespace into new homespace
         self.assertEqual(comp_copy.identity, 'http://acme.com/cd/1')
         self.assertEqual(comp_copy.sequences[0], 'http://acme.com/seq/1')
+
+    def test_import_into_nontyped_namespace_from_typed_namespace(self):
+        print('test_import_into_nontyped_namespace_from_typed_namespace')
+        # Now repeat. This time copy an sbol-typed URI to a non-typed, sbol-compliant URI
+        setHomespace('http://examples.org')
+        Config.setOption('sbol_typed_uris', True)
+
+        doc = Document()
+        comp = ComponentDefinition('cd')
+        seq = Sequence('seq')
+        comp.sequences = seq.identity
+        doc.addComponentDefinition(comp)
+        doc.addSequence(seq)
+
+        # Import the object into the new namespace, while removing the type token from the URI
+        Config.setOption('sbol_typed_uris', False)
+        old_homespace = getHomespace()
+        setHomespace('http://acme.com')
+        comp_copy = comp.copy(None, old_homespace)  # Import from old homespace into new homespace
+        self.assertEqual(comp_copy.identity, 'http://acme.com/cd/1')
+        self.assertEqual(comp_copy.sequences[0], 'http://acme.com/seq/1')      
+
+    def test_import_into_typed_namespace_from_nontyped_namespace(self):
+        print('test_import_into_typed_namespace_from_nontyped_namespace')
+
+        # Now repeat. This time copy an sbol-typed URI to a non-typed, sbol-compliant URI
+        setHomespace('http://examples.org')
+        Config.setOption('sbol_typed_uris', False)
+
+        doc = Document()
+        comp = ComponentDefinition('cd')
+        seq = Sequence('seq')
+        comp.sequences = seq.identity
+        doc.addComponentDefinition(comp)
+        doc.addSequence(seq)
+
+        # Import the object into the new namespace, while removing the type token from the URI
+        Config.setOption('sbol_typed_uris', True)
+        old_homespace = getHomespace()
+        setHomespace('http://acme.com')
+        comp_copy = comp.copy(None, old_homespace)  # Import from old homespace into new homespace
+        self.assertEqual(comp_copy.identity, 'http://acme.com/ComponentDefinition/cd/1')
+        self.assertEqual(comp_copy.sequences[0], 'http://acme.com/Sequence/seq/1')
 
     def test_copy_namespace(self):
         # Confirm that extension namespaces are copied into the target Document
