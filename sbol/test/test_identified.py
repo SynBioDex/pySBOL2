@@ -245,11 +245,11 @@ class TestCopy(unittest.TestCase):
         doc.addComponentDefinition(comp)
 
         comp_copy = comp.copy()
-        self.assertEquals(comp.version, rdflib.Literal('1.0.0'))
-        self.assertEquals(comp_copy.version, rdflib.Literal('2.0.0'))
-        self.assertEquals(comp_copy.identity, comp.persistentIdentity + '/2.0.0')
-        self.assertEquals(comp_copy.wasDerivedFrom[0], comp.identity)
-        self.assertEquals(comp_copy.types[0], sbol.constants.BIOPAX_DNA)
+        self.assertEqual(comp.version, rdflib.Literal('1.0.0'))
+        self.assertEqual(comp_copy.version, rdflib.Literal('2.0.0'))
+        self.assertEqual(comp_copy.identity, comp.persistentIdentity + '/2.0.0')
+        self.assertEqual(comp_copy.wasDerivedFrom[0], comp.identity)
+        self.assertEqual(comp_copy.types[0], sbol.constants.BIOPAX_DNA)
 
     def test_copy_to_new_document(self):
         sbol.Config.setOption('sbol_typed_uris', False)
@@ -262,8 +262,8 @@ class TestCopy(unittest.TestCase):
         # Clone the object to another Document, the wasDerivedFrom should not be a circular reference
         doc2 = sbol.Document()
         comp3 = comp2.copy(doc2)
-        self.assertEquals(comp3.identity, comp2.identity)
-        self.assertEquals(comp3.wasDerivedFrom[0], comp1.identity)
+        self.assertEqual(comp3.identity, comp2.identity)
+        self.assertEqual(comp3.wasDerivedFrom[0], comp1.identity)
         self.assertNotEqual(comp3.wasDerivedFrom[0], comp2.identity)
 
         # Confirm version is the same as the copied object
