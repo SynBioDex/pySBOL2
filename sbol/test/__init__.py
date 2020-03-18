@@ -1,5 +1,6 @@
 import unittest
 import sys
+from .test_collection import TestCollection
 from .test_componentdefinition import TestComponentDefinitions
 from .test_constants import TestConstants
 from .test_design import TestDesign
@@ -24,6 +25,7 @@ from .test_validation import TestValidation
 def runTests(test_list=None):
     if test_list is None:
         test_list = [
+            TestCollection,
             TestComponentDefinitions,
             TestConfig,
             TestConstants,
