@@ -8,25 +8,30 @@ __version__ = '3.0.0'
 # instead of `__all__`, we will try to be careful about what gets
 # imported into this file. In the absence of __all__, all imported
 # symbols are also exported.
+from .collection import Collection
 from .combinatorialderivation import CombinatorialDerivation
 from .component import Component
+from .componentdefinition import ComponentDefinition
 from .config import Config, ConfigOptions
 from .config import getHomespace, hasHomespace, setHomespace
 from .constants import *
 from .dbtl import Design
 from .document import Document
-from .componentdefinition import ComponentDefinition
+from .identified import Identified
+from .implementation import Implementation
 from .interaction import Interaction
 from .module import Module
 from .moduledefinition import ModuleDefinition
 from .participation import Participation
 from .partshop import PartShop
+from .property import LiteralProperty
+from .property import TextProperty
 from .provo import Activity
-from .sbolerror import SBOLError
+from .sbolerror import SBOLError, SBOLErrorCode
 from .sequence import Sequence
 from .sequenceannotation import SequenceAnnotation
-from .identified import Identified
-from .property import *
+from .validation import is_alphanumeric_or_underscore
+from .validation import is_not_alphanumeric_or_underscore
 
 def testSBOL():
     """

@@ -1,5 +1,16 @@
-from .object import *
+import posixpath
+
+from .object import SBOLObject
+from .config import Config
+from .config import ConfigOptions
+from .config import getHomespace
+from .config import hasHomespace
 from .constants import *
+from .property import LiteralProperty
+from .property import ReferencedObject
+from .property import URIProperty
+from .sbolerror import SBOLError
+from .sbolerror import SBOLErrorCode
 from . import validation
 
 
@@ -9,7 +20,7 @@ class Identified(SBOLObject):
     # that are different versions of each other.
     # An Identified object MUST be referred to
     # using either its identity URI or its persistentIdentity URI.
-    _persistentIdentity = None
+    # _persistentIdentity = None
 
     # The displayId property is an OPTIONAL identifier
     # with a data type of String.
@@ -21,7 +32,7 @@ class Identified(SBOLObject):
     # (global uniqueness is not necessary)
     # and MUST be composed of only alphanumeric or underscore characters
     # and MUST NOT begin with a digit.
-    _displayId = None
+    # _displayId = None
 
     # If the version property is used,
     # then it is RECOMMENDED that version numbering follow the conventions
@@ -32,7 +43,7 @@ class Identified(SBOLObject):
     # by the characters '.' and '-' and are compared in lexicographical order
     # (for example, 1 < 1.3.1 < 2.0-beta).
     # For a full explanation, see the linked resources.
-    _version = None
+    # _version = None
 
     # The wasDerivedFrom property is OPTIONAL and has a data type of URI.
     # An SBOL object with this property refers to another SBOL object
@@ -46,12 +57,12 @@ class Identified(SBOLObject):
     # or form a cyclical chain of references via its wasDerivedFrom property
     # and those of other SBOL objects. For example, the reference chain
     # "A was derived from B and B was derived from A" is cyclical.
-    _wasDerivedFrom = None
+    # _wasDerivedFrom = None
 
     # An Activity which generated this ComponentDefinition,
     # eg., a design process like codon-optimization
     # or a construction process like Gibson Assembly
-    _wasGeneratedBy = None
+    # _wasGeneratedBy = None
 
     # The name property is OPTIONAL and has a data type of
     # String. This property is intended to be displayed to a human
@@ -61,12 +72,12 @@ class Identified(SBOLObject):
     # tools give users the ability to switch perspectives between name
     # properties that are human-readable and displayId properties that
     # are less human-readable, but are more likely to be unique.
-    _name = None
+    # _name = None
 
     # The description property is OPTIONAL and has a data type of String.
     # This property is intended to contain a more thorough
     # text description of an Identified object.
-    _description = None
+    # _description = None
 
     def __init__(self, type_uri=SBOL_IDENTIFIED, uri=URIRef('example'),
                  version=VERSION_STRING):
@@ -80,31 +91,36 @@ class Identified(SBOLObject):
         self._description = LiteralProperty(self, SBOL_DESCRIPTION, '0', '1', None)
         if Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS.value) is True:
             self._displayId.set(uri)
-            self._persistentIdentity.set(URIRef(os.path.join(getHomespace(), uri)))
+            self._persistentIdentity.set(URIRef(posixpath.join(getHomespace(), uri)))
             if Config.getOption(ConfigOptions.SBOL_TYPED_URIS.value) is True:
                 if version != '':
                     self._identity.set(
-                        URIRef(os.path.join(getHomespace(),
-                                            self.getClassName(type_uri),
-                                            uri, version))
+                        URIRef(posixpath.join(getHomespace(),
+                                              self.getClassName(type_uri),
+                                              uri, version))
                     )
                 else:
                     self._identity.set(
-                        URIRef(os.path.join(getHomespace(),
-                                            self.getClassName(type_uri),
-                                            uri))
+                        URIRef(posixpath.join(getHomespace(),
+                                              self.getClassName(type_uri),
+                                              uri))
                     )
             else:
                 if version != '':
                     self._identity.set(
-                        URIRef(os.path.join(getHomespace(), uri, version)))
+                        URIRef(posixpath.join(getHomespace(), uri, version)))
                 else:
                     self._identity.set(
-                        URIRef(os.path.join(getHomespace(), uri)))
+                        URIRef(posixpath.join(getHomespace(), uri)))
         elif hasHomespace():
-            self._identity.set(URIRef(os.path.join(getHomespace(), uri)))
+            self._identity.set(URIRef(posixpath.join(getHomespace(), uri)))
             self._persistentIdentity.set(
-                URIRef(os.path.join(getHomespace(), uri)))
+                URIRef(posixpath.join(getHomespace(), uri)))
+        # Provo hooks
+        self._wasDerivedFrom = URIProperty(self, SBOL_WAS_DERIVED_FROM,
+                                           '0', '*', None)
+        self.wasGeneratedBy = ReferencedObject(self, PROVO_WAS_GENERATED_BY,
+                                               PROVO_WAS_GENERATED_BY, '0', '*', [])
         # self._identity.validate() # TODO
 
     @property
@@ -147,6 +163,14 @@ class Identified(SBOLObject):
     def name(self, new_name):
         self._name.set(new_name)
 
+    @property
+    def wasDerivedFrom(self):
+        return self._wasDerivedFrom.value
+
+    @wasDerivedFrom.setter
+    def wasDerivedFrom(self, new_wasDerivedFrom):
+        self._wasDerivedFrom.set(new_wasDerivedFrom)
+
     def generate(self):
         raise NotImplementedError("Not yet implemented")
 
@@ -162,12 +186,12 @@ class Identified(SBOLObject):
         if Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS.value) is True:
             # Form compliant URI for child object
             persistent_id = parent.properties[SBOL_PERSISTENT_IDENTITY][0]
-            persistent_id = os.path.join(persistent_id, self.displayId)
+            persistent_id = posixpath.join(persistent_id, self.displayId)
             if len(parent.properties[SBOL_VERSION]) > 0:
                 version = parent.properties[SBOL_VERSION][0]
             else:
                 version = VERSION_STRING
-            obj_id = os.path.join(persistent_id, version)
+            obj_id = posixpath.join(persistent_id, version)
             # Reset SBOLCompliant properties
             self._identity.set(obj_id)
             self._persistentIdentity.set(persistent_id)
@@ -175,7 +199,7 @@ class Identified(SBOLObject):
             matches = parent.find_property_value(SBOL_IDENTIFIED, obj_id)
             if len(matches) > 0:
                 raise SBOLError("Cannot update SBOL-compliant URI. The URI " +
-                                self.identity + " is not unique",
+                                str(self.identity) + " is not unique",
                                 SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE)
             for rdf_type, store in self.owned_objects.items():
                 if rdf_type not in self._hidden_properties:
@@ -186,7 +210,7 @@ class Identified(SBOLObject):
             matches = parent.doc.find_property_value(SBOL_IDENTITY, self.identity)
             if len(matches) > 0:
                 raise SBOLError("Cannot update SBOL-compliant URI. "
-                                "An object with URI " + self.identity +
+                                "An object with URI " + str(self.identity) +
                                 " is already in the Document",
                                 SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE)
 

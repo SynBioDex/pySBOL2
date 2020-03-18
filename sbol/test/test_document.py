@@ -2,9 +2,10 @@ import locale
 import logging
 import os
 import unittest
+
+import rdflib
+
 import sbol
-from rdflib import URIRef
-from rdflib.namespace import NamespaceManager
 
 MODULE_LOCATION = os.path.dirname(os.path.abspath(__file__))
 TEST_LOCATION = os.path.join(MODULE_LOCATION, 'resources', 'crispr_example.xml')
@@ -175,13 +176,104 @@ class TestDocument(unittest.TestCase):
         namespaces = [n for n in doc.graph.namespace_manager.namespaces()]
         doc.readString(doc.writeString())
         namespaces = [n for n in doc.graph.namespace_manager.namespaces()]
-        self.assertTrue(('examples', URIRef('http://examples.org#')) in namespaces)
+        self.assertIn(('examples', rdflib.URIRef('http://examples.org#')),
+                      namespaces)
 
     def test_namespace_fail(self):
         doc = sbol.Document()
         with self.assertRaises(ValueError):
             doc.addNamespace('http://examples.org', 'foo')
 
+    def test_doc(self):
+        doc = sbol.Document()
+        # This was actually broken, so don't laugh at it
+        self.assertEqual(doc.doc, doc)
+        md = doc.moduleDefinitions.create('foo')
+        self.assertEqual(doc, md.doc)
+        m = md.modules.create('bar')
+        self.assertEqual(doc, m.doc)
 
-if __name__ == '__main__':
-    unittest.main()
+    def test_eq(self):
+        doc = sbol.Document()
+        doc2 = sbol.Document()
+        self.assertEqual(doc, doc2)
+        doc.addNamespace('http://example.org#', 'bar')
+        self.assertNotEqual(doc, doc2)
+
+    def test_get_top_level(self):
+        doc = sbol.Document()
+        self.assertTrue(hasattr(doc, 'getTopLevel'))
+        # Expect a not found error in an empty document
+        try:
+            doc.getTopLevel('foo')
+        except sbol.SBOLError as err:
+            self.assertEqual(err.error_code(),
+                             sbol.SBOLErrorCode.SBOL_ERROR_NOT_FOUND)
+        else:
+            self.fail('Expected SBOLError')
+        cd = doc.componentDefinitions.create('foo')
+        cd2 = doc.getTopLevel(cd.identity)
+        self.assertEqual(cd, cd2)
+        # Test access via string. Above was via URIRef.
+        cd2 = doc.getTopLevel(str(cd.identity))
+        self.assertEqual(cd, cd2)
+
+    def test_addImplementation(self):
+        doc = sbol.Document()
+        with self.assertRaises(Exception):
+            # This raises an attribute exception right now, and that
+            # should change in the future.
+            doc.addImplementation('foo')
+        impl = sbol.Implementation(uri='foo')
+        doc.addImplementation(impl)
+        self.assertEqual(doc.implementations[0], impl)
+        impl2 = sbol.Implementation(uri='bar')
+        impl3 = sbol.Implementation(uri='baz')
+        doc.addImplementation([impl2, impl3])
+        self.assertEqual(doc.implementations[1], impl2)
+        self.assertEqual(doc.implementations[2], impl3)
+
+    def test_addImplementationGenerator(self):
+        # We should be able to add implementations from a generator.
+        # We should not be restricted to adding only a list. Any
+        # Iterable should be fine.
+        def impl_gen(count):
+            for i in range(count):
+                uri = 'impl{}'.format(i)
+                yield sbol.Implementation(uri=uri)
+        homespace = 'http://sbols.org/sbol_test'
+        sbol.setHomespace(homespace)
+        doc = sbol.Document()
+        doc.addImplementation(impl_gen(3))
+        uri_template = '{}/impl{}/1'
+        self.assertEqual(doc.implementations[0].identity,
+                         rdflib.URIRef(uri_template.format(homespace, '0')))
+        self.assertEqual(doc.implementations[1].identity,
+                         rdflib.URIRef(uri_template.format(homespace, '1')))
+        self.assertEqual(doc.implementations[2].identity,
+                         rdflib.URIRef(uri_template.format(homespace, '2')))
+
+    def test_getImplementation(self):
+        homespace = 'http://sbols.org/sbol_test'
+        sbol.setHomespace(homespace)
+        doc = sbol.Document()
+        impl = sbol.Implementation(uri='foo')
+        doc.addImplementation(impl)
+        impl2 = sbol.Implementation(uri='bar')
+        doc.addImplementation(impl2)
+        # Get by index
+        self.assertEqual(doc.getImplementation(0), impl)
+        self.assertEqual(doc.getImplementation(1), impl2)
+        # Get by short URI
+        self.assertEqual(doc.getImplementation('foo'), impl)
+        self.assertEqual(doc.getImplementation('bar'), impl2)
+        # Get by full URI
+        uri_template = '{}/Implementation/{}/1'
+        uri = rdflib.URIRef(uri_template.format(homespace, 'foo'))
+        self.assertEqual(doc.getImplementation(uri), impl)
+        uri = rdflib.URIRef(uri_template.format(homespace, 'bar'))
+        self.assertEqual(doc.getImplementation(uri), impl2)
+
+    def test_bool(self):
+        doc = sbol.Document()
+        self.assertTrue(doc)

@@ -1,35 +1,38 @@
 import collections.abc
-from .identified import *
-from .config import *
-from .constants import *
-from .componentdefinition import ComponentDefinition
-from .sequenceannotation import SequenceAnnotation
-from .sequence import Sequence
-from .component import Component, FunctionalComponent
-from .moduledefinition import ModuleDefinition
-from .module import Module
-from .interaction import Interaction
-from .participation import Participation
-from .model import Model
-from .sequenceconstraint import SequenceConstraint
-from .location import Location, Range, Cut, GenericLocation
-from .mapsto import MapsTo
-from .collection import Collection
-from .provo import Plan, Activity, Agent, Usage, Association
-from .attachment import Attachment
-from .combinatorialderivation import CombinatorialDerivation
-from .implementation import Implementation
-from .dbtl import Analysis, Build, Design, SampleRoster, Test
-from .experiment import Experiment, ExperimentalData
-from .object import SBOLObject
-from .property import OwnedObject, URIProperty
+import logging
+import os
+
 import rdflib
 from rdflib import URIRef
-import rdflib.namespace
-import os
+
 from . import SBOL2Serialize
-import logging
-from logging.config import fileConfig
+from . import validation
+from .attachment import Attachment
+from .collection import Collection
+from .combinatorialderivation import CombinatorialDerivation
+from .component import Component, FunctionalComponent
+from .componentdefinition import ComponentDefinition
+from .config import parsePropertyName
+from .constants import *
+from .dbtl import Analysis, Build, Design, SampleRoster, Test
+from .experiment import Experiment, ExperimentalData
+from .identified import Identified
+from .implementation import Implementation
+from .interaction import Interaction
+from .location import Location, Range, Cut, GenericLocation
+from .mapsto import MapsTo
+from .model import Model
+from .module import Module
+from .moduledefinition import ModuleDefinition
+from .object import SBOLObject
+from .participation import Participation
+from .property import OwnedObject, URIProperty
+from .provo import Plan, Activity, Agent, Usage, Association
+from .sbolerror import SBOLError
+from .sbolerror import SBOLErrorCode
+from .sequence import Sequence
+from .sequenceannotation import SequenceAnnotation
+from .sequenceconstraint import SequenceConstraint
 
 
 class Document(Identified):
@@ -98,13 +101,13 @@ class Document(Identified):
         self._namespaces = {}
         self.resource_namespaces = set()
         self.designs = OwnedObject(self, SYSBIO_DESIGN, Design,
-                                   '0', '*', [libsbol_rule_11])
+                                   '0', '*', [validation.libsbol_rule_11])
         self.builds = OwnedObject(self, SYSBIO_BUILD, Build,
-                                  '0', '*', [libsbol_rule_12])
+                                  '0', '*', [validation.libsbol_rule_12])
         self.tests = OwnedObject(self, SYSBIO_TEST, Test,
-                                 '0', '*', [libsbol_rule_13])
+                                 '0', '*', [validation.libsbol_rule_13])
         self.analyses = OwnedObject(self, SYSBIO_ANALYSIS, Analysis,
-                                    '0', '*', [libsbol_rule_14])
+                                    '0', '*', [validation.libsbol_rule_14])
         self.componentDefinitions = OwnedObject(self,
                                                 SBOL_COMPONENT_DEFINITION,
                                                 ComponentDefinition,
@@ -146,8 +149,19 @@ class Document(Identified):
                                       '0', '*', None)
         self._keywords = URIProperty(self, PURL_URI + "elements/1.1/subject",
                                      '0', '*', None)
+        # I am my own document
+        self.doc = self
         if filename is not None:
             self.read(filename)
+
+    def __eq__(self, other):
+        if not super().__eq__(other):
+            return False
+        # super().__eq__ will have checked the types so we know other
+        # is a Document at this point.
+        if self._namespaces != other._namespaces:
+            return False
+        return True
 
     @property
     def citations(self):
@@ -187,7 +201,7 @@ class Document(Identified):
         """
         # Check for uniqueness of URI
         if sbol_obj.identity in self.SBOLObjects:
-            raise SBOLError('Cannot add ' + sbol_obj.identity +
+            raise SBOLError('Cannot add ' + str(sbol_obj.identity) +
                             ' to Document. An object with this identity '
                             'is already contained in the Document',
                             SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE)
@@ -252,6 +266,19 @@ class Document(Identified):
         else:
             self.add(sbol_obj)
 
+    def addCollection(self, sbol_obj):
+        """
+        Convenience method for adding a collection.
+
+        :param sbol_obj: a Collection
+        :return: None
+        """
+        if isinstance(sbol_obj, collections.abc.Iterable):
+            for obj in sbol_obj:
+                self.add(obj)
+        else:
+            self.add(sbol_obj)
+
     def addSequence(self, sbol_obj):
         """
         Convenience method for adding a sequence.
@@ -269,6 +296,15 @@ class Document(Identified):
         :return: None
         """
         self.add(sbol_obj)
+
+    def addImplementation(self, implementation):
+        """ Convenience method for adding an implementation.
+        """
+        if isinstance(implementation, collections.abc.Iterable):
+            for impl in implementation:
+                self.add(impl)
+        else:
+            self.add(implementation)
 
     def create(self, uri):
         """
@@ -320,6 +356,9 @@ class Document(Identified):
 
     def getModel(self, uri):
         return self.models.get(uri)
+
+    def getImplementation(self, uri):
+        return self.implementations.get(uri)
 
     # File I/O #
     def write(self, filename):
@@ -492,7 +531,8 @@ class Document(Identified):
             # add to the Document's property store
             if new_obj.is_top_level():
                 self.owned_objects[new_obj.rdf_type].append(new_obj)
-        elif subject not in self.SBOLObjects and obj not in self.SBOL_DATA_MODEL_REGISTER:
+        elif (subject not in self.SBOLObjects
+              and obj not in self.SBOL_DATA_MODEL_REGISTER):
             # Generic TopLevels
             new_obj = SBOLObject()
             new_obj.identity = subject
@@ -511,8 +551,8 @@ class Document(Identified):
             found = predicate.rfind('/')
         if found != -1:
             # Checks if the object's property already exists
-            if str(subject) in self.SBOLObjects:
-                parent = self.SBOLObjects[str(subject)]
+            if subject in self.SBOLObjects:
+                parent = self.SBOLObjects[subject]
                 # Decide if this triple corresponds to a simple property,
                 # a list property, an owned property or a referenced property
                 if predicate in parent.properties:
@@ -520,7 +560,7 @@ class Document(Identified):
                     parent.properties[predicate].append(obj)
                 elif predicate in parent.owned_objects:
                     # triple is an owned object
-                    owned_obj = self.SBOLObjects[str(obj)]
+                    owned_obj = self.SBOLObjects[obj]
                     if owned_obj is not None:
                         parent.owned_objects[predicate].append(owned_obj)
                         owned_obj.parent = parent
@@ -532,6 +572,10 @@ class Document(Identified):
                         parent.properties[predicate].append(obj)
                     else:
                         parent.properties[predicate].append(obj)
+            else:
+                msg = 'Subject {} ({}) not found in my SBOLObjects'
+                msg = msg.format(subject, type(subject))
+                self.logger.debug(msg)
 
     def remove_descendants(self):
         to_delete = []
@@ -656,6 +700,11 @@ class Document(Identified):
         """
         return self.size()
 
+    def __bool__(self):
+        # Ignore list semantics for boolean conversion.
+        # A document is True if it exists.
+        return True
+
     def __str__(self):
         """
         Produce a string representation of the Document.
@@ -753,3 +802,19 @@ class Document(Identified):
 
     def getTypeURI(self):
         return URIRef(SBOL_DOCUMENT)
+
+    def getTopLevel(self, uri):
+        # Ensure it's a URI Ref
+        uri = rdflib.URIRef(uri)
+        if uri not in self.SBOLObjects:
+            msg = 'Top level object {} is not in document'
+            msg = msg.format(uri)
+            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_NOT_FOUND)
+        sbol_obj = self.SBOLObjects[uri]
+        # Verify object is top level
+        if sbol_obj.is_top_level():
+            return sbol_obj
+        # Not top level, raise error
+        msg = '{} is not a top level object'
+        msg = msg.format(uri)
+        raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)

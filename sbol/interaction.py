@@ -1,9 +1,11 @@
+from .constants import *
 from .component import FunctionalComponent
 from .identified import Identified
 from .measurement import Measurement
-from .object import *
 from .participation import Participation
-from .validation import *
+from .property import OwnedObject
+from .property import URIProperty
+from . import validation
 
 
 class Interaction(Identified):
@@ -13,7 +15,7 @@ class Interaction(Identified):
         self.functionalComponents = OwnedObject(self,
                                                 SBOL_FUNCTIONAL_COMPONENTS,
                                                 FunctionalComponent,
-                                                '0', '*', [libsbol_rule_18])
+                                                '0', '*', [validation.libsbol_rule_18])
         self._types = URIProperty(self, SBOL_TYPES,
                                   '1', '*', [], interaction_type)
         self.participations = OwnedObject(self, SBOL_PARTICIPATIONS,

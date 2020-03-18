@@ -1,19 +1,10 @@
 import re
+
 from .sbolerror import SBOLError, SBOLErrorCode
-from .identified import *
 
 
 def is_alphanumeric_or_underscore(c):
-    i = ord(c)
-    if i >= 48 and i <= 57:
-        return True
-    if i >= 65 and i <= 90:
-        return True
-    if i >= 97 and i <= 122:
-        return True
-    if i == 95:
-        return True
-    return False
+    return c.isalnum() or c == '_'
 
 
 def is_not_alphanumeric_or_underscore(c):
@@ -37,7 +28,7 @@ def sbolRule10102(sbol_obj, arg):
 def sbol_rule_10202(sbol_obj, arg):
     """The identity property of an Identified object
     MUST be globally unique."""
-    if not isinstance(sbol_obj, Identified) or not isinstance(arg, str):
+    if not hasattr(sbol_obj, 'identity') or not isinstance(arg, str):
         # Not applicable
         raise TypeError('Inappropriate types passed to sbol_rule_10202')
     # if sbol_obj.doc is not None:

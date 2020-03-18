@@ -1,13 +1,21 @@
-from rdflib import Literal
-from .sbolerror import *
-from .config import Config, ConfigOptions, getHomespace, parseClassName, parsePropertyName
-from .constants import *
-import os
-import logging
-from logging.config import fileConfig
 from abc import ABC, abstractmethod
+import collections
+import logging
+import math
+import os
+import posixpath
 
 import rdflib
+from rdflib import Literal
+
+from .config import Config
+from .config import ConfigOptions
+from .config import getHomespace
+from .config import parseClassName
+from .config import parsePropertyName
+from .constants import *
+from .sbolerror import SBOLError
+from .sbolerror import SBOLErrorCode
 
 
 def sort_version(obj):
@@ -48,6 +56,10 @@ class Property(ABC):
         :param initial_value: The initial value of the Property
         (int, str, float supported)
         """
+        # Ensure property_owner has a properties attribute of type
+        # dict.
+        if not isinstance(property_owner.properties, dict):
+            raise TypeError('property_owner.properties must be a dict')
         self._sbol_owner = property_owner
         if isinstance(type_uri, URIRef):
             self._rdf_type = type_uri
@@ -59,7 +71,8 @@ class Property(ABC):
         self._upperBound = upper_bound
         self._validation_rules = []
         self._validation_rules = validation_rules
-        self.value = initial_value
+        if initial_value is not None:
+            self.value = initial_value
 
     @property
     def logger(self):
@@ -86,25 +99,17 @@ class Property(ABC):
         return self._sbol_owner
 
     def getRawValue(self):
+        if self._rdf_type not in self._sbol_owner.properties:
+            return None
+        properties = self._sbol_owner.properties[self._rdf_type]
         if self._upperBound == '1':
-            if self._rdf_type not in self._sbol_owner.properties:
+            try:
+                return properties[-1]
+            except IndexError:
+                # List is empty
                 return None
-            properties = self._sbol_owner.properties[self._rdf_type]
-            if len(properties) == 0:
-                return None
-            else:
-                # Just return the object by itself (not a list)
-                p = self._sbol_owner.properties[self._rdf_type][-1]
-                return p
-        else:
-            if self._rdf_type not in self._sbol_owner.properties:
-                return None
-            properties = self._sbol_owner.properties[self._rdf_type]
-            if len(properties) == 0:
-                return []
-            else:
-                # Return the whole list
-                return self._sbol_owner.properties[self._rdf_type]
+        # upperbound is not 1, just return the list
+        return properties
 
     @property
     def value(self):
@@ -163,13 +168,33 @@ class Property(ABC):
 
     def find(self, query):
         """Check if a value in this property matches the query."""
-        raise NotImplementedError("Not yet implemented")
+        msg = '{}.find() not yet implemented for query {} of type {}'
+        msg = msg.format(type(self).__name__, query, type(query))
+        raise NotImplementedError(msg)
 
     def getLowerBound(self):
         return self._lowerBound
 
+    @property
+    def lower_bound(self):
+        """Return the lower bound of the property as an integer.
+
+        """
+        return int(self._lowerBound)
+
     def getUpperBound(self):
         return self._upperBound
+
+    @property
+    def upper_bound(self):
+        """Return the upper bound of the property as a number.  If the upper
+        bound is '*', this value is math.inf. Otherwise the upper
+        bound is converted to an integer and returned.
+
+        """
+        if self._upperBound == '*':
+            return math.inf
+        return int(self._upperBound)
 
     def validate(self, arg):
         if arg is None:
@@ -179,10 +204,15 @@ class Property(ABC):
             validation_rule(self._sbol_owner, arg)
 
     def __contains__(self, item):
-        if self.find(item) is not None:
-            return True
+        try:
+            obj = self.find(item)
+        except SBOLError as err:
+            if err.error_code() == SBOLErrorCode.NOT_FOUND_ERROR:
+                return None
+            if err.error_code() == SBOLErrorCode.SBOL_ERROR_NOT_FOUND:
+                return None
         else:
-            return False
+            return bool(obj)
 
     def _isHidden(self):
         return self._rdf_type in self._sbol_owner.hidden_properties
@@ -215,24 +245,13 @@ class URIProperty(Property):
         properties = self._sbol_owner.properties[self._rdf_type]
         if len(properties) == 0:
             return None
-        else:
-            # Just return the object by itself (not a list)
-            p = self._sbol_owner.properties[self._rdf_type][-1]
-            return p.n3()[1:-1]
+        return properties[-1]
 
     def getPropertyValueList(self):
         if self._rdf_type not in self._sbol_owner.properties:
-            return None
-        properties = self._sbol_owner.properties[self._rdf_type]
-        if len(properties) == 0:
             return []
-        else:
-            # Return the whole list
-            plist = self._sbol_owner.properties[self._rdf_type]
-            new_plist = []
-            for p in plist:
-                new_plist.append(p.n3()[1:-1])
-            return new_plist
+        properties = self._sbol_owner.properties[self._rdf_type]
+        return properties.copy()
 
     @value.setter
     def value(self, new_value):
@@ -246,7 +265,7 @@ class URIProperty(Property):
 
     def setSinglePropertyValue(self, new_value):
         if type(new_value) is list:
-            raise TypeError('The ' + self.getTypeURI() +
+            raise TypeError('The ' + str(self.getTypeURI()) +
                             ' property does not accept list arguments.')
         if self._rdf_type not in self._sbol_owner.properties:
             self._sbol_owner.properties[self._rdf_type] = []
@@ -295,12 +314,11 @@ class LiteralProperty(Property):
     def __init__(self, property_owner, type_uri, lower_bound, upper_bound,
                  validation_rules, initial_value=None):
         super().__init__(property_owner, type_uri, lower_bound, upper_bound,
-                         validation_rules, initial_value)
-        if self.value:
-            self.set(self.value)
-        #     self._sbol_owner.properties[type_uri] = [initial_value]
-        # else:
-        #     self._sbol_owner.properties[type_uri] = []
+                         validation_rules)
+        if self._rdf_type not in self._sbol_owner.properties:
+            self._sbol_owner.properties[self._rdf_type] = []
+        if initial_value is not None:
+            self.value = initial_value
 
     @property
     def value(self):
@@ -310,29 +328,15 @@ class LiteralProperty(Property):
             return self.getPropertyValueList()
 
     def getSinglePropertyValue(self):
-        if self._rdf_type not in self._sbol_owner.properties:
-            return None
         properties = self._sbol_owner.properties[self._rdf_type]
         if len(properties) == 0:
             return None
-        else:
-            # Just return the object by itself (not a list)
-            p = self._sbol_owner.properties[self._rdf_type][-1]
-            return p.value
+        # Just return the object by itself (not a list)
+        return self.convert_to_user(properties[0])
 
     def getPropertyValueList(self):
-        if self._rdf_type not in self._sbol_owner.properties:
-            return None
         properties = self._sbol_owner.properties[self._rdf_type]
-        if len(properties) == 0:
-            return []
-        else:
-            # Return the whole list
-            plist = self._sbol_owner.properties[self._rdf_type]
-            new_plist = []
-            for p in plist:
-                new_plist.append(p.value)
-            return new_plist
+        return [self.convert_to_user(v) for v in properties]
 
     @value.setter
     def value(self, new_value):
@@ -345,46 +349,61 @@ class LiteralProperty(Property):
             self.setPropertyValueList(new_value)
 
     def setSinglePropertyValue(self, new_value):
-        if type(new_value) is list:
-            raise TypeError('The ' + self.getTypeURI() +
-                            ' property does not accept list arguments.')
-        if self._rdf_type not in self._sbol_owner.properties:
-            self._sbol_owner.properties[self._rdf_type] = []
+        new_value = self.convert_from_user(new_value)
+        # clear out any old value
+        self._sbol_owner.properties[self._rdf_type].clear()
         if new_value is None:
+            # We've already cleared the value, do nothing else.
             return
-        elif len(self._sbol_owner.properties[self._rdf_type]) == 0:
-            self._sbol_owner.properties[self._rdf_type].append(Literal(new_value))
-        else:
-            self._sbol_owner.properties[self._rdf_type][-1] = Literal(new_value)
+        self._sbol_owner.properties[self._rdf_type].append(new_value)
 
-    def setPropertyValueList(self, new_value_list):
-        if self._rdf_type not in self._sbol_owner.properties:
-            self._sbol_owner.properties[self._rdf_type] = []
-        if new_value_list is None:
-            return
-        else:
-            if type(new_value_list) is list:
-                for value in new_value_list:
-                    if not isinstance(value, Literal):
-                        self.logger.warning('Value "' + str(value) +
-                                            ' assigned to LiteralProperty ' +
-                                            ' is of type ' + str(type(value)) +
-                                            '. Wrapping it in: ' + str(Literal))
-                        value = Literal(value)
-                    self._sbol_owner.properties[self._rdf_type].append(value)
-            else:
-                # the list is actually not a list, but a single element, even
-                # though lists are supported.
-                self._sbol_owner.properties[self._rdf_type].append(URIRef(new_value_list))
+    def setPropertyValueList(self, new_value):
+        if not isinstance(new_value, collections.Iterable):
+            raise TypeError('{} must be an iterable'.format(self.getTypeURI()))
+        # Special case. Should we really support this?
+        # Convert a string to a list of that string
+        if isinstance(new_value, str):
+            new_value = [new_value]
+        new_value = [self.convert_from_user(v) for v in new_value]
+        # should we filter out None in the list? I don't think so. If
+        # the user put them there, then that's what they're going to
+        # get.
+        self._sbol_owner.properties[self._rdf_type] = new_value
 
     def add(self, new_value):
-        if self._sbol_owner is not None:
-            if self._rdf_type not in self._sbol_owner.properties:
-                self._sbol_owner.properties[self._rdf_type] = []
-            properties = self._sbol_owner.properties[self._rdf_type]
-            properties.append(Literal(new_value))
-        else:
-            self.logger.error("Unable to update property: SBOL owner not set.")
+        property = self._sbol_owner.properties[self._rdf_type]
+        if len(property) >= self.upper_bound:
+            msg = 'Property {} has reached the upper bound of {}'
+            msg = msg.format(self._rdf_type, self.upper_bound)
+            raise ValueError(msg)
+        new_value = self.convert_from_user(new_value)
+        property.append(new_value)
+
+    def convert_to_user(self, value):
+        # Stored as a Literal, which is a str, which is what the user
+        # wants. This is a no-op.
+        return value
+
+    def convert_from_user(self, value):
+        # None is ok iff upper bound is 1 and lower bound is 0.
+        # If upper bound > 1, attribute is a list and None is not a valid list
+        # If lower bound > 0, attribute must have a value, so None is unacceptable
+        if value is None and self.upper_bound == 1 and self.lower_bound == 0:
+            return None
+        if not isinstance(value, str):
+            msg = '{} values must have type str'.format(self.getTypeURI())
+            raise TypeError(msg)
+        return Literal(value)
+
+
+class TextProperty(LiteralProperty):
+
+    # In the future, pull the convert_to_user and convert_from_user
+    # methods out of LiteralProperty and into TextProperty. Then make
+    # LiteralProperty an abstract base class.
+
+    # For now, this class is just an alias to LiteralProperty
+    pass
 
 
 class OwnedObject(URIProperty):
@@ -437,25 +456,23 @@ class OwnedObject(URIProperty):
                 # Add to Document and check for uniqueness of URI
                 if self._sbol_owner.doc is not None:
                     sbol_obj.doc = self._sbol_owner.doc
-                # Add to parent object
-                object_store.append(sbol_obj)
                 sbol_obj.parent = self._sbol_owner
                 # Update URI for the argument object and all its children,
                 # if SBOL-compliance is enabled.
                 sbol_obj.update_uri()
-
+                # Add to parent object
+                object_store.append(sbol_obj)
                 # Run validation rules
                 # TODO
 
     def __getitem__(self, id):
         if type(id) is int:
             return self.get_int(id)
-        elif type(id) is URIRef:
-            return self.get_uri(id.n3())
-        elif type(id) is str:
-            return self.get_uri(id)
-        else:
-            raise TypeError('id must be str or int')
+        if isinstance(id, str):
+            return self.get_uri(rdflib.URIRef(id))
+        # Anything other than int and str, covered above, is a problem
+        errmsg = 'id must be str or int, got {!r}'.format(type(id))
+        raise TypeError(errmsg)
 
     def get_int(self, id):
         object_store = self._sbol_owner.owned_objects[self._rdf_type]
@@ -464,6 +481,13 @@ class OwnedObject(URIProperty):
             # raised to properly detect end of sequence
             raise IndexError
         return object_store[id]
+
+    def find(self, query):
+        if isinstance(query, str):
+            return self.get_uri(rdflib.URIRef(query))
+        errmsg = 'Invalid find query {} of type {}'
+        errmsg = errmsg.format(query, type(query).__name__)
+        raise TypeError(errmsg)
 
     def get_uri(self, id):
         if Config.getOption(ConfigOptions.VERBOSE.value) is True:
@@ -497,8 +521,8 @@ class OwnedObject(URIProperty):
             if obj is not None:
                 return obj
             else:
-                raise SBOLError('Object ' + id + ' not found',
-                                SBOLErrorCode.NOT_FOUND_ERROR)
+                msg = 'Object {} not found'.format(id)
+                raise SBOLError(msg, SBOLErrorCode.NOT_FOUND_ERROR)
 
     def find_resource(self, uri, resource_namespaces, object_store,
                       parent_obj, typedURI=False):
@@ -506,9 +530,9 @@ class OwnedObject(URIProperty):
         for ns in resource_namespaces:
             # Assume the parent object is TopLevel and form the compliant URI
             if typedURI is True:
-                compliant_uri = os.path.join(ns, parseClassName(self._rdf_type), uri)
+                compliant_uri = posixpath.join(ns, parseClassName(self._rdf_type), uri)
             else:
-                compliant_uri = os.path.join(ns, uri)
+                compliant_uri = posixpath.join(ns, uri)
             compliant_uri += os.sep
             compliant_uri = URIRef(compliant_uri)
             persistent_id_matches = []
@@ -525,18 +549,19 @@ class OwnedObject(URIProperty):
             if len(persistent_id_matches) > 0:
                 return persistent_id_matches[-1]
             # Assume the object is not TopLevel # TODO What is this for?
-            if SBOL_PERSISTENT_IDENTITY in parent_obj.properties:
+            if (SBOL_PERSISTENT_IDENTITY in parent_obj.properties
+                    and parent_obj.properties[SBOL_PERSISTENT_IDENTITY]):
                 persistentIdentity = parent_obj.properties[SBOL_PERSISTENT_IDENTITY][0]
-            if SBOL_VERSION in parent_obj.properties:
+            if (SBOL_VERSION in parent_obj.properties
+                    and parent_obj.properties[SBOL_VERSION]):
                 version = parent_obj.properties[SBOL_VERSION][0]
-                compliant_uri = os.path.join(persistentIdentity, uri, version)
+                compliant_uri = posixpath.join(persistentIdentity, uri, version)
             else:
-                compliant_uri = os.path.join(persistentIdentity, uri)
+                compliant_uri = posixpath.join(persistentIdentity, uri)
             if Config.getOption(ConfigOptions.VERBOSE.value) is True:
                 print('Searching for non-TopLevel: ' + compliant_uri)
             for obj in object_store:
-                # identity is a string, so cast the URIRef compliant_uri to a string
-                if obj.identity == str(compliant_uri):
+                if obj.identity == compliant_uri:
                     return obj
 
     def get(self, uri):
@@ -696,23 +721,51 @@ class ReferencedObject(Property):
         reference_store = self._sbol_owner.properties[self._rdf_type]
         return reference_store[item]
 
-    def set(self, uri):
-        # TODO for parity with Property, this should perhaps be split into calls to two 
-        # subordinate methods for setSinglePropertyValue and setPropertyValueList
-        if self._sbol_owner is not None:
-            if self._upperBound == '1':
-                self._sbol_owner.properties[self._rdf_type] = uri
-            else:
-                if type(uri) == list:
-                    self._sbol_owner.properties[self._rdf_type] = uri
-                else:
-                    self._sbol_owner.properties[self._rdf_type] = [uri]
+    def set(self, new_value):
+        if self._sbol_owner is None:
+            # Not sure we should raise this, but I'm guessing it would
+            # be good to know.
+            # TODO: convert this to a better Python exception or to an
+            # SBOL exception
+            raise Exception('No owner for referenced value')
+        if self.getUpperBound() == '1':
+            self.setSinglePropertyValue(new_value)
         else:
-            # NOTE: we could raise an exception here, but the
-            # original code is not doing anything in this case.
-            print('Unable to set item. SBOL owner was None.')
+            self.setPropertyValueList(new_value)
+
+    def _to_uri(self, obj):
+        """Converts strings, URIRefs, and sbol.Identified instances into
+        rdflib.URIRefs.
+
+        """
+        if isinstance(obj, str):
+            return rdflib.URIRef(obj)
+        if hasattr(obj, '__uri__'):
+            # SBOLObjects have a __uri__ method, and others can too
+            return obj.__uri__()
+        errmsg = 'Cannot convert {} of type {} to a referenced object'
+        raise TypeError(errmsg.format(obj, type(obj)))
+
+    def setSinglePropertyValue(self, new_value):
+        self._sbol_owner.properties[self._rdf_type] = [self._to_uri(new_value)]
+
+    def setPropertyValueList(self, new_value):
+        if hasattr(new_value, '__uri__'):
+            # Convert to URI
+            # SBOLObjects have a __uri__ method, and others can too
+            new_value = new_value.__uri__()
+        if isinstance(new_value, str):
+            # Turn it into a list
+            new_value = [new_value]
+        if isinstance(new_value, collections.Iterable):
+            # Convert the items to URIRefs
+            new_value = list([self._to_uri(x) for x in new_value])
+        self._sbol_owner.properties[self._rdf_type] = new_value
 
     def add(self, uri):
+        # Does anyone call this method? If so, it needs to be properly
+        # implemented.
+        raise Exception('Should ReferencedObject.add be deprecated?')
         if self._sbol_owner is not None:
             if self._rdf_type not in self._sbol_owner.properties:
                 self._sbol_owner.properties[self._rdf_type] = []
@@ -723,21 +776,30 @@ class ReferencedObject(Property):
             print('Unable to set item. SBOL owner was None.')
 
     def addReference(self, uri):
+        # Does anyone call this method? If so, it needs to be properly
+        # implemented.
+        raise Exception('Should ReferencedObject.addReference be deprecated?')
         self._sbol_owner.properties[self._rdf_type].append(uri)
 
-    def _uri_ref_to_str(self, thing):
+    def _ensure_uri_ref(self, thing):
+        """This method ensures that what gets returned is an rdflib.URIRef. If
+        the set methods are working properly, this should be
+        unnecessary. Hence the warning message if what it finds is not
+        a URIRef. The goal is to remove this method eventually.
+
+        """
         if isinstance(thing, rdflib.URIRef):
-            return str(thing)
-        else:
             return thing
+        self.logger.warning('ReferencedObject was not a URIRef: {}'.format(thing))
+        return rdflib.URIRef(thing)
 
     @property
     def value(self):
         raw_value = self.getRawValue()
         if self._upperBound == '1':
-            return self._uri_ref_to_str(raw_value)
+            return self._ensure_uri_ref(raw_value)
         else:
-            result = [self._uri_ref_to_str(rval) for rval in raw_value]
+            result = [self._ensure_uri_ref(rval) for rval in raw_value]
             # Return a list, not a generator. Consumers are expecting a list.
             return list(result)
 

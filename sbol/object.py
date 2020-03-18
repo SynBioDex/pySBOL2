@@ -1,25 +1,20 @@
-from .property import *
-from .validation import *
-from .config import *
-from rdflib import RDF
 import logging
-from logging.config import fileConfig
+import posixpath
 
 import rdflib
+
+from .config import getHomespace
+from .config import hasHomespace
+from .constants import *
+from .property import ReferencedObject
+from .property import URIProperty
+from . import validation
 
 
 class SBOLObject:
     """An SBOLObject converts a Python data structure into an RDF triple store
      and contains methods for serializing and parsing RDF triples.
     """
-
-    # 'Protected' members
-    _namespaces = None
-    _default_namespace = None
-    _hidden_properties = []
-
-    # def _init(self, rdf_type, uri):
-    #     raise NotImplementedError("Not yet implemented")
 
     def _serialize(self):
         # Convert and SBOL object into RDF triples.
@@ -47,13 +42,6 @@ class SBOLObject:
         """
         raise NotImplementedError("Not yet implemented")
 
-    # 'Public' members
-    doc = None
-    rdf_type = None
-    parent = None
-    properties = None
-    owned_objects = None
-
     # TODO Docstrings on variables isn't a thing in Python. Consider using Epydoc.
     # The identity property is REQUIRED by all Identified objects
     # and has a data type of URI. A given Identified object's identity
@@ -64,12 +52,17 @@ class SBOLObject:
     # within this domain. For other best practices regarding URIs
     # see Section 11.2 of the
     # [SBOL specification document](http://sbolstandard.org/wp-content/uploads/2015/08/SBOLv2.0.1.pdf).
-    _identity = None
+    # _identity = None
 
-    def __init__(self, _rdf_type=URIRef(UNDEFINED), uri=URIRef("example")):
+    def __init__(self, _rdf_type=rdflib.URIRef(UNDEFINED),
+                 uri=rdflib.URIRef("example")):
         """Open-world constructor."""
         self.owned_objects = {}  # map<rdf_type, vector<SBOLObject>>
         self.properties = {}  # map<rdf_type, vector<SBOLObject>>
+        self.doc = None
+        self.parent = None
+        self._default_namespace = None
+        self._hidden_properties = []
         if type(_rdf_type) is str:
             self.rdf_type = URIRef(_rdf_type)
         else:
@@ -79,14 +72,14 @@ class SBOLObject:
             self.logger.debug("Property was not a URIRef: '" +
                               str(uri) + "', " + str(type(uri)))
             self._identity = URIProperty(self, SBOL_IDENTITY,
-                                         '0', '1', [sbol_rule_10202], URIRef(uri))
+                                         '0', '1', [validation.sbol_rule_10202], URIRef(uri))
         else:
             self._identity = URIProperty(self, SBOL_IDENTITY,
-                                         '0', '1', [sbol_rule_10202], uri)
+                                         '0', '1', [validation.sbol_rule_10202], uri)
         if hasHomespace():
-            uri = os.path.join(getHomespace(), uri)
+            uri = posixpath.join(getHomespace(), uri)
             self._identity = URIProperty(self, SBOL_IDENTITY,
-                                         '0', '1', [sbol_rule_10202], uri)
+                                         '0', '1', [validation.sbol_rule_10202], uri)
 
     @property
     def logger(self):
@@ -98,6 +91,9 @@ class SBOLObject:
             logging.basicConfig()
         return logger
 
+    def __uri__(self):
+        return self.identity
+
     @property
     def identity(self):
         # Return the value associated with the identity property
@@ -106,6 +102,10 @@ class SBOLObject:
     @identity.setter
     def identity(self, new_identity):
         self._identity.value = new_identity
+
+    @property
+    def type(self):
+        return self.rdf_type
 
     def getTypeURI(self):
         """
@@ -121,6 +121,15 @@ class SBOLObject:
         else:
             return rdf_type
 
+    def cast(self, cls):
+        if not isinstance(self, cls):
+            msg = 'Cannot cast instance of {} to class {}'
+            msg = msg.format(type(self).__name__, cls.__name__)
+            raise TypeError(msg)
+        # TODO: libSBOL does a copy here. I don't think that's needed
+        # in Python.
+        return self
+
     def find(self, uri):
         """Search this object recursively to see if an object or
         any child object with URI already exists.
@@ -129,6 +138,7 @@ class SBOLObject:
         :return: The SBOLObject associated with this URI if it exists,
         None otherwise.
         """
+        uri = rdflib.URIRef(uri)
         if self.identity == uri:
             return self
         for rdf_type, object_store in self.owned_objects.items():
@@ -207,6 +217,7 @@ class SBOLObject:
         """
         raise NotImplementedError("Not yet implemented")
 
+    # TODO: Can we deprecate this method?
     def compare(self, comparand):
         """Compare two SBOL objects or Documents. The behavior
         is currently undefined for objects with custom annotations
@@ -217,66 +228,25 @@ class SBOLObject:
         False if they are different.
         """
         # TODO This may work differently than the original method...
-        if type(comparand) != type(self):
-            return False
-        is_equal = True
-        if self.rdf_type != comparand.rdf_type:
-            self.logger.warning(self.identity + ' does not match type of ' + comparand.rdf_type)
-            return False
-        if self.rdf_type == SBOL_DOCUMENT:
-            ns_set = set(())
-            comparand_ns_set = set(())
-            for val in self._namespaces.values():
-                ns_set.add(val)
-            for val in comparand._namespaces.values():
-                comparand_ns_set.add(val)
-            if ns_set != comparand_ns_set:
-                self.logger.warning("NAMESPACES ARE NOT EQUAL!!!")
-                is_equal = False
-        self.logger.debug("Here are my properties: "
-                          + str(self.properties))
-        self.logger.debug("Here are their properties: "
-                          + str(comparand.properties))
-        if self.compare_unordered_lists(self.properties, comparand.properties) is False:
-            self.logger.warning("PROPERTIES ARE NOT EQUAL!!!")
-            is_equal = False
-        self.logger.debug("Here are my owned objects: "
-                          + str(self.owned_objects))
-        self.logger.debug("Here are their owned objects: "
-                          + str(comparand.owned_objects))
-        if self.compare_unordered_lists(self.owned_objects, comparand.owned_objects) is False:
-            self.logger.warning("OWNED OBJECTS ARE NOT EQUAL!!!")
-            is_equal = False
-        return is_equal
-
-    def compare_unordered_lists(self, mine, theirs):
-        """This is a very inefficient hack for comparing two unordered mutable lists.
-
-        We could make some small improvements to this approach,
-        or consider alternatives."""
-        for my_obj in mine:
-            found = False
-            for their_obj in theirs:
-                if my_obj == their_obj:
-                    found = True
-                    break
-            if found is False:
-                return False
-        return True
+        return self == comparand
 
     def __eq__(self, other):
-        """Compare two SBOL objects or Documents. The behavior
-        is currently undefined for objects
-        with custom annotations or extension classes.
+        """Compare two SBOLObjects. The behavior is currently undefined for
+        objects with custom annotations or extension classes.
 
         :param other: The object being compared to this one.
         :return: True if the objects are identical, False if they are different.
+
         """
-        # if other is None or not isinstance(other, SBOLObject):
-        #     return False
-        # if self.rdf_type != other.rdf_type:
-        #     print(self.identity.get() + ' does not match type of ' + other.type())
-        return self.compare(other)
+        if type(other) != type(self):
+            return False
+        if self.rdf_type != other.rdf_type:
+            return False
+        if self.properties != other.properties:
+            return False
+        if self.owned_objects != other.owned_objects:
+            return False
+        return True
 
     def getPropertyValue(self, property_uri):
         """Get the value of a custom annotation property by its URI.
@@ -370,7 +340,8 @@ class SBOLObject:
         raise NotImplementedError("Implemented by child classes")
 
     def build_graph(self, graph):
-        graph.add((self._identity.getRawValue(), RDF.type, self.rdf_type))
+        graph.add((self._identity.getRawValue(), rdflib.RDF.type,
+                   self.rdf_type))
         for typeURI, proplist in self.properties.items():
             for prop in proplist:
                 graph.add((self._identity.getRawValue(),
@@ -415,7 +386,7 @@ class SBOLObject:
                 obj.serialize_rdf2xml(graph)  # recursive
 
     def __str__(self):
-        return self.identity  # identity should be a URIRef``
+        return str(self.identity)
 
     def is_top_level(self):
         return False

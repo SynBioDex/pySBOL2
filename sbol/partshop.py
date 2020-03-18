@@ -1,11 +1,17 @@
-import requests
-import os
-import logging
-from logging.config import fileConfig
-from sbol.sbolerror import *
-from sbol.constants import *
-from sbol.config import Config, ConfigOptions, parseURLDomain
 import getpass
+import logging
+import os
+
+import requests
+# For backward compatible HTTPError
+import urllib3.exceptions
+
+from .config import Config
+from .config import ConfigOptions
+from .config import parseURLDomain
+from .constants import *
+from .sbolerror import SBOLError
+from .sbolerror import SBOLErrorCode
 
 
 class PartShop:
@@ -19,18 +25,23 @@ class PartShop:
         :param spoofed_url:
         """
         # initialize member variables
-        self.resource = url
+        self.resource = self._validate_url(url, 'resource')
         self.user = ''
         self.key = ''
-        self.spoofed_resource = spoofed_url
+        self.spoofed_resource = self._validate_url(spoofed_url, 'spoofed')
+
+    def _validate_url(self, url, url_name):
+        # This feels like a weak validation
+        # Should we verify that it is a string?
+        #   [1, 2, 3] will pass this test, and surely break something else later.
+        # Should we use urllib.parse.urlparse?
+        #   It doesn't do a whole lot, but catches some things this code doesn't
         if len(url) > 0 and url[-1] == '/':
-            raise SBOLError(SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT,
-                            'PartShop initialization failed. The resource URL '
-                            'should not contain a terminal backlash')
-        if len(spoofed_url) > 0 and spoofed_url[-1] == '/':
-            raise SBOLError(SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT,
-                            'PartShop initialization failed. The spoofed URL '
-                            'should not contain a terminal backslash')
+            msg = ('PartShop initialization failed. The {} URL '
+                   + 'should not contain a terminal backlash')
+            msg = msg.format(url_name)
+            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
+        return url
 
     @property
     def logger(self):
@@ -45,6 +56,9 @@ class PartShop:
     def count(self):
         """Return the count of objects contained in a PartShop"""
         raise NotImplementedError('Not yet implemented')
+
+    def spoof(self, spoofed_url):
+        self.spoofed_resource = self._validate_url(spoofed_url, 'spoofed')
 
     def sparqlQuery(self, query):
         """
@@ -93,13 +107,14 @@ class PartShop:
         else:
             raise TypeError('URIs must be str or list. Found: ' + str(type(uris)))
         for uri in endpoints:
-            if self.resource in uri:  # user has specified full URI
-                query = uri
-            elif len(self.spoofed_resource) > 0 and self.resource in uri:
-                query = uri.replace(self.resource, self.spoofed_resource)
-            else:
-                # Assume user has only specified displayId
-                query = self.resource + '/' + uri
+            try:
+                query = self._uri2url(uri)
+            except SBOLError as err:
+                if err.error_code() == SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT:
+                    # Assume user has only specified displayId
+                    query = self.resource + '/' + uri
+                else:
+                    raise
             query += '/sbol'
             if not recursive:
                 query += 'nr'
@@ -147,7 +162,8 @@ class PartShop:
                 collection = collection.replace(self.resource,
                                                 self.spoofed_resource)
             if Config.getOption(ConfigOptions.VERBOSE.value) is True:
-                self.logger.info('Submitting Document to an existing collection: ' + collection)
+                self.logger.info('Submitting Document to an existing collection: %s',
+                                 collection)
         # if Config.getOption(ConfigOptions.SERIALIZATION_FORMAT.value) == 'rdfxml':
         #     self.addSynBioHubAnnotations(doc)
         files = {}
@@ -155,9 +171,9 @@ class PartShop:
             files['id'] = (None, doc.displayId)
         if len(doc.version) > 0:
             files['version'] = (None, doc.version)
-        if len(doc.name) > 0:
+        if doc.name and len(doc.name) > 0:
             files['name'] = (None, doc.name)
-        if len(doc.description) > 0:
+        if doc.description and len(doc.description) > 0:
             files['description'] = (None, doc.description)
         citations = ''
         for citation in doc.citations:
@@ -175,23 +191,55 @@ class PartShop:
         if collection != '':
             files['rootCollections'] = (None, collection)
         # Send POST request
-        print(files)
+        # print(files)
         response = requests.post(self.resource + '/submit',
                                  files=files,
                                  headers={'Accept': 'text/plain',
                                           'X-authorization': self.key})
-        print(response.text)
+        # print(response.text)
         if response:
             return response
         elif response.status_code == 401:
-            raise SBOLError(SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST,
-                            'You must login with valid credentials '
-                            'before submitting')
+            # Raise a urllib3 HTTPError exception to be backward compatible with pySBOL
+            raise urllib3.exceptions.HTTPError('You must login with valid credentials '
+                                               'before submitting')
         else:
-            raise SBOLError(SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST,
-                            'HTTP post request failed with: ' +
-                            str(response.status_code) +
-                            ' - ' + str(response.content))
+            # Raise a urllib3 HTTPError exception to be backward compatible with pySBOL
+            raise urllib3.exceptions.HTTPError('HTTP post request failed with: ' +
+                                               str(response.status_code) +
+                                               ' - ' + str(response.content))
+
+    def _uri2url(self, uri):
+        """Converts an SBOL URI to a URL for running queries to a SynBioHub
+        endpoint.
+
+        """
+        if self.resource in uri:
+            return uri
+        if parseURLDomain(self.resource) in uri:
+            return uri
+        if self.spoofed_resource and self.spoofed_resource in uri:
+            return uri.replace(self.spoofed_resource, self.resource)
+        msg = ('{} does not exist in the resource namespace')
+        msg = msg.format(uri)
+        raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
+
+    def remove(self, uri):
+        query = self._uri2url(uri)
+        url = '{}/remove'.format(query)
+        headers = {
+            'X-authorization': self.key,
+            'Accept': 'application/json'
+        }
+        response = requests.get(url, headers=headers)
+        if response.ok:
+            return True
+        if response.status_code == 401:
+            # TODO: Is there a symbol we can use instead of 401?
+            msg = 'You must login with valid credentials before removing'
+            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_HTTP_UNAUTHORIZED)
+        # Not sure what went wrong
+        raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST)
 
     def login(self, user_id, password=''):
         """In order to submit to a PartShop, you must login first.
@@ -210,9 +258,9 @@ class PartShop:
             headers={'Content-Type': 'application/x-www-form-urlencoded'}
         )
         if not response:
-            raise SBOLError(SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST,
-                            'Login failed due to an HTTP error: ' +
-                            str(response))
+            msg = 'Login failed due to an HTTP error: {}'
+            msg = msg.format(response)
+            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST)
         self.key = response.content.decode('utf-8')
         return response
 
@@ -221,6 +269,14 @@ class PartShop:
 
     def getURL(self):
         return self.resource
+
+    # For backward compatibility with pySBOL
+    def getUser(self):
+        return self.user
+
+    # For backward compatibility with pySBOL
+    def getSpoofedURL(self):
+        return self.spoofed_resource
 
     # def addSynBioHubAnnotations(self, doc):
     #     doc.addNamespace("http://wiki.synbiohub.org/wiki/Terms/synbiohub#", "sbh")

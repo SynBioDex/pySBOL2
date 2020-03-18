@@ -1,5 +1,10 @@
-from .toplevel import *
 from deprecated import deprecated
+
+from rdflib import URIRef
+
+from .constants import *
+from .property import LiteralProperty
+from .toplevel import TopLevel
 
 
 class Sequence(TopLevel):
@@ -68,7 +73,7 @@ class Sequence(TopLevel):
     # | Small Molecule            | SMILES         | SBOL_ENCODING_SMILES        | http://www.opensmiles.org/opensmiles.html        |
     @property
     def encoding(self):
-        return str(self._encoding.value)
+        return self._encoding.value
 
     @encoding.setter
     def encoding(self, new_encoding):
@@ -111,6 +116,11 @@ class Sequence(TopLevel):
         :return: The length of the primary sequence in the elements property.
         """
         return len(self.elements)
+
+    def __bool__(self):
+        # Ignore list semantics for boolean conversion.
+        # A sequence is True if it exists.
+        return True
 
     @deprecated(version='3.0.0', reason='Use len(sequence) instead')
     def length(self):

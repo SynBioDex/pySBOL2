@@ -5,34 +5,34 @@
 an open standard for the representation of *in silico* biological designs. It draws from [libSBOL](https://github.com/SynBioDex/libSBOL)
 and [pySBOL](https://github.com/SynBioDex/pySBOL).
 
+For developers, please see [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## INSTALLATION
 
-This library is currently under development. To test it out, follow these steps:
-1) Clone this repository.
-2) (From top-level directory) `pip install -e .`
-3) Open a python3 interpreter, and import sbol.
+This library is currently under development. Please consider using a
+virtual environment for your installation.
 
-If you are using pySBOL, consider running this in a virtual environment.
-
-## TESTING
-
-SBOL comes with a testing function to check the integrity of the library. To run the unit tests, simply execute the following command.
-```python
-import sbol
-sbol.testSBOL()
+```shell
+# Name the virtual environment
+DIR=myenv
+# Create the virtual environment
+python3 -m venv "${DIR}"
+# Activate the virtual environment
+source "${DIR}"/bin/activate
+# Recommended: upgrade pip
+pip install -U pip
+# Install the sbol module
+pip install git+https://github.com/llotneb/SBOL.git
 ```
-SBOL also comes with a suite of 'round-trip' tests to verify that serialization and deserialization of SBOL files works correctly.
-To run the round-trip tests, execute the following command.
-```python
-import sbol
-sbol.testRoundTrip()
-```
-If you are a developer, please run ./dev/bootstrap.sh to set up the pre-commit hooks.
-This will ensure that unit tests and style checking is performed before each commit.
 
 ## DOCUMENTATION
 
 To be updated.
+
+This module should be largely compatible with
+[pySBOL](https://github.com/SynBioDex/pySBOL).
+The [pySBOL documentation](https://pysbol2.readthedocs.io/en/latest/index.html)
+should be used until this module has its own documentation.
 
 ## ACKNOWLEDGEMENTS
 
