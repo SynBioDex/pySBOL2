@@ -10,6 +10,21 @@ SBOL_PATH = os.path.dirname(MODULE_LOCATION)
 # Please don't increase this number!
 MAX_WILDCARD_IMPORTS = 6
 
+# -----------------------------------------------------------------
+# Locale Fix
+#
+# If you get an ascii conversion error, you probably do not have a
+# local set.
+#
+# Follow these steps, substituting for "en_US.utf8" as appropriate:
+#
+#     apt update
+#     apt install locales
+#     locale-gen en_US.utf8
+#     export LANG=en_US.utf8
+#
+# -----------------------------------------------------------------
+
 
 class TestStyle(unittest.TestCase):
 
