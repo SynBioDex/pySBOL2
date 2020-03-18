@@ -253,12 +253,27 @@ class Identified(SBOLObject):
                                 continue
                             new_uri = replace_namespace(referenced_object, target_namespace)
                             values[i_uri] = new_uri
-                            print(uri, new_uri)
 
                     if reference_property._upperBound == '1':
                         reference_property.value = values[0]
                     else:
                         reference_property.value = values
+
+        # Set the new object's version according to the user specified parameter
+        if version != '':
+            new_obj.version = version
+
+        # If user doesn't provide a version, then set it automatically based on this object's version
+        elif self.version != None:
+                
+            # If user is copying into the same Document and namespace, increment the version to avoid a URI collision
+            if new_obj.doc == self.doc and target_namespace == '':
+                new_object.version.incrementMajor()
+
+            # If user is copying into a different Document, then copy the original object's version without incrementing
+            else:
+                new_object.version = self.version
+
 
         return new_obj
 

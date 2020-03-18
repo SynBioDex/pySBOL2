@@ -114,7 +114,6 @@ class TestCopy(unittest.TestCase):
         # When copying an object into a new namespace, confirm that it's URI is copied into the new namespace.
         # Also confirm that any ReferencedObject attributes whose values point to an object in the old namespace
         # are also copied into the new namespace
-
         setHomespace('http://examples.org')
         Config.setOption('sbol_compliant_uris', True)
         Config.setOption('sbol_typed_uris', False)
@@ -133,7 +132,6 @@ class TestCopy(unittest.TestCase):
         self.assertEqual(comp_copy.sequences[0], 'http://acme.com/seq/1')
 
     def test_import_into_nontyped_namespace_from_typed_namespace(self):
-        print('test_import_into_nontyped_namespace_from_typed_namespace')
         # Now repeat. This time copy an sbol-typed URI to a non-typed, sbol-compliant URI
         setHomespace('http://examples.org')
         Config.setOption('sbol_typed_uris', True)
@@ -154,7 +152,6 @@ class TestCopy(unittest.TestCase):
         self.assertEqual(comp_copy.sequences[0], 'http://acme.com/seq/1')      
 
     def test_import_into_typed_namespace_from_nontyped_namespace(self):
-        print('test_import_into_typed_namespace_from_nontyped_namespace')
 
         # Now repeat. This time copy an sbol-typed URI to a non-typed, sbol-compliant URI
         setHomespace('http://examples.org')
@@ -187,6 +184,34 @@ class TestCopy(unittest.TestCase):
         cd.extension_property = LiteralProperty(cd, extension_namespace + 'extension_property', '0', '1', None, 'foo')
         cd_copy = cd.copy(target_doc)
         self.assertTrue(target_doc._namespaces[extension_prefix] == URIRef(extension_namespace))
+
+    def test_copy_and_increment_version(self):
+        Config.setOption('sbol_typed_uris', False)
+        doc = Document()
+        comp = ComponentDefinition('foo', BIOPAX_DNA, '1.0.0')
+        doc.addComponentDefinition(comp)
+
+        # Copy an object within a single Document, the version should be automatically incrememented
+        comp_copy = comp.copy()
+        self.assertEquals(comp.version, '1.0.0')
+        self.assertEquals(comp_copy.version, '2.0.0')
+        self.assertEquals(comp_copy.identity, comp.persistentIdentity + '/2.0.0')
+        self.assertEquals(comp_copy.wasDerivedFrom[0], comp.identity)
+        self.assertEquals(comp_copy.types[0], BIOPAX_DNA)
+
+    def test_copy_to_new_document(self):
+        Config.setOption('sbol_typed_uris', False)
+        doc = Document()
+        comp1 = doc.componentDefinitions.create('cd1')
+        comp2 = doc.componentDefinitions.create('cd2')
+        comp2.wasDerivedFrom = comp1.identity
+
+        # Clone the object to another Document, the wasDerivedFrom should not be a circular reference
+        doc2 = Document()
+        comp3 = comp2.copy(doc2)
+        self.assertEquals(comp3.identity, comp2.identity)
+        self.assertEquals(comp3.wasDerivedFrom[0], comp1.identity)
+        self.assertNotEqual(comp3.wasDerivedFrom[0], comp2.identity)
 
 if __name__ == '__main__':
     unittest.main()
