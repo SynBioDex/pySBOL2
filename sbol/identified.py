@@ -11,6 +11,7 @@ from .property import ReferencedObject
 from .property import URIProperty
 from .sbolerror import SBOLError
 from .sbolerror import SBOLErrorCode
+from .config import parseClassName
 from . import validation
 
 

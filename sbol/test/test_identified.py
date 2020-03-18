@@ -4,6 +4,9 @@ import unittest
 import rdflib
 
 import sbol
+import sbol.config
+import sbol.property
+import sbol.constants
 
 MODULE_LOCATION = os.path.dirname(os.path.abspath(__file__))
 PARTS_LOCATION = os.path.join(MODULE_LOCATION, 'resources', 'tutorial',
@@ -156,106 +159,106 @@ class TestCopy(unittest.TestCase):
         i = sbol.Identified('i')
         i.name = 'foo'
         i_copy = i.copy()
-        self.assertEqual(i_copy.name, 'foo')
+        self.assertEqual(i_copy.name, rdflib.Literal('foo'))
 
     def test_import_object_into_new_namespace(self):
         # When copying an object into a new namespace, confirm that it's URI is copied into the new namespace.
         # Also confirm that any ReferencedObject attributes whose values point to an object in the old namespace
         # are also copied into the new namespace
-        setHomespace('http://examples.org')
-        Config.setOption('sbol_compliant_uris', True)
-        Config.setOption('sbol_typed_uris', False)
-        doc = Document()
-        comp = ComponentDefinition('cd')
-        seq = Sequence('seq')
+        sbol.setHomespace('http://examples.org')
+        sbol.Config.setOption('sbol_compliant_uris', True)
+        sbol.Config.setOption('sbol_typed_uris', False)
+        doc = sbol.Document()
+        comp = sbol.ComponentDefinition('cd')
+        seq = sbol.Sequence('seq')
         doc.addComponentDefinition(comp)
         doc.addSequence(seq)
         comp.sequences = seq.identity
 
         # Import the object into a new namespace
-        old_homespace = getHomespace()
-        setHomespace('http://acme.com')
+        old_homespace = sbol.getHomespace()
+        sbol.setHomespace('http://acme.com')
         comp_copy = comp.copy(None, old_homespace)  # Import from old homespace into new homespace
-        self.assertEqual(comp_copy.identity, 'http://acme.com/cd/1')
-        self.assertEqual(comp_copy.sequences[0], 'http://acme.com/seq/1')
+        self.assertEqual(comp_copy.identity, rdflib.URIRef('http://acme.com/cd/1'))
+        self.assertEqual(comp_copy.sequences[0], rdflib.URIRef('http://acme.com/seq/1'))
 
     def test_import_into_nontyped_namespace_from_typed_namespace(self):
         # Now repeat. This time copy an sbol-typed URI to a non-typed, sbol-compliant URI
-        setHomespace('http://examples.org')
-        Config.setOption('sbol_typed_uris', True)
+        sbol.setHomespace('http://examples.org')
+        sbol.Config.setOption('sbol_typed_uris', True)
 
-        doc = Document()
-        comp = ComponentDefinition('cd')
-        seq = Sequence('seq')
+        doc = sbol.Document()
+        comp = sbol.ComponentDefinition('cd')
+        seq = sbol.Sequence('seq')
         comp.sequences = seq.identity
         doc.addComponentDefinition(comp)
         doc.addSequence(seq)
 
         # Import the object into the new namespace, while removing the type token from the URI
-        Config.setOption('sbol_typed_uris', False)
-        old_homespace = getHomespace()
-        setHomespace('http://acme.com')
+        sbol.Config.setOption('sbol_typed_uris', False)
+        old_homespace = sbol.getHomespace()
+        sbol.setHomespace('http://acme.com')
         comp_copy = comp.copy(None, old_homespace)  # Import from old homespace into new homespace
-        self.assertEqual(comp_copy.identity, 'http://acme.com/cd/1')
-        self.assertEqual(comp_copy.sequences[0], 'http://acme.com/seq/1')      
+        self.assertEqual(comp_copy.identity, rdflib.URIRef('http://acme.com/cd/1'))
+        self.assertEqual(comp_copy.sequences[0], rdflib.URIRef('http://acme.com/seq/1'))      
 
     def test_import_into_typed_namespace_from_nontyped_namespace(self):
 
         # Now repeat. This time copy an sbol-typed URI to a non-typed, sbol-compliant URI
-        setHomespace('http://examples.org')
-        Config.setOption('sbol_typed_uris', False)
+        sbol.setHomespace('http://examples.org')
+        sbol.Config.setOption('sbol_typed_uris', False)
 
-        doc = Document()
-        comp = ComponentDefinition('cd')
-        seq = Sequence('seq')
+        doc = sbol.Document()
+        comp = sbol.ComponentDefinition('cd')
+        seq = sbol.Sequence('seq')
         comp.sequences = seq.identity
         doc.addComponentDefinition(comp)
         doc.addSequence(seq)
 
         # Import the object into the new namespace, while removing the type token from the URI
-        Config.setOption('sbol_typed_uris', True)
-        old_homespace = getHomespace()
-        setHomespace('http://acme.com')
+        sbol.Config.setOption('sbol_typed_uris', True)
+        old_homespace = sbol.getHomespace()
+        sbol.setHomespace('http://acme.com')
         comp_copy = comp.copy(None, old_homespace)  # Import from old homespace into new homespace
-        self.assertEqual(comp_copy.identity, 'http://acme.com/ComponentDefinition/cd/1')
-        self.assertEqual(comp_copy.sequences[0], 'http://acme.com/Sequence/seq/1')
+        self.assertEqual(comp_copy.identity, rdflib.URIRef('http://acme.com/ComponentDefinition/cd/1'))
+        self.assertEqual(comp_copy.sequences[0], rdflib.URIRef('http://acme.com/Sequence/seq/1'))
 
     def test_copy_namespace(self):
         # Confirm that extension namespaces are copied into the target Document
         extension_prefix = 'extension_prefix'
         extension_namespace = 'http://examples.org#'
-        doc = Document()
-        target_doc = Document()
-        cd = ComponentDefinition('cd')
+        doc = sbol.Document()
+        target_doc = sbol.Document()
+        cd = sbol.ComponentDefinition('cd')
         doc.addComponentDefinition(cd)
         doc.addNamespace(extension_namespace, extension_prefix)
-        cd.extension_property = LiteralProperty(cd, extension_namespace + 'extension_property', '0', '1', None, 'foo')
+        cd.extension_property = sbol.property.LiteralProperty(cd, extension_namespace + 'extension_property', '0', '1', None, 'foo')
         cd_copy = cd.copy(target_doc)
-        self.assertTrue(target_doc._namespaces[extension_prefix] == URIRef(extension_namespace))
+        self.assertTrue(target_doc._namespaces[extension_prefix] == rdflib.URIRef(extension_namespace))
 
     def test_copy_and_increment_version(self):
-        Config.setOption('sbol_typed_uris', False)
-        doc = Document()
-        comp = ComponentDefinition('foo', BIOPAX_DNA, '1.0.0')
+        sbol.Config.setOption('sbol_typed_uris', False)
+        doc = sbol.Document()
+        comp = sbol.ComponentDefinition('foo', sbol.constants.BIOPAX_DNA, '1.0.0')
         doc.addComponentDefinition(comp)
 
         # Copy an object within a single Document, the version should be automatically incrememented
         comp_copy = comp.copy()
-        self.assertEquals(comp.version, '1.0.0')
-        self.assertEquals(comp_copy.version, '2.0.0')
+        self.assertEquals(comp.version, rdflib.Literal('1.0.0'))
+        self.assertEquals(comp_copy.version, rdflib.Literal('2.0.0'))
         self.assertEquals(comp_copy.identity, comp.persistentIdentity + '/2.0.0')
         self.assertEquals(comp_copy.wasDerivedFrom[0], comp.identity)
-        self.assertEquals(comp_copy.types[0], BIOPAX_DNA)
+        self.assertEquals(comp_copy.types[0], sbol.constants.BIOPAX_DNA)
 
     def test_copy_to_new_document(self):
-        Config.setOption('sbol_typed_uris', False)
-        doc = Document()
+        sbol.Config.setOption('sbol_typed_uris', False)
+        doc = sbol.Document()
         comp1 = doc.componentDefinitions.create('cd1')
         comp2 = doc.componentDefinitions.create('cd2')
         comp2.wasDerivedFrom = comp1.identity
 
         # Clone the object to another Document, the wasDerivedFrom should not be a circular reference
-        doc2 = Document()
+        doc2 = sbol.Document()
         comp3 = comp2.copy(doc2)
         self.assertEquals(comp3.identity, comp2.identity)
         self.assertEquals(comp3.wasDerivedFrom[0], comp1.identity)
