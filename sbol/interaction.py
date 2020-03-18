@@ -9,9 +9,9 @@ from . import validation
 
 
 class Interaction(Identified):
-    def __init__(self, rdf_type=SBOL_INTERACTION,
-                 uri='example', interaction_type=SBO_INTERACTION):
-        super().__init__(rdf_type, uri)
+    def __init__(self, uri='example', interaction_type=SBO_INTERACTION,
+                 *, type_uri=SBOL_INTERACTION):
+        super().__init__(type_uri, uri)
         self.functionalComponents = OwnedObject(self,
                                                 SBOL_FUNCTIONAL_COMPONENTS,
                                                 FunctionalComponent,
