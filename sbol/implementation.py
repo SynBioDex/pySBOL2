@@ -5,8 +5,8 @@ from .property import URIProperty
 
 class Implementation(TopLevel):
 
-    def __init__(self, type_uri=SBOL_IMPLEMENTATION,
-                 uri=URIRef("example"), version=VERSION_STRING):
+    def __init__(self, uri=URIRef("example"), version=VERSION_STRING,
+                 *, type_uri=SBOL_IMPLEMENTATION):
         super().__init__(type_uri, uri, version)
         self._built = URIProperty(self, SBOL_URI+'#built', '0', '1', [])
 
