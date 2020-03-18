@@ -26,7 +26,7 @@ class TestSbolTutorial(unittest.TestCase):
 
     @unittest.expectedFailure  # See Issue 24, Document has no attribute copy
     def test_tutorial(self):
-        # Set the default namespace (e.g. “http://my_namespace.org”)
+        # Set the default namespace (e.g. "http://my_namespace.org")
         namespace = "http://my_namespace.org"
         homespace = sbol.setHomespace(namespace)
 
@@ -60,7 +60,7 @@ class TestSbolTutorial(unittest.TestCase):
 
     @unittest.expectedFailure  # See Issue #25, PartShop has no attribute search
     def test_partshop(self):
-        # Start an interface to igem’s public part shop on
+        # Start an interface to igem's public part shop on
         # SynBioHub. Located at `https://synbiohub.org/public/igem`
         partshop = sbol.PartShop('https://synbiohub.org/public/igem')
 
