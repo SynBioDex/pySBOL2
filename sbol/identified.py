@@ -249,11 +249,15 @@ class Identified(SBOLObject):
         if target_namespace:
 
             # Map the identity of self into the target namespace
-            if '_identity' in new_obj.__dict__.keys():
-                new_obj.__dict__['_identity'].value = replace_namespace(self, target_namespace)
+            if '_identity' in self.__dict__.keys():
+                old_uri = self.__dict__['_identity'].value
+                new_uri = replace_namespace(old_uri, target_namespace, self.getTypeURI())
+                new_obj.__dict__['_identity'].value = new_uri
 
-            if '_persistentIdentity' in new_obj.__dict__.keys():
-                new_obj.__dict__['_persistentIdentity'].value = replace_namespace(self, target_namespace)
+            if '_persistentIdentity' in self.__dict__.keys():
+                old_uri = self.__dict__['_persistentIdentity'].value
+                new_uri = replace_namespace(old_uri, target_namespace, self.getTypeURI())
+                new_obj.__dict__['_persistentIdentity'].value = new_uri
 
             # Map any references to other SBOL objects in the Document into the new namespace
             if self.doc != None:
@@ -278,7 +282,7 @@ class Identified(SBOLObject):
                             referenced_object = self.doc.find(uri) 
                             if referenced_object == None:
                                 continue
-                            new_uri = replace_namespace(referenced_object, target_namespace)
+                            new_uri = replace_namespace(uri, target_namespace, referenced_object.getTypeURI())
                             values[i_uri] = new_uri
 
                     if reference_property._upperBound == '1':
@@ -462,6 +466,11 @@ class Identified(SBOLObject):
 '''
 
 def parseNamespace(uri):
+    '''
+    Utility function for parsing the namespace from an RDF type -- note, this
+    will work on some SBOL object URIs, but not universally.  It is primarily
+    for use with RDF types.
+    '''
     rlimit = uri.rfind('#') + 1
     if rlimit:
         return uri[:rlimit]
@@ -470,14 +479,18 @@ def parseNamespace(uri):
         return uri[:rlimit]
     return ''
 
-def replace_namespace(sbol_obj, target_namespace):
-    
+def replace_namespace(old_uri, target_namespace, rdf_type):
+    '''
+    Utility function for mapping an SBOL object's identity into a new namespace. The rdf_type
+    is used to map to and from sbol-typed namespaces.
+    '''
+
     # If the value is an SBOL-typed URI, replace both the namespace and class name
-    class_name = parseClassName(sbol_obj.getTypeURI())
+    class_name = parseClassName(rdf_type)
     replacement_target = target_namespace + '/' + class_name
     
     # If not an sbol typed URI, then just replace the namespace
-    if not replacement_target in sbol_obj.identity:
+    if not replacement_target in old_uri:
         replacement_target = target_namespace
 
     if Config.getOption('sbol_typed_uris'):
@@ -487,4 +500,4 @@ def replace_namespace(sbol_obj, target_namespace):
         # Map into a non-typed namespace
         replacement = getHomespace()
 
-    return sbol_obj.identity.replace(replacement_target, replacement)
+    return old_uri.replace(replacement_target, replacement)

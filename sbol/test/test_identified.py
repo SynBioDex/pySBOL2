@@ -180,6 +180,7 @@ class TestCopy(unittest.TestCase):
         sbol.setHomespace('http://acme.com')
         comp_copy = comp.copy(None, old_homespace)  # Import from old homespace into new homespace
         self.assertEqual(comp_copy.identity, rdflib.URIRef('http://acme.com/cd/1'))
+        self.assertEqual(comp_copy.persistentIdentity, rdflib.URIRef('http://acme.com/cd'))
         self.assertEqual(comp_copy.sequences[0], rdflib.URIRef('http://acme.com/seq/1'))
 
     def test_import_into_nontyped_namespace_from_typed_namespace(self):
@@ -200,6 +201,7 @@ class TestCopy(unittest.TestCase):
         sbol.setHomespace('http://acme.com')
         comp_copy = comp.copy(None, old_homespace)  # Import from old homespace into new homespace
         self.assertEqual(comp_copy.identity, rdflib.URIRef('http://acme.com/cd/1'))
+        self.assertEqual(comp_copy.persistentIdentity, rdflib.URIRef('http://acme.com/cd'))
         self.assertEqual(comp_copy.sequences[0], rdflib.URIRef('http://acme.com/seq/1'))      
 
     def test_import_into_typed_namespace_from_nontyped_namespace(self):
@@ -221,6 +223,7 @@ class TestCopy(unittest.TestCase):
         sbol.setHomespace('http://acme.com')
         comp_copy = comp.copy(None, old_homespace)  # Import from old homespace into new homespace
         self.assertEqual(comp_copy.identity, rdflib.URIRef('http://acme.com/ComponentDefinition/cd/1'))
+        self.assertEqual(comp_copy.persistentIdentity, rdflib.URIRef('http://acme.com/ComponentDefinition/cd'))
         self.assertEqual(comp_copy.sequences[0], rdflib.URIRef('http://acme.com/Sequence/seq/1'))
 
     def test_copy_namespace(self):
