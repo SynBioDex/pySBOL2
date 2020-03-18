@@ -222,6 +222,8 @@ class Identified(SBOLObject):
         # Assign the new object to the target Document
         if target_doc:
             new_obj.doc = target_doc
+        else:
+            new_obj.doc = self.doc
 
         # This namespace map will be used later when copying namespaces over to
         # the new Document
@@ -285,20 +287,19 @@ class Identified(SBOLObject):
                         reference_property.value = values
 
         # Set the new object's version according to the user specified parameter
-        if version != '':
+        if version:
             new_obj.version = version
 
         # If user doesn't provide a version, then set it automatically based on this object's version
         elif self.version != None:
-                
+
             # If user is copying into the same Document and namespace, increment the version to avoid a URI collision
-            if new_obj.doc == self.doc and target_namespace == '':
-                new_object.version.incrementMajor()
+            if new_obj.doc and new_obj.doc == self.doc and not target_namespace:
+                new_obj.version.incrementMajor()
 
             # If user is copying into a different Document, then copy the original object's version without incrementing
             else:
-                new_object.version = self.version
-
+                new_obj.version = self.version
 
         return new_obj
 

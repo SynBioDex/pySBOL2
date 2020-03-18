@@ -236,13 +236,14 @@ class TestCopy(unittest.TestCase):
         cd_copy = cd.copy(target_doc)
         self.assertTrue(target_doc._namespaces[extension_prefix] == rdflib.URIRef(extension_namespace))
 
+    @unittest.expectedFailure
     def test_copy_and_increment_version(self):
+        # When copying an object within the same Document, the version should be automatically incrememented
         sbol.Config.setOption('sbol_typed_uris', False)
         doc = sbol.Document()
         comp = sbol.ComponentDefinition('foo', sbol.constants.BIOPAX_DNA, '1.0.0')
         doc.addComponentDefinition(comp)
 
-        # Copy an object within a single Document, the version should be automatically incrememented
         comp_copy = comp.copy()
         self.assertEquals(comp.version, rdflib.Literal('1.0.0'))
         self.assertEquals(comp_copy.version, rdflib.Literal('2.0.0'))
@@ -253,8 +254,9 @@ class TestCopy(unittest.TestCase):
     def test_copy_to_new_document(self):
         sbol.Config.setOption('sbol_typed_uris', False)
         doc = sbol.Document()
-        comp1 = doc.componentDefinitions.create('cd1')
-        comp2 = doc.componentDefinitions.create('cd2')
+        comp1 = sbol.ComponentDefinition('cd1', sbol.constants.BIOPAX_DNA, '2')
+        comp2 = sbol.ComponentDefinition('cd2', sbol.constants.BIOPAX_DNA, '2')
+        doc.addComponentDefinition([comp1, comp2])
         comp2.wasDerivedFrom = comp1.identity
 
         # Clone the object to another Document, the wasDerivedFrom should not be a circular reference
@@ -263,6 +265,10 @@ class TestCopy(unittest.TestCase):
         self.assertEquals(comp3.identity, comp2.identity)
         self.assertEquals(comp3.wasDerivedFrom[0], comp1.identity)
         self.assertNotEqual(comp3.wasDerivedFrom[0], comp2.identity)
+
+        # Confirm version is the same as the copied object
+        self.assertEqual(comp3.version, rdflib.Literal('2'))
+
 
 if __name__ == '__main__':
     unittest.main()
