@@ -174,6 +174,10 @@ class TestProperty(unittest.TestCase):
         c.definition = None
         self.assertEqual(c.definition, None)
 
+        c.definition = cd1.identity
+        c.definition = ''
+        self.assertEqual(c.definition, None)
+
         cd0.sequences = []
         self.assertEqual(cd0.sequences, [])
         
