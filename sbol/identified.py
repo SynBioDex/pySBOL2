@@ -290,20 +290,27 @@ class Identified(SBOLObject):
                     else:
                         reference_property.value = values
 
-        # Set the new object's version according to the user specified parameter
+        # Set the new object's version according to the user specified parameter. If user didnt't provide a version, 
+        # then set it automatically based on self's version (if it has one).
         if version:
             new_obj.version = version
-
-        # If user doesn't provide a version, then set it automatically based on this object's version
         elif self.version != None:
 
-            # If user is copying into the same Document and namespace, increment the version to avoid a URI collision
+            # If user is copying into the same Document and namespace, then assume the user is trying to create a
+            # new version of the object. The version should be automatically incremented to avoid a URI collision
+            # with the original object.  However, if user is copying into a different Document, then copy the 
+            # original object's version without incrementing
             if new_obj.doc and new_obj.doc == self.doc and not target_namespace:
                 new_obj.version.incrementMajor()
-
-            # If user is copying into a different Document, then copy the original object's version without incrementing
             else:
                 new_obj.version = self.version
+
+        # When an object is simply being cloned, the value of wasDerivedFrom should be copied exactly as is from self. 
+        # However, when copy is being used to generate a new entity, the wasDerivedFrom should point back to self.
+        if self.identity == new_obj.identity:
+            new_obj.wasDerivedFrom = self.wasDerivedFrom
+        else:
+            new_obj.wasDerivedFrom = self.identity
 
         return new_obj
 

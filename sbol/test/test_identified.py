@@ -175,16 +175,21 @@ class TestCopy(unittest.TestCase):
         doc.addSequence(seq)
         comp.sequences = seq.identity
 
-        # Import the object into a new namespace
+        # Import from old homespace into new homespace
         old_homespace = sbol.getHomespace()
         sbol.setHomespace('http://acme.com')
-        comp_copy = comp.copy(None, old_homespace)  # Import from old homespace into new homespace
+        comp_copy = comp.copy(None, old_homespace)  
+
+        # Verify new namespace was correctly substituted
         self.assertEqual(comp_copy.identity, rdflib.URIRef('http://acme.com/cd/1'))
         self.assertEqual(comp_copy.persistentIdentity, rdflib.URIRef('http://acme.com/cd'))
         self.assertEqual(comp_copy.sequences[0], rdflib.URIRef('http://acme.com/seq/1'))
 
+        # Verify wasDerivedFrom relationship
+        self.assertEqual(comp_copy.wasDerivedFrom[0], comp.identity)
+
     def test_import_into_nontyped_namespace_from_typed_namespace(self):
-        # Now repeat. This time copy an sbol-typed URI to a non-typed, sbol-compliant URI
+        # Copy an sbol-typed URI to a non-typed, sbol-compliant URI
         sbol.setHomespace('http://examples.org')
         sbol.Config.setOption('sbol_typed_uris', True)
 
@@ -195,18 +200,23 @@ class TestCopy(unittest.TestCase):
         doc.addComponentDefinition(comp)
         doc.addSequence(seq)
 
-        # Import the object into the new namespace, while removing the type token from the URI
+        # Import the object into the new namespace
         sbol.Config.setOption('sbol_typed_uris', False)
         old_homespace = sbol.getHomespace()
         sbol.setHomespace('http://acme.com')
         comp_copy = comp.copy(None, old_homespace)  # Import from old homespace into new homespace
+
+        # Verify new namespace was correctly substituted and type token was successfully removed
         self.assertEqual(comp_copy.identity, rdflib.URIRef('http://acme.com/cd/1'))
         self.assertEqual(comp_copy.persistentIdentity, rdflib.URIRef('http://acme.com/cd'))
         self.assertEqual(comp_copy.sequences[0], rdflib.URIRef('http://acme.com/seq/1'))      
 
+        # Verify wasDerivedFrom relationship
+        self.assertEqual(comp_copy.wasDerivedFrom[0], comp.identity)
+
     def test_import_into_typed_namespace_from_nontyped_namespace(self):
 
-        # Now repeat. This time copy an sbol-typed URI to a non-typed, sbol-compliant URI
+        # Copy an sbol-typed URI to a non-typed, sbol-compliant URI
         sbol.setHomespace('http://examples.org')
         sbol.Config.setOption('sbol_typed_uris', False)
 
@@ -217,14 +227,19 @@ class TestCopy(unittest.TestCase):
         doc.addComponentDefinition(comp)
         doc.addSequence(seq)
 
-        # Import the object into the new namespace, while removing the type token from the URI
+        # Import the object into the new namespace
         sbol.Config.setOption('sbol_typed_uris', True)
         old_homespace = sbol.getHomespace()
         sbol.setHomespace('http://acme.com')
-        comp_copy = comp.copy(None, old_homespace)  # Import from old homespace into new homespace
+        comp_copy = comp.copy(None, old_homespace)
+
+        # Verify new namespace was correctly substituted and type token was successfully added
         self.assertEqual(comp_copy.identity, rdflib.URIRef('http://acme.com/ComponentDefinition/cd/1'))
         self.assertEqual(comp_copy.persistentIdentity, rdflib.URIRef('http://acme.com/ComponentDefinition/cd'))
         self.assertEqual(comp_copy.sequences[0], rdflib.URIRef('http://acme.com/Sequence/seq/1'))
+
+        # Verify wasDerivedFrom relationship
+        self.assertEqual(comp_copy.wasDerivedFrom[0], comp.identity)
 
     def test_copy_namespace(self):
         # Confirm that extension namespaces are copied into the target Document
@@ -262,7 +277,8 @@ class TestCopy(unittest.TestCase):
         doc.addComponentDefinition([comp1, comp2])
         comp2.wasDerivedFrom = comp1.identity
 
-        # Clone the object to another Document, the wasDerivedFrom should not be a circular reference
+        # Since the object is cloned, the wasDerivedFrom should not be a circular reference
+        # (this would violate SBOL-spec validation rules)
         doc2 = sbol.Document()
         comp3 = comp2.copy(doc2)
         self.assertEqual(comp3.identity, comp2.identity)
