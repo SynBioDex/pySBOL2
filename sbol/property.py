@@ -741,20 +741,27 @@ class ReferencedObject(Property):
         raise TypeError(errmsg.format(obj, type(obj)))
 
     def setSinglePropertyValue(self, new_value):
-        self._sbol_owner.properties[self._rdf_type] = [self._to_uri(new_value)]
+        if new_value is None: 
+            self._sbol_owner.properties[self._rdf_type] = []
+        else:
+            self._sbol_owner.properties[self._rdf_type] = [self._to_uri(new_value)]
 
     def setPropertyValueList(self, new_value):
-        if hasattr(new_value, '__uri__'):
-            # Convert to URI
-            # SBOLObjects have a __uri__ method, and others can too
-            new_value = new_value.__uri__()
-        if isinstance(new_value, str):
-            # Turn it into a list
-            new_value = [new_value]
-        if isinstance(new_value, collections.Iterable):
-            # Convert the items to URIRefs
-            new_value = list([self._to_uri(x) for x in new_value])
-        self._sbol_owner.properties[self._rdf_type] = new_value
+        if new_value is None: 
+            self._sbol_owner.properties[self._rdf_type] = []
+        else:
+            if hasattr(new_value, '__uri__'):
+                # Convert to URI
+                # SBOLObjects have a __uri__ method, and others can too
+                new_value = new_value.__uri__()
+            if isinstance(new_value, str):
+                # Turn it into a list
+                new_value = [new_value]
+            if isinstance(new_value, collections.Iterable):
+                # Convert the items to URIRefs
+                # Don't add None items to the list
+                new_value = list([self._to_uri(x) for x in new_value if x])
+            self._sbol_owner.properties[self._rdf_type] = new_value
 
     def add(self, uri):
         # Does anyone call this method? If so, it needs to be properly
@@ -780,6 +787,8 @@ class ReferencedObject(Property):
         a URIRef. The goal is to remove this method eventually.
 
         """
+        if thing is None:
+            return thing
         if isinstance(thing, rdflib.URIRef):
             return thing
         self.logger.warning('ReferencedObject was not a URIRef: {}'.format(thing))
