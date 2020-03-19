@@ -275,7 +275,8 @@ class Identified(SBOLObject):
                         values = [reference_property.value]
                     else:
                         values = reference_property.value
-
+                    if len(values) == 0:
+                        continue
                     for i_uri, uri in enumerate(values):
                         if target_namespace in uri:
                             
@@ -311,6 +312,17 @@ class Identified(SBOLObject):
             new_obj.wasDerivedFrom = self.wasDerivedFrom
         else:
             new_obj.wasDerivedFrom = self.identity
+
+        # Copy child objects recursively
+        for property_uri, object_list in self.owned_objects.items():
+            # Don't copy hidden properties
+            if target_doc and property_uri in self._hidden_properties:
+                continue
+            for o in object_list:
+                o_copy = o.copy(target_doc, target_namespace, version)
+                new_obj.owned_objects[property_uri].append(o_copy)
+                o_copy.parent = self
+                # o_copy.update_uri()
 
         return new_obj
 

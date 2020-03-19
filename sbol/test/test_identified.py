@@ -161,6 +161,24 @@ class TestCopy(unittest.TestCase):
         i_copy = i.copy()
         self.assertEqual(i_copy.name, rdflib.Literal('foo'))
 
+    def test_copy_child_objects(self):
+        doc = sbol.Document()
+        cd = doc.componentDefinitions.create('cd')
+        c1 = cd.components.create('c1')
+        c2 = cd.components.create('c2')
+        sc1 = cd.sequenceConstraints.create('sc1')
+        sc2 = cd.sequenceConstraints.create('sc2')
+        sa1 = cd.sequenceConstraints.create('sa1')
+        sa2 = cd.sequenceConstraints.create('sa2')
+
+        doc2 = sbol.Document()
+        cd_copy = cd.copy(target_doc=doc2, target_namespace ='http://foo.org')
+        self.assertListEqual([c.identity for c in cd.components], [c.identity for c in cd_copy.components])
+        self.assertListEqual([sc.identity for sc in cd.sequenceConstraints], [sc.identity for sc in \
+                             cd_copy.sequenceConstraints])
+        self.assertListEqual([sa.identity for sa in cd.sequenceAnnotations], [sa.identity for sa in \
+                             cd_copy.sequenceAnnotations])
+
     def test_import_object_into_new_namespace(self):
         # When copying an object into a new namespace, confirm that it's URI is copied into the new namespace.
         # Also confirm that any ReferencedObject attributes whose values point to an object in the old namespace
