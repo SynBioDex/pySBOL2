@@ -185,6 +185,7 @@ class TestProperty(unittest.TestCase):
         cd0.sequences = None
         self.assertEqual(cd0.sequences, [])
 
-        cd0.sequences = [seq0a.identity, seq0b.identity]
-        cd0.sequences = [None, None]
-        self.assertEqual(cd0.sequences, [])
+        with self.assertRaises(TypeError):
+            cd0.sequences = [seq0a.identity, seq0b.identity]
+            cd0.sequences = [None, None]
+            self.assertEqual(cd0.sequences, [])
