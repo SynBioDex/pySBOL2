@@ -172,7 +172,7 @@ class TestCopy(unittest.TestCase):
         sa2 = cd.sequenceConstraints.create('sa2')
 
         doc2 = sbol.Document()
-        cd_copy = cd.copy(target_doc=doc2, target_namespace ='http://foo.org')
+        cd_copy = cd.copy(target_doc=doc2)
         self.assertListEqual([c.identity for c in cd.components], [c.identity for c in cd_copy.components])
         self.assertListEqual([sc.identity for sc in cd.sequenceConstraints], [sc.identity for sc in \
                              cd_copy.sequenceConstraints])

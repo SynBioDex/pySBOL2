@@ -270,26 +270,17 @@ class Identified(SBOLObject):
                     reference_properties.append(new_obj.__dict__['_built'])
 
                 for reference_property in reference_properties:
-                    # TODO extract this into property.py
-                    if reference_property._upperBound == '1':
-                        values = [reference_property.value]
-                    else:
-                        values = reference_property.value
-                    if len(values) == 0:
-                        continue
-                    for i_uri, uri in enumerate(values):
+                    values = new_obj.properties[reference_property._rdf_type]
+                    new_values = []
+                    for uri in values:
                         if target_namespace in uri:
                             
                             referenced_object = self.doc.find(uri) 
-                            if referenced_object == None:
+                            if referenced_object == None:  # This URI reference is to an external resource
                                 continue
                             new_uri = replace_namespace(uri, target_namespace, referenced_object.getTypeURI())
-                            values[i_uri] = new_uri
-
-                    if reference_property._upperBound == '1':
-                        reference_property.value = values[0]
-                    else:
-                        reference_property.value = values
+                            new_values.append(new_uri)
+                    new_obj.properties[reference_property._rdf_type] = new_values
 
         # Set the new object's version according to the user specified parameter. If user didnt't provide a version, 
         # then set it automatically based on self's version (if it has one).
