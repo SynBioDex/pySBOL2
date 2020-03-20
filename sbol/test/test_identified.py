@@ -173,10 +173,10 @@ class TestCopy(unittest.TestCase):
 
         doc2 = sbol.Document()
         cd_copy = cd.copy(target_doc=doc2)
-        self.assertListEqual([c.identity for c in cd.components], [c.identity for c in cd_copy.components])
-        self.assertListEqual([sc.identity for sc in cd.sequenceConstraints], [sc.identity for sc in \
+        self.assertEqual([c.identity for c in cd.components], [c.identity for c in cd_copy.components])
+        self.assertEqual([sc.identity for sc in cd.sequenceConstraints], [sc.identity for sc in \
                              cd_copy.sequenceConstraints])
-        self.assertListEqual([sa.identity for sa in cd.sequenceAnnotations], [sa.identity for sa in \
+        self.assertEqual([sa.identity for sa in cd.sequenceAnnotations], [sa.identity for sa in \
                              cd_copy.sequenceAnnotations])
 
     def test_import_object_into_new_namespace(self):
