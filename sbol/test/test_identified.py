@@ -292,14 +292,18 @@ class TestCopy(unittest.TestCase):
         doc = sbol.Document()
         comp1 = sbol.ComponentDefinition('cd1', sbol.constants.BIOPAX_DNA, '2')
         comp2 = sbol.ComponentDefinition('cd2', sbol.constants.BIOPAX_DNA, '2')
-        doc.addComponentDefinition([comp1, comp2])
         comp2.wasDerivedFrom = comp1.identity
+        doc.addComponentDefinition([comp1, comp2])
 
         # Since the object is cloned, the wasDerivedFrom should not be a circular reference
         # (this would violate SBOL-spec validation rules)
         doc2 = sbol.Document()
         comp3 = comp2.copy(doc2)
         self.assertEqual(comp3.identity, comp2.identity)
+        self.assertEqual(len(doc2.componentDefinitions), 1)
+
+        # Since self was cloned, check that wasDerivedFrom is not a circular reference
+        # (this would violate SBOL-spec validation rules)
         self.assertEqual(comp3.wasDerivedFrom[0], comp1.identity)
         self.assertNotEqual(comp3.wasDerivedFrom[0], comp2.identity)
 
