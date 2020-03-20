@@ -158,7 +158,7 @@ class TestProperty(unittest.TestCase):
         seq0a = sbol.Sequence('seq0a')
         seq0b = sbol.Sequence('seq0b')
         cd0.sequences = [seq0a.identity, seq0b.identity]
-        self.assertListEqual(cd0.sequences, [seq0a.identity, seq0b.identity])
+        self.assertEqual(cd0.sequences, [seq0a.identity, seq0b.identity])
 
         c.definition = cd1
         self.assertEqual(c.definition, cd1.identity)
@@ -168,7 +168,7 @@ class TestProperty(unittest.TestCase):
         self.assertEqual(type(c.definition), rdflib.URIRef)
         
         cd0.sequences = [str(seq0a.identity), str(seq0b.identity)]
-        self.assertListEqual([type(s) for s in cd0.sequences], [rdflib.URIRef, rdflib.URIRef])
+        self.assertEqual([type(s) for s in cd0.sequences], [rdflib.URIRef, rdflib.URIRef])
 
         # Test unset
         c.definition = None
