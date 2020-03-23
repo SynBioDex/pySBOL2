@@ -437,27 +437,31 @@ class OwnedObject(URIProperty):
         return obj
 
     def add(self, sbol_obj):
-        if self._sbol_owner is not None:
-            if sbol_obj.is_top_level() and self._sbol_owner.doc is not None:
-                self._sbol_owner.doc.add(sbol_obj)
-            else:
-                object_store = self._sbol_owner.owned_objects[self._rdf_type]
-                if sbol_obj in object_store:
-                    raise SBOLError("The object " + sbol_obj.identity +
-                                    " is already contained by the " +
-                                    self._rdf_type + " property",
-                                    SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE)
-                # Add to Document and check for uniqueness of URI
-                if self._sbol_owner.doc is not None:
-                    sbol_obj.doc = self._sbol_owner.doc
-                sbol_obj.parent = self._sbol_owner
-                # Update URI for the argument object and all its children,
-                # if SBOL-compliance is enabled.
-                sbol_obj.update_uri()
-                # Add to parent object
-                object_store.append(sbol_obj)
-                # Run validation rules
-                # TODO
+        if self._sbol_owner is None:
+            # Just silently do nothing?
+            return
+        if sbol_obj.is_top_level() and self._sbol_owner.doc is not None:
+            # Is this really all we need to do?
+            self._sbol_owner.doc.add(sbol_obj)
+            return
+        # Not top level, add to the attribute
+        object_store = self._sbol_owner.owned_objects[self._rdf_type]
+        if sbol_obj in object_store:
+            raise SBOLError("The object " + sbol_obj.identity +
+                            " is already contained by the " +
+                            self._rdf_type + " property",
+                            SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE)
+        # Add to Document and check for uniqueness of URI
+        if self._sbol_owner.doc is not None:
+            sbol_obj.doc = self._sbol_owner.doc
+        sbol_obj.parent = self._sbol_owner
+        # Update URI for the argument object and all its children,
+        # if SBOL-compliance is enabled.
+        sbol_obj.update_uri()
+        # Add to parent object
+        object_store.append(sbol_obj)
+        # Run validation rules
+        # TODO
 
     def __getitem__(self, id):
         if type(id) is int:
