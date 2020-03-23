@@ -605,37 +605,34 @@ class OwnedObject(URIProperty):
         if new_value is not None:
             self.set(new_value)
 
-    def set(self, sbol_obj):
-        """Sets the first object in the container"""
-        if self._sbol_owner.is_top_level():
-            doc = self._sbol_owner.doc
-            if self._isHidden() and doc.find(sbol_obj.identity):
-                # In order to avoid a duplicate URI error, don't attempt
-                # to add the object if this is a hidden property,
-                pass
-            else:
-                doc.add(sbol_obj)
-        self.set_notoplevelcheck(sbol_obj)
-
-    def set_notoplevelcheck(self, sbol_obj):
-        # Add to parent object
-        if self._rdf_type not in self._sbol_owner.owned_objects:
-            self._sbol_owner.owned_objects[self._rdf_type] = []
-        if len(self._sbol_owner.owned_objects[self._rdf_type]) == 0:
-            self._sbol_owner.owned_objects[self._rdf_type].append(sbol_obj)
+    def set(self, new_value):
+        if self._sbol_owner is None:
+            # Not sure we should raise this, but I'm guessing it would
+            # be good to know.
+            # TODO: convert this to a better Python exception or to an
+            # SBOL exception
+            raise Exception('No owner for referenced value')
+        if self.getUpperBound() == '1':
+            self.setSinglePropertyValue(new_value)
         else:
-            raise SBOLError("Cannot set " + parsePropertyName(self._rdf_type) +
-                            " property. The property is already set. "
-                            "Call remove before attempting to "
-                            "overwrite the value.",
-                            SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
-        sbol_obj.parent = self._sbol_owner
-        # Update URI for the argument object and all its children,
-        # if SBOL-compliance is enabled.
-        sbol_obj.update_uri()
+            self.setPropertyValueList(new_value)
 
-        # Run validation rules
-        # TODO
+    def setSinglePropertyValue(self, new_value):
+        # Clear out the previous value, then add the new value
+        #
+        # TODO: This can leave the attribute empty if `add` fails.
+        # Can we capture that and sent the old value back again?
+        self._sbol_owner.owned_objects[self._rdf_type].clear()
+        self.add(new_value)
+
+    def setPropertyValueList(self, new_value):
+        # Clear out the previous value, then add the new value
+        #
+        # TODO: This can leave the attribute empty if `add` fails.
+        # Can we capture that and sent the old value back again?
+        self._sbol_owner.owned_objects[self._rdf_type].clear()
+        for nv in new_value:
+            self.add(nv)
 
     def remove(self, identifier):
         """id can be either an integer index or a string URI"""
