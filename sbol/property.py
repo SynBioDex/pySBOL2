@@ -215,7 +215,7 @@ class Property(ABC):
             return bool(obj)
 
     def _isHidden(self):
-        return self._rdf_type in self._sbol_owner.hidden_properties
+        return self._rdf_type in self._sbol_owner._hidden_properties
 
     def __len__(self):
         if self._rdf_type not in self._sbol_owner.properties:
