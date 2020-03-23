@@ -33,7 +33,7 @@ class TestProperty(unittest.TestCase):
         plasmid.removeRole()
         self.assertEqual(len(plasmid.roles), 1)
 
-    @unittest.skip("See #93")
+    @unittest.expectedFailure  # See #93
     def test_unsetSingletonProperty(self):
         doc = Document()
         cd = doc.componentDefinitions.create('cd')
@@ -46,7 +46,7 @@ class TestProperty(unittest.TestCase):
         cd.name = ''
         self.assertEqual(cd.name, None)
 
-    @unittest.skip("See #93")
+    @unittest.expectedFailure  # See #93
     def test_unsetListProperty(self):
         plasmid = ComponentDefinition('pBB1', BIOPAX_DNA, '1.0.0')
         plasmid.roles = [SO_PLASMID, SO_CIRCULAR]
