@@ -166,9 +166,10 @@ class TestProperty(unittest.TestCase):
         # Test conversion to URIRef
         c.definition = str(cd1.identity)
         self.assertEqual(type(c.definition), rdflib.URIRef)
-        
+
         cd0.sequences = [str(seq0a.identity), str(seq0b.identity)]
-        self.assertEqual([type(s) for s in cd0.sequences], [rdflib.URIRef, rdflib.URIRef])
+        self.assertEqual([type(s) for s in cd0.sequences],
+                         [rdflib.URIRef, rdflib.URIRef])
 
         # Test unset
         c.definition = None
@@ -180,7 +181,7 @@ class TestProperty(unittest.TestCase):
 
         cd0.sequences = []
         self.assertEqual(cd0.sequences, [])
-        
+
         cd0.sequences = [seq0a.identity, seq0b.identity]
         cd0.sequences = None
         self.assertEqual(cd0.sequences, [])

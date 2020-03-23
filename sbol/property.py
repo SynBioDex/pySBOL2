@@ -743,8 +743,8 @@ class ReferencedObject(Property):
     def setSinglePropertyValue(self, new_value):
         if new_value is None or new_value == '':
             self._sbol_owner.properties[self._rdf_type] = []
-        if new_value:
-            self._sbol_owner.properties[self._rdf_type] = [self._to_uri(new_value)]
+            return
+        self._sbol_owner.properties[self._rdf_type] = [self._to_uri(new_value)]
 
     def setPropertyValueList(self, new_value):
         if new_value is None:
