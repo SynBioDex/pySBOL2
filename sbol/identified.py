@@ -215,7 +215,7 @@ class Identified(SBOLObject):
                                 " is already in the Document",
                                 SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE)
 
-    def copy(self, target_doc = None, target_namespace = None, version = None):
+    def copy(self, target_doc=None, target_namespace=None, version=None):
 
         new_obj = self.__class__()
 
@@ -231,15 +231,16 @@ class Identified(SBOLObject):
             # Add a non-default namespace to the target document if not present
             # (This can happen when copying extension properties not in the
             # SBOL namespace, for example.)
-            if self.doc and target_doc != None:
+            if self.doc and target_doc is not None:
                 property_namespace = URIRef(parseNamespace(property_uri))
                 if property_namespace in namespace_map.keys():
                     prefix = namespace_map[property_namespace]
                     target_doc.addNamespace(property_namespace, prefix)
 
-        # If caller specified a target_namespace argument, then import objects into this new namespace
-        # This involves replacing the target_namespace in ReferenceObject URIs with the current Homespace
-        # Don't overwrite namespaces for the wasDerivedFrom field, which points back to the original object
+        # If caller specified a target_namespace argument, then import objects into this
+        # new namespace. This involves replacing the target_namespace in ReferenceObject
+        # URIs with the current Homespace. Don't overwrite namespaces for the
+        # wasDerivedFrom field, which points back to the original object
         if target_namespace:
 
             # Map the identity of self into the target namespace
@@ -253,13 +254,16 @@ class Identified(SBOLObject):
                 new_uri = replace_namespace(old_uri, target_namespace, self.getTypeURI())
                 new_obj.__dict__['_persistentIdentity'].value = new_uri
 
-            # Map any references to other SBOL objects in the Document into the new namespace
-            if self.doc != None:
+            # Map any references to other SBOL objects in the Document into the new
+            # namespace
+            if self.doc is not None:
 
                 # Collect ReferencedObject attributes
-                reference_properties = [p for p in new_obj.__dict__.values() if isinstance(p, ReferencedObject)]
+                reference_properties = [p for p in new_obj.__dict__.values() if
+                                        isinstance(p, ReferencedObject)]
 
-                # These URIProperty attributes should be treated like ReferencedObject attributes
+                # These URIProperty attributes should be treated like ReferencedObject
+                # attributes
                 if '_built' in new_obj.__dict__.keys():
                     reference_properties.append(new_obj.__dict__['_built'])
 
@@ -268,11 +272,12 @@ class Identified(SBOLObject):
                     new_values = []
                     for uri in values:
                         if target_namespace in uri:
-                            
-                            referenced_object = self.doc.find(uri) 
-                            if referenced_object == None:  # This URI reference is to an external resource
+
+                            referenced_object = self.doc.find(uri)
+                            if referenced_object is None:
                                 continue
-                            new_uri = replace_namespace(uri, target_namespace, referenced_object.getTypeURI())
+                            new_uri = replace_namespace(uri, target_namespace,
+                                                        referenced_object.getTypeURI())
                             new_values.append(new_uri)
                     new_obj.properties[reference_property._rdf_type] = new_values
 
@@ -282,23 +287,26 @@ class Identified(SBOLObject):
         elif self.doc:
             self.doc.add(new_obj)
 
-        # Set the new object's version according to the user specified parameter. If user didnt't provide a version, 
-        # then set it automatically based on self's version (if it has one).
+        # Set the new object's version according to the user specified parameter. If
+        # user didnt't provide a version, then set it automatically based on self's
+        # version (if it has one).
         if version:
             new_obj.version = version
-        elif self.version != None:
+        elif self.version is not None:
 
-            # If user is copying into the same Document and namespace, then assume the user is trying to create a
-            # new version of the object. The version should be automatically incremented to avoid a URI collision
-            # with the original object.  However, if user is copying into a different Document, then copy the 
-            # original object's version without incrementing
+            # If user is copying into the same Document and namespace, then assume the
+            # user is trying to create a new version of the object. The version should
+            # be automatically incremented to avoid a URI collision with the original
+            # object.  However, if user is copying into a different Document, then copy
+            # the original object's version without incrementing
             if new_obj.doc and new_obj.doc is self.doc and not target_namespace:
                 new_obj.version.incrementMajor()
             else:
                 new_obj.version = self.version
 
-        # When an object is simply being cloned, the value of wasDerivedFrom should be copied exactly as is from self. 
-        # However, when copy is being used to generate a new entity, the wasDerivedFrom should point back to self.
+        # When an object is simply being cloned, the value of wasDerivedFrom should be
+        # copied exactly as is from self. However, when copy is being used to generate
+        # a new entity, the wasDerivedFrom should point back to self.
         if self.identity == new_obj.identity:
             new_obj.wasDerivedFrom = self.wasDerivedFrom
         else:
@@ -317,6 +325,7 @@ class Identified(SBOLObject):
 
         return new_obj
 
+
 def parseNamespace(uri):
     '''
     Utility function for parsing the namespace from an RDF type -- note, this
@@ -331,18 +340,19 @@ def parseNamespace(uri):
         return uri[:rlimit]
     return ''
 
+
 def replace_namespace(old_uri, target_namespace, rdf_type):
     '''
-    Utility function for mapping an SBOL object's identity into a new namespace. The rdf_type
-    is used to map to and from sbol-typed namespaces.
+    Utility function for mapping an SBOL object's identity into a new namespace. The
+    rdf_type is used to map to and from sbol-typed namespaces.
     '''
 
     # If the value is an SBOL-typed URI, replace both the namespace and class name
     class_name = parseClassName(rdf_type)
     replacement_target = target_namespace + '/' + class_name
-    
+
     # If not an sbol typed URI, then just replace the namespace
-    if not replacement_target in old_uri:
+    if replacement_target not in old_uri:
         replacement_target = target_namespace
 
     if Config.getOption('sbol_typed_uris'):

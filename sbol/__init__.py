@@ -33,6 +33,7 @@ from .sequenceannotation import SequenceAnnotation
 from .validation import is_alphanumeric_or_underscore
 from .validation import is_not_alphanumeric_or_underscore
 
+
 def testSBOL():
     """
     Function to test pySBOL API.
