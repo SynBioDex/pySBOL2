@@ -4,9 +4,6 @@ import unittest
 import rdflib
 
 import sbol
-import sbol.config
-import sbol.property
-import sbol.constants
 
 MODULE_LOCATION = os.path.dirname(os.path.abspath(__file__))
 PARTS_LOCATION = os.path.join(MODULE_LOCATION, 'resources', 'tutorial',

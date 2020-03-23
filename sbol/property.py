@@ -767,8 +767,6 @@ class ReferencedObject(Property):
         # implemented.
         raise Exception('Should ReferencedObject.add be deprecated?')
         if self._sbol_owner is not None:
-            if self._rdf_type not in self._sbol_owner.properties:
-                self._sbol_owner.properties[self._rdf_type] = []
             self._sbol_owner.properties[self._rdf_type].append(uri)
         else:
             # NOTE: we could raise an exception here, but
