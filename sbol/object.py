@@ -6,6 +6,7 @@ import rdflib
 from .config import getHomespace
 from .config import hasHomespace
 from .constants import *
+from .property import OwnedObject
 from .property import ReferencedObject
 from .property import URIProperty
 from . import validation
@@ -400,6 +401,12 @@ class SBOLObject:
             result = result.value
         return result
 
+    def _is_owned_object(self, name):
+        try:
+            return isinstance(self.__dict__[name], OwnedObject)
+        except KeyError:
+            return False
+
     def _is_referenced_object(self, name):
         try:
             return isinstance(self.__dict__[name], ReferencedObject)
@@ -413,4 +420,6 @@ class SBOLObject:
         if self._is_referenced_object(name):
             self._set_referenced_object(name, value)
             return
+        if self._is_owned_object(name):
+            raise AttributeError('Cannot set owned object. Use set or add methods.')
         object.__setattr__(self, name, value)
