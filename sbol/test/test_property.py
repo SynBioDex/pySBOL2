@@ -141,3 +141,52 @@ class TestProperty(unittest.TestCase):
                              sbol.SBOLErrorCode.NOT_FOUND_ERROR)
         else:
             self.fail('Expected SBOLError')
+
+    def test_referenced_object(self):
+        # Test referenced object property is initialized to correct types
+        cd0 = sbol.ComponentDefinition('cd0')
+        self.assertEqual(type(cd0.sequences), list)
+
+        c = cd0.components.create('c')
+        self.assertEqual(c.definition, None)
+
+        # Test assignment
+        cd1 = sbol.ComponentDefinition('cd1')
+        c.definition = cd1.identity
+        self.assertEqual(c.definition, cd1.identity)
+
+        seq0a = sbol.Sequence('seq0a')
+        seq0b = sbol.Sequence('seq0b')
+        cd0.sequences = [seq0a.identity, seq0b.identity]
+        self.assertEqual(cd0.sequences, [seq0a.identity, seq0b.identity])
+
+        c.definition = cd1
+        self.assertEqual(c.definition, cd1.identity)
+
+        # Test conversion to URIRef
+        c.definition = str(cd1.identity)
+        self.assertEqual(type(c.definition), rdflib.URIRef)
+
+        cd0.sequences = [str(seq0a.identity), str(seq0b.identity)]
+        self.assertEqual([type(s) for s in cd0.sequences],
+                         [rdflib.URIRef, rdflib.URIRef])
+
+        # Test unset
+        c.definition = None
+        self.assertEqual(c.definition, None)
+
+        c.definition = cd1.identity
+        c.definition = ''
+        self.assertEqual(c.definition, None)
+
+        cd0.sequences = []
+        self.assertEqual(cd0.sequences, [])
+
+        cd0.sequences = [seq0a.identity, seq0b.identity]
+        cd0.sequences = None
+        self.assertEqual(cd0.sequences, [])
+
+        with self.assertRaises(TypeError):
+            cd0.sequences = [seq0a.identity, seq0b.identity]
+            cd0.sequences = [None, None]
+            self.assertEqual(cd0.sequences, [])

@@ -741,9 +741,15 @@ class ReferencedObject(Property):
         raise TypeError(errmsg.format(obj, type(obj)))
 
     def setSinglePropertyValue(self, new_value):
+        if new_value is None or new_value == '':
+            self._sbol_owner.properties[self._rdf_type] = []
+            return
         self._sbol_owner.properties[self._rdf_type] = [self._to_uri(new_value)]
 
     def setPropertyValueList(self, new_value):
+        if new_value is None:
+            self._sbol_owner.properties[self._rdf_type] = []
+            return
         if hasattr(new_value, '__uri__'):
             # Convert to URI
             # SBOLObjects have a __uri__ method, and others can too
@@ -788,6 +794,8 @@ class ReferencedObject(Property):
     @property
     def value(self):
         raw_value = self.getRawValue()
+        if raw_value is None:
+            return None
         if self._upperBound == '1':
             return self._ensure_uri_ref(raw_value)
         else:
