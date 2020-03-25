@@ -209,6 +209,7 @@ class TestCopy(unittest.TestCase):
     def test_import_into_nontyped_namespace_from_typed_namespace(self):
         # Copy an sbol-typed URI to a non-typed, sbol-compliant URI
         sbol.setHomespace('http://examples.org')
+        sbol.Config.setOption('sbol_compliant_uris', True)
         sbol.Config.setOption('sbol_typed_uris', True)
 
         doc = sbol.Document()
@@ -239,6 +240,7 @@ class TestCopy(unittest.TestCase):
         # Copy an sbol-typed URI to a non-typed, sbol-compliant URI
         sbol.setHomespace('http://examples.org')
         sbol.Config.setOption('sbol_typed_uris', False)
+        sbol.Config.setOption('sbol_compliant_uris', True)
 
         doc = sbol.Document()
         comp = sbol.ComponentDefinition('cd')
