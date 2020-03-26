@@ -84,6 +84,28 @@ class TestOwnedObject(unittest.TestCase):
         m2 = md.modules[m.identity]
         self.assertEqual(m.identity, m2.identity)
 
+    def test_assignment(self):
+        doc = sbol.Document()
+        md = doc.moduleDefinitions.create('foo')
+        m1 = sbol.Module('m1')
+        m2 = sbol.Module('m2')
+        with self.assertRaises(AttributeError):
+            md.modules = [m1, m2]
 
-if __name__ == '__main__':
-    unittest.main()
+    def test_set_no_doc(self):
+        # Add a module when the parent module definition is not in a
+        # Document
+        md = sbol.ModuleDefinition('foo')
+        m1 = sbol.Module('m1')
+        md.modules.set([m1])
+        self.assertEqual(m1, md.modules.get(0))
+        self.assertEqual(m1, md.modules.find(m1.identity))
+
+    def test_find(self):
+        md = sbol.ModuleDefinition('foo')
+        m1 = md.modules.create('m1')
+        self.assertEqual(m1, md.modules.get(0))
+        self.assertEqual(m1, md.modules.find(m1.identity))
+        self.assertEqual(m1, md.modules.find(m1.displayId))
+        self.assertEqual(m1, md.modules.find(str(m1.displayId)))
+        self.assertEqual(m1, md.modules.find('m1'))
