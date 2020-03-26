@@ -150,5 +150,178 @@ class TestIdentified(unittest.TestCase):
         self.assertEqual(cd.wasGeneratedBy, expected)
 
 
+class TestCopy(unittest.TestCase):
+
+    def test_copy_properties(self):
+        i = sbol.Identified('i')
+        i.name = 'foo'
+        i_copy = i.copy()
+        self.assertEqual(i_copy.name, rdflib.Literal('foo'))
+
+    def test_copy_child_objects(self):
+        doc = sbol.Document()
+        cd = doc.componentDefinitions.create('cd')
+        c1 = cd.components.create('c1')
+        c2 = cd.components.create('c2')
+        sc1 = cd.sequenceConstraints.create('sc1')
+        sc2 = cd.sequenceConstraints.create('sc2')
+        sa1 = cd.sequenceConstraints.create('sa1')
+        sa2 = cd.sequenceConstraints.create('sa2')
+
+        doc2 = sbol.Document()
+        cd_copy = cd.copy(target_doc=doc2)
+        self.assertEqual([c.identity for c in cd.components],
+                         [c.identity for c in cd_copy.components])
+        self.assertEqual([sc.identity for sc in cd.sequenceConstraints],
+                         [sc.identity for sc in cd_copy.sequenceConstraints])
+        self.assertEqual([sa.identity for sa in cd.sequenceAnnotations],
+                         [sa.identity for sa in cd_copy.sequenceAnnotations])
+
+    def test_import_object_into_new_namespace(self):
+        # When copying an object into a new namespace, confirm that it's URI is copied
+        # into the new namespace. Also confirm that any ReferencedObject attributes
+        # whose values point to an object in the old namespace are also copied into the
+        # new namespace
+        sbol.setHomespace('http://examples.org')
+        sbol.Config.setOption('sbol_compliant_uris', True)
+        sbol.Config.setOption('sbol_typed_uris', False)
+        doc = sbol.Document()
+        comp = sbol.ComponentDefinition('cd')
+        seq = sbol.Sequence('seq')
+        doc.addComponentDefinition(comp)
+        doc.addSequence(seq)
+        comp.sequences = seq.identity
+
+        # Import from old homespace into new homespace
+        old_homespace = sbol.getHomespace()
+        sbol.setHomespace('http://acme.com')
+        comp_copy = comp.copy(None, old_homespace)
+
+        # Verify new namespace was correctly substituted
+        self.assertEqual(comp_copy.identity, rdflib.URIRef('http://acme.com/cd/1'))
+        self.assertEqual(comp_copy.persistentIdentity,
+                         rdflib.URIRef('http://acme.com/cd'))
+        self.assertEqual(comp_copy.sequences[0], rdflib.URIRef('http://acme.com/seq/1'))
+
+        # Verify wasDerivedFrom relationship
+        self.assertEqual(comp_copy.wasDerivedFrom[0], comp.identity)
+
+    def test_import_into_nontyped_namespace_from_typed_namespace(self):
+        # Copy an sbol-typed URI to a non-typed, sbol-compliant URI
+        sbol.setHomespace('http://examples.org')
+        sbol.Config.setOption('sbol_compliant_uris', True)
+        sbol.Config.setOption('sbol_typed_uris', True)
+
+        doc = sbol.Document()
+        comp = sbol.ComponentDefinition('cd')
+        seq = sbol.Sequence('seq')
+        comp.sequences = seq.identity
+        doc.addComponentDefinition(comp)
+        doc.addSequence(seq)
+
+        # Import the object into the new namespace
+        sbol.Config.setOption('sbol_typed_uris', False)
+        old_homespace = sbol.getHomespace()
+        sbol.setHomespace('http://acme.com')
+        comp_copy = comp.copy(None, old_homespace)
+
+        # Verify new namespace was correctly substituted and type token was successfully
+        # removed
+        self.assertEqual(comp_copy.identity, rdflib.URIRef('http://acme.com/cd/1'))
+        self.assertEqual(comp_copy.persistentIdentity,
+                         rdflib.URIRef('http://acme.com/cd'))
+        self.assertEqual(comp_copy.sequences[0], rdflib.URIRef('http://acme.com/seq/1'))
+
+        # Verify wasDerivedFrom relationship
+        self.assertEqual(comp_copy.wasDerivedFrom[0], comp.identity)
+
+    def test_import_into_typed_namespace_from_nontyped_namespace(self):
+
+        # Copy an sbol-typed URI to a non-typed, sbol-compliant URI
+        sbol.setHomespace('http://examples.org')
+        sbol.Config.setOption('sbol_typed_uris', False)
+        sbol.Config.setOption('sbol_compliant_uris', True)
+
+        doc = sbol.Document()
+        comp = sbol.ComponentDefinition('cd')
+        seq = sbol.Sequence('seq')
+        comp.sequences = seq.identity
+        doc.addComponentDefinition(comp)
+        doc.addSequence(seq)
+
+        # Import the object into the new namespace
+        sbol.Config.setOption('sbol_typed_uris', True)
+        old_homespace = sbol.getHomespace()
+        sbol.setHomespace('http://acme.com')
+        comp_copy = comp.copy(None, old_homespace)
+
+        # Verify new namespace was correctly substituted and type token was successfully
+        # added
+        self.assertEqual(comp_copy.identity,
+                         rdflib.URIRef('http://acme.com/ComponentDefinition/cd/1'))
+        self.assertEqual(comp_copy.persistentIdentity,
+                         rdflib.URIRef('http://acme.com/ComponentDefinition/cd'))
+        self.assertEqual(comp_copy.sequences[0],
+                         rdflib.URIRef('http://acme.com/Sequence/seq/1'))
+
+        # Verify wasDerivedFrom relationship
+        self.assertEqual(comp_copy.wasDerivedFrom[0], comp.identity)
+
+    def test_copy_namespace(self):
+        # Confirm that extension namespaces are copied into the target Document
+        extension_prefix = 'extension_prefix'
+        extension_namespace = 'http://examples.org#'
+        doc = sbol.Document()
+        target_doc = sbol.Document()
+        cd = sbol.ComponentDefinition('cd')
+        doc.addComponentDefinition(cd)
+        doc.addNamespace(extension_namespace, extension_prefix)
+        cd.extension_property = sbol.property.LiteralProperty(cd, extension_namespace +
+                                                              'extension_property', '0',
+                                                              '1', None, 'foo')
+        cd_copy = cd.copy(target_doc)
+        self.assertTrue(target_doc._namespaces[extension_prefix] ==
+                        rdflib.URIRef(extension_namespace))
+
+    @unittest.expectedFailure
+    def test_copy_and_increment_version(self):
+        # When copying an object within the same Document, the version should be
+        # automatically incrememented
+        sbol.Config.setOption('sbol_typed_uris', False)
+        doc = sbol.Document()
+        comp = sbol.ComponentDefinition('foo', sbol.constants.BIOPAX_DNA, '1.0.0')
+        doc.addComponentDefinition(comp)
+
+        comp_copy = comp.copy()
+        self.assertEqual(comp.version, rdflib.Literal('1.0.0'))
+        self.assertEqual(comp_copy.version, rdflib.Literal('2.0.0'))
+        self.assertEqual(comp_copy.identity, comp.persistentIdentity + '/2.0.0')
+        self.assertEqual(comp_copy.wasDerivedFrom[0], comp.identity)
+        self.assertEqual(comp_copy.types[0], sbol.constants.BIOPAX_DNA)
+
+    def test_copy_to_new_document(self):
+        sbol.Config.setOption('sbol_typed_uris', False)
+        doc = sbol.Document()
+        comp1 = sbol.ComponentDefinition('cd1', sbol.constants.BIOPAX_DNA, '2')
+        comp2 = sbol.ComponentDefinition('cd2', sbol.constants.BIOPAX_DNA, '2')
+        comp2.wasDerivedFrom = comp1.identity
+        doc.addComponentDefinition([comp1, comp2])
+
+        # Since the object is cloned, the wasDerivedFrom should not be a circular
+        # reference (this would violate SBOL-spec validation rules)
+        doc2 = sbol.Document()
+        comp3 = comp2.copy(doc2)
+        self.assertEqual(comp3.identity, comp2.identity)
+        self.assertEqual(len(doc2.componentDefinitions), 1)
+
+        # Since self was cloned, check that wasDerivedFrom is not a circular reference
+        # (this would violate SBOL-spec validation rules)
+        self.assertEqual(comp3.wasDerivedFrom[0], comp1.identity)
+        self.assertNotEqual(comp3.wasDerivedFrom[0], comp2.identity)
+
+        # Confirm version is the same as the copied object
+        self.assertEqual(comp3.version, rdflib.Literal('2'))
+
+
 if __name__ == '__main__':
     unittest.main()

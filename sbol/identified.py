@@ -11,6 +11,7 @@ from .property import ReferencedObject
 from .property import URIProperty
 from .sbolerror import SBOLError
 from .sbolerror import SBOLErrorCode
+from .config import parseClassName
 from . import validation
 
 
@@ -213,3 +214,152 @@ class Identified(SBOLObject):
                                 "An object with URI " + str(self.identity) +
                                 " is already in the Document",
                                 SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE)
+
+    def copy(self, target_doc=None, target_namespace=None, version=None):
+
+        new_obj = self.__class__()
+
+        # This namespace map will be used later when copying namespaces over to
+        # the new Document
+        if self.doc:
+            namespace_map = {ns: p for p, ns in self.doc._namespaces.items()}
+
+        # Copy properties
+        for property_uri, value_store in self.properties.items():
+            new_obj.properties[property_uri] = value_store.copy()
+
+            # Add a non-default namespace to the target document if not present
+            # (This can happen when copying extension properties not in the
+            # SBOL namespace, for example.)
+            if self.doc and target_doc is not None:
+                property_namespace = URIRef(parseNamespace(property_uri))
+                if property_namespace in namespace_map.keys():
+                    prefix = namespace_map[property_namespace]
+                    target_doc.addNamespace(property_namespace, prefix)
+
+        # If caller specified a target_namespace argument, then import objects into this
+        # new namespace. This involves replacing the target_namespace in ReferenceObject
+        # URIs with the current Homespace. Don't overwrite namespaces for the
+        # wasDerivedFrom field, which points back to the original object
+        if target_namespace:
+
+            # Map the identity of self into the target namespace
+            if '_identity' in self.__dict__.keys():
+                old_uri = self.__dict__['_identity'].value
+                new_uri = replace_namespace(old_uri, target_namespace, self.getTypeURI())
+                new_obj.__dict__['_identity'].value = new_uri
+
+            if '_persistentIdentity' in self.__dict__.keys():
+                old_uri = self.__dict__['_persistentIdentity'].value
+                new_uri = replace_namespace(old_uri, target_namespace, self.getTypeURI())
+                new_obj.__dict__['_persistentIdentity'].value = new_uri
+
+            # Map any references to other SBOL objects in the Document into the new
+            # namespace
+            if self.doc is not None:
+
+                # Collect ReferencedObject attributes
+                reference_properties = [p for p in new_obj.__dict__.values() if
+                                        isinstance(p, ReferencedObject)]
+
+                # These URIProperty attributes should be treated like ReferencedObject
+                # attributes
+                if '_built' in new_obj.__dict__.keys():
+                    reference_properties.append(new_obj.__dict__['_built'])
+
+                for reference_property in reference_properties:
+                    values = new_obj.properties[reference_property._rdf_type]
+                    new_values = []
+                    for uri in values:
+                        if target_namespace in uri:
+
+                            referenced_object = self.doc.find(uri)
+                            if referenced_object is None:
+                                continue
+                            new_uri = replace_namespace(uri, target_namespace,
+                                                        referenced_object.getTypeURI())
+                            new_values.append(new_uri)
+                    new_obj.properties[reference_property._rdf_type] = new_values
+
+        # Assign the new object to the target Document
+        if target_doc:
+            target_doc.add(new_obj)
+        elif self.doc:
+            self.doc.add(new_obj)
+
+        # Set the new object's version according to the user specified parameter. If
+        # user didnt't provide a version, then set it automatically based on self's
+        # version (if it has one).
+        if version:
+            new_obj.version = version
+        elif self.version is not None:
+
+            # If user is copying into the same Document and namespace, then assume the
+            # user is trying to create a new version of the object. The version should
+            # be automatically incremented to avoid a URI collision with the original
+            # object.  However, if user is copying into a different Document, then copy
+            # the original object's version without incrementing
+            if new_obj.doc and new_obj.doc is self.doc and not target_namespace:
+                new_obj.version.incrementMajor()
+            else:
+                new_obj.version = self.version
+
+        # When an object is simply being cloned, the value of wasDerivedFrom should be
+        # copied exactly as is from self. However, when copy is being used to generate
+        # a new entity, the wasDerivedFrom should point back to self.
+        if self.identity == new_obj.identity:
+            new_obj.wasDerivedFrom = self.wasDerivedFrom
+        else:
+            new_obj.wasDerivedFrom = self.identity
+
+        # Copy child objects recursively
+        for property_uri, object_list in self.owned_objects.items():
+            # Don't copy hidden properties
+            if target_doc and property_uri in self._hidden_properties:
+                continue
+            for o in object_list:
+                o_copy = o.copy(target_doc, target_namespace, version)
+                new_obj.owned_objects[property_uri].append(o_copy)
+                o_copy.parent = self
+                # o_copy.update_uri()
+
+        return new_obj
+
+
+def parseNamespace(uri):
+    '''
+    Utility function for parsing the namespace from an RDF type -- note, this
+    will work on some SBOL object URIs, but not universally.  It is primarily
+    for use with RDF types.
+    '''
+    rlimit = uri.rfind('#') + 1
+    if rlimit:
+        return uri[:rlimit]
+    rlimit = uri.rfind('/') + 1
+    if rlimit:
+        return uri[:rlimit]
+    return ''
+
+
+def replace_namespace(old_uri, target_namespace, rdf_type):
+    '''
+    Utility function for mapping an SBOL object's identity into a new namespace. The
+    rdf_type is used to map to and from sbol-typed namespaces.
+    '''
+
+    # If the value is an SBOL-typed URI, replace both the namespace and class name
+    class_name = parseClassName(rdf_type)
+    replacement_target = target_namespace + '/' + class_name
+
+    # If not an sbol typed URI, then just replace the namespace
+    if replacement_target not in old_uri:
+        replacement_target = target_namespace
+
+    if Config.getOption('sbol_typed_uris'):
+        # Map into a typed namespace
+        replacement = getHomespace() + '/' + class_name
+    else:
+        # Map into a non-typed namespace
+        replacement = getHomespace()
+
+    return old_uri.replace(replacement_target, replacement)

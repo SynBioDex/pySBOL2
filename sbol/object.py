@@ -50,9 +50,8 @@ class SBOLObject:
     # a URI prefix that maps to a domain over which the user has control.
     # Namely, the user can guarantee uniqueness of identities
     # within this domain. For other best practices regarding URIs
-    # see Section 11.2 of the
-    # [SBOL specification document](http://sbolstandard.org/wp-content/uploads/2015/08/SBOLv2.0.1.pdf).
-    # _identity = None
+    # see Section 11.2 of the [SBOL specification document
+    # (http://sbolstandard.org/wp-content/uploads/2015/08/SBOLv2.0.1.pdf).
 
     def __init__(self, _rdf_type=rdflib.URIRef(UNDEFINED),
                  uri=rdflib.URIRef("example")):
@@ -71,11 +70,11 @@ class SBOLObject:
         if not isinstance(uri, URIRef):
             self.logger.debug("Property was not a URIRef: '" +
                               str(uri) + "', " + str(type(uri)))
-            self._identity = URIProperty(self, SBOL_IDENTITY,
-                                         '0', '1', [validation.sbol_rule_10202], URIRef(uri))
+            self._identity = URIProperty(self, SBOL_IDENTITY, '0', '1',
+                                         [validation.sbol_rule_10202], URIRef(uri))
         else:
-            self._identity = URIProperty(self, SBOL_IDENTITY,
-                                         '0', '1', [validation.sbol_rule_10202], uri)
+            self._identity = URIProperty(self, SBOL_IDENTITY, '0', '1',
+                                         [validation.sbol_rule_10202], uri)
         if hasHomespace():
             uri = posixpath.join(getHomespace(), uri)
             self._identity = URIProperty(self, SBOL_IDENTITY,
@@ -376,8 +375,9 @@ class SBOLObject:
                 continue
             # predicate = self.doc.referenceNamespace(name)
             for obj in object_store:
-                # NOTE: couldn't we just use 'name'? (Would probably work the same, but wanted
-                # to follow the original implementation as closely as possible.)
+                # NOTE: couldn't we just use 'name'? (Would probably work the same,
+                # but wanted to follow the original implementation as closely as
+                # possible.)
                 typeURI = obj.getTypeURI()
                 if typeURI in self._hidden_properties:
                     continue

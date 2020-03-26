@@ -11,18 +11,20 @@ __version__ = '3.0.0'
 from .collection import Collection
 from .combinatorialderivation import CombinatorialDerivation
 from .component import Component
+from .componentdefinition import ComponentDefinition
 from .config import Config, ConfigOptions
 from .config import getHomespace, hasHomespace, setHomespace
 from .constants import *
 from .dbtl import Design
 from .document import Document
-from .componentdefinition import ComponentDefinition
+from .identified import Identified
 from .implementation import Implementation
 from .interaction import Interaction
 from .module import Module
 from .moduledefinition import ModuleDefinition
 from .participation import Participation
 from .partshop import PartShop
+from .property import LiteralProperty
 from .property import TextProperty
 from .provo import Activity
 from .sbolerror import SBOLError, SBOLErrorCode

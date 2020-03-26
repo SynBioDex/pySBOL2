@@ -7,6 +7,7 @@ from .test_design import TestDesign
 from .test_document import TestDocument
 from .test_error import TestError
 from .test_identified import TestIdentified
+from .test_identified import TestCopy
 from .test_implementation import TestImplementation
 from .test_interaction import TestInteraction
 from .test_config import TestConfig
@@ -30,6 +31,7 @@ def runTests(test_list=None):
             TestComponentDefinitions,
             TestConfig,
             TestConstants,
+            TestCopy,
             TestDesign,
             TestDocument,
             TestError,
