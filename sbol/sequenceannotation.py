@@ -1,6 +1,6 @@
 from .constants import *
 from .identified import Identified
-from .location import Location
+from .location import OwnedLocation
 from .property import OwnedObject, URIProperty
 
 
@@ -18,7 +18,7 @@ class SequenceAnnotation(Identified):
         """
         super().__init__(SBOL_SEQUENCE_ANNOTATION, uri, version)
         self.component = None  # TODO support ReferencedObject
-        self.locations = OwnedObject(self, SBOL_LOCATIONS, Location,
+        self.locations = OwnedLocation(self, SBOL_LOCATIONS,
                                      '0', '*', [])
         self._roles = URIProperty(self, SBOL_ROLES, '0', '*', [])
 

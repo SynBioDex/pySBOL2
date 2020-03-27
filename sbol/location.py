@@ -1,12 +1,13 @@
 from .identified import Identified
 from .constants import *
-from .property import URIProperty, ReferencedObject, LiteralProperty
+from .property import URIProperty, ReferencedObject, LiteralProperty, OwnedObject
 from rdflib import URIRef
 
 
 class Location(Identified):
     """The Location class specifies the strand orientation of a Component."""
-    def __init__(self, uri=URIRef('example'), orientation=SBOL_ORIENTATION_INLINE, type_uri=SBOL_LOCATION):
+    def __init__(self, uri=URIRef('example'), orientation=SBOL_ORIENTATION_INLINE,
+                 type_uri=SBOL_LOCATION):
         super().__init__(type_uri, uri)
         self._orientation = URIProperty(self, SBOL_ORIENTATION,
                                         '1', '1', [], orientation)
@@ -102,3 +103,29 @@ class GenericLocation(Location):
     a partial design that lacks a Sequence."""
     def __init__(self, uri=URIRef('example'), type_uri=SBOL_GENERIC_LOCATION):
         super().__init__(uri=uri, type_uri=type_uri)
+
+
+class OwnedLocation(OwnedObject):
+    def __init__(self, property_owner, sbol_uri, lower_bound, upper_bound,
+                 validation_rules=None, first_object=None):
+        """Initialize a container and optionally put the first object in it.
+        If validation rules are specified, they will be checked upon initialization.
+
+        builder is a function that takes a single argument, a string,
+        and constructs an object of appropriate type for this
+        OwnedObject instance. For instance, if this OwnedObject is
+        intended to hold ComponentDefinitions, then the builder should
+        return an object of type ComponentDefinition.
+
+        """
+        super().__init__(property_owner, sbol_uri, Location, lower_bound, upper_bound,
+                         validation_rules, first_object)
+
+    def createRange(self, uri=URIRef('example')):
+        return self.create(uri, Range)
+
+    def createCut(self, uri=URIRef('example')):
+        return self.create(uri, Cut)
+
+    def createGenericLocation(self, uri=URIRef('example')):
+        return self.create(uri, GenericLocation)

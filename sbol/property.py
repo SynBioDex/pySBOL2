@@ -426,13 +426,24 @@ class OwnedObject(URIProperty):
             if first_object is not None:
                 self._sbol_owner.owned_objects[sbol_uri].append(first_object)
 
-    def create(self, uri):
+    def create(self, uri, builder=None):
         """Creates an instance appropriate for this owned object collection.
 
         uri - the name of the object
 
         """
-        obj = self.builder(uri=uri)
+        if not builder:
+            builder = self.builder
+        else:
+            # Override the default builder to create a subtype of the builder, e.g.,
+            # create a Range instead of a Location
+            if not callable(builder):
+                msg = '{!r} object is not callable'
+                raise TypeError(msg.format(type(builder)))
+            if not issubclass(builder, self.builder):
+                msg = '{!r} is not a subclass of {!r}'
+                raise TypeError(msg.format(type(builder), type(self.builder)))             
+        obj = builder(uri=uri)
         self.add(obj)
         return obj
 

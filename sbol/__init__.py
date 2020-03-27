@@ -20,6 +20,7 @@ from .document import Document
 from .identified import Identified
 from .implementation import Implementation
 from .interaction import Interaction
+from .location import Location, Range, Cut, GenericLocation
 from .module import Module
 from .moduledefinition import ModuleDefinition
 from .participation import Participation
