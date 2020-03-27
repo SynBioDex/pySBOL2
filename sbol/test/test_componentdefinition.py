@@ -177,3 +177,14 @@ class TestComponentDefinitions(unittest.TestCase):
         gl = sa.locations['gl']
         self.assertEqual(type(gl), sbol.GenericLocation)
         self.assertEqual(len(sa.locations), 2)
+
+    @unittest.expectedFailure
+    def testCut(self):
+        # This test is marked as expectedFailure for now, but can probably
+        # be merged with testOwnedLocation when it is passing
+        cd = sbol.ComponentDefinition('cd')
+        sa = cd.sequenceAnnotations.create('sa')
+        c = sa.locations.createCut('c')
+        self.assertEqual(type(c), sbol.Cut)
+        c = sa.locations['c']
+        self.assertEqual(type(c), sbol.Cut)
