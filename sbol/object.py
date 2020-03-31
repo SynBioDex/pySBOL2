@@ -1,6 +1,7 @@
 import logging
 import posixpath
 
+from deprecated import deprecated
 import rdflib
 
 from .config import getHomespace
@@ -283,14 +284,43 @@ class SBOLObject:
         owned_objects_uris = [p for p in self.owned_objects.keys()]
         return property_uris + owned_objects_uris
 
+    @deprecated(version='3.0.0', reason='Use extension properties instead')
     def setPropertyValue(self, property_uri, val):
         """Set and overwrite the value for a user-defined annotation property.
 
         :param property_uri:
-        :param val: Either a literal or URI value.
+        :param val: A string
         :return: None
         """
-        raise NotImplementedError("Not yet implemented")
+        if not isinstance(val, str):
+            raise TypeError('%r is not a string', val)
+        # Ensure that the property is a URIRef
+        property_uri = rdflib.URIRef(property_uri)
+        # If there is effectively no value ('', None, [], {}, etc.)
+        # clear out the value
+        if not val:
+            # No value, no property, do nothing
+            if property_uri not in self.properties:
+                return
+            # If a value exists in the property, set only the first
+            # entry to the empty string. This is backward compatible
+            # with pySBOL/libSBOL
+            if self.properties[property_uri]:
+                self.properties[property_uri][0] = ''
+            return
+        # If the value does not exist, just set it and we're done
+        if property_uri not in self.properties:
+            self.properties[property_uri] = [rdflib.Literal(val)]
+            return
+        # Ensure that val is a Literal or URIRef
+        if not isinstance(val, (rdflib.Literal, rdflib.URIRef)):
+            # Default to Literal
+            val = rdflib.Literal(val)
+            # If an existing property is a URIRef, convert val to URIRef
+            if self.properties[property_uri]:
+                if isinstance(self.properties[property_uri][0], rdflib.URIRef):
+                    val = rdflib.URIRef(val)
+        self.properties[property_uri][0] = val
 
     def addPropertyValue(self, property_uri, val):
         """Append a value to a user-defined annotation property.
