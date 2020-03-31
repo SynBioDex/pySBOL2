@@ -1,5 +1,8 @@
 import os
 import unittest
+import warnings
+
+import rdflib
 
 import sbol
 
@@ -21,7 +24,7 @@ class TestObject(unittest.TestCase):
         d = sbol.Document()
         d.read(PARTS_LOCATION)
         cd = d.componentDefinitions['http://examples.org/ComponentDefinition/AmeR/1']
-        expected = 'AmeR'
+        expected = rdflib.Literal('AmeR')
         name = cd.getPropertyValue(sbol.SBOL_NAME)
         self.assertEqual(name, expected)
 

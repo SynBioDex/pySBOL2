@@ -255,7 +255,7 @@ class SBOLObject:
         :return: The value of the property or SBOL_ERROR_NOT_FOUND.
         """
         values = self.getPropertyValues(property_uri)
-        return str(values[0])
+        return values[0]
 
     def getPropertyValues(self, property_uri):
         """Get all values of a custom annotation property by its URI.
