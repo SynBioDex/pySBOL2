@@ -398,7 +398,7 @@ class IntProperty(LiteralProperty):
         if not isinstance(value, int):
             msg = '{} values must have type int'.format(self.getTypeURI())
             raise TypeError(msg)
-        return int(value)
+        return Literal(value)
 
 
 class TextProperty(LiteralProperty):
