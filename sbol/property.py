@@ -149,13 +149,7 @@ class Property(ABC):
     def clear(self):
         """Clear all property values."""
         properties = self._sbol_owner.properties[self._rdf_type]
-        # current_value = properties[0]
         properties.clear()
-        # if isinstance(current_value[0], URIRef):
-        #     # this property is a uri
-        #     properties.append('<>')
-        # elif isinstance(current_value[0], Literal) and current_value[0].datatype == XSD.str:
-        #     properties.append('""')
 
     def write(self):
         """Write property values."""
@@ -390,6 +384,23 @@ class LiteralProperty(Property):
         return Literal(value)
 
 
+class IntProperty(LiteralProperty):
+
+    def convert_to_user(self, value):
+        return int(value)
+
+    def convert_from_user(self, value):
+        # None is ok iff upper bound is 1 and lower bound is 0.
+        # If upper bound > 1, attribute is a list and None is not a valid list
+        # If lower bound > 0, attribute must have a value, so None is unacceptable
+        if value is None and self.upper_bound == 1 and self.lower_bound == 0:
+            return None
+        if not isinstance(value, int):
+            msg = '{} values must have type int'.format(self.getTypeURI())
+            raise TypeError(msg)
+        return int(value)
+
+
 class TextProperty(LiteralProperty):
 
     # In the future, pull the convert_to_user and convert_from_user
@@ -442,7 +453,7 @@ class OwnedObject(URIProperty):
                 raise TypeError(msg.format(type(builder)))
             if not issubclass(builder, self.builder):
                 msg = '{!r} is not a subclass of {!r}'
-                raise TypeError(msg.format(type(builder), type(self.builder)))             
+                raise TypeError(msg.format(type(builder), type(self.builder)))
         obj = builder(uri=uri)
         self.add(obj)
         return obj

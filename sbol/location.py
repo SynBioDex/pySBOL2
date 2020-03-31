@@ -1,6 +1,7 @@
 from .identified import Identified
 from .constants import *
-from .property import URIProperty, ReferencedObject, LiteralProperty, OwnedObject
+from .property import URIProperty, ReferencedObject, LiteralProperty, OwnedObject, \
+                      IntProperty
 from rdflib import URIRef
 
 
@@ -32,8 +33,8 @@ class Range(Location):
     as is typical practice in computer science."""
     def __init__(self, uri=URIRef('example'), start=1, end=2, type_uri=SBOL_RANGE):
         super().__init__(uri=uri, type_uri=type_uri)
-        self.start = start
-        self.end = end
+        self.start = IntProperty(self, SBOL_START, '0', '1', None, start)
+        self.end = IntProperty(self, SBOL_END, '0', '1', None, end)
 
     def precedes(self, comparand):
         if self.end < comparand.start:
