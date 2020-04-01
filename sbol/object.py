@@ -296,8 +296,8 @@ class SBOLObject:
             raise TypeError('%r is not a string', val)
         # Ensure that the property is a URIRef
         property_uri = rdflib.URIRef(property_uri)
-        # If there is effectively no value ('', None, [], {}, etc.)
-        # clear out the value
+        # If there is effectively no value (i.e. '') clear out the
+        # value
         if not val:
             # No value, no property, do nothing
             if property_uri not in self.properties:
