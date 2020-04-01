@@ -36,8 +36,24 @@ class Range(Location):
     as is typical practice in computer science."""
     def __init__(self, uri=URIRef('example'), start=1, end=2, type_uri=SBOL_RANGE):
         super().__init__(uri=uri, type_uri=type_uri)
-        self.start = IntProperty(self, SBOL_START, '0', '1', None, start)
-        self.end = IntProperty(self, SBOL_END, '0', '1', None, end)
+        self._start = IntProperty(self, SBOL_START, '0', '1', None, start)
+        self._end = IntProperty(self, SBOL_END, '0', '1', None, end)
+
+    @property
+    def start(self):
+        return self._start.value
+
+    @start.setter
+    def start(self, val):
+        self._start.set(val)
+
+    @property
+    def end(self):
+        return self._end.value
+
+    @end.setter
+    def end(self, val):
+        self._end.set(val)
 
     def precedes(self, comparand):
         if self.end < comparand.start:

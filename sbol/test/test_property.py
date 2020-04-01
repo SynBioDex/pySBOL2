@@ -216,3 +216,5 @@ class TestProperty(unittest.TestCase):
         r.start = 42
         self.assertEqual(type(r.start), int)
         self.assertEqual(r.start, 42)
+        with self.assertRaises(TypeError):
+            r.start = 'forty-two'
