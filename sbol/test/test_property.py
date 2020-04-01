@@ -45,7 +45,6 @@ class TestProperty(unittest.TestCase):
         cd.name = ''
         self.assertEqual(cd.name, None)
 
-    @unittest.expectedFailure  # See #93
     def test_unsetListProperty(self):
         plasmid = sbol.ComponentDefinition('pBB1', sbol.BIOPAX_DNA, '1.0.0')
         plasmid.roles = [sbol.SO_PLASMID, sbol.SO_CIRCULAR]
@@ -215,3 +214,38 @@ class TestProperty(unittest.TestCase):
         r.start = 42
         self.assertEqual(type(r.start), int)
         self.assertEqual(r.start, 42)
+
+    def test_uri_property_list(self):
+        cd = sbol.ComponentDefinition('cd')
+        foo_str = 'foo'
+        bar_str = 'bar'
+        foo_uri = rdflib.URIRef(foo_str)
+        bar_uri = rdflib.URIRef(bar_str)
+        cd.roles = foo_str
+        self.assertEqual(cd.roles, [foo_uri])
+        # This used to append. Eek!
+        cd.roles = bar_str
+        self.assertEqual(cd.roles, [bar_uri])
+        # This used to append. Eek!
+        cd.roles = [foo_str, bar_str]
+        self.assertEqual(cd.roles, [foo_uri, bar_uri])
+        with self.assertRaises(TypeError):
+            cd.roles = 34
+
+    def test_uri_property_append(self):
+        cd = sbol.ComponentDefinition('cd')
+        foo_str = 'foo'
+        bar_str = 'bar'
+        foo_uri = rdflib.URIRef(foo_str)
+        bar_uri = rdflib.URIRef(bar_str)
+        cd.roles = foo_str
+        self.assertEqual(cd.roles, [foo_uri])
+        # append has no effect. This is because the list that is
+        # returned by `cd.roles` is not connected with the internal
+        # data representation.
+        cd.roles.append(bar_str)
+        self.assertEqual(cd.roles, [foo_uri])
+        # The `+=` operator is a good way for users to append new
+        # items to the list
+        cd.roles += [bar_str]
+        self.assertEqual(cd.roles, [foo_uri, bar_uri])

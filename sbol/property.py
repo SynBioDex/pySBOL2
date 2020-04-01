@@ -226,6 +226,16 @@ class Property(ABC):
 
 
 class URIProperty(Property):
+
+    def __init__(self, property_owner, type_uri, lower_bound, upper_bound,
+                 validation_rules, initial_value=None):
+        super().__init__(property_owner, type_uri, lower_bound, upper_bound,
+                         validation_rules)
+        if self._rdf_type not in self._sbol_owner.properties:
+            self._sbol_owner.properties[self._rdf_type] = []
+        if initial_value is not None:
+            self.value = initial_value
+
     @property
     def value(self):
         if self._upperBound == '1':
@@ -270,31 +280,25 @@ class URIProperty(Property):
         else:
             self._sbol_owner.properties[self._rdf_type][-1] = URIRef(new_value)
 
-    def setPropertyValueList(self, new_value_list):
-        if self._rdf_type not in self._sbol_owner.properties:
+    def setPropertyValueList(self, value):
+        if value is None:
             self._sbol_owner.properties[self._rdf_type] = []
-        if new_value_list is None:
             return
-        else:
-            if type(new_value_list) is list:
-                for value in new_value_list:
-                    self._sbol_owner.properties[self._rdf_type].append(URIRef(value))
-            else:
-                # the list is actually not a list, but a single element, even
-                # though lists are supported.
-                self._sbol_owner.properties[self._rdf_type].append(
-                    URIRef(new_value_list))
+        if isinstance(value, str):
+            self._sbol_owner.properties[self._rdf_type] = [rdflib.URIRef(value)]
+            return
+        if isinstance(value, collections.abc.Iterable):
+            new_value = [URIRef(v) for v in value]
+            self._sbol_owner.properties[self._rdf_type] = new_value
+            return
+        # Unrecognized value. Raise type error
+        msg = 'Cannot set URIProperty to value {} of type {}'
+        raise TypeError(msg.format(value, type(value).__name__))
 
     def add(self, new_value):
-        """Appends the new value to a list of values,
-        for properties that allow it."""
-        if self._sbol_owner is not None:
-            if self._rdf_type not in self._sbol_owner.properties:
-                self._sbol_owner.properties[self._rdf_type] = []
-            properties = self._sbol_owner.properties[self._rdf_type]
-            properties.append(URIRef(new_value))
-        else:
-            self.logger.error("Unable to update property: SBOL owner not set.")
+        # Note: this is only called internally. This method is not
+        # accessible from outside the library via the public API.
+        self.value += [new_value]
 
 
 class LiteralProperty(Property):
