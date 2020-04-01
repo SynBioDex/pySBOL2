@@ -1,7 +1,6 @@
 import unittest
 import os
 import sbol
-from sbol import *
 
 import rdflib
 
@@ -12,30 +11,30 @@ TEST_LOCATION = os.path.join(MODULE_LOCATION, 'resources',
 
 class TestProperty(unittest.TestCase):
     def test_listProperty(self):
-        plasmid = ComponentDefinition('pBB1', BIOPAX_DNA, '1.0.0')
-        plasmid.roles = [SO_PLASMID, SO_CIRCULAR]
+        plasmid = sbol.ComponentDefinition('pBB1', sbol.BIOPAX_DNA, '1.0.0')
+        plasmid.roles = [sbol.SO_PLASMID, sbol.SO_CIRCULAR]
         self.assertEqual(len(plasmid.roles), 2)
 
     def test_noListProperty(self):
-        plasmid = ComponentDefinition('pBB1', BIOPAX_DNA, '1.0.0')
+        plasmid = sbol.ComponentDefinition('pBB1', sbol.BIOPAX_DNA, '1.0.0')
         with self.assertRaises(TypeError):
             plasmid.version = ['1', '2']
 
     def test_addPropertyToList(self):
-        plasmid = ComponentDefinition('pBB1', BIOPAX_DNA, '1.0.0')
-        plasmid.roles = [SO_PLASMID]
-        plasmid.addRole(SO_CIRCULAR)
+        plasmid = sbol.ComponentDefinition('pBB1', sbol.BIOPAX_DNA, '1.0.0')
+        plasmid.roles = [sbol.SO_PLASMID]
+        plasmid.addRole(sbol.SO_CIRCULAR)
         self.assertEqual(len(plasmid.roles), 2)
 
     def test_removePropertyFromList(self):
-        plasmid = ComponentDefinition('pBB1', BIOPAX_DNA, '1.0.0')
-        plasmid.roles = [SO_PLASMID, SO_CIRCULAR]
+        plasmid = sbol.ComponentDefinition('pBB1', sbol.BIOPAX_DNA, '1.0.0')
+        plasmid.roles = [sbol.SO_PLASMID, sbol.SO_CIRCULAR]
         plasmid.removeRole()
         self.assertEqual(len(plasmid.roles), 1)
 
     @unittest.expectedFailure  # See #93
     def test_unsetSingletonProperty(self):
-        doc = Document()
+        doc = sbol.Document()
         cd = doc.componentDefinitions.create('cd')
         cd.name = 'foo'
         self.assertEqual(cd.name, 'foo')
@@ -46,15 +45,14 @@ class TestProperty(unittest.TestCase):
         cd.name = ''
         self.assertEqual(cd.name, None)
 
-    @unittest.expectedFailure  # See #93
     def test_unsetListProperty(self):
-        plasmid = ComponentDefinition('pBB1', BIOPAX_DNA, '1.0.0')
-        plasmid.roles = [SO_PLASMID, SO_CIRCULAR]
+        plasmid = sbol.ComponentDefinition('pBB1', sbol.BIOPAX_DNA, '1.0.0')
+        plasmid.roles = [sbol.SO_PLASMID, sbol.SO_CIRCULAR]
         plasmid.roles = []
         self.assertEqual(len(plasmid.roles), 0)
 
     def test_lenOwnedObject(self):
-        d = Document()
+        d = sbol.Document()
         d.read(TEST_LOCATION)
         self.assertEqual(25, len(d.componentDefinitions))
         self.assertEqual(2, len(d.moduleDefinitions))
@@ -69,7 +67,7 @@ class TestProperty(unittest.TestCase):
         self.assertEqual(expected, str(s1))
 
     def test_readProperties(self):
-        d = Document()
+        d = sbol.Document()
         d.read(TEST_LOCATION)
         cd2 = d.componentDefinitions['http://sbols.org/CRISPR_Example/EYFP_gene/1.0.0']
         self.assertEqual(2, len(cd2.components))
@@ -102,7 +100,7 @@ class TestProperty(unittest.TestCase):
 
     def test_text_property_setting_single(self):
         md = sbol.ModuleDefinition()
-        testing_uri = URIRef(SBOL_URI + "#Testing")
+        testing_uri = rdflib.URIRef(sbol.SBOL_URI + "#Testing")
         tp = sbol.TextProperty(md, testing_uri, '0', '1', [])
         # Test setting to string
         expected = 'foo'
@@ -120,7 +118,7 @@ class TestProperty(unittest.TestCase):
 
     def test_text_property_setting_list(self):
         md = sbol.ModuleDefinition()
-        testing_uri = URIRef(SBOL_URI + "#Testing")
+        testing_uri = rdflib.URIRef(sbol.SBOL_URI + "#Testing")
         tp = sbol.TextProperty(md, testing_uri, '0', '*', [])
         # Test setting to string
         expected = 'foo'
@@ -218,3 +216,38 @@ class TestProperty(unittest.TestCase):
         self.assertEqual(r.start, 42)
         with self.assertRaises(TypeError):
             r.start = 'forty-two'
+
+    def test_uri_property_list(self):
+        cd = sbol.ComponentDefinition('cd')
+        foo_str = 'foo'
+        bar_str = 'bar'
+        foo_uri = rdflib.URIRef(foo_str)
+        bar_uri = rdflib.URIRef(bar_str)
+        cd.roles = foo_str
+        self.assertEqual(cd.roles, [foo_uri])
+        # This used to append. Eek!
+        cd.roles = bar_str
+        self.assertEqual(cd.roles, [bar_uri])
+        # This used to append. Eek!
+        cd.roles = [foo_str, bar_str]
+        self.assertEqual(cd.roles, [foo_uri, bar_uri])
+        with self.assertRaises(TypeError):
+            cd.roles = 34
+
+    def test_uri_property_append(self):
+        cd = sbol.ComponentDefinition('cd')
+        foo_str = 'foo'
+        bar_str = 'bar'
+        foo_uri = rdflib.URIRef(foo_str)
+        bar_uri = rdflib.URIRef(bar_str)
+        cd.roles = foo_str
+        self.assertEqual(cd.roles, [foo_uri])
+        # append has no effect. This is because the list that is
+        # returned by `cd.roles` is not connected with the internal
+        # data representation.
+        cd.roles.append(bar_str)
+        self.assertEqual(cd.roles, [foo_uri])
+        # The `+=` operator is a good way for users to append new
+        # items to the list
+        cd.roles += [bar_str]
+        self.assertEqual(cd.roles, [foo_uri, bar_uri])
