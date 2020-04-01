@@ -206,6 +206,21 @@ class TestCopy(unittest.TestCase):
         # Verify wasDerivedFrom relationship
         self.assertEqual(comp_copy.wasDerivedFrom[0], comp.identity)
 
+        # Ensure these are equal under the covers
+        self.assertEqual(type(comp.properties[sbol.SBOL_SEQUENCE_PROPERTY][0]),
+                         rdflib.URIRef)
+        self.assertEqual(type(comp.properties[sbol.SBOL_SEQUENCE_PROPERTY][0]),
+                         type(comp_copy.properties[sbol.SBOL_SEQUENCE_PROPERTY][0]))
+
+    def test_replace_namespace(self):
+        sbol.setHomespace('http://wallacecorporation.com')
+        old_namespace = 'http://tyrellcorporation.com'
+        old_uri = rdflib.URIRef(old_namespace + '/foo')
+        new_uri = sbol.identified.replace_namespace(old_uri, old_namespace,
+                                                    sbol.SBOL_COMPONENT_DEFINITION)
+        self.assertEqual(type(new_uri), rdflib.URIRef)
+        self.assertEqual(new_uri, rdflib.URIRef(sbol.getHomespace() + '/foo'))
+
     def test_import_into_nontyped_namespace_from_typed_namespace(self):
         # Copy an sbol-typed URI to a non-typed, sbol-compliant URI
         sbol.setHomespace('http://examples.org')

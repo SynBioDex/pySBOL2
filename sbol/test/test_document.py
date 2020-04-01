@@ -289,3 +289,15 @@ class TestDocument(unittest.TestCase):
         cd = doc2.componentDefinitions['cd']
         cd.int_property = sbol.IntProperty(cd, 'http://examples.org', '0', '1', None)
         self.assertEqual(cd.int_property.value, 42)
+
+    def test_range(self):
+        # Test proper serializing and de-serializing of range properties
+        doc = sbol.Document()
+        cd = doc.componentDefinitions.create('cd')
+        sa = cd.sequenceAnnotations.create('sa')
+        r = sa.locations.createRange('r')
+        r.start = 42
+        doc2 = sbol.Document()
+        doc2.readString(doc.writeString())
+        r = doc2.componentDefinitions['cd'].sequenceAnnotations['sa'].locations['r']
+        self.assertEqual(r.start, 42)
