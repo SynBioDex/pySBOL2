@@ -209,3 +209,9 @@ class TestProperty(unittest.TestCase):
             cd0.sequences = [seq0a.identity, seq0b.identity]
             cd0.sequences = [None, None]
             self.assertEqual(cd0.sequences, [])
+
+    def test_int_property(self):
+        r = sbol.location.Range('r')
+        r.start = 42
+        self.assertEqual(type(r.start), int)
+        self.assertEqual(r.start, 42)
