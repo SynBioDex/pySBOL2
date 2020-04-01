@@ -362,4 +362,7 @@ def replace_namespace(old_uri, target_namespace, rdf_type):
         # Map into a non-typed namespace
         replacement = getHomespace()
 
-    return old_uri.replace(replacement_target, replacement)
+    new_uri = old_uri.replace(replacement_target, replacement)
+    if type(old_uri) is URIRef:
+        return URIRef(new_uri)
+    return new_uri
