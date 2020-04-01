@@ -52,7 +52,6 @@ class Range(Location):
     def end(self, val):
         self._end.set(val)
 
-
     def precedes(self, comparand):
         if self.end < comparand.start:
             return comparand.start - self.end
