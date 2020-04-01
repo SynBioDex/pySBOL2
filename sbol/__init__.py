@@ -25,6 +25,7 @@ from .module import Module
 from .moduledefinition import ModuleDefinition
 from .participation import Participation
 from .partshop import PartShop
+from .property import IntProperty
 from .property import LiteralProperty
 from .property import TextProperty
 from .provo import Activity
