@@ -306,7 +306,7 @@ class SBOLObject:
             # entry to the empty string. This is backward compatible
             # with pySBOL/libSBOL
             if self.properties[property_uri]:
-                self.properties[property_uri][0] = ''
+                self.properties[property_uri][0] = rdflib.Literal('')
             return
         # If the value does not exist, just set it and we're done
         if property_uri not in self.properties:

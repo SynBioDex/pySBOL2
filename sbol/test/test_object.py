@@ -83,6 +83,8 @@ class TestObject(unittest.TestCase):
         with self.assertRaises(TypeError):
             md.setPropertyValue(my_property, ['foo', 'bar'])
         # Test basic setting
+        empty_str = ''
+        empty_literal = rdflib.Literal(empty_str)
         foo_literal = rdflib.Literal('foo')
         md.setPropertyValue(my_property, foo_literal)
         self.assertEqual(md.getPropertyValue(my_property), foo_literal)
@@ -99,11 +101,11 @@ class TestObject(unittest.TestCase):
         self.assertEqual(md.getPropertyValue(my_property), baz_literal)
         self.assertEqual(md.getPropertyValues(my_property), [baz_literal, bar_literal])
         # Unset the value
-        md.setPropertyValue(my_property, '')
-        self.assertEqual(md.getPropertyValue(my_property), '')
+        md.setPropertyValue(my_property, empty_str)
+        self.assertEqual(md.getPropertyValue(my_property), empty_literal)
         # This may seem odd, but it is the way pySBOL/libSBOL worked,
         # so we do it for backward compatibility
-        self.assertEqual(md.getPropertyValues(my_property), ['', bar_literal])
+        self.assertEqual(md.getPropertyValues(my_property), [empty_literal, bar_literal])
 
         # What about a plain string? Does that get converted to URIRef or Literal?
         #  If a value is present, mimic that value's type
@@ -128,4 +130,31 @@ class TestObject(unittest.TestCase):
         self.assertEqual(md2.getPropertyValue(my_property), foo_literal)
         # Unsetting the value
         md2.setPropertyValue(my_property, '')
-        self.assertEqual(md2.getPropertyValue(my_property), '')
+        self.assertEqual(md2.getPropertyValue(my_property), empty_literal)
+
+    def test_serialize_property_value(self):
+        # Set a property value to the empty string and verify that it
+        # can be serialized and deserialized properly. The underlying
+        # question is what does the internal representation need to be
+        # to have that happen correctly.
+        my_property = 'http://example.com/myproperty'
+        empty_str = ''
+        empty_literal = rdflib.Literal(empty_str)
+        foo_str = 'foo'
+        foo_literal = rdflib.Literal(foo_str)
+        doc = sbol.Document()
+        md = doc.moduleDefinitions.create('md')
+        with warnings.catch_warnings(record=True):
+            md.setPropertyValue(my_property, foo_str)
+        self.assertEqual(md.getPropertyValue(my_property), foo_literal)
+        with warnings.catch_warnings(record=True):
+            md.setPropertyValue(my_property, empty_str)
+        self.assertEqual(md.getPropertyValue(my_property), empty_literal)
+        # Now serialize the document to a string
+        serialized = doc.writeString()
+        doc2 = sbol.Document()
+        doc2.readString(serialized)
+        self.assertEqual(len(doc2.moduleDefinitions), 1)
+        md2 = doc2.moduleDefinitions[0]
+        self.assertEqual(md2.displayId, md.displayId)
+        self.assertEqual(md2.getPropertyValue(my_property), empty_literal)
