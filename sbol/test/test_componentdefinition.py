@@ -200,8 +200,6 @@ class TestComponentDefinitions(unittest.TestCase):
         with self.assertRaises(TypeError):
             sa.locations.getCut()
 
-    # Waiting for fix to #142
-    @unittest.expectedFailure
     def test_get_cut(self):
         cd = sbol.ComponentDefinition('cd')
         sa = cd.sequenceAnnotations.create('sa')
