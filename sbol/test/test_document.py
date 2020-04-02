@@ -301,3 +301,8 @@ class TestDocument(unittest.TestCase):
         doc2.readString(doc.writeString())
         r = doc2.componentDefinitions['cd'].sequenceAnnotations['sa'].locations['r']
         self.assertEqual(r.start, 42)
+
+    def test_clone_document(self):
+        doc = sbol.Document()
+        doc2 = doc.copy()
+        self.assertEqual(doc, doc2)
