@@ -103,7 +103,7 @@ class Cut(Location):
     two coordinates of a Sequence's elements."""
     def __init__(self, uri=URIRef('example'), at=1, type_uri=SBOL_CUT):
         super().__init__(uri=uri, type_uri=type_uri)
-        self._at = LiteralProperty(self, SBOL_AT, '1', '1', [], at)
+        self._at = IntProperty(self, SBOL_AT, '1', '1', [], at)
 
     @property
     def at(self):
