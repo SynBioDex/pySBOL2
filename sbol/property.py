@@ -668,11 +668,13 @@ class OwnedObject(URIProperty):
         """id can be either an integer index or a string URI"""
         if type(identifier) is int:
             self.removeOwnedObject_int(identifier)
-        elif type(identifier) is str:
+        elif isinstance(identifier, str):
             self.removeOwnedObject_str(identifier)
         else:
-            raise TypeError('id parameter must be an integer index '
-                            'or a string uri')
+            msg = 'id parameter must be an integer index or a string uri.'
+            msg += ' Got {} of type {}'.format(identifier,
+                                               type(identifier).__name__)
+            raise TypeError(msg)
 
     def removeOwnedObject_int(self, index):
         if self._sbol_owner is not None:
