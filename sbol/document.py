@@ -160,6 +160,7 @@ class Document(Identified):
         # super().__eq__ will have checked the types so we know other
         # is a Document at this point.
         if self._namespaces != other._namespaces:
+            print('Namespaces don\'t match')
             return False
         return True
 

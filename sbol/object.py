@@ -242,10 +242,17 @@ class SBOLObject:
         if type(other) != type(self):
             return False
         if self.rdf_type != other.rdf_type:
+            print('RDF types don\'t match')
             return False
         if self.properties != other.properties:
+            print('Properties don\'t match')
+            for p1, p2 in zip(self.properties, other.properties):
+                for v1, v2 in zip(self.properties[p1], other.properties[p2]):
+                    print(v1, v2)
             return False
         if self.owned_objects != other.owned_objects:
+            print('Owned objects don\'t match')
+
             return False
         return True
 

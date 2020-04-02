@@ -301,3 +301,9 @@ class TestDocument(unittest.TestCase):
         doc2.readString(doc.writeString())
         r = doc2.componentDefinitions['cd'].sequenceAnnotations['sa'].locations['r']
         self.assertEqual(r.start, 42)
+
+    def test_copy(self):
+        doc = sbol.Document()
+        doc2 = doc.copy(version=rdflib.Literal('1'))
+        print(doc == doc2)
+        self.assertEqual(doc, doc2)
