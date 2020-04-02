@@ -149,3 +149,15 @@ class OwnedLocation(OwnedObject):
 
     def createGenericLocation(self, uri=URIRef('example')):
         return self.create(uri, GenericLocation)
+
+    def getRange(self, uri=''):
+        range = self.get(uri)
+        if isinstance(range, Range):
+            return range
+        raise TypeError('Found object is not of type Range')
+
+    def getCut(self, uri=''):
+        cut = self.get(uri)
+        if isinstance(cut, Cut):
+            return cut
+        raise TypeError('Found object is not of type Cut')

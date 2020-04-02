@@ -188,3 +188,33 @@ class TestComponentDefinitions(unittest.TestCase):
         self.assertEqual(type(c), sbol.Cut)
         c = sa.locations['c']
         self.assertEqual(type(c), sbol.Cut)
+
+    def test_get_range(self):
+        cd = sbol.ComponentDefinition('cd')
+        sa = cd.sequenceAnnotations.create('sa')
+        r = sa.locations.createRange('r')
+        self.assertEqual(type(r), sbol.Range)
+        # SYNBICT uses getRange with no argument. It returns the first
+        # object.
+        r2 = sa.locations.getRange()
+        self.assertEqual(r2, r)
+        # getCut with zero args should raise a type error because the
+        # first object is a Range.
+        with self.assertRaises(TypeError):
+            sa.locations.getCut()
+
+    # Waiting for fix to #142
+    @unittest.expectedFailure
+    def test_get_cut(self):
+        cd = sbol.ComponentDefinition('cd')
+        sa = cd.sequenceAnnotations.create('sa')
+        c = sa.locations.createCut('c')
+        self.assertEqual(type(c), sbol.Cut)
+        # SYNBICT uses getCut with no argument. It returns the first
+        # object.
+        c2 = sa.locations.getCut()
+        self.assertEqual(c2, c)
+        # getRange with zero args should raise a type error because
+        # the first object is a Cut.
+        with self.assertRaises(TypeError):
+            sa.locations.getRange()
