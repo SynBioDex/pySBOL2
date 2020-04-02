@@ -160,7 +160,6 @@ class Document(Identified):
         # super().__eq__ will have checked the types so we know other
         # is a Document at this point.
         if self._namespaces != other._namespaces:
-            print('Namespaces don\'t match')
             return False
         return True
 
@@ -819,3 +818,13 @@ class Document(Identified):
         msg = '{} is not a top level object'
         msg = msg.format(uri)
         raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
+
+    def copy(self, target_doc=None, target_namespace=None, version=None):
+        # This enables the user to use the pattern doc2 = doc.copy() to clone a Document.
+        # SWIG pySBOL assumes the user does NOT want to increment the Document's version
+        # when creating a clone. (Whether or not these are the right semantics, that's
+        # how it is implemented.) By passing an explicit version parameter to super's
+        # copy method, we short-circuit its default behavior to auto-increment version.
+        if version is None:
+            version = self.version
+        return super().copy(target_doc, target_namespace, version)
