@@ -251,3 +251,11 @@ class TestProperty(unittest.TestCase):
         # items to the list
         cd.roles += [bar_str]
         self.assertEqual(cd.roles, [foo_uri, bar_uri])
+
+    def test_owned_object_remove(self):
+        md = sbol.ModuleDefinition('md')
+        m1 = md.modules.create('m1')
+        m2 = md.modules.create('m2')
+        self.assertEqual(list(md.modules), [m1, m2])
+        md.modules.remove(m2.identity)
+        self.assertEqual(list(md.modules), [m1])
