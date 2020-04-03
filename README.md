@@ -1,9 +1,11 @@
-# SBOL
+# pySBOL2
 [![Build Status](https://travis-ci.com/llotneb/SBOL.svg?branch=master)](https://travis-ci.com/llotneb/SBOL)
 
-**SBOL** is a pure Python implementation of the SBOL standard [Synthetic Biology Open Language (SBOL)](http://www.sbolstandard.org/) - 
+**pySBOL2** is a pure Python implementation of the SBOL 2.3.0 standard [Synthetic Biology Open Language (SBOL)](http://www.sbolstandard.org/) - 
 an open standard for the representation of *in silico* biological designs. It draws from [libSBOL](https://github.com/SynBioDex/libSBOL)
 and [pySBOL](https://github.com/SynBioDex/pySBOL).
+
+This native Python library is intended to eventually supplant the original [pySBOL](https://github.com/SynBioDex/pySBOL) based on C++ wrappers.
 
 For developers, please see [CONTRIBUTING.md](CONTRIBUTING.md).
 
@@ -36,7 +38,7 @@ should be used until this module has its own documentation.
 
 ## ACKNOWLEDGEMENTS
 
-To be updated.
+Development of this library has been supported by the DARPA Synergistic Discovery & Design program and BBN Technologies.
 
 <p align="center">
   <img src="./logo.jpg" height="100" />
