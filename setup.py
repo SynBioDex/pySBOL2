@@ -33,5 +33,4 @@ setup(name='sbol2',
             'deprecated',
             'lxml',
             'requests'
-      ]
-)
+      ])
