@@ -1,11 +1,11 @@
 from setuptools import setup
 
-setup(name='sbol',
-      version='2.3.3-beta',
-      description='Pure Python implementation of SBOL standard',
-      url='https://github.com/llotneb/SBOL.git',
-      author='Benjamin Toll',
-      author_email='Ben.Toll@raytheon.com',
+setup(name='sbol2',
+      version='1.0b1',
+      description='Pure Python implementation of SBOL 2 standard',
+      url='https://github.com/SynBioDex/pySBOL2',
+      author='Bryan Bartley',
+      author_email='editors@sbolstandard.org',
       license='Apache-2',
       # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
       classifiers=[
@@ -23,16 +23,15 @@ setup(name='sbol',
 
             # Specify the Python versions you support here. In particular, ensure
             # that you indicate whether you support Python 2, Python 3 or both.
-            'Programming Language :: Python :: 3',
-            'Programming Language :: Python :: 3.6'
+            'Programming Language :: Python :: 3'
       ],
       # What does your project relate to?
       keywords='synthetic biology',
-      packages=['sbol'],
+      packages=['sbol2'],
       install_requires=[
             'rdflib',
             'deprecated',
             'lxml',
             'requests'
-      ],
-      zip_safe=False)
+      ]
+)
