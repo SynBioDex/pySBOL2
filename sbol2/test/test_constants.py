@@ -1,7 +1,7 @@
 import os
 import unittest
 
-import sbol
+import sbol2 as sbol
 
 MODULE_LOCATION = os.path.dirname(os.path.abspath(__file__))
 TEST_LOCATION = os.path.join(MODULE_LOCATION, 'resources', 'crispr_example.xml')

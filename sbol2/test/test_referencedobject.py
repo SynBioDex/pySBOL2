@@ -4,8 +4,8 @@ import os
 import unittest
 
 import rdflib
-import sbol
-from sbol.property import ReferencedObject
+import sbol2 as sbol
+from sbol2.property import ReferencedObject
 
 MODULE_LOCATION = os.path.dirname(os.path.abspath(__file__))
 TEST_LOCATION = os.path.join(MODULE_LOCATION, 'resources', 'crispr_example.xml')

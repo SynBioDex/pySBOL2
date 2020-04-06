@@ -2,7 +2,7 @@ import unittest
 
 import rdflib
 
-from sbol import *
+from sbol2 import *
 
 CRISPR_URI = 'http://sbols.org/CRISPR_Example/CRISPR_Template'
 CRISPR_URI_1 = 'http://sbols.org/CRISPR_Example/CRISPR_Template/1'
