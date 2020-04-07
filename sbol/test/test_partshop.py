@@ -7,11 +7,11 @@ import sbol
 
 
 if 'username' in os.environ:
-    username = os.environ['username']
+    username = os.environ['SBH_USER']
 else:
     username = None
 if 'password' in os.environ:
-    password = os.environ['password']
+    password = os.environ['SBH_PASSWORD']
 else:
     password = None
 
