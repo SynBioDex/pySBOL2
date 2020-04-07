@@ -6,12 +6,12 @@ import requests
 import sbol2 as sbol
 
 
-if 'username' in os.environ:
-    username = os.environ['username']
+if 'SBH_USER' in os.environ:
+    username = os.environ['SBH_USER']
 else:
     username = None
-if 'password' in os.environ:
-    password = os.environ['password']
+if 'SBH_PASSWORD' in os.environ:
+    password = os.environ['SBH_PASSWORD']
 else:
     password = None
 
@@ -68,12 +68,13 @@ class TestPartShop(unittest.TestCase):
 
     @unittest.skipIf(password is None, "No password supplied")
     def test_submit_00(self):
+        RESOURCE = 'https://synbiohub.utah.edu'
         doc = sbol.Document()
         doc.displayId = 'test_collection'
         doc.name = 'test collection'
         doc.description = 'a test collection automatically generated ' \
                           'by the SBOL client library'
-        ps = sbol.PartShop('https://hub-staging.sd2e.org')
+        ps = sbol.PartShop(RESOURCE)
         ps.login(username, password)
         response = ps.submit(doc, overwrite=1)
         self.assertEqual(response.status_code, 200)
@@ -146,20 +147,22 @@ WHERE {
     def test_submit(self):
         # This test is derived from an etl-to-synbiohub_pipeline test
         # case that was failing.
+        RESOURCE = 'https://tang.ece.utah.edu'
+        SPOOFED_RESOURCE = 'https://synbiohub.utah.edu'
         doc = sbol.Document()
         doc.version = '1'
         doc.displayId = 'sbol_test'
         doc.name = "SBOL Test Collection"
         doc.description = "A scratch collection for automated testing of the sbol."
-        sbh = sbol.PartShop('https://hub-staging.sd2e.org', 'https://hub.sd2e.org')
+        sbh = sbol.PartShop(RESOURCE, SPOOFED_RESOURCE)
         sbh.login(username, password)
         try:
             sbh.submit(doc)
-        except Throwable:
+        except Exception:
             # What exception type should we really be expecting? The
             # original test had a bare except.
-            uri_template = 'https://hub.sd2e.org/user/sd2e/{0}/{0}_collection/1'
-            target_collection = uri_template.format(doc.displayId)
+            uri_template = '{0}/user/{1}/{2}/{2}_collection/1'
+            target_collection = uri_template.format(RESOURCE, username, doc.displayId)
             sbh.submit(doc, target_collection, 1)
 
     def test_uri2url(self):
