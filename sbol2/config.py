@@ -1,5 +1,4 @@
 from enum import Enum
-import os
 import random
 
 from .sbolerror import SBOLError
@@ -233,54 +232,70 @@ def getFileFormat():
     return Config.getFileFormat()
 
 
-def constructCompliantURI(sbol_type, display_id, version):
-    if Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS.value) is True:
-        return getHomespace() + os.sep + parseClassName(sbol_type) + os.sep + \
-               display_id + os.sep + version
-    else:
-        return ''
+# constructCompliantURI is never invoked. If it ever gets resurrected,
+# fix the use of os.sep.
+#
+# def constructCompliantURI(sbol_type, display_id, version):
+#     if Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS.value) is True:
+#         return getHomespace() + os.sep + parseClassName(sbol_type) + os.sep + \
+#                display_id + os.sep + version
+#     else:
+#         return ''
 
 
-def constructCompliantURI_parentChild(parent_type, child_type,
-                                      display_id, version):
-    if Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS.value) is True:
-        return getHomespace() + os.sep + parseClassName(parent_type) + \
-               os.sep + parseClassName(child_type) + \
-               os.sep + display_id + os.sep + version
-    else:
-        return ''
+# constructCompliantURI_parentChild is never invoked. If it ever gets
+# resurrected, fix the use of os.sep.
+#
+# def constructCompliantURI_parentChild(parent_type, child_type,
+#                                       display_id, version):
+#     if Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS.value) is True:
+#         return getHomespace() + os.sep + parseClassName(parent_type) + \
+#                os.sep + parseClassName(child_type) + \
+#                os.sep + display_id + os.sep + version
+#     else:
+#         return ''
 
 
-def randomIdentifier():
-    # TODO test
-    id = ''
-    for i in range(1, 11):
-        r = random.randint(0, 9)
-        id += str(r)
-        if r % 4 == 0 and r != 16:
-            id += '-'
-    return id
+# randomIdentifier is only invoked by autoconstructURI below, and
+# autoconstructURI is never called. Delete this function when
+# autoconstructURI is deleted.
+#
+# def randomIdentifier():
+#     # TODO test
+#     id = ''
+#     for i in range(1, 11):
+#         r = random.randint(0, 9)
+#         id += str(r)
+#         if r % 4 == 0 and r != 16:
+#             id += '-'
+#     return id
 
 
-def autoconstructURI():
-    if Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS) is False \
-            and hasHomespace():
-        return getHomespace() + os.sep + randomIdentifier()
-    elif Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS) is False \
-            and not hasHomespace():
-        raise SBOLError('The autoconstructURI method requires '
-                        'a valid namespace authority. Use setHomespace().',
-                        SBOLErrorCode.SBOL_ERROR_COMPLIANCE)
-    else:
-        raise SBOLError('The autoconstructURI method only works '
-                        'when SBOLCompliance flag is false. '
-                        'Use setOption to disable SBOL-compliant URIs.',
-                        SBOLErrorCode.SBOL_ERROR_COMPLIANCE)
+# autoconstructURI is never invoked. If it ever gets resurrected, fix
+# the use of os.sep.
+#
+# def autoconstructURI():
+#     if Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS) is False \
+#             and hasHomespace():
+#         return getHomespace() + os.sep + randomIdentifier()
+#     elif Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS) is False \
+#             and not hasHomespace():
+#         raise SBOLError('The autoconstructURI method requires '
+#                         'a valid namespace authority. Use setHomespace().',
+#                         SBOLErrorCode.SBOL_ERROR_COMPLIANCE)
+#     else:
+#         raise SBOLError('The autoconstructURI method only works '
+#                         'when SBOLCompliance flag is false. '
+#                         'Use setOption to disable SBOL-compliant URIs.',
+#                         SBOLErrorCode.SBOL_ERROR_COMPLIANCE)
 
 
-def getCompliantURI(uri_prefix, sbol_class_name, display_id, version):
-    return uri_prefix + os.sep + sbol_class_name + \
-           os.sep + display_id + os.sep + version
+# getCompliantURI is never invoked. If it ever gets resurrected, fix
+# the use of os.sep.
+#
+# def getCompliantURI(uri_prefix, sbol_class_name, display_id, version):
+#     return uri_prefix + os.sep + sbol_class_name + \
+#            os.sep + display_id + os.sep + version
 
 
 def parseClassName(uri):
