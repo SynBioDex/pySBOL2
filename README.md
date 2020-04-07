@@ -1,5 +1,5 @@
 # pySBOL2
-[![Build Status](https://travis-ci.com/llotneb/SBOL.svg?branch=master)](https://travis-ci.com/llotneb/SBOL)
+[![Build Status](https://travis-ci.org/SynBioDex/pySBOL2.svg?branch=master)](https://travis-ci.org/SynBioDex/pySBOL2)
 
 **pySBOL2** is a pure Python implementation of the SBOL 2.3.0 standard [Synthetic Biology Open Language (SBOL)](http://www.sbolstandard.org/) - 
 an open standard for the representation of *in silico* biological designs. It draws from [libSBOL](https://github.com/SynBioDex/libSBOL)
