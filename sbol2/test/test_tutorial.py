@@ -2,7 +2,7 @@ import logging
 import os
 import unittest
 
-import sbol
+import sbol2 as sbol
 
 LOGGER_NAME = 'sbol.test'
 DEBUG_ENV_VAR = 'SBOL_TEST_DEBUG'

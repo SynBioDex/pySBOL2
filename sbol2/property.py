@@ -553,11 +553,15 @@ class OwnedObject(URIProperty):
         persistentIdentity = ''
         for ns in resource_namespaces:
             # Assume the parent object is TopLevel and form the compliant URI
+            #
+            # Note the final empty string, which causes a trailing '/'
+            # to be added. Not sure why we need the trailing slash,
+            # but that's why the '' is there.
             if typedURI is True:
-                compliant_uri = posixpath.join(ns, parseClassName(self._rdf_type), uri)
+                compliant_uri = posixpath.join(ns, parseClassName(self._rdf_type),
+                                               uri, '')
             else:
-                compliant_uri = posixpath.join(ns, uri)
-            compliant_uri += os.sep
+                compliant_uri = posixpath.join(ns, uri, '')
             compliant_uri = URIRef(compliant_uri)
             persistent_id_matches = []
             if Config.getOption('verbose') is True:

@@ -3,7 +3,7 @@ import unittest
 
 import rdflib
 
-import sbol
+import sbol2 as sbol
 
 MODULE_LOCATION = os.path.dirname(os.path.abspath(__file__))
 PARTS_LOCATION = os.path.join(MODULE_LOCATION, 'resources', 'tutorial',

@@ -7,7 +7,7 @@ import shutil
 import sys
 import rdflib
 import rdflib.compare
-import sbol
+import sbol2 as sbol
 
 MODULE_LOCATION = os.path.dirname(os.path.abspath(__file__))
 TEST_LOC_SBOL2 = os.path.join(MODULE_LOCATION, 'SBOLTestSuite', 'SBOL2')

@@ -1,6 +1,6 @@
 import logging
 import unittest
-import sbol
+import sbol2 as sbol
 
 
 class TestModuleDefinition(unittest.TestCase):

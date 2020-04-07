@@ -3,7 +3,7 @@ import unittest
 
 import requests
 
-import sbol
+import sbol2 as sbol
 
 
 if 'username' in os.environ:

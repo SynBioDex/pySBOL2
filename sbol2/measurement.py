@@ -1,6 +1,7 @@
-from sbol.identified import Identified
-from sbol.constants import *
-from sbol.property import LiteralProperty, URIProperty
+from .constants import *
+from .identified import Identified
+from .property import LiteralProperty, URIProperty
+
 from rdflib import URIRef
 
 

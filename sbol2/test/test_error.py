@@ -1,6 +1,6 @@
 import unittest
 
-import sbol
+import sbol2 as sbol
 
 
 class TestError(unittest.TestCase):

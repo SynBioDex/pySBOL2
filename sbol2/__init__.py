@@ -1,4 +1,4 @@
-__version__ = '3.0.0'
+__version__ = '1.0b1'
 
 # Anything imported here is part of the public API. Limit what gets
 # imported to only those things that are actually needed.
@@ -40,7 +40,7 @@ def testSBOL():
     """
     Function to test pySBOL API.
     """
-    import sbol.test as unit_tests
+    import sbol2.test as unit_tests
     unit_tests.runTests()
 
 
@@ -48,7 +48,7 @@ def testRoundTrip():
     """
     Function to run test suite for pySBOL
     """
-    import sbol.test as unit_tests
+    import sbol2.test as unit_tests
     unit_tests.runRoundTripTests()
 
 
@@ -58,7 +58,7 @@ def testSBOLHook():
     all tests pass.
     :return:
     """
-    import sbol.test as unit_tests
+    import sbol2.test as unit_tests
     result = unit_tests.runTests()
     if result.wasSuccessful():
         exit(0)
