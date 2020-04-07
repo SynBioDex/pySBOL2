@@ -284,7 +284,7 @@ class SBOLObject:
         owned_objects_uris = [p for p in self.owned_objects.keys()]
         return property_uris + owned_objects_uris
 
-    @deprecated(version='3.0.0', reason='Use extension properties instead')
+    @deprecated(reason='Use extension properties instead')
     def setPropertyValue(self, property_uri, val):
         """Set and overwrite the value for a user-defined annotation property.
 

@@ -1,6 +1,6 @@
 import unittest
 import os
-import sbol
+import sbol2 as sbol
 
 import rdflib
 

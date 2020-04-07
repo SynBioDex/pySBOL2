@@ -122,7 +122,7 @@ class Sequence(TopLevel):
         # A sequence is True if it exists.
         return True
 
-    @deprecated(version='3.0.0', reason='Use len(sequence) instead')
+    @deprecated(reason='Use len(sequence) instead')
     def length(self):
         """
 

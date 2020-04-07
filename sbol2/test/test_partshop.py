@@ -3,7 +3,7 @@ import unittest
 
 import requests
 
-import sbol
+import sbol2 as sbol
 
 
 if 'username' in os.environ:
@@ -39,6 +39,8 @@ class TestPartShop(unittest.TestCase):
         #     print(obj)
         self.assertEqual(7, len(doc))
 
+    # The part has gone missing in SynBioHub
+    @unittest.expectedFailure
     def test_pull_02(self):
         doc = sbol.Document()
         ps = sbol.PartShop('https://synbiohub.utah.edu/public/RepressionModel')

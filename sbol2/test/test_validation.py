@@ -1,7 +1,7 @@
 import unittest
 
-import sbol
-from sbol.validation import sbol_rule_10202
+import sbol2 as sbol
+from sbol2.validation import sbol_rule_10202
 
 
 class TestValidation(unittest.TestCase):

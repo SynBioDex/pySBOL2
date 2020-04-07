@@ -2,7 +2,7 @@ import unittest
 
 import rdflib
 
-import sbol
+import sbol2 as sbol
 
 
 class TestInteraction(unittest.TestCase):

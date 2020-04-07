@@ -5,7 +5,7 @@ import unittest
 
 import rdflib
 
-import sbol
+import sbol2 as sbol
 
 MODULE_LOCATION = os.path.dirname(os.path.abspath(__file__))
 CRISPR_EXAMPLE = os.path.join(MODULE_LOCATION, 'resources', 'crispr_example.xml')
