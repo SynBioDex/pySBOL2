@@ -158,7 +158,7 @@ WHERE {
         sbh.login(username, password)
         try:
             sbh.submit(doc)
-        except Throwable:
+        except Exception:
             # What exception type should we really be expecting? The
             # original test had a bare except.
             uri_template = '{0}/user/{1}/{2}/{2}_collection/1'
