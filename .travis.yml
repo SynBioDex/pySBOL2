@@ -1,30 +1,26 @@
-# Thanks to https://github.com/joerick/cibuildwheel for windows build
-# commands
-
 language: generic
-
 matrix:
   include:
-    - os: linux
-      language: python
-      python: 3.6
-
-    - os: linux
-      language: python
-      python: 3.7
-
-    - os: windows
-      language: shell
-      before_install:
-       - choco install python3 --version=3.7.6 --no-progress -y
-      install:
-       - C:\\Python37\\python -m pip install .
-      script:
-       - C:\\Python37\\python -c "import sbol; sbol.testSBOL()"
-
+  - os: linux
+    language: python
+    python: 3.6
+  - os: linux
+    language: python
+    python: 3.7
+  - os: windows
+    language: shell
+    before_install:
+    - choco install python3 --version=3.7.6 --no-progress -y
+    install:
+    - C:\\Python37\\python -m pip install .
+    script:
+    - C:\\Python37\\python -c "import sbol; sbol.testSBOL()"
 install:
-  - python3 -m pip install .
-
+- python3 -m pip install .
 script:
-  - python3 -c "import sbol; sbol.testSBOL()"
-  - travis_wait python3 -c "import sbol; sbol.testRoundTrip()"
+- python3 -c "import sbol; sbol.testSBOL()"
+- travis_wait python3 -c "import sbol; sbol.testRoundTrip()"
+env:
+  global:
+  - secure: EBUb9YBXJFo2qwruQVyn5dLiq9qDBu/EOzNkn0GzPE1hF8Pwm8j6w21dmcXwAoR+xizm3XACnNdXeq0j+2ehevw3Q6HIt5OkdeVFNYxZYDSDjNTieAZ1c/xI85AC8Kzh6g817GcKufINzQctDy0wcnxoP5bzy1SjM7RYpPfDjEGqzXvU9g8kI2JJUGLiDvq7lZSgbxCPD7Gcej8JZghpEHWAySWNzxzFQ3tpU7LexJvKktntlTe5+qvD1DKyWodXMTPCA/T2X6GZEaWFKmzb/o7ms11czFOIgTZa/EzXClmQz3o3Vqz+T1HvIMblNGd1hJMXU18YXR8ibrD6bh4016kPhLKmrcwlls0r1GUmto39icPpxocHQpmc8+ubbTonknZFvaTHCdOG1OIBhSCpGH4WNvA1TvSgYuW9SBtRls9kD1QVhnNI1yaTBEjaq2QDh4Y0l7vSS/KwOhVcx0JbUpd5rIGtW0R89QKRJndIjyUlWLisk5Kc+zfDSUJDB9Xv++bhEI3L09aGjtlUj7TC1TbH1HoXSHXE1018hDy2cPPH7pipzMeZdo4nmL6XfBsJF84BkmwXDzNqw2bDALQDSybYuL+4KfbEEb8RKutkenpH01AE8R1L61HXHntdq5O8qnbvj4n60IXs8vyZpvPzGtodXh79p0yIMy9tSDmg9Mc=
+  - secure: f2iP6NCwO1GxkSOS8Own8YCsCwZl31tTQt1+Hos7vVxiZWf8Z2bhIz95f7zYUFO84helt7mT2CCcnsaXt/ynaj7gAWfsyEHiSFx6xebHsoXw6AhnC1Eotn2UQsU9pSTt7aZtcO18faOoyE1nUUXPzUacQ/gzMpfl/kEagYIdLPUbg8qJw9UJycScLcAsqsM9ehFHnGnTOSc/XLy45WKLJZvyCPhk9ZgMblrchtEm7FiN0BbdTD0gha5bpurIFQBo206XAMNKbB2RuxKkc63kOHxsnhVj9lZWUDK8wgu9c8ECWZVRC3jrtsG2nBnUl4g5SuWbC4b59YoURLynDMp8hDuOY1hX6ukWXDDVV+i6FyAeIJ5lR2m8DM0gMuBRa02jLcjR1DRhbKXXlhQJdx/gFQ0j6CEARh3SxY1MvEc06k7KBF3ZlQQaNg1QE77MuOljP6ssj6whmzbwkA1Q0NoeElD6FgTAgmr5RIf+WegTSlJg/wSElMd/kDiRBIGXE1036gdQq4D0bYr09iuFUth2aGb8AQwflfsf9jFugHFZpQoQgtvA5uZGU/8rlxwxAHPc1opyLyjOJvXnmOw/9is18VbhCM/ePKQwza7OaRaXtkOJlDDcCNjPEQj09rihMb+S7udV3OAwtCwM7bSwck3Krw2TXwTJQgyfBkD7HgYXDjQ=
