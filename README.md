@@ -17,19 +17,29 @@ virtual environment for your installation.
 ```shell
 # Name the virtual environment
 DIR=myenv
+
 # Create the virtual environment
 python3 -m venv "${DIR}"
+
 # Activate the virtual environment
 source "${DIR}"/bin/activate
+
 # Recommended: upgrade pip
 pip install -U pip
+
 # Install the sbol module
-pip install git+https://github.com/llotneb/SBOL.git
+pip install sbol2
+```
+
+## CODE EXAMPLE
+
+```
+import sbol2
+
+doc = sbol2.Document()
 ```
 
 ## DOCUMENTATION
-
-To be updated.
 
 This module should be largely compatible with
 [pySBOL](https://github.com/SynBioDex/pySBOL).
