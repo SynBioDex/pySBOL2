@@ -199,8 +199,8 @@ class Activity(TopLevel):
         super().__init__(rdf_type, uri, version)
         self.plan = OwnedObject(self, PROVO_PLAN, Plan,
                                 '0', '1', [validation.libsbol_rule_22])
-        self.agent = OwnedObject(self, PROVO_AGENT, Agent,
-                                 '0', '1', [validation.libsbol_rule_22])
+        self.agent = ReferencedObject(self, PROVO_AGENT, Agent,
+                                      '0', '1', [validation.libsbol_rule_22])
         self._types = URIProperty(self, SBOL_TYPES, '0', '1', [])
         self._startedAtTime = LiteralProperty(self, PROVO_STARTED_AT_TIME,
                                               '0', '1', [])
