@@ -12,6 +12,8 @@ from .collection import Collection
 from .combinatorialderivation import CombinatorialDerivation
 from .component import Component, FunctionalComponent
 from .componentdefinition import ComponentDefinition
+from .config import ConfigOptions
+from .config import Config
 from .config import parsePropertyName
 from .constants import *
 from .dbtl import Analysis, Build, Design, SampleRoster, Test
@@ -33,6 +35,8 @@ from .sbolerror import SBOLErrorCode
 from .sequence import Sequence
 from .sequenceannotation import SequenceAnnotation
 from .sequenceconstraint import SequenceConstraint
+
+import requests
 
 
 class Document(Identified):
@@ -590,11 +594,6 @@ class Document(Identified):
         s.replace("\\\\", "\\")
         return s
 
-    # Online validation #
-    def request_validation(self, sbol_str):
-        # TODO what is this method supposed to do?
-        raise NotImplementedError("Not yet implemented")
-
     def request_comparison(self, diff_file):
         """
         Perform comparison on Documents using the online validation tool.
@@ -672,13 +671,69 @@ class Document(Identified):
             for s, p, o in self.graph:
                 self.logger.debug((s, p, o))
 
+    def validation_options(self):
+        # Config validation options that have boolean values
+        config_options = [
+            ConfigOptions.CHECK_BEST_PRACTICES,
+            ConfigOptions.CHECK_COMPLETENESS,
+            ConfigOptions.CHECK_URI_COMPLIANCE,
+            ConfigOptions.DIFF_FILE_NAME,
+            ConfigOptions.FAIL_ON_FIRST_ERROR,
+            ConfigOptions.INSERT_TYPE,
+            ConfigOptions.LANGUAGE,
+            ConfigOptions.MAIN_FILE_NAME,
+            ConfigOptions.PROVIDE_DETAILED_STACK_TRACE,
+            ConfigOptions.SUBSET_URI,
+            ConfigOptions.TEST_EQUALITY,
+            ConfigOptions.URI_PREFIX,
+            ConfigOptions.VERSION
+        ]
+        options = {}
+        for opt in config_options:
+            options[opt.value] = Config.getOption(opt)
+        return dict(options=options)
+
+    # Online validation #
+    def request_validation(self, sbol_str):
+        json_request = self.validation_options()
+        return_file = Config.getOption(ConfigOptions.RETURN_FILE)
+        json_request[ConfigOptions.RETURN_FILE.value] = return_file
+        json_request['main_file'] = sbol_str
+
+        headers = {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'charsets': 'utf-8'
+        }
+
+        validator_url = Config.getOption(ConfigOptions.VALIDATOR_URL)
+
+        # Send the request to the online validation tool
+        response = requests.post(validator_url,
+                                 json=json_request,
+                                 headers=headers)
+        if response:
+            info = response.json()
+            if info['valid']:
+                result = "Valid."
+            else:
+                result = "Invalid."
+            errors = ' '.join(info['errors'])
+            if errors:
+                result = ' '.join([result, errors])
+            return result
+        else:
+            msg = 'Cannot validate online. HTTP post request failed with code {}: {}'
+            msg = msg.format(response.status_code, response.content)
+            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST)
+
     def validate(self):
         """
         Run validation on this Document via the online validation tool.
 
         :return: A string containing a message with the validation results
         """
-        raise NotImplementedError("Not yet implemented")
+        return self.request_validation(self.writeString())
 
     def size(self):
         """
