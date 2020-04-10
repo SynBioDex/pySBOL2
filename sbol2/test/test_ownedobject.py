@@ -89,8 +89,8 @@ class TestOwnedObject(unittest.TestCase):
         md = doc.moduleDefinitions.create('foo')
         m1 = sbol.Module('m1')
         m2 = sbol.Module('m2')
-        with self.assertRaises(AttributeError):
-            md.modules = [m1, m2]
+        md.modules = [m1, m2]
+        self.assertEqual(list(md.modules), [m1, m2])
 
     def test_set_no_doc(self):
         # Add a module when the parent module definition is not in a
