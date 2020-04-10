@@ -178,23 +178,22 @@ class Config:
         :param val: The option value (str or bool expected)
         :return: None
         """
-        if option in options:
-            if option in valid_options:
-                if val in valid_options[option]:
-                    options[option] = val
-                else:
-                    raise SBOLError(SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT,
-                                    val +
-                                    ' is not a valid value for '
-                                    'this option. Valid options are ' +
-                                    str(valid_options[option]))
-            else:
-                # Any argument is valid, eg. uriPrefix
+        # Convert a config option to its string value
+        if isinstance(option, ConfigOptions):
+            option = option.value
+        if option not in options:
+            msg = '{!r} is not a valid configuration option'.format(option)
+            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
+        if option in valid_options:
+            if val in valid_options[option]:
                 options[option] = val
+            else:
+                msg = '{!r} is not a valid value for option {!r}.'.format(val, option)
+                msg += ' Valid options are: {!r}.'.format(valid_options[option])
+                raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
         else:
-            raise SBOLError(SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT,
-                            option +
-                            ' is not a valid configuration option for libSBOL')
+            # Any argument is valid, eg. uriPrefix
+            options[option] = val
 
     @staticmethod
     def getOption(option):
@@ -203,12 +202,14 @@ class Config:
         :param option: The option key
         :return: The option value
         """
+        # Convert a config option to its string value
+        if isinstance(option, ConfigOptions):
+            option = option.value
         if option in options:
             return options[option]
         else:
-            raise SBOLError(SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT,
-                            str(option) +
-                            ' not a valid configuration option for libSBOL')
+            msg = '{!r} is not a valid configuration option'.format(option)
+            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
 
 
 # Global methods
