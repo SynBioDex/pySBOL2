@@ -41,7 +41,7 @@ options = {
     ConfigOptions.SBOL_TYPED_URIS.value: True,
     ConfigOptions.SERIALIZATION_FORMAT.value: 'sbol',
     ConfigOptions.VALIDATE.value: True,
-    ConfigOptions.VALIDATOR_URL.value: 'http://www.async.ece.utah.edu/validate/',
+    ConfigOptions.VALIDATOR_URL.value: 'https://validator.sbolstandard.org/validate/',
     ConfigOptions.LANGUAGE.value: 'SBOL2',
     ConfigOptions.TEST_EQUALITY.value: False,
     ConfigOptions.CHECK_URI_COMPLIANCE.value: False,

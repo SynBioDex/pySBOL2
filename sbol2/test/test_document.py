@@ -5,6 +5,7 @@ import unittest
 
 import rdflib
 
+import sbol2
 import sbol2 as sbol
 
 MODULE_LOCATION = os.path.dirname(os.path.abspath(__file__))
@@ -12,6 +13,17 @@ TEST_LOCATION = os.path.join(MODULE_LOCATION, 'resources', 'crispr_example.xml')
 
 
 class TestDocument(unittest.TestCase):
+
+    def setUp(self):
+        # One of the unit tests changes the validator URL
+        # configuration, so we capture it here and reset it in
+        # tearDown(). It would be nice to have a method to reset to
+        # factory configuration.
+        self.validator_url = sbol2.Config.getOption(sbol2.ConfigOptions.VALIDATOR_URL)
+
+    def tearDown(self):
+        sbol2.Config.setOption(sbol2.ConfigOptions.VALIDATOR_URL,
+                               self.validator_url)
 
     def test_empty_len0(self):
         doc = sbol.Document()
@@ -306,3 +318,24 @@ class TestDocument(unittest.TestCase):
         doc = sbol.Document()
         doc2 = doc.copy()
         self.assertEqual(doc, doc2)
+
+    def test_validate(self):
+        doc = sbol2.Document()
+        # Add a module definition
+        doc.moduleDefinitions.create('md')
+        result = doc.validate()
+        expected = 'Valid.'
+        self.assertEqual(result, expected)
+
+    def test_validate_invalid(self):
+        doc = sbol2.Document()
+        result = doc.request_validation('mumbo jumbo')
+        expected = 'Invalid.'
+        self.assertEqual(result[:len(expected)], expected)
+
+    def test_validate_bad_url(self):
+        sbol2.Config.setOption(sbol2.ConfigOptions.VALIDATOR_URL,
+                               self.validator_url + 'foo/bar')
+        doc = sbol2.Document()
+        with self.assertRaises(sbol2.SBOLError):
+            doc.validate()
