@@ -29,6 +29,7 @@ from .property import IntProperty
 from .property import LiteralProperty
 from .property import TextProperty
 from .provo import Activity
+from .provo import Plan
 from .sbolerror import SBOLError, SBOLErrorCode
 from .sequence import Sequence
 from .sequenceannotation import SequenceAnnotation
