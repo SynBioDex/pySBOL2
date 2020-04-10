@@ -446,10 +446,14 @@ class SBOLObject:
     def _set_referenced_object(self, name, value):
         self.__dict__[name].set(value)
 
+    def _set_owned_object(self, name, value):
+        self.__dict__[name].set(value)
+
     def __setattr__(self, name, value):
         if self._is_referenced_object(name):
             self._set_referenced_object(name, value)
             return
         if self._is_owned_object(name):
-            raise AttributeError('Cannot set owned object. Use set or add methods.')
+            self._set_owned_object(name, value)
+            return
         object.__setattr__(self, name, value)
