@@ -8,7 +8,7 @@ MODULE_LOCATION = os.path.dirname(os.path.abspath(__file__))
 SBOL_PATH = os.path.dirname(MODULE_LOCATION)
 
 # Please don't increase this number!
-MAX_WILDCARD_IMPORTS = 5
+MAX_WILDCARD_IMPORTS = 4
 
 # -----------------------------------------------------------------
 # Locale Fix

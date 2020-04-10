@@ -1,6 +1,6 @@
 import unittest
 
-import sbol2 as sbol
+import sbol2
 
 
 class TestError(unittest.TestCase):
@@ -10,16 +10,16 @@ class TestError(unittest.TestCase):
         # called with arguments in the wrong order. A warning has been
         # added to note these occurrences until they can be fixed.
         with self.assertWarns(RuntimeWarning):
-            sbol.SBOLError(sbol.SBOLErrorCode.NOT_FOUND_ERROR,
-                           'Item not found')
+            sbol2.SBOLError(sbol2.SBOLErrorCode.NOT_FOUND_ERROR,
+                            'Item not found')
 
     def test_what(self):
         msg = 'Item not found'
-        error = sbol.SBOLError(msg, sbol.SBOLErrorCode.NOT_FOUND_ERROR)
+        error = sbol2.SBOLError(msg, sbol2.SBOLErrorCode.NOT_FOUND_ERROR)
         self.assertEqual(error.what(), msg)
 
     def test_error_code(self):
         msg = 'Item not found'
-        code = sbol.SBOLErrorCode.NOT_FOUND_ERROR
-        error = sbol.SBOLError(msg, code)
+        code = sbol2.SBOLErrorCode.NOT_FOUND_ERROR
+        error = sbol2.SBOLError(msg, code)
         self.assertEqual(error.error_code(), code)
