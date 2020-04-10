@@ -4,6 +4,7 @@ import warnings
 
 import rdflib
 
+import sbol2
 import sbol2 as sbol
 
 MODULE_LOCATION = os.path.dirname(os.path.abspath(__file__))
@@ -160,3 +161,15 @@ class TestObject(unittest.TestCase):
         md2 = doc2.moduleDefinitions[0]
         self.assertEqual(md2.displayId, md.displayId)
         self.assertEqual(md2.getPropertyValue(my_property), empty_literal)
+
+    def test_this(self):
+        # The `this` attribute should return the object itself. This
+        # is for backward compatibility with pySBOL. It is a
+        # deprecated attribute.
+        md = sbol2.ModuleDefinition('md')
+        # Enable all warnings
+        warnings.simplefilter("default")
+        with warnings.catch_warnings(record=True) as warns:
+            self.assertEqual(md.this, md)
+        # Verify that a warning was issued
+        self.assertEqual(len(warns), 1)
