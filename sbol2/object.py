@@ -108,6 +108,12 @@ class SBOLObject:
     def type(self):
         return self.rdf_type
 
+    @property
+    @deprecated(reason='`this` no longer makes sense')
+    def this(self):
+        # For backward compatibility with pySBOL. Just return myself.
+        return self
+
     def getTypeURI(self):
         """
         :return: The uniform resource identifier that describes
