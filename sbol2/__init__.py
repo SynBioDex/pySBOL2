@@ -29,7 +29,10 @@ from .property import IntProperty
 from .property import LiteralProperty
 from .property import TextProperty
 from .provo import Activity
+from .provo import Agent
+from .provo import Association
 from .provo import Plan
+from .provo import Usage
 from .sbolerror import SBOLError, SBOLErrorCode
 from .sequence import Sequence
 from .sequenceannotation import SequenceAnnotation
