@@ -1,9 +1,15 @@
 from . import validation
 from .component import FunctionalComponent
+from .config import Config
+from .constants import *
 from .interaction import Interaction
 from .module import Module
-from .property import *
-from .toplevel import *
+from .property import OwnedObject
+from .property import ReferencedObject
+from .property import URIProperty
+from .toplevel import TopLevel
+
+import rdflib
 
 
 class ModuleDefinition(TopLevel):
@@ -71,7 +77,7 @@ class ModuleDefinition(TopLevel):
     # a different way or at a different level of detail.
     models = None
 
-    def __init__(self, uri=URIRef("example"), version=VERSION_STRING,
+    def __init__(self, uri=rdflib.URIRef("example"), version=VERSION_STRING,
                  sbol_type_uri=SBOL_MODULE_DEFINITION):
         """Construct a ModuleDefinition
 

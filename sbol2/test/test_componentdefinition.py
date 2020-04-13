@@ -4,8 +4,7 @@ import unittest
 
 import rdflib
 
-import sbol2 as sbol
-from sbol2 import *
+import sbol2
 
 MODULE_LOCATION = os.path.dirname(os.path.abspath(__file__))
 CRISPR_EXAMPLE = os.path.join(MODULE_LOCATION, 'resources', 'crispr_example.xml')
@@ -18,20 +17,20 @@ class TestComponentDefinitions(unittest.TestCase):
 
     def test_typesSet(self):
         # Constructs a protein component
-        cas9 = ComponentDefinition('Cas9', BIOPAX_PROTEIN)
-        self.assertEqual([BIOPAX_PROTEIN], cas9.types)
+        cas9 = sbol2.ComponentDefinition('Cas9', sbol2.BIOPAX_PROTEIN)
+        self.assertEqual([sbol2.BIOPAX_PROTEIN], cas9.types)
 
     def test_typesNotSet(self):
-        target_promoter = ComponentDefinition('target_promoter')
-        self.assertEqual([BIOPAX_DNA], target_promoter.types)
+        target_promoter = sbol2.ComponentDefinition('target_promoter')
+        self.assertEqual([sbol2.BIOPAX_DNA], target_promoter.types)
 
     def testAddComponentDefinition(self):
-        setHomespace('http://sbols.org/CRISPR_Example')
-        Config.setOption('sbol_compliant_uris', True)
-        Config.setOption('sbol_typed_uris', False)
+        sbol2.setHomespace('http://sbols.org/CRISPR_Example')
+        sbol2.Config.setOption('sbol_compliant_uris', True)
+        sbol2.Config.setOption('sbol_typed_uris', False)
         expected = 'BB0001'
-        test_CD = ComponentDefinition(expected)
-        doc = Document()
+        test_CD = sbol2.ComponentDefinition(expected)
+        doc = sbol2.Document()
         doc.addComponentDefinition(test_CD)
         self.assertIsNotNone(doc.componentDefinitions.get(expected))
         displayId = doc.componentDefinitions.get(expected).displayId
@@ -39,17 +38,18 @@ class TestComponentDefinitions(unittest.TestCase):
         self.assertEqual(displayId, rdflib.Literal(expected))
 
     def testRemoveComponentDefinition(self):
-        test_CD = ComponentDefinition("BB0001")
-        doc = Document()
+        test_CD = sbol2.ComponentDefinition("BB0001")
+        doc = sbol2.Document()
         doc.addComponentDefinition(test_CD)
         doc.componentDefinitions.remove(0)
         # NOTE: changed the test to expect the 'sbol error type'
         # as opposed to a RuntimeError.
-        self.assertRaises(SBOLError, lambda: doc.componentDefinitions.get("BB0001"))
+        with self.assertRaises(sbol2.SBOLError):
+            doc.componentDefinitions.get("BB0001")
 
     def testCDDisplayId(self):
         list_cd_read = []
-        doc = Document()
+        doc = sbol2.Document()
         doc.read(CRISPR_EXAMPLE)
 
         # List of displayIds
@@ -129,12 +129,12 @@ class TestComponentDefinitions(unittest.TestCase):
 
     @unittest.expectedFailure
     def testInsertUpstream(self):
-        doc = Document()
-        gene = ComponentDefinition("BB0001")
-        promoter = ComponentDefinition("R0010")
-        rbs = ComponentDefinition("B0032")
-        cds = ComponentDefinition("E0040")
-        terminator = ComponentDefinition("B0012")
+        doc = sbol2.Document()
+        gene = sbol2.ComponentDefinition("BB0001")
+        promoter = sbol2.ComponentDefinition("R0010")
+        rbs = sbol2.ComponentDefinition("B0032")
+        cds = sbol2.ComponentDefinition("E0040")
+        terminator = sbol2.ComponentDefinition("B0012")
 
         doc.addComponentDefinition([gene, promoter, rbs, cds, terminator])
         gene.assemblePrimaryStructure([rbs, cds, terminator])
@@ -152,7 +152,7 @@ class TestComponentDefinitions(unittest.TestCase):
     @unittest.expectedFailure
     def testHasUpstreamComponent(self):
         uri = 'http://sbols.org/CRISPR_Example/gRNA_b_gene/1.0.0'
-        doc = sbol.Document()
+        doc = sbol2.Document()
         doc.read(CRISPR_EXAMPLE)
         cd = doc.componentDefinitions.get(uri)
         self.assertIsNotNone(cd)
@@ -166,31 +166,31 @@ class TestComponentDefinitions(unittest.TestCase):
         self.assertTrue(cd.hasUpstreamComponent(c))
 
     def testOwnedLocation(self):
-        cd = sbol.ComponentDefinition('cd')
+        cd = sbol2.ComponentDefinition('cd')
         sa = cd.sequenceAnnotations.create('sa')
         r = sa.locations.createRange('r')
-        self.assertEqual(type(r), sbol.Range)
+        self.assertEqual(type(r), sbol2.Range)
         r = sa.locations['r']
-        self.assertEqual(type(r), sbol.Range)
+        self.assertEqual(type(r), sbol2.Range)
         gl = sa.locations.createGenericLocation('gl')
-        self.assertEqual(type(gl), sbol.GenericLocation)
+        self.assertEqual(type(gl), sbol2.GenericLocation)
         gl = sa.locations['gl']
-        self.assertEqual(type(gl), sbol.GenericLocation)
+        self.assertEqual(type(gl), sbol2.GenericLocation)
         self.assertEqual(len(sa.locations), 2)
 
     def testCut(self):
-        cd = sbol.ComponentDefinition('cd')
+        cd = sbol2.ComponentDefinition('cd')
         sa = cd.sequenceAnnotations.create('sa')
         c = sa.locations.createCut('c')
-        self.assertEqual(type(c), sbol.Cut)
+        self.assertEqual(type(c), sbol2.Cut)
         c = sa.locations['c']
-        self.assertEqual(type(c), sbol.Cut)
+        self.assertEqual(type(c), sbol2.Cut)
 
     def test_get_range(self):
-        cd = sbol.ComponentDefinition('cd')
+        cd = sbol2.ComponentDefinition('cd')
         sa = cd.sequenceAnnotations.create('sa')
         r = sa.locations.createRange('r')
-        self.assertEqual(type(r), sbol.Range)
+        self.assertEqual(type(r), sbol2.Range)
         # SYNBICT uses getRange with no argument. It returns the first
         # object.
         r2 = sa.locations.getRange()
@@ -201,10 +201,10 @@ class TestComponentDefinitions(unittest.TestCase):
             sa.locations.getCut()
 
     def test_get_cut(self):
-        cd = sbol.ComponentDefinition('cd')
+        cd = sbol2.ComponentDefinition('cd')
         sa = cd.sequenceAnnotations.create('sa')
         c = sa.locations.createCut('c')
-        self.assertEqual(type(c), sbol.Cut)
+        self.assertEqual(type(c), sbol2.Cut)
         # SYNBICT uses getCut with no argument. It returns the first
         # object.
         c2 = sa.locations.getCut()
