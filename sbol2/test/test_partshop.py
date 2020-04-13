@@ -4,7 +4,12 @@ import unittest
 import requests
 
 import sbol2 as sbol
+import sbol2
 
+MODULE_LOCATION = os.path.dirname(os.path.abspath(__file__))
+CRISPR_LOCATION = os.path.join(MODULE_LOCATION, 'resources', 'crispr_example.xml')
+
+TEST_RESOURCE = 'https://synbiohub.utah.edu'
 
 if 'SBH_USER' in os.environ:
     username = os.environ['SBH_USER']
@@ -205,3 +210,21 @@ WHERE {
                              sbol.SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
         else:
             self.fail('Expected SBOLError')
+
+    @unittest.skipIf(password is None, "No password supplied")
+    def test_attach_file(self):
+        doc = sbol2.Document()
+        doc.displayId = 'test_collection'
+        doc.name = 'test collection'
+        doc.description = 'a test collection automatically generated ' \
+                          'by the SBOL client library'
+        md = doc.moduleDefinitions.create('attachmd')
+        # Found the URI by looking at https://synbiohub.utah.edu
+        # There must be a better way
+        md_uri = 'https://synbiohub.utah.edu/user/bartleyba/test_collection/attachmd/1'
+        # For URI, could we use SBH_USER, and doc.displayId, and
+        # md.displayId and md.version to assemble the URI?
+        sbh = sbol2.PartShop(TEST_RESOURCE)
+        sbh.login(username, password)
+        sbh.submit(doc, overwrite=1)
+        sbh.attachFile(md_uri, CRISPR_LOCATION)
