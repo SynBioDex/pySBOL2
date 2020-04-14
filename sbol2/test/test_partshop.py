@@ -214,10 +214,9 @@ WHERE {
     @unittest.skipIf(password is None, "No password supplied")
     def test_attach_file(self):
         doc = sbol2.Document()
-        doc.displayId = 'test_collection'
-        doc.name = 'test collection'
-        desc = 'a test collection automatically generated'
-        desc += ' by the SBOL client library'
+        doc.displayId = 'test_attachment'
+        doc.name = 'test attachment'
+        desc = 'a test collection created by the sbol2 unit tests'
         doc.description = desc
         md = doc.moduleDefinitions.create('attachmd')
         sbh = sbol2.PartShop(TEST_RESOURCE)
