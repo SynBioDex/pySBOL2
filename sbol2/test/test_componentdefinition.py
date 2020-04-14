@@ -218,7 +218,7 @@ class TestComponentDefinitions(unittest.TestCase):
 class TestAssemblyRoutines(unittest.TestCase):
 
     @unittest.expectedFailure
-    def testAssemble(self):
+    def test_assemble(self):
         doc = sbol2.Document()
         gene = sbol2.ComponentDefinition("BB0001")
         promoter = sbol2.ComponentDefinition("R0010")
@@ -250,7 +250,7 @@ class TestAssemblyRoutines(unittest.TestCase):
                          CDS.identity, terminator.identity])
 
     @unittest.expectedFailure
-    def testCompileSequence(self):
+    def test_compile_sequence(self):
         doc = sbol2.Document()
         sbol2.Config.setOption('sbol_typed_uris', True)
         gene = sbol2.ComponentDefinition("BB0001")
@@ -281,7 +281,7 @@ class TestAssemblyRoutines(unittest.TestCase):
         self.assertEqual(target_seq, gene.sequence.elements)
 
     @unittest.expectedFailure
-    def testRecursiveCompile(self):
+    def test_recursive_compile(self):
         doc = sbol2.Document()
         cd1 = sbol2.ComponentDefinition('cd1')
         cd2 = sbol2.ComponentDefinition('cd2')
@@ -318,7 +318,7 @@ class TestAssemblyRoutines(unittest.TestCase):
         self.assertEquals(r4.end, 2)
 
     @unittest.expectedFailure
-    def testStandardAssembly(self):
+    def test_standard_assembly(self):
         doc = sbol2.Document()
         gene = sbol2.ComponentDefinition("BB0001")
         promoter = sbol2.ComponentDefinition("R0010")
@@ -349,7 +349,7 @@ class TestAssemblyRoutines(unittest.TestCase):
         self.assertEquals(target_seq, 'atactagagttactagctactagagg')
 
     @unittest.expectedFailure
-    def testAssembleWithDisplayIds(self):
+    def test_assemble_with_displayIds(self):
         sbol2.Config.setOption('sbol_typed_uris', True)
 
         doc = sbol2.Document()
@@ -385,7 +385,7 @@ class TestAssemblyRoutines(unittest.TestCase):
         self.assertEqual(target_seq, 'atcg')
 
     @unittest.expectedFailure
-    def testDeleteUpstream(self):
+    def test_delete_upstream(self):
         doc = sbol2.Document()
         gene = sbol2.ComponentDefinition("BB0001")
         promoter = sbol2.ComponentDefinition("R0010")
@@ -424,7 +424,7 @@ class TestAssemblyRoutines(unittest.TestCase):
             gene.deleteUpstreamComponent(Component())
 
     @unittest.expectedFailure
-    def testDeleteDownstream(self):
+    def test_delete_downstream(self):
         doc = sbol2.Document()
         gene = sbol2.ComponentDefinition("BB0001")
         promoter = sbol2.ComponentDefinition("R0010")
@@ -463,7 +463,7 @@ class TestAssemblyRoutines(unittest.TestCase):
             gene.deleteDownstreamComponent(Component())
 
     @unittest.expectedFailure
-    def testInsertDownstream(self):
+    def test_insert_downstream(self):
         doc = sbol2.Document()
         gene = sbol2.ComponentDefinition("BB0001")
         promoter = sbol2.ComponentDefinition("R0010")
@@ -485,7 +485,7 @@ class TestAssemblyRoutines(unittest.TestCase):
         self.assertEqual(primary_structure, valid_primary_structure)
 
     @unittest.expectedFailure
-    def testInsertUpstream(self):
+    def test_insert_upstream(self):
         doc = sbol2.Document()
         gene = sbol2.ComponentDefinition("BB0001")
         promoter = sbol2.ComponentDefinition("R0010")
