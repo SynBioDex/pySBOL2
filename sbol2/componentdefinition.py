@@ -1,6 +1,8 @@
 from rdflib import URIRef
 
+
 from .component import Component
+from .config import Config
 from .constants import *
 from .toplevel import TopLevel
 from . import validation
@@ -441,3 +443,162 @@ class ComponentDefinition(TopLevel):
 
     def getTypeURI(self):
         return SBOL_COMPONENT_DEFINITION
+
+    def getPrimaryStructureComponents(self):
+        subcomponents = []
+        if len(self.components) == 1:
+            subcomponents.append(self.components[0])
+        else:
+            # Check if this is a complete primary structure
+            # (note this isn't a perfect test)
+            if len(self.sequenceConstraints) != (len(self.components) - 1):
+                raise ValueError('ComponentDefinition <%s> does not appear to describe'
+                                 'a complete primary structure. It appears to be '
+                                 'missing SequenceConstraints.' % self.identity)
+
+            c_first = self.getFirstComponent()
+            subcomponents.append(c_first)
+            c_next = c_first
+            while self.hasDownstreamComponent(c_next):
+                c_next = self.getDownstreamComponent(c_next)
+                subcomponents.append(c_next)
+        return subcomponents
+
+    def assemble(self, component_list, assembly_method=None, doc=None):
+        # Due to the recursive nature of this routine, it is hard to completely
+        # validate that all the necessary preconditions for successful execution are met
+        # prior to execution. That means if a call fails, it may result in a modified
+        # and incomplete data structure that will be difficult to fix when the user is
+        # working interactively in the interpreter
+        if not Config.getOption('sbol_compliant_uris'):
+            raise EnvironmentError('Assemble method requires SBOL-compliance enabled')
+
+        # Validate doc
+        if not self.doc and not doc:
+            raise ValueError('Missing doc argument. If the ComponentDefinition does '
+                             'not belong to a Document, a target Document must be '
+                             'specified using the doc keyword argument.')
+        if doc and self.doc != doc:
+            raise ValueError('Invalid doc argument. Do not use the doc keyword '
+                             'argument if the ComponentDefinition already belongs '
+                             'to a Document')
+
+        # Validate component_list
+        doc = doc if doc else self.doc
+        if isinstance(component_list, list) and all(isinstance(c, ComponentDefinition)
+                                                    for c in component_list):
+            for cdef in component_list:
+                if cdef.doc and cdef.doc.this != doc.this:
+                    raise ValueError('Invalid component_list specified. Assembly '
+                                     'subcomponents must belong to the same Document '
+                                     'as self.')
+        elif isinstance(component_list, list) and all(isinstance(c, str)
+                                                      for c in component_list):
+            component_identities = component_list[:]
+            component_list = []
+            for c_id in component_identities:
+                if c_id not in doc.componentDefinitions:
+                    raise ValueError('Invalid component_list specified. '
+                                     'ComponentDefinition <%s> not found.' % c_id)
+                cdef = doc.componentDefinitions[c_id]
+                component_list.append(cdef)
+        else:
+            raise TypeError('Invalid component_list specified. Please provide a list '
+                            'of ComponentDefinitions or, alternatively, a list of '
+                            'ComponentDefinition displayIds')
+
+        if not self.doc:
+            doc.addComponentDefinition(self)
+        for cdef in component_list:
+            if not cdef.doc:
+                self.doc.addComponentDefinition(cdef)
+
+        if assembly_method:
+            component_list = assembly_method(component_list)
+            if not all(type(c) is ComponentDefinition for c in component_list):
+                raise TypeError('Invalid callback specified for assembly_method. The '
+                                'callback must return a list of ComponentDefinitions')
+
+        # Instantiate a Component for each ComponentDefinition in the list
+        instance_list = []
+        for cdef in component_list:
+
+            # Generate URI of new Component.  Check if an object with that URI is
+            # already instantiated.
+            instance_count = 0
+            component_id = self.persistentIdentity + "/" + cdef.displayId + "_" \
+                + str(instance_count) + "/" + self.version
+            while self.find(component_id):
+                # Find the last instance assigned
+                instance_count += 1
+                component_id = self.persistentIdentity + "/" + cdef.displayId + "_" \
+                    + str(instance_count) + "/" + self.version
+
+            c = self.components.create(cdef.displayId + "_" + str(instance_count))
+            c.definition = cdef.identity
+            instance_list.append(c)
+        return component_list
+
+    def assemblePrimaryStructure(self, primary_structure, assembly_method=None,
+                                 doc=None):
+
+        primary_structure = self.assemble(primary_structure, assembly_method, doc)
+
+        # If user specifies a list of IDs rather than ComponentDefinitions, convert to
+        # list of ComponentDefinitions (Some parameter validation is done by the
+        # preceding call to ComponentDefinition.assemble)
+        doc = doc if doc else self.doc
+        if all(isinstance(c, str) for c in primary_structure):
+            component_identities = primary_structure[:]
+            primary_structure = []
+            for c_id in component_identities:
+                cdef = doc.componentDefinitions[c_id]
+                primary_structure.append(cdef)
+
+        self.types += [SO_LINEAR]
+
+        component_map = {}
+        for c in self.components:
+            if c.definition not in component_map:
+                component_map[c.definition] = [c]
+            else:
+                component_map[c.definition].append(c)
+        primary_structure_components = []
+        for cd in primary_structure:
+            primary_structure_components.append(component_map[cd.identity].pop())
+
+        # Iterate pairwise through the primary_structure, and place SequenceConstraints
+        # between adjacent ComponentDefinitions.
+        if len(self.sequenceConstraints):
+            self.sequenceConstraints.clear()
+        for upstream, downstream in zip(primary_structure_components[:-1],
+                                        primary_structure_components[1:]):
+            instance_count = 0
+            constraint_id = 'constraint_%d' % instance_count
+            while constraint_id in self.sequenceConstraints:
+                instance_count += 1
+                constraint_id = 'constraint_%d' % instance_count
+            sc = self.sequenceConstraints.create(constraint_id)
+            sc.subject = upstream
+            sc.object = downstream
+            sc.restriction = SBOL_RESTRICTION_PRECEDES
+
+    def compile(self, assembly_method=None):
+        if not self.doc:
+            raise ValueError('Cannot compile <%s>. The ComponentDefinition must belong '
+                             'to a Document in order to compile.' % self.identity)
+
+        if not self.sequence:
+            if Config.getOption('sbol_compliant_uris'):
+                display_id = self.displayId
+                if not Config.getOption('sbol_typed_uris'):
+                    display_id += '_seq'
+                seq = self.doc.sequences.create(display_id)
+                self.sequence = seq
+                self.sequences = seq.identity
+            else:
+                seq = self.sequences.create(self.identity + '_seq')
+                self.sequence = seq
+                self.sequences = seq.identity
+
+        return self.sequence.compile(assembly_method=assembly_method)

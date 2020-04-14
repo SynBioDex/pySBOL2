@@ -138,3 +138,118 @@ class Sequence(TopLevel):
         :return:
         """
         raise NotImplementedError("Not yet implemented")
+
+    def compile(self, composite_sequence='', assembly_method=None):
+        if not self.doc:
+            raise ValueError('Cannot compile Sequence <%s>. The Sequence must belong to '
+                             'a Document in order to compile.' % self.identity)
+
+        # Search for the parent ComponentDefinition to which this Sequence belongs
+        parent_cdef = None
+        for cd in self.doc.componentDefinitions:
+            if cd.sequence and cd.sequence.identity == self.identity:
+                parent_cdef = cd
+                break
+
+        if not parent_cdef:
+            raise ValueError('Cannot compile Sequence <%s>. The Sequence must be '
+                             'associated with a ComponentDefinition in order to compile.'
+                             % self.identity)
+
+        if len(parent_cdef.components) == 0:
+            if parent_cdef.sequence.elements:
+                return parent_cdef.sequence.elements
+            else:
+                return ''  # Maybe this should raise an Exception ?
+
+        elif len(parent_cdef.components) > 0:
+            # Recurse into subcomponents and assemble their sequence
+            composite_sequence_initial_size = len(composite_sequence)
+
+            subcomponents = parent_cdef.getPrimaryStructureComponents()
+            for c in subcomponents:
+                cdef = self.doc.getComponentDefinition(c.definition)
+                if not cdef.sequence:
+                    if Config.getOption('sbol_compliant_uris'):
+                        seq = self.doc.sequences.create(cdef.displayId)
+                        cdef.sequence = seq
+                        cdef.sequences = seq.identity
+                    else:
+                        seq = self.doc.sequences.create(cdef.identity + '_seq')
+                        cdef.sequence = seq
+                        cdef.sequences = seq.identity
+                seq = cdef.sequence
+
+                # Check for regularity -- only one SequenceAnnotation per Component is
+                # allowed
+                sequence_annotations = \
+                    parent_cdef.find_property_value(SBOL_COMPONENT_PROPERTY, c.identity)
+
+                sequence_annotations = [o.cast(SequenceAnnotation)
+                                        for o in sequence_annotations]
+                if len(sequence_annotations) > 1:
+                    raise ValueError('Cannot compile Sequence. Component <%s> is '
+                                     'irregular. More than one SequenceAnnotation is '
+                                     'associated with this Component' % c.identity)
+
+                # Auto-construct a SequenceAnnotation for this Component if one doesn't
+                # already exist
+                if len(sequence_annotations) == 0:
+                    sa_instance = 0
+                    sa_id = cdef.displayId if Config.getOption('sbol_compliant_uris') \
+                        else cdef.identity
+                    sa_id += '_annotation'
+                    sa_uri = '%s/%s_%d/%s' % (parent_cdef.persistentIdentity, sa_id,
+                                              sa_instance, cdef.version)
+                    while sa_uri in parent_cdef.sequenceAnnotations:
+                        sa_instance += 1
+                        sa_uri = '%s/%s_%d/%s' % (parent_cdef.persistentIdentity, sa_id,
+                                                  sa_instance, cdef.version)
+                    sa = parent_cdef.sequenceAnnotations.create('%s_%d' % (sa_id,
+                                                                sa_instance))
+                    sa.component = c
+                    sequence_annotations.append(sa)
+
+                sa = sequence_annotations[0]
+
+                # Check for regularity--only one Range per SequenceAnnotation is allowed
+                ranges = []
+                if len(sa.locations):
+                    # Look for an existing Range that can be re-used
+                    for l in sa.locations:
+                        if l.type == SBOL_RANGE:
+                            ranges.append(l.cast(Range))
+                else:
+                    # Auto-construct a Range
+                    range_id = sa.displayId if Config.getOption('sbol_compliant_uris') \
+                        else sa.identity
+                    r = sa.locations.createRange(range_id + '_range')
+                    ranges.append(r)
+                if len(ranges) > 1:
+                    raise ValueError('Cannot compile Sequence <%s> because '
+                                     'SequenceAnnotation <%s> has more than one Range.'
+                                     % (self.identity, sa.identity))
+
+                r = ranges[0]
+                r.start = len(composite_sequence) + 1
+                subsequence = seq.compile(composite_sequence)  # Recursive call
+                if assembly_method:
+                    subsequence = assembly_method(subsequence)
+                    if not type(subsequence) is str:
+                        raise TypeError('Invalid callback specified for assembly_method.'
+                                        ' The callback must return a string.')
+
+                # If sourceLocation is specified, don't use the entire sequence for the
+                # subcomponent
+                if len(c.sourceLocations) == 1:
+                    source_loc = c.sourceLocations.getRange()
+                    subsequence = subsequence[(source_loc.start - 1):(source_loc.end)]
+                composite_sequence = composite_sequence + subsequence
+                r.end = len(composite_sequence)
+
+            composite_sequence_current_size = composite_sequence_initial_size \
+                + len(composite_sequence)
+            subsequence = composite_sequence[composite_sequence_initial_size:
+                                             composite_sequence_current_size]
+            self.elements = subsequence
+            return subsequence
