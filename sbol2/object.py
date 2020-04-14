@@ -222,7 +222,16 @@ class SBOLObject:
         :return: A vector containing all objects found that contain
         the URI in a property value.
         """
-        raise NotImplementedError("Not yet implemented")
+        references = []
+        # Ask all the owned objects
+        for oo_list in self.owned_objects.values():
+            for oo in oo_list:
+                references.extend(oo.find_reference(uri))
+        # Check myself
+        for pvals in self.properties.values():
+            if uri in pvals:
+                references.append(self)
+        return references
 
     # TODO: Can we deprecate this method?
     def compare(self, comparand):

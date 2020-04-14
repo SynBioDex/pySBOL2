@@ -11,6 +11,10 @@ import sbol2 as sbol
 MODULE_LOCATION = os.path.dirname(os.path.abspath(__file__))
 TEST_LOCATION = os.path.join(MODULE_LOCATION, 'resources', 'crispr_example.xml')
 
+# For testing reading of annotations
+ANNO_LOCATION = os.path.join(MODULE_LOCATION, 'SBOLTestSuite', 'SBOL2',
+                             'AnnotationOutput.xml')
+
 
 class TestDocument(unittest.TestCase):
 
@@ -339,3 +343,23 @@ class TestDocument(unittest.TestCase):
         doc = sbol2.Document()
         with self.assertRaises(sbol2.SBOLError):
             doc.validate()
+
+    def test_read_annotations(self):
+        # Test reading a file with annotations and make sure they end
+        # up where we expect them
+        doc = sbol2.Document(filename=ANNO_LOCATION)
+        # There is 1 component definition
+        self.assertEqual(len(doc.componentDefinitions), 1)
+        cd = doc.componentDefinitions[0]
+        info_uri = rdflib.URIRef('http://partsregistry.org/information')
+        sigma_uri = rdflib.URIRef('http://partsregistry.org/sigmafactor')
+        regulation_uri = rdflib.URIRef('http://partsregistry.org/regulation')
+        self.assertNotIn(info_uri, cd.properties)
+        self.assertIn(info_uri, cd.owned_objects)
+        # TODO What is the real API for accessing the extension object?
+        info = cd.owned_objects[info_uri][0]
+        self.assertIsNotNone(info)
+        self.assertEqual(info.getPropertyValue(sigma_uri),
+                         rdflib.Literal('//rnap/prokaryote/ecoli/sigma70'))
+        self.assertEqual(info.getPropertyValue(regulation_uri),
+                         rdflib.Literal('//regulation/constitutive'))
