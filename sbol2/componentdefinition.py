@@ -444,6 +444,84 @@ class ComponentDefinition(TopLevel):
     def getTypeURI(self):
         return SBOL_COMPONENT_DEFINITION
 
+    def hasUpstreamComponent(self, component):
+        if len(self.sequenceConstraints) < 1:
+            raise SBOLError(SBOL_ERROR_NOT_FOUND, 'Cannot determine upstream Component. '
+                            'Self has no SequenceConstraints')
+        else:
+            for sc in self.sequenceConstraints:
+                if sc.object == component.identity and \
+                      sc.restriction == SBOL_RESTRICTION_PRECEDES:
+                    return True
+            return False
+
+    def hasDownstreamComponent(self, component):
+        if len(self.sequenceConstraints) < 1:
+            raise SBOLError(SBOL_ERROR_NOT_FOUND, 'Cannot determine upstream Component. '
+                            'Self has no SequenceConstraints')
+        else:
+            for sc in self.sequenceConstraints:
+                if sc.subject == component.identity and \
+                      sc.restriction == SBOL_RESTRICTION_PRECEDES:
+                    return True
+            return False
+
+    def getUpstreamComponent(self, component):
+        if len(self.sequenceConstraints) < 1:
+            raise SBOLError(SBOL_ERROR_NOT_FOUND, 'Cannot get upstream Component. Self '
+                            'has no SequenceConstraints')
+        else:
+            upstream_component_id = None
+            for sc in self.sequenceConstraints:
+                if sc.object == component.identity and \
+                      sc.restriction == SBOL_RESTRICTION_PRECEDES:
+                    upstream_component = self.components[sc.subject]
+                    return upstream_component
+        raise SBOLError(SBOL_ERROR_END_OF_LIST, 'This component has no upstream '
+                        'component. Use hasUpstreamComponent to catch this error')
+
+    def getDownstreamComponent(self, component):
+        if len(self.sequenceConstraints) < 1:
+            raise SBOLError(SBOL_ERROR_NOT_FOUND, 'Cannot get downstream Component. '
+                            'Self has no SequenceConstraints')
+        else:
+            upstream_component_id = None
+            for sc in self.sequenceConstraints:
+                if sc.subject == component.identity and \
+                      sc.restriction == SBOL_RESTRICTION_PRECEDES:
+                    upstream_component = self.components[sc.object]
+                    return upstream_component
+        raise SBOLError(SBOL_ERROR_END_OF_LIST, 'This component has no downstream '
+                        'component. Use hasDownstreamComponent to catch this error')
+
+    def getFirstComponent(self):
+        # A Component's sequential position in the primary structure does not
+        # necessarily correspond with its index in the components list (Rather
+        # this must be determined by reasoning over SequenceConstraints)
+        if len(self.components) < 1:
+            raise SBOLError(SBOL_ERROR_NOT_FOUND, 'This ComponentDefinition has no '
+                            'components')
+
+        arbitrary_component = self.components[0]
+        next_component = arbitrary_component
+        while self.hasUpstreamComponent(next_component):
+            next_component = self.getUpstreamComponent(next_component)
+        return next_component
+
+    def getLastComponent(self):
+        # A Component's sequential position in the primary structure does not
+        # necessarily correspond with its index in the components list (Rather
+        # this must be determined by reasoning over SequenceConstraints)
+        if len(self.components) < 1:
+            raise SBOLError(SBOL_ERROR_NOT_FOUND, 'This ComponentDefinition has no '
+                            'components')
+
+        arbitrary_component = self.components[0]
+        next_component = arbitrary_component
+        while self.hasDownstreamComponent(next_component):
+            next_component = self.getDownstreamComponent(next_component)
+        return next_component
+
     def getPrimaryStructureComponents(self):
         subcomponents = []
         if len(self.components) == 1:
@@ -463,6 +541,13 @@ class ComponentDefinition(TopLevel):
                 c_next = self.getDownstreamComponent(c_next)
                 subcomponents.append(c_next)
         return subcomponents
+
+    def getPrimaryStructure(self):
+        if self.doc is None:
+            raise SBOLError(SBOL_ERROR_MISSING_DOCUMENT, 'Cannot get primary structure.'
+                            'Self must belong to a Document.')
+        component_ids = [c.definition for c in self.getPrimaryStructureComponents()]
+        return [self.doc.getComponentDefinition(c) for c in component_ids]
 
     def assemble(self, component_list, assembly_method=None, doc=None):
         # Due to the recursive nature of this routine, it is hard to completely

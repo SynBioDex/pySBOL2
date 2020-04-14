@@ -217,6 +217,43 @@ class TestComponentDefinitions(unittest.TestCase):
 
 class TestAssemblyRoutines(unittest.TestCase):
 
+    def test_inspect_primary_structure(self):
+        # Test that components can be retrieved in the sequential order specified by
+        # SequenceContraint relationships
+        doc = sbol2.Document()
+        cd_root = doc.componentDefinitions.create('root')
+        c0 = cd_root.components.create('c0')
+        c1 = cd_root.components.create('c1')
+        c2 = cd_root.components.create('c2')
+
+        # The following components are created in reverse order for purposes of
+        # validating the hasUpstreamComponent and getUpstreamComponent methods
+        cd2 = doc.componentDefinitions.create('cd2')
+        cd1 = doc.componentDefinitions.create('cd1')
+        cd0 = doc.componentDefinitions.create('cd0')
+
+        c0.definition = cd0
+        c1.definition = cd1
+        c2.definition = cd2
+        sc0 = cd_root.sequenceConstraints.create('sc0')
+        sc1 = cd_root.sequenceConstraints.create('sc1')
+        sc0.subject = c0
+        sc0.object = c1
+        sc1.subject = c1
+        sc1.object = c2
+        self.assertEqual(cd_root.hasUpstreamComponent(c0), False)
+        self.assertEqual(cd_root.hasUpstreamComponent(c1), True)
+        self.assertEqual(cd_root.getUpstreamComponent(c2), c1)
+
+        self.assertEqual(cd_root.hasDownstreamComponent(c2), False)
+        self.assertEqual(cd_root.hasDownstreamComponent(c1), True)
+        self.assertEqual(cd_root.getDownstreamComponent(c0), c1)
+
+        self.assertEqual(cd_root.getFirstComponent(), c0)
+        self.assertEqual(cd_root.getLastComponent(), c2)
+        self.assertEqual(cd_root.getPrimaryStructureComponents(), [c0, c1, c2])
+        self.assertEqual(cd_root.getPrimaryStructure(), [cd0, cd1, cd2])
+
     @unittest.expectedFailure
     def test_assemble(self):
         doc = sbol2.Document()
