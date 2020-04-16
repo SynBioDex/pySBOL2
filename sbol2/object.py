@@ -237,6 +237,26 @@ class SBOLObject:
         # TODO This may work differently than the original method...
         return self == comparand
 
+    def compare_properties(self, other):
+        if sorted(self.properties.keys()) != sorted(other.properties.keys()):
+            return False
+        # Keys are equal, check values by converting to sets
+        for k in self.properties.keys():
+            if set(self.properties[k]) != set(other.properties[k]):
+                return False
+        return True
+
+    def compare_owned_objects(self, other):
+        if sorted(self.owned_objects.keys()) != sorted(other.owned_objects.keys()):
+            return False
+        # Keys are equal, check values by converting to dicts
+        for k in self.owned_objects.keys():
+            oo1 = {oo.identity: oo for oo in self.owned_objects[k]}
+            oo2 = {oo.identity: oo for oo in other.owned_objects[k]}
+            if oo1 != oo2:
+                return False
+        return True
+
     def __eq__(self, other):
         """Compare two SBOLObjects. The behavior is currently undefined for
         objects with custom annotations or extension classes.
@@ -249,9 +269,9 @@ class SBOLObject:
             return False
         if self.rdf_type != other.rdf_type:
             return False
-        if self.properties != other.properties:
+        if not self.compare_properties(other):
             return False
-        if self.owned_objects != other.owned_objects:
+        if not self.compare_owned_objects(other):
             return False
         return True
 

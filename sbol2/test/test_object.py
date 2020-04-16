@@ -173,3 +173,25 @@ class TestObject(unittest.TestCase):
             self.assertEqual(md.this, md)
         # Verify that a warning was issued
         self.assertEqual(len(warns), 1)
+
+    def test_eq_unordered_properties(self):
+        # Test that two objects are equal even if a property is in a
+        # different order
+        expected1 = [sbol2.SBO_INHIBITION, sbol2.SBO_CONTROL]
+        expected2 = [sbol2.SBO_CONTROL, sbol2.SBO_INHIBITION]
+        md1 = sbol2.ModuleDefinition('md1')
+        md1.roles = expected1
+        md2 = sbol2.ModuleDefinition('md1')
+        md2.roles = expected2
+        self.assertTrue(md1.compare(md2))
+
+    def test_eq_unordered_owned_objects(self):
+        # Test that two objects are equal even if owned objects are in
+        # a different order
+        expected1 = [sbol2.Module('m1'), sbol2.Module('m2')]
+        expected2 = [sbol2.Module('m2'), sbol2.Module('m1')]
+        md1 = sbol2.ModuleDefinition('md1')
+        md1.modules = expected1
+        md2 = sbol2.ModuleDefinition('md1')
+        md2.modules = expected2
+        self.assertTrue(md1.compare(md2))
