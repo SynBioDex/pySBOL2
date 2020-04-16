@@ -10,6 +10,8 @@ from .constants import *
 from .property import OwnedObject
 from .property import ReferencedObject
 from .property import URIProperty
+from .sbolerror import SBOLError
+from .sbolerror import SBOLErrorCode
 from . import validation
 
 
