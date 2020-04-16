@@ -13,6 +13,32 @@ from .property import URIProperty
 from . import validation
 
 
+# This is an internal function, not part of the public API
+def _compare_properties(obj1, obj2):
+    obj1_keys = obj1.properties.keys()
+    if sorted(obj1_keys) != sorted(obj2.properties.keys()):
+        return False
+    # Keys are equal, check values by converting to sets
+    for k in obj1_keys:
+        if set(obj1.properties[k]) != set(obj2.properties[k]):
+            return False
+    return True
+
+
+# This is an internal function, not part of the public API
+def _compare_owned_objects(obj1, obj2):
+    obj1_keys = obj1.owned_objects.keys()
+    if sorted(obj1_keys) != sorted(obj2.owned_objects.keys()):
+        return False
+    # Keys are equal, check values by converting to dicts
+    for k in obj1_keys:
+        oo1 = {oo.identity: oo for oo in obj1.owned_objects[k]}
+        oo2 = {oo.identity: oo for oo in obj2.owned_objects[k]}
+        if oo1 != oo2:
+            return False
+    return True
+
+
 class SBOLObject:
     """An SBOLObject converts a Python data structure into an RDF triple store
      and contains methods for serializing and parsing RDF triples.
@@ -237,26 +263,6 @@ class SBOLObject:
         # TODO This may work differently than the original method...
         return self == comparand
 
-    def compare_properties(self, other):
-        if sorted(self.properties.keys()) != sorted(other.properties.keys()):
-            return False
-        # Keys are equal, check values by converting to sets
-        for k in self.properties.keys():
-            if set(self.properties[k]) != set(other.properties[k]):
-                return False
-        return True
-
-    def compare_owned_objects(self, other):
-        if sorted(self.owned_objects.keys()) != sorted(other.owned_objects.keys()):
-            return False
-        # Keys are equal, check values by converting to dicts
-        for k in self.owned_objects.keys():
-            oo1 = {oo.identity: oo for oo in self.owned_objects[k]}
-            oo2 = {oo.identity: oo for oo in other.owned_objects[k]}
-            if oo1 != oo2:
-                return False
-        return True
-
     def __eq__(self, other):
         """Compare two SBOLObjects. The behavior is currently undefined for
         objects with custom annotations or extension classes.
@@ -269,9 +275,9 @@ class SBOLObject:
             return False
         if self.rdf_type != other.rdf_type:
             return False
-        if not self.compare_properties(other):
+        if not _compare_properties(self, other):
             return False
-        if not self.compare_owned_objects(other):
+        if not _compare_owned_objects(self, other):
             return False
         return True
 
