@@ -34,10 +34,14 @@ def _compare_owned_objects(obj1, obj2):
         return False
     # Keys are equal, check values by converting to dicts
     for k in obj1_keys:
+        # Recursively compare child objects
         oo1 = {oo.identity: oo for oo in obj1.owned_objects[k]}
         oo2 = {oo.identity: oo for oo in obj2.owned_objects[k]}
-        if oo1 != oo2:
+        if oo1.keys() != oo2.keys():
             return False
+        for uri in oo1:
+            if not oo1[uri].compare(oo2[uri]):
+                return False
     return True
 
 
@@ -261,20 +265,7 @@ class SBOLObject:
                 references.append(self)
         return references
 
-    # TODO: Can we deprecate this method?
-    def compare(self, comparand):
-        """Compare two SBOL objects or Documents. The behavior
-        is currently undefined for objects with custom annotations
-        or extension classes.
-
-        :param comparand: The object being compared to this one.
-        :return: True if the objects are identical,
-        False if they are different.
-        """
-        # TODO This may work differently than the original method...
-        return self == comparand
-
-    def __eq__(self, other):
+    def compare(self, other):
         """Compare two SBOLObjects. The behavior is currently undefined for
         objects with custom annotations or extension classes.
 

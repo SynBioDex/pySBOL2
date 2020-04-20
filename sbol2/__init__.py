@@ -11,6 +11,7 @@ __version__ = '1.0b2'
 from .collection import Collection
 from .combinatorialderivation import CombinatorialDerivation
 from .component import Component
+from .component import FunctionalComponent
 from .componentdefinition import ComponentDefinition
 from .config import Config, ConfigOptions
 from .config import getHomespace, hasHomespace, setHomespace
@@ -23,6 +24,7 @@ from .interaction import Interaction
 from .location import Location, Range, Cut, GenericLocation
 from .module import Module
 from .moduledefinition import ModuleDefinition
+from .object import SBOLObject
 from .participation import Participation
 from .partshop import PartShop
 from .property import IntProperty

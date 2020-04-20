@@ -1,3 +1,4 @@
+import collections
 import os
 import unittest
 import warnings
@@ -219,3 +220,11 @@ class TestObject(unittest.TestCase):
         # Now md1a and md1b compare False because of recursive
         # comparison of modules
         self.assertFalse(md1a.compare(md1b))
+
+    def test_is_hashable(self):
+        obj = sbol2.SBOLObject()
+        self.assertTrue(isinstance(obj, collections.abc.Hashable))
+        # Make sure the hash function returns a reasonable value. The
+        # hashable test above can be fooled according to the
+        # documentation.
+        self.assertTrue(isinstance(hash(obj), int))
