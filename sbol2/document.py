@@ -1,6 +1,7 @@
 import collections.abc
 import logging
 import os
+import posixpath
 
 import rdflib
 from rdflib import URIRef
@@ -14,6 +15,7 @@ from .component import Component, FunctionalComponent
 from .componentdefinition import ComponentDefinition
 from .config import ConfigOptions
 from .config import Config
+from . import config
 from .config import parsePropertyName
 from .constants import *
 from .dbtl import Analysis, Build, Design, SampleRoster, Test
@@ -35,6 +37,7 @@ from .sbolerror import SBOLErrorCode
 from .sequence import Sequence
 from .sequenceannotation import SequenceAnnotation
 from .sequenceconstraint import SequenceConstraint
+from .toplevel import TopLevel
 
 import requests
 
@@ -495,19 +498,25 @@ class Document(Identified):
                         obj = URIRef(lval)
                 self.parse_properties_inner(result.s, result.p, obj)
 
-        # Additional step - python version, only.
-        # Remove anything that isn't meant to be at the top level.
-        for result in all_results:
-            if str(result.p) != rdf_type:
-                obj = result.o
-                lval = str(obj)
-                if isinstance(result.o, URIRef) and pos != -1:
-                    if lval[:pos] == graphBaseURIStr:
-                        # This was a URI without a scheme.  Remove URI base
-                        lval = lval[pos:]
-                        obj = URIRef(lval)
-                self.remove_descendants()
-        # TODO parse annotation objects
+        # Remove objects from SBOLObjects if they are not TopLevel AND
+        # they have a parent object.
+        #
+        # Note: use a list of the keys so that we can modify the dict
+        # while we iterate.
+        for k in list(self.SBOLObjects.keys()):
+            so = self.SBOLObjects[k]
+            if isinstance(so, TopLevel):
+                continue
+            if so.parent:
+                # Not TopLevel and already has parent, remove from
+                # SBOLObjects
+                del self.SBOLObjects[k]
+                continue
+            self.logger.debug('Orphan %r', so)
+
+        # Handle the annotation objects
+        self.parse_annotation_objects()
+
         # TODO dress document
 
     def parse_objects_inner(self, subject, obj):
@@ -545,11 +554,7 @@ class Document(Identified):
             new_obj.doc = self
 
     def parse_properties_inner(self, subject, predicate, obj):
-        if self.logger.isEnabledFor(logging.DEBUG):
-            self.logger.debug("Adding: (" + str(subject) + " - " +
-                              str(type(subject)) + ", " + str(predicate) +
-                              " - " + str(type(predicate)) + ", " + str(obj) +
-                              " - " + str(type(obj)) + ")")
+        self.logger.debug('Adding (%r, %r, %r)', subject, predicate, obj)
         found = predicate.rfind('#')
         if found == -1:
             found = predicate.rfind('/')
@@ -581,13 +586,72 @@ class Document(Identified):
                 msg = msg.format(subject, type(subject))
                 self.logger.debug(msg)
 
-    def remove_descendants(self):
-        to_delete = []
-        for name, obj in self.SBOLObjects.items():
-            if not obj.is_top_level():
-                to_delete.append(name)
-        for name in to_delete:
-            del self.SBOLObjects[name]
+    def find_reference(self, uri):
+        """Find objects that reference the given URI. Returns a list of
+        objects. The list will be empty if no references were found.
+
+        """
+        references = []
+        for obj in self.SBOLObjects.values():
+            references.extend(obj.find_reference(uri))
+        return references
+
+    def parse_annotation_objects(self):
+        """Parse leftover objects from reading and link them up where they
+        belong. These are usually extension-type objects.
+
+        """
+        for uri, obj in self.SBOLObjects.items():
+            self.logger.debug('Possible annotation object %s', obj.identity)
+        annotation_objects = [obj for obj in self.SBOLObjects.values()
+                              if not isinstance(obj, TopLevel)]
+        for ao in annotation_objects:
+            self.logger.debug('Annotation object: %s', ao.identity)
+            if SBOL_PERSISTENT_IDENTITY in ao.properties:
+                # Copy to a new TopLevel object
+                tl = TopLevel(type_uri=ao.type)
+                for k, v in ao.properties.items():
+                    tl.properties[k] = v
+                for k, v in ao.owned_objects.items():
+                    tl.owned_objects[k] = v
+                tl.doc = self
+                self.SBOLObjects[tl.identity] = tl
+            else:
+                # Determine the RDF type of the member property that
+                # contains this kind of annotation object
+                ns = config.parseNamespace(ao.type)
+                self.logger.debug('anno ns = %r', ns)
+                class_name = config.parseClassName(ao.type)
+                self.logger.debug('anno class name = %r', class_name)
+                # lowercase the first character
+                property_name = class_name[0].lower() + class_name[1:]
+                self.logger.debug('anno property name = %r', property_name)
+                property_uri = rdflib.URIRef(posixpath.join(ns, property_name))
+                self.logger.debug('anno property uri = %r', property_uri)
+                matches = self.find_reference(ao.identity)
+                self.logger.debug('Found %d references', len(matches))
+                matches = [m for m in matches if property_uri in m.properties]
+                self.logger.debug('Found %d good references', len(matches))
+                if len(matches) > 1:
+                    msg = 'Invalid custom annotation object in SBOL document'
+                    raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_SERIALIZATION)
+                if len(matches) == 1:
+                    match = matches[0]
+                    if property_uri not in match.owned_objects:
+                        match.owned_objects[property_uri] = []
+                    match.owned_objects[property_uri].append(ao)
+                    ao.parent = match
+                    # Clean up the property
+                    self.logger.debug('match[%r] = %r', property_uri,
+                                      match.properties[property_uri])
+                    self.logger.debug('ao.identity = %r', ao.identity)
+                    match.properties[property_uri].remove(ao.identity)
+                    if len(match.properties[property_uri]) == 0:
+                        # Remove the empty property list
+                        del match.properties[property_uri]
+                    # Remove this annotation object from the list of
+                    # SBOLObjects
+                    del self.SBOLObjects[ao.identity]
 
     def convert_ntriples_encoding_to_ascii(self, s):
         s.replace("\\\"", "\"")
@@ -669,7 +733,7 @@ class Document(Identified):
                 owned_obj.build_graph(self.graph)
         if self.logger.isEnabledFor(logging.DEBUG):
             for s, p, o in self.graph:
-                self.logger.debug((s, p, o))
+                self.logger.debug('Graph contains: %r', (s, p, o))
 
     def validation_options(self):
         # Config validation options that have boolean values
