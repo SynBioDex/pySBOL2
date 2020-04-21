@@ -1,5 +1,4 @@
 import locale
-import logging
 import os
 import unittest
 
@@ -164,6 +163,20 @@ class TestDocument(unittest.TestCase):
         md = doc.moduleDefinitions.create('foo')
         md2 = doc.moduleDefinitions[md.displayId]
         self.assertEqual(md.identity, md2.identity)
+
+    def test_crispr_lookup(self):
+        doc = sbol.Document(TEST_LOCATION)
+        uri = 'http://sbols.org/CRISPR_Example/CRISPR_Template/1.0.0'
+        display_id = 'CRISPR_Template'
+        md = doc.moduleDefinitions[uri]
+        self.assertIsNotNone(md)
+        self.assertEqual(md.identity, rdflib.URIRef(uri))
+        self.assertEqual(md.displayId, rdflib.Literal(display_id))
+        # Test lookup by displayId. This was broken when loading from a file.
+        md = doc.moduleDefinitions[display_id]
+        self.assertIsNotNone(md)
+        self.assertEqual(md.identity, rdflib.URIRef(uri))
+        self.assertEqual(md.displayId, rdflib.Literal(display_id))
 
     def test_find_property_value(self):
         # find_property_value wasn't comparing against the passed

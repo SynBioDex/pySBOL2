@@ -4,7 +4,6 @@ import os
 import posixpath
 
 import rdflib
-from rdflib import URIRef
 
 from . import SBOL2Serialize
 from . import validation
@@ -15,6 +14,7 @@ from .component import Component, FunctionalComponent
 from .componentdefinition import ComponentDefinition
 from .config import ConfigOptions
 from .config import Config
+from .config import parseClassName
 from . import config
 from .config import parsePropertyName
 from .constants import *
@@ -516,8 +516,8 @@ class Document(Identified):
 
         # Handle the annotation objects
         self.parse_annotation_objects()
-
-        # TODO dress document
+        # Dress document
+        self.dress_document()
 
     def parse_objects_inner(self, subject, obj):
         # Construct the top-level object if we haven't already done so
@@ -653,6 +653,30 @@ class Document(Identified):
                     # SBOLObjects
                     del self.SBOLObjects[ao.identity]
 
+    def infer_resource_namespaces(self):
+        for obj in self.SBOLObjects.values():
+            if not isinstance(obj, Identified):
+                continue
+            if not (obj.persistentIdentity and obj.displayId and obj.version):
+                continue
+            # if object identity ends with compliant suffix, extract the
+            # start as a namespace
+            uri = obj.identity
+            compliant_suffix = posixpath.join(posixpath.sep, obj.displayId,
+                                              obj.version)
+            if uri.endswith(compliant_suffix):
+                self.resource_namespaces.add(uri[0:-len(compliant_suffix)])
+                continue
+            typed_suffix = posixpath.join(posixpath.sep, parseClassName(obj.rdf_type),
+                                          obj.displayId, obj.version)
+            if uri.endswith(typed_suffix):
+                self.resource_namespaces.add(uri[0:-len(typed_suffix)])
+
+    def dress_document(self):
+        self.infer_resource_namespaces()
+        # There is a lot more that is done in libSBOL Document::dress_document()
+        # TODO: do more of that here
+
     def convert_ntriples_encoding_to_ascii(self, s):
         s.replace("\\\"", "\"")
         s.replace("\\\\", "\\")
@@ -681,6 +705,7 @@ class Document(Identified):
         for object_store in self.owned_objects.values():
             object_store.clear()
         self._namespaces.clear()
+        self.resource_namespaces.clear()
         if clear_graph:
             self.graph = rdflib.Graph()  # create a new graph
 
