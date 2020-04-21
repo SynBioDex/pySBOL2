@@ -1,5 +1,8 @@
 import unittest
 import os
+
+import sbol2
+# backward compatibility
 import sbol2 as sbol
 
 import rdflib
@@ -259,3 +262,15 @@ class TestProperty(unittest.TestCase):
         self.assertEqual(list(md.modules), [m1, m2])
         md.modules.remove(m2.identity)
         self.assertEqual(list(md.modules), [m1])
+
+    def test_validation_rules(self):
+        md = sbol2.ModuleDefinition()
+        with self.assertRaises(TypeError):
+            # No validation rules, so `'AND'` is interpreted
+            # as validation rules
+            tp = sbol2.TextProperty(md, 'http://example.com#logic', '0', '1',
+                                    'AND')
+        # Use an empty list to specify no validation rules
+        tp = sbol2.TextProperty(md, 'http://example.com#logic', '0', '1',
+                                [], 'AND')
+        # Should add a test for callable validation rules

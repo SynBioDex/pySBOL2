@@ -69,7 +69,14 @@ class Property(ABC):
             raise ValueError("RDF type must be URIRef or str")
         self._lowerBound = lower_bound
         self._upperBound = upper_bound
-        self._validation_rules = []
+        # Validate validation rules
+        if validation_rules is None:
+            # Some constructors pass None for validation rules
+            # Convert to empty list
+            validation_rules = []
+        for vr in validation_rules:
+            if not callable(vr):
+                raise TypeError('Validation rule %r is not callable' % vr)
         self._validation_rules = validation_rules
         if initial_value is not None:
             self.value = initial_value
