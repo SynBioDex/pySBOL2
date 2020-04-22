@@ -104,7 +104,7 @@ class Document(Identified):
         self.graph = rdflib.Graph()
         # The Document's register of objects
         self.objectCache = {}  # Needed?
-        self.SBOLObjects = {}  # Needed?
+        self.SBOLObjects = {}
         self._namespaces = {}
         self.resource_namespaces = set()
         self.designs = OwnedObject(self, SYSBIO_DESIGN, Design,
@@ -753,9 +753,8 @@ class Document(Identified):
         for prefix, ns in self._namespaces.items():
             self.graph.bind(prefix, ns)
         # ASSUMPTION: Document does not have properties. Is this a valid assumption?
-        for typeURI, objlist in self.owned_objects.items():
-            for owned_obj in objlist:
-                owned_obj.build_graph(self.graph)
+        for obj in self.SBOLObjects.values():
+            obj.build_graph(self.graph)
         if self.logger.isEnabledFor(logging.DEBUG):
             for s, p, o in self.graph:
                 self.logger.debug('Graph contains: %r', (s, p, o))
