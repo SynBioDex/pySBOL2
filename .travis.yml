@@ -15,6 +15,7 @@ matrix:
     - C:\\Python37\\python -m pip install .
     script:
     - C:\\Python37\\python -c "import sbol2; sbol2.testSBOLHook()"
+    - C:\\Python37\\python -c "import sbol2; sbol2.testRoundTrip()"
 install:
   - python3 -m pip install .
 script:
