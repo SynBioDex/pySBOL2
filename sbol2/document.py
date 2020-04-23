@@ -603,7 +603,7 @@ class Document(Identified):
             self.logger.debug('Annotation object: %s', ao.identity)
             if SBOL_PERSISTENT_IDENTITY in ao.properties:
                 # Copy to a new TopLevel object
-                tl = TopLevel(type_uri=ao.type)
+                tl = TopLevel(type_uri=ao.type, version=None)
                 for k, v in ao.properties.items():
                     tl.properties[k] = v
                 for k, v in ao.owned_objects.items():
