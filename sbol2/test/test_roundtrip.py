@@ -33,7 +33,6 @@ class TestRoundTripSBOL2(unittest.TestCase):
             logging.basicConfig()
         if DEBUG_ENV_VAR in os.environ:
             self.logger.setLevel(logging.DEBUG)
-            self.logger.debug('Debug logging enabled')
 
     def tearDown(self):
         # Remove directory after the test
