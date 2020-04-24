@@ -104,7 +104,7 @@ class Document(Identified):
         self.graph = rdflib.Graph()
         # The Document's register of objects
         self.objectCache = {}  # Needed?
-        self.SBOLObjects = {}  # Needed?
+        self.SBOLObjects = {}
         self._namespaces = {}
         self.resource_namespaces = set()
         self.designs = OwnedObject(self, SYSBIO_DESIGN, Design,
@@ -456,18 +456,9 @@ class Document(Identified):
             self.logger.debug("*** Internal namespaces data structure: ")
             for ns in self._namespaces:
                 self.logger.debug(ns)
-        # Find top-level objects
-        top_level_query = "PREFIX : <http://example.org/ns#> " \
-                          "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " \
-                          "PREFIX sbol: <http://sbols.org/v2#> " \
-                          "SELECT ?s ?o " \
-                          "{ ?s a ?o }"
-        sparql_results = self.graph.query(top_level_query)
-        for result in sparql_results:
-            if self.logger.isEnabledFor(logging.DEBUG):
-                self.logger.debug("Type of s: " + str(type(result.s)))  # DEBUG
-                self.logger.debug("Type of o: " + str(type(result.o)))  # DEBUG
-            self.parse_objects_inner(result.s, result.o)
+        # Instantiate all objects with an RDF type
+        for s, _, o in self.graph.triples((None, rdflib.RDF.type, None)):
+            self.parse_objects_inner(s, o)
         # Find everything in the triple store
         all_query = "PREFIX : <http://example.org/ns#> " \
                     "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " \
@@ -525,6 +516,9 @@ class Document(Identified):
         if subject not in self.SBOLObjects and obj in self.SBOL_DATA_MODEL_REGISTER:
             # Call constructor for the appropriate SBOLObject
             new_obj = self.SBOL_DATA_MODEL_REGISTER[obj]()
+            if isinstance(new_obj, Identified):
+                # Clear out the version. it will get set later
+                new_obj.version = ''
             if self.logger.isEnabledFor(logging.DEBUG):
                 self.logger.debug("New object type: " + str(type(new_obj)))
                 self.logger.debug("New object attrs: " + str(vars(new_obj)))
@@ -609,7 +603,7 @@ class Document(Identified):
             self.logger.debug('Annotation object: %s', ao.identity)
             if SBOL_PERSISTENT_IDENTITY in ao.properties:
                 # Copy to a new TopLevel object
-                tl = TopLevel(type_uri=ao.type)
+                tl = TopLevel(type_uri=ao.type, version=None)
                 for k, v in ao.properties.items():
                     tl.properties[k] = v
                 for k, v in ao.owned_objects.items():
@@ -753,9 +747,8 @@ class Document(Identified):
         for prefix, ns in self._namespaces.items():
             self.graph.bind(prefix, ns)
         # ASSUMPTION: Document does not have properties. Is this a valid assumption?
-        for typeURI, objlist in self.owned_objects.items():
-            for owned_obj in objlist:
-                owned_obj.build_graph(self.graph)
+        for obj in self.SBOLObjects.values():
+            obj.build_graph(self.graph)
         if self.logger.isEnabledFor(logging.DEBUG):
             for s, p, o in self.graph:
                 self.logger.debug('Graph contains: %r', (s, p, o))

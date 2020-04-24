@@ -55,7 +55,11 @@ def testRoundTrip():
     Function to run test suite for pySBOL
     """
     import sbol2.test as unit_tests
-    unit_tests.runRoundTripTests()
+    result = unit_tests.runRoundTripTests()
+    if result.wasSuccessful():
+        exit(0)
+    else:
+        exit(1)
 
 
 def testSBOLHook():

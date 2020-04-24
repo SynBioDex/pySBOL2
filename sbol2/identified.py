@@ -94,11 +94,11 @@ class Identified(SBOLObject):
             self._displayId.set(uri)
             self._persistentIdentity.set(URIRef(posixpath.join(getHomespace(), uri)))
             if Config.getOption(ConfigOptions.SBOL_TYPED_URIS.value) is True:
-                if version != '':
+                if self.version:
                     self._identity.set(
                         URIRef(posixpath.join(getHomespace(),
                                               self.getClassName(type_uri),
-                                              uri, version))
+                                              uri, self.version))
                     )
                 else:
                     self._identity.set(
@@ -107,9 +107,9 @@ class Identified(SBOLObject):
                                               uri))
                     )
             else:
-                if version != '':
+                if self.version:
                     self._identity.set(
-                        URIRef(posixpath.join(getHomespace(), uri, version)))
+                        URIRef(posixpath.join(getHomespace(), uri, self.version)))
                 else:
                     self._identity.set(
                         URIRef(posixpath.join(getHomespace(), uri)))
