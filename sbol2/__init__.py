@@ -40,37 +40,3 @@ from .sequence import Sequence
 from .sequenceannotation import SequenceAnnotation
 from .validation import is_alphanumeric_or_underscore
 from .validation import is_not_alphanumeric_or_underscore
-
-
-def testSBOL():
-    """
-    Function to test pySBOL API.
-    """
-    import sbol2.test as unit_tests
-    unit_tests.runTests()
-
-
-def testRoundTrip():
-    """
-    Function to run test suite for pySBOL
-    """
-    import sbol2.test as unit_tests
-    result = unit_tests.runRoundTripTests()
-    if result.wasSuccessful():
-        exit(0)
-    else:
-        exit(1)
-
-
-def testSBOLHook():
-    """
-    Function to test pySBOL API. Exits 1 or 0 depending on whether
-    all tests pass.
-    :return:
-    """
-    import sbol2.test as unit_tests
-    result = unit_tests.runTests()
-    if result.wasSuccessful():
-        exit(0)
-    else:
-        exit(1)
