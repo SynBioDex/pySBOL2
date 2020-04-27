@@ -17,13 +17,11 @@ matrix:
     install:
     - C:\\Python37\\python -m pip install .
     script:
-    - C:\\Python37\\python -c "import sbol2; sbol2.testSBOLHook()"
-    - C:\\Python37\\python -c "import sbol2; sbol2.testRoundTrip()"
+    - C:\\Python37\\python -m unittest discover -s test
 install:
   - python3 -m pip install .
 script:
-- python3 -c "import sbol2; sbol2.testSBOLHook()"
-- travis_wait python3 -c "import sbol2; sbol2.testRoundTrip()"
+  - travis_wait python3 -m unittest discover -s test
 env:
   global:
   - secure: jRx84QQzMJ/A/Vke0301kuNtiztnUpu2RbQk909eiOEIZZR/0asV1EQybzr/dD2fVCokiCwXjghGD5r8BEOWk1moPWVRGYpJmdSZsYFZQn3cDg7TjzvU40vmHBeCdr64kP1DmZ2WcaMUtB/GAti3rUXDfbVsCe2Qsb7LsrrtXBlbb/jLIGIgO4Q2Bg/bR6ixFaiiWwxDkSR90yIJwhN14cNxgKge9uYdseQeUo0MuvItcZaNLo4ed7qZNa9POGpooHgcWOzSQug+YmVgGEIJ+pAUU+YZl4Sq1EVA7vJh51R65hgmsdisziffFWtzYlrpRPL7MR+anDibBNlMI97BQpt0+RyTEBvkTEojOGKlwj9QRa15ihW3vCffpq1zE7uccugYgqvAgqCeD3IN9uEccbDbEi/zFO1D9mIlsi5xFo3pIT+hmS67JTngh9ZKOmueMCbLZV575fvXO5uMiIIZezZMfm0VO9HE841K8jtY6T6fHsmyxwC745+MM2wpeV0rz1rD1PqcYF1Lxr8bOYny0wXBB9Gk2uAm2Uw2WSh+fZ5sdGCvLgeqzrEdLqb0aPe0vEu7NYfEp/p5BqeYsWvLhAJYDvsRldod/CPyS/cFPANdrk4Wg2acShrNR4U+PY8FRnOS5WWpABFYWi9s1Db6YsGLmRFDkG7ZBrhWSuKzDJM=
