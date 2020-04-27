@@ -357,7 +357,7 @@ class LiteralProperty(Property):
         self._sbol_owner.properties[self._rdf_type].append(new_value)
 
     def setPropertyValueList(self, new_value):
-        if not isinstance(new_value, collections.Iterable):
+        if not isinstance(new_value, collections.abc.Iterable):
             raise TypeError('{} must be an iterable'.format(self.getTypeURI()))
         # Special case. Should we really support this?
         # Convert a string to a list of that string
@@ -797,7 +797,7 @@ class ReferencedObject(Property):
         if isinstance(new_value, str):
             # Turn it into a list
             new_value = [new_value]
-        if isinstance(new_value, collections.Iterable):
+        if isinstance(new_value, collections.abc.Iterable):
             # Convert the items to URIRefs
             new_value = list([self._to_uri(x) for x in new_value])
         self._sbol_owner.properties[self._rdf_type] = new_value
