@@ -129,8 +129,6 @@ WHERE {
         except sbol.sbolerror.SBOLError as err:
             self.assertEqual(err.error_code(),
                              sbol.SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST)
-        except Throwable:
-            self.fail("Unknown exception raised")
         self.assertEqual(partShop.getUser(), user)
 
     def test_getSpoofedURL(self):
