@@ -1,4 +1,5 @@
 import unittest
+import warnings
 
 import rdflib
 
@@ -73,6 +74,12 @@ class TestConfig(unittest.TestCase):
         self.assertEqual(expected_crispr_template_cd, str(crispr_template_cd))
         self.assertEqual(rdflib.URIRef(expected_crispr_template_cd),
                          crispr_template_cd.identity)
+
+    def test_ca_path(self):
+        with warnings.catch_warnings(record=True) as warns:
+            sbol2.Config.getOption('ca-path')
+            sbol2.Config.setOption('ca-path', '/fake/path')
+        self.assertEqual(len(warns), 2)
 
 
 if __name__ == '__main__':
