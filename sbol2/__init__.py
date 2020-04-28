@@ -8,6 +8,7 @@ __version__ = '1.0b3'
 # instead of `__all__`, we will try to be careful about what gets
 # imported into this file. In the absence of __all__, all imported
 # symbols are also exported.
+from .attachment import Attachment
 from .collection import Collection
 from .combinatorialderivation import CombinatorialDerivation
 from .component import Component
