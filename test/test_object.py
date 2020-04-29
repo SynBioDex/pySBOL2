@@ -32,7 +32,7 @@ class TestObject(unittest.TestCase):
 
     def test_compare(self):
         # This didn't work because the SBOLObject.__eq__ method was
-        # broken.  See issue https://github.com/llotneb/SBOL/issues/62
+        # broken.  See issue #62.
         sbol.setHomespace('http://example.org/Unit_Test')
         doc = sbol.Document()
         md1 = doc.moduleDefinitions.create('Foo1')

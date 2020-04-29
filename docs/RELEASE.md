@@ -15,12 +15,11 @@
 1. Update GitHub [milestones](https://github.com/SynBioDex/pySBOL2/milestones)
    * Close the current milestone
    * Create a new milestone for the next release
-1. Create distribution wheel and source tarball
+1. Create source and binary distributions
 
    ```shell
    cd <pySBOL2>
    python3 setup.py sdist bdist_wheel
-   ls dist
    ```
 
 1. Create a GitHub release, upload the wheel and source tarball
@@ -28,6 +27,13 @@
    * Use the current tag
    * Name it "Major.Minor[.Patch]"
    * Upload the source tar file and the wheel
+1. Upload packages to [pypi.org](https://pypi.org/project/sbol2/)
+
+   ```shell
+   cd <pySBOL2>
+   python3 -m twine upload dist/*
+   ```
+
 1. Bump the version numbers on the develop branches
    * _Note: Use the standard contribution process by submitting these
      changes via a pull request on your fork, not a direct push to the

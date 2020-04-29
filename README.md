@@ -31,6 +31,13 @@ pip install -U pip
 pip install sbol2
 ```
 
+Alternatively if you want to be able to run unit tests (starting with 1.0b3)
+please install the source distribution:
+
+```shell
+pip install --no-binary sbol2 sbol2
+```
+
 ## CODE EXAMPLE
 
 ```
