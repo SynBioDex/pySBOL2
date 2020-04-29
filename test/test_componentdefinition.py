@@ -85,12 +85,12 @@ class TestComponentDefinitions(unittest.TestCase):
     def testPrimaryStructureIteration(self):
         list_cd = []
         list_cd_true = ["R0010", "E0040", "B0032", "B0012"]
-        doc = Document()
-        gene = ComponentDefinition("BB0001")
-        promoter = ComponentDefinition("R0010")
-        rbs = ComponentDefinition("B0032")
-        cds = ComponentDefinition("E0040")
-        terminator = ComponentDefinition("B0012")
+        doc = sbol2.Document()
+        gene = sbol2.ComponentDefinition("BB0001")
+        promoter = sbol2.ComponentDefinition("R0010")
+        rbs = sbol2.ComponentDefinition("B0032")
+        cds = sbol2.ComponentDefinition("E0040")
+        terminator = sbol2.ComponentDefinition("B0012")
 
         doc.addComponentDefinition([gene, promoter, rbs, cds, terminator])
 
@@ -107,12 +107,12 @@ class TestComponentDefinitions(unittest.TestCase):
 
     @unittest.expectedFailure
     def testInsertDownstream(self):
-        doc = Document()
-        gene = ComponentDefinition("BB0001")
-        promoter = ComponentDefinition("R0010")
-        rbs = ComponentDefinition("B0032")
-        cds = ComponentDefinition("E0040")
-        terminator = ComponentDefinition("B0012")
+        doc = sbol2.Document()
+        gene = sbol2.ComponentDefinition("BB0001")
+        promoter = sbol2.ComponentDefinition("R0010")
+        rbs = sbol2.ComponentDefinition("B0032")
+        cds = sbol2.ComponentDefinition("E0040")
+        terminator = sbol2.ComponentDefinition("B0012")
 
         doc.addComponentDefinition([gene, promoter, rbs, cds, terminator])
         gene.assemblePrimaryStructure([promoter, rbs, cds])
