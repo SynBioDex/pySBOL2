@@ -213,3 +213,23 @@ class TestComponentDefinitions(unittest.TestCase):
         # the first object is a Cut.
         with self.assertRaises(TypeError):
             sa.locations.getRange()
+
+    def test_hidden_sequence(self):
+        # Sequence should be hidden when writing SBOL
+        doc = sbol2.Document()
+        cd = sbol2.ComponentDefinition('cd1', sbol2.BIOPAX_DNA)
+        cd.name = 'cd1-name'
+        cd.description = 'cd1-description'
+        seq = sbol2.Sequence('cd1_sequence', 'GCAT')
+        cd.sequence = seq
+        doc.addComponentDefinition(cd)
+        xml = doc.writeString()
+        graph = rdflib.Graph()
+        graph.parse(data=xml)
+        # We shouldn't find SBOL_SEQUENCE within the component definition
+        bad_triple = (cd.identity, sbol2.SBOL_SEQUENCE, None)
+        self.assertEqual([], list(graph.triples(bad_triple)))
+
+
+if __name__ == '__main__':
+    unittest.main()

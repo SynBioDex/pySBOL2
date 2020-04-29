@@ -132,6 +132,7 @@ class ComponentDefinition(TopLevel):
         self.sequenceConstraints = OwnedObject(self, SBOL_SEQUENCE_CONSTRAINTS,
                                                SequenceConstraint,
                                                '0', '*', None)
+        self._hidden_properties = [SBOL_SEQUENCE]
 
     @property
     def types(self):

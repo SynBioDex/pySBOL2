@@ -407,10 +407,16 @@ class SBOLObject:
         graph.add((self._identity.getRawValue(), rdflib.RDF.type,
                    self.rdf_type))
         for typeURI, proplist in self.properties.items():
+            if typeURI in self._hidden_properties:
+                # Skip hidden properties
+                continue
             for prop in proplist:
                 graph.add((self._identity.getRawValue(),
                            typeURI, prop))
         for typeURI, objlist in self.owned_objects.items():
+            if typeURI in self._hidden_properties:
+                # Skip hidden properties
+                continue
             for owned_obj in objlist:
                 graph.add((self._identity.getRawValue(),
                            typeURI, URIRef(owned_obj.identity)))
