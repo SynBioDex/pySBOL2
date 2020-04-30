@@ -229,6 +229,24 @@ class TestComponentDefinitions(unittest.TestCase):
         # We shouldn't find SBOL_SEQUENCE within the component definition
         bad_triple = (cd.identity, sbol2.SBOL_SEQUENCE, None)
         self.assertEqual([], list(graph.triples(bad_triple)))
+        good_triple = (cd.identity, sbol2.SBOL_SEQUENCE_PROPERTY, None)
+        good_triples = list(graph.triples(good_triple))
+        self.assertEqual(len(good_triples), 1)
+        self.assertEqual(good_triples[0], (cd.identity,
+                                           sbol2.SBOL_SEQUENCE_PROPERTY,
+                                           seq.identity))
+
+    def test_sequence_validation(self):
+        cd = sbol2.ComponentDefinition('cd1', sbol2.BIOPAX_DNA)
+        cd.name = 'cd1-name'
+        cd.description = 'cd1-description'
+        seq = sbol2.Sequence('cd1_sequence', 'GCAT')
+        cd.sequence = seq
+        self.assertEqual([seq.identity], cd.sequences)
+
+    @unittest.expectedFailure
+    def test_sequences_validation(self):
+        self.fail('Not yet implemented')
 
 
 if __name__ == '__main__':
