@@ -198,9 +198,6 @@ class Property(ABC):
         return int(self._upperBound)
 
     def validate(self, arg):
-        if arg is None:
-            # NOTE: Original libSBOL code has commented-out code for this case.
-            raise TypeError("arg cannot be None")
         for validation_rule in self._validation_rules:
             validation_rule(self._sbol_owner, arg)
 
@@ -437,6 +434,7 @@ class OwnedObject(URIProperty):
         """
         super().__init__(property_owner, sbol_uri, lower_bound, upper_bound,
                          validation_rules, first_object)
+        self.validate(first_object)
         if not callable(builder):
             msg = '{!r} object is not callable'
             raise TypeError(msg.format(type(builder)))
@@ -494,7 +492,7 @@ class OwnedObject(URIProperty):
         # Add to parent object
         object_store.append(sbol_obj)
         # Run validation rules
-        # TODO
+        self.validate(sbol_obj)
 
     def __getitem__(self, id):
         if type(id) is int:
@@ -632,7 +630,7 @@ class OwnedObject(URIProperty):
         sbol_obj.update_uri()
 
         # Run validation rules
-        # TODO
+        self.validate(sbol_obj)
 
     @property
     def value(self):

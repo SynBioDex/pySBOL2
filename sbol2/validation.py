@@ -119,19 +119,23 @@ def libsbol_rule_10(sbol_obj, arg):
 
 
 def libsbol_rule_11(sbol_obj, arg):
-    raise NotImplementedError("Not yet implemented")
+    # raise NotImplementedError("Not yet implemented")
+    pass
 
 
 def libsbol_rule_12(sbol_obj, arg):
-    raise NotImplementedError("Not yet implemented")
+    # raise NotImplementedError("Not yet implemented")
+    pass
 
 
 def libsbol_rule_13(sbol_obj, arg):
-    raise NotImplementedError("Not yet implemented")
+    # raise NotImplementedError("Not yet implemented")
+    pass
 
 
 def libsbol_rule_14(sbol_obj, arg):
-    raise NotImplementedError("Not yet implemented")
+    # raise NotImplementedError("Not yet implemented")
+    pass
 
 
 def libsbol_rule_15(sbol_obj, arg):
@@ -139,19 +143,18 @@ def libsbol_rule_15(sbol_obj, arg):
 
 
 def libsbol_rule_16(sbol_obj, arg):
-    raise NotImplementedError("Not yet implemented")
+    # raise NotImplementedError("Not yet implemented")
+    pass
 
 
 def libsbol_rule_17(sbol_obj, arg):
-    raise NotImplementedError("Not yet implemented")
+    # raise NotImplementedError("Not yet implemented")
+    pass
 
 
 def libsbol_rule_18(sbol_obj, arg):
-    raise NotImplementedError("Not yet implemented")
-
-
-def libsbol_rule_20(sbol_obj, arg):
-    raise NotImplementedError("Not yet implemented")
+    # raise NotImplementedError("Not yet implemented")
+    pass
 
 
 def libsbol_rule_21(sbol_obj, arg):
@@ -159,7 +162,8 @@ def libsbol_rule_21(sbol_obj, arg):
 
 
 def libsbol_rule_22(sbol_obj, arg):
-    raise NotImplementedError("Not yet implemented")
+    # raise NotImplementedError("Not yet implemented")
+    pass
 
 
 def libsbol_rule_24(sbol_obj, arg):

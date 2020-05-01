@@ -5,6 +5,7 @@ from .constants import *
 from .toplevel import TopLevel
 from . import validation
 from .property import OwnedObject, ReferencedObject, URIProperty
+from .sbolerror import SBOLError, SBOLErrorCode
 from .sequence import Sequence
 from .sequenceannotation import SequenceAnnotation
 from .sequenceconstraint import SequenceConstraint
@@ -120,7 +121,7 @@ class ComponentDefinition(TopLevel):
                                   '0', '*', None)
         self.sequence = OwnedObject(self, SBOL_SEQUENCE,
                                     Sequence,
-                                    '0', '1', [validation.libsbol_rule_20])
+                                    '0', '1', [libsbol_rule_20])
         self.sequences = ReferencedObject(self, SBOL_SEQUENCE_PROPERTY,
                                           SBOL_SEQUENCE, '0', '*',
                                           [validation.libsbol_rule_21])
@@ -132,6 +133,7 @@ class ComponentDefinition(TopLevel):
         self.sequenceConstraints = OwnedObject(self, SBOL_SEQUENCE_CONSTRAINTS,
                                                SequenceConstraint,
                                                '0', '*', None)
+        self._hidden_properties = [SBOL_SEQUENCE]
 
     @property
     def types(self):
@@ -441,3 +443,22 @@ class ComponentDefinition(TopLevel):
 
     def getTypeURI(self):
         return SBOL_COMPONENT_DEFINITION
+
+
+def libsbol_rule_20(sbol_obj, arg):
+    """Synchronizes ComponentDefinition.sequence with ComponentDefinition.sequences.
+    """
+    if not isinstance(sbol_obj, ComponentDefinition):
+        msg = 'Expected {}, got {}'
+        msg = msg.format(ComponentDefinition.__name__, type(sbol_obj).__name__)
+        raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
+    if arg is None:
+        # Clearing out sequence. What should we do with sequences?
+        # Should we clear sequences?
+        return
+    if not isinstance(arg, Sequence):
+        msg = 'Expected {}, got {}'
+        msg = msg.format(Sequence.__name__, type(arg).__name__)
+        raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
+    if arg.identity not in sbol_obj.sequences:
+        sbol_obj.sequences = [arg.identity]
