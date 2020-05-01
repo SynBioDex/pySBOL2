@@ -161,11 +161,11 @@ class Document(Identified):
         if filename is not None:
             self.read(filename)
 
-    def __eq__(self, other):
-        if not super().__eq__(other):
+    def compare(self, other):
+        # Let the super class do the bulk of the comparison. Super
+        # compares owned objects and properties.
+        if not super().compare(other):
             return False
-        # super().__eq__ will have checked the types so we know other
-        # is a Document at this point.
         if self._namespaces != other._namespaces:
             return False
         return True
@@ -223,7 +223,7 @@ class Document(Identified):
                 self.owned_objects[sbol_obj.getTypeURI()].append(sbol_obj)
             sbol_obj.doc = self
             # Recurse into child objects and set their back-pointer to this Document
-            for key, obj_store in self.owned_objects.items():
+            for key, obj_store in sbol_obj.owned_objects.items():
                 for child_obj in obj_store:
                     if child_obj.doc != self:
                         self.add(child_obj)
