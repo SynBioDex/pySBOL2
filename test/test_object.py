@@ -67,8 +67,6 @@ class TestObject(unittest.TestCase):
     def test_set_property_value_deprecated(self):
         # Verify that setPropertyValue is deprecated
         md = sbol.ModuleDefinition('md')
-        # Enable all warnings
-        warnings.simplefilter("default")
         with warnings.catch_warnings(record=True) as warns:
             md.setPropertyValue('myprop', 'foo')
         self.assertEqual(len(warns), 1)

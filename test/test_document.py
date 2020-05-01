@@ -222,12 +222,12 @@ class TestDocument(unittest.TestCase):
         m = md.modules.create('bar')
         self.assertEqual(doc, m.doc)
 
-    def test_eq(self):
+    def test_compare(self):
         doc = sbol.Document()
         doc2 = sbol.Document()
-        self.assertEqual(doc, doc2)
+        self.assertTrue(doc.compare(doc2))
         doc.addNamespace('http://example.org#', 'bar')
-        self.assertNotEqual(doc, doc2)
+        self.assertFalse(doc.compare(doc2))
 
     def test_get_top_level(self):
         doc = sbol.Document()
@@ -334,7 +334,7 @@ class TestDocument(unittest.TestCase):
     def test_clone_document(self):
         doc = sbol.Document()
         doc2 = doc.copy()
-        self.assertEqual(doc, doc2)
+        self.assertTrue(doc.compare(doc2))
 
     def test_validate(self):
         doc = sbol2.Document()
@@ -376,3 +376,24 @@ class TestDocument(unittest.TestCase):
                          rdflib.Literal('//rnap/prokaryote/ecoli/sigma70'))
         self.assertEqual(info.getPropertyValue(regulation_uri),
                          rdflib.Literal('//regulation/constitutive'))
+
+    def test_recursive_add(self):
+        # Make sure that when an object gets added to a document
+        # all of its child objects also get added.
+        cd = sbol2.ComponentDefinition('cd')
+        comp = sbol2.Component('cd_c')
+        cd.components.add(comp)
+        # Use of cd.sequence is dubious because the sequence attribute
+        # isn't really there in SBOL 2.3. But it's the test case that
+        # found the bug with recursive addition of objects, so we use it.
+        seq = sbol2.Sequence('cd_seq')
+        cd.sequence = seq
+        doc = sbol2.Document()
+        doc.addComponentDefinition(cd)
+        # The cd and sequence should be in the document
+        # The component is not top level, so doesn't get added
+        self.assertEqual(2, len(doc))
+
+
+if __name__ == '__main__':
+    unittest.main()
