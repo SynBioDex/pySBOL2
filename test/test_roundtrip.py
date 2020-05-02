@@ -10,7 +10,8 @@ import rdflib.compare
 import sbol2 as sbol
 
 MODULE_LOCATION = os.path.dirname(os.path.abspath(__file__))
-TEST_LOC_SBOL2 = os.path.join(MODULE_LOCATION, 'SBOLTestSuite', 'SBOL2')
+SBOL_TEST_SUITE = os.path.join(MODULE_LOCATION, 'SBOLTestSuite')
+TEST_LOC_SBOL2 = os.path.join(SBOL_TEST_SUITE, 'SBOL2_bp')
 FILES_SBOL2 = os.listdir(TEST_LOC_SBOL2)
 FILES_SBOL2.sort()
 TEST_FILES_SBOL2 = []
@@ -76,6 +77,49 @@ class TestRoundTripSBOL2(unittest.TestCase):
             for stmt in rdf_diff[2]:
                 self.logger.debug('Only in loaded: %r', stmt)
 
+    def run_round_trip_file(self, test_path):
+        filename = os.path.basename(test_path)
+        test2_path = os.path.join(self.temp_out_dir, filename)
+
+        self.doc = sbol.Document()   # Document for read and write
+        self.doc.read(test_path)
+        self.doc.write(test2_path)
+
+        self.doc2 = sbol.Document()  # Document to compare for equality
+        self.doc2.read(test2_path)
+        self.assertTrue(self.doc.compare(self.doc2))
+
+        # Now compare the graphs in RDF
+        g1 = rdflib.Graph()
+        g1.load(test_path)
+        iso1 = rdflib.compare.to_isomorphic(g1)
+        g2 = rdflib.Graph()
+        g2.load(test2_path)
+        iso2 = rdflib.compare.to_isomorphic(g2)
+        rdf_diff = rdflib.compare.graph_diff(iso1, iso2)
+        if rdf_diff[1] or rdf_diff[2]:
+            self.logger.warning('Detected %d different RDF triples in %s' %
+                                (len(rdf_diff[1]) + len(rdf_diff[2]), test_path))
+            if not self.logger.isEnabledFor(logging.DEBUG):
+                self.logger.warning('Set environment variable %s to see details',
+                                    DEBUG_ENV_VAR)
+            for stmt in rdf_diff[1]:
+                self.logger.debug('Only in original: %r', stmt)
+            for stmt in rdf_diff[2]:
+                self.logger.debug('Only in loaded: %r', stmt)
+
+    def run_round_trip_dir(self, directory, skiplist=[]):
+        dirname = os.path.basename(directory)
+        for filename in os.listdir(directory):
+            if filename in skiplist:
+                continue
+            if filename.endswith('rdf') or filename.endswith('xml'):
+                test_path = os.path.join(directory, filename)
+                with self.subTest(filename=os.path.join(dirname, filename)):
+                    self.setUp()
+                    self.run_round_trip_file(test_path)
+                    self.tearDown()
+
     def test_sbol2_files(self):
         subtest = 1
         for f in TEST_FILES_SBOL2:
@@ -88,19 +132,41 @@ class TestRoundTripSBOL2(unittest.TestCase):
                 self.run_round_trip(f)
                 self.tearDown()
 
+    def test_sbol2_bp_files(self):
+        test_dir = os.path.join(SBOL_TEST_SUITE, 'SBOL2_bp')
+        self.run_round_trip_dir(test_dir)
+
+    def test_sbol2_ic_files(self):
+        test_dir = os.path.join(SBOL_TEST_SUITE, 'SBOL2_ic')
+        self.run_round_trip_dir(test_dir)
+
+    def test_sbol2_nc_files(self):
+        test_dir = os.path.join(SBOL_TEST_SUITE, 'SBOL2_nc')
+        # SBOL1and2Test.xml has a namespace error when serializing
+        # Handle it for now as an expected failure below
+        self.run_round_trip_dir(test_dir, ['SBOL1and2Test.xml'])
+
     @unittest.expectedFailure
     def test_source_location(self):
         self.run_round_trip('test_source_location.xml')
+
+    @unittest.expectedFailure
+    def test_sbol_1_and_2(self):
+        # Invalid namespace prefix in lxml.etree when serializing the document
+        test_path = os.path.join(SBOL_TEST_SUITE, 'SBOL2_nc',
+                                 'SBOL1and2Test.xml')
+        self.run_round_trip_file(test_path)
 
     def test_utf8_roundtrip(self):
         # Test loading a utf-8 SBOL file without LANG set. This was a
         # bug at one time, and only shows itself when LANG is unset.
         # Here we simulate that by temporarily setting the locale to
         # the generic 'C' locale.
+        test_path = os.path.join(SBOL_TEST_SUITE, 'SBOL2', 'pICSL50014.xml')
         loc = locale.getlocale()
         try:
             locale.setlocale(locale.LC_ALL, 'C')
-            self.run_round_trip('pICSL50014.xml')
+            self.run_round_trip_file(test_path)
         finally:
             locale.setlocale(locale.LC_ALL, loc)
 
