@@ -37,14 +37,15 @@ class TestRoundTripSBOL2(unittest.TestCase):
         """
         filename = os.path.basename(test_path)
         test2_path = os.path.join(self.temp_out_dir, filename)
+        # Read the document, then write it back to disk
+        doc = sbol2.Document()
+        doc.read(test_path)
+        doc.write(test2_path)
 
-        self.doc = sbol2.Document()   # Document for read and write
-        self.doc.read(test_path)
-        self.doc.write(test2_path)
-
-        self.doc2 = sbol2.Document()  # Document to compare for equality
-        self.doc2.read(test2_path)
-        self.assertTrue(self.doc.compare(self.doc2))
+        # Read the newly written document and compare results
+        doc2 = sbol2.Document()
+        doc2.read(test2_path)
+        self.assertTrue(doc.compare(doc2))
 
         # Now compare the graphs in RDF
         g1 = rdflib.Graph()
