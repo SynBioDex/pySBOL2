@@ -6,7 +6,7 @@ import tempfile
 import shutil
 import rdflib
 import rdflib.compare
-import sbol2 as sbol
+import sbol2
 
 MODULE_LOCATION = os.path.dirname(os.path.abspath(__file__))
 SBOL_TEST_SUITE = os.path.join(MODULE_LOCATION, 'SBOLTestSuite')
@@ -19,7 +19,7 @@ class TestRoundTripSBOL2(unittest.TestCase):
     def setUp(self):
         # Create temp directory
         self.temp_out_dir = tempfile.mkdtemp()
-        self.logger = logging.getLogger('sbol.test')
+        self.logger = logging.getLogger('sbol2.test')
         if not self.logger.hasHandlers():
             logging.basicConfig()
         if DEBUG_ENV_VAR in os.environ:
@@ -38,11 +38,11 @@ class TestRoundTripSBOL2(unittest.TestCase):
         filename = os.path.basename(test_path)
         test2_path = os.path.join(self.temp_out_dir, filename)
 
-        self.doc = sbol.Document()   # Document for read and write
+        self.doc = sbol2.Document()   # Document for read and write
         self.doc.read(test_path)
         self.doc.write(test2_path)
 
-        self.doc2 = sbol.Document()  # Document to compare for equality
+        self.doc2 = sbol2.Document()  # Document to compare for equality
         self.doc2.read(test2_path)
         self.assertTrue(self.doc.compare(self.doc2))
 
