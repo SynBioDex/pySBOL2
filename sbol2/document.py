@@ -2,6 +2,8 @@ import collections.abc
 import logging
 import os
 import posixpath
+from typing import Any, Mapping, Union
+import warnings
 
 import rdflib
 
@@ -965,3 +967,84 @@ class Document(Identified):
         if version is None:
             version = self.version
         return super().copy(target_doc, target_namespace, version)
+
+    def exportToFormat(self, language: str, output_path: str):
+        # Copy the global config options. Shallow copy is ok because values
+        # are either bool or str.
+        options = config.options.copy()
+        options[ConfigOptions.LANGUAGE.value] = language
+        # We always want the return file
+        options[ConfigOptions.RETURN_FILE.value] = True
+        response = validate(self, options)
+
+        # What should we be expecting from the validator?
+        # Can we tell if there was an error?
+        # Is it if there are any errors? Or if 'Conversion failed.' is one of the errors?
+        # Or if response['result'] is not empty?
+        if response['errors'][0]:
+            msg = ' '.join(response['errors'])
+            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
+        if not response['result']:
+            msg = 'Validator returned no content'
+            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
+        # write the result to the desired output path
+        with open(output_path, 'w') as fp:
+            fp.write(response['result'])
+
+    def convert(self, language, output_path):
+        warnings.warn('Document.convert is now Document.exportToFormat',
+                      DeprecationWarning)
+        self.exportToFormat(language, output_path)
+
+
+def _make_validation_request(options: Mapping[str, Union[bool, str]]):
+    config_options = [
+        config.ConfigOptions.CHECK_BEST_PRACTICES.value,
+        config.ConfigOptions.CHECK_COMPLETENESS.value,
+        config.ConfigOptions.CHECK_URI_COMPLIANCE.value,
+        config.ConfigOptions.DIFF_FILE_NAME.value,
+        config.ConfigOptions.FAIL_ON_FIRST_ERROR.value,
+        config.ConfigOptions.INSERT_TYPE.value,
+        config.ConfigOptions.LANGUAGE.value,
+        config.ConfigOptions.MAIN_FILE_NAME.value,
+        config.ConfigOptions.PROVIDE_DETAILED_STACK_TRACE.value,
+        config.ConfigOptions.SUBSET_URI.value,
+        config.ConfigOptions.TEST_EQUALITY.value,
+        config.ConfigOptions.URI_PREFIX.value,
+        config.ConfigOptions.VERSION.value
+    ]
+    request_options = {}
+    for key in config_options:
+        request_options[key] = options[key]
+    return dict(options=request_options)
+
+
+def validate(doc: Document, options: Mapping[str, Any]):
+    """
+    :rtype: Dict[str, Any]
+    """
+    return_file_key = config.ConfigOptions.RETURN_FILE.value
+    validator_key = config.ConfigOptions.VALIDATOR_URL.value
+    json_request = _make_validation_request(options)
+    # We always want the return file
+    json_request[return_file_key] = options[return_file_key]
+    json_request['main_file'] = doc.writeString()
+
+    headers = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'charsets': 'utf-8'
+    }
+
+    validator_url = options[validator_key]
+
+    # Send the request to the online validation tool
+    response = requests.post(validator_url,
+                             json=json_request,
+                             headers=headers)
+    if response:
+        return response.json()
+    else:
+        msg = 'Validation failure. HTTP post request failed with code {}: {}'
+        msg = msg.format(response.status_code, response.content)
+        raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST)
