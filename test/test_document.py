@@ -344,12 +344,6 @@ class TestDocument(unittest.TestCase):
         expected = 'Valid.'
         self.assertEqual(result, expected)
 
-    def test_validate_invalid(self):
-        doc = sbol2.Document()
-        result = doc.request_validation('mumbo jumbo')
-        expected = 'Invalid.'
-        self.assertEqual(result[:len(expected)], expected)
-
     def test_validate_bad_url(self):
         sbol2.Config.setOption(sbol2.ConfigOptions.VALIDATOR_URL,
                                self.validator_url + 'foo/bar')
