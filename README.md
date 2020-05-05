@@ -11,28 +11,22 @@ For developers, please see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## INSTALLATION
 
-This library is currently under development. Please consider using a
-virtual environment for your installation.
+Use [pip](https://pip.pypa.io/) to install pySBOL2:
 
 ```shell
-# Name the virtual environment
-DIR=myenv
-
-# Create the virtual environment
-python3 -m venv "${DIR}"
-
-# Activate the virtual environment
-source "${DIR}"/bin/activate
-
-# Recommended: upgrade pip
-pip install -U pip
-
-# Install the sbol module
 pip install sbol2
 ```
 
+If you get a permission error, try using the `--user` flag:
+
+```shell
+pip install --user sbol2
+```
+
 Alternatively if you want to be able to run unit tests (starting with 1.0b3)
-please install the source distribution:
+please install the source distribution using the `--no-binary sbol2` flag.
+The location of the unit tests will vary based on platform and other
+pip command line options you may have used.
 
 ```shell
 pip install --no-binary sbol2 sbol2
@@ -40,10 +34,17 @@ pip install --no-binary sbol2 sbol2
 
 ## CODE EXAMPLE
 
+This short example creates a Document, adds a ComponentDefinition
+to the Document, and then writes the resulting Document to an SBOL
+file.
+
 ```
 import sbol2
 
 doc = sbol2.Document()
+cd = sbol2.ComponentDefinition('cd1')
+doc.add(cd)
+doc.write('my-sbol.xml')
 ```
 
 ## DOCUMENTATION
@@ -55,7 +56,10 @@ should be used until this module has its own documentation.
 
 ## ACKNOWLEDGEMENTS
 
-Development of this library has been supported by the DARPA Synergistic Discovery & Design program and BBN Technologies.
+Development of this library has been supported by the 
+[DARPA Synergistic Discovery and Design (SD2)](https://www.darpa.mil/program/synergistic-discovery-and-design)
+program and [Raytheon BBN Technologies](http://bbn.com/).
+
 
 <p align="center">
   <img src="./logo.jpg" height="100" />
