@@ -315,6 +315,15 @@ class Document(Identified):
         else:
             self.add(implementation)
 
+    def addAttachment(self, attachment):
+        """Add an attachment to this document.
+        """
+        if isinstance(attachment, collections.abc.Iterable):
+            for a in attachment:
+                self.add(a)
+        else:
+            self.add(attachment)
+
     def create(self, uri):
         """
         Creates another SBOL object derived from TopLevel

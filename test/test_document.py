@@ -388,6 +388,13 @@ class TestDocument(unittest.TestCase):
         # The component is not top level, so doesn't get added
         self.assertEqual(2, len(doc))
 
+    def test_add_attachment(self):
+        doc = sbol2.Document()
+        test_attach = sbol2.Attachment("TEST")
+        doc.addAttachment(test_attach)
+        self.assertEqual(1, len(doc.attachments))
+        self.assertTrue(test_attach.compare(doc.attachments[0]))
+
 
 if __name__ == '__main__':
     unittest.main()
