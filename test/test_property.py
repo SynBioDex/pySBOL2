@@ -142,6 +142,11 @@ class TestProperty(unittest.TestCase):
         tp.value = expected
         self.assertEqual(tp.value, [])
 
+    def test_owned_object_singleton(self):
+        cd = sbol.ComponentDefinition('cd')
+        cd.sequence = sbol.Sequence('seq')
+        self.assertEqual(type(cd.sequence), sbol.Sequence)
+
     def test_owned_object_find(self):
         doc = sbol.Document()
         md = doc.moduleDefinitions.create('foo')

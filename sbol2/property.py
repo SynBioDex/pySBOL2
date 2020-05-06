@@ -597,7 +597,7 @@ class OwnedObject(URIProperty):
                 if obj.identity == compliant_uri:
                     return obj
 
-    def get(self, uri):
+    def get(self, uri = ''):
         # TODO: orig getter contains a size check when uri is a constant string
         if uri == '':
             return self._sbol_owner.owned_objects[self._rdf_type][0]
