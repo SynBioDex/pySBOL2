@@ -47,7 +47,7 @@ class PartShop:
 
     @property
     def logger(self):
-        logger = logging.getLogger('sbol')
+        logger = logging.getLogger('sbol2')
         if not logger.hasHandlers():
             # If there are no handlers, nobody has initialized
             # logging.  Configure logging here so we have a chance of
