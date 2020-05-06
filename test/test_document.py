@@ -1,5 +1,4 @@
 import locale
-import logging
 import os
 import unittest
 
@@ -10,6 +9,10 @@ import sbol2 as sbol
 
 MODULE_LOCATION = os.path.dirname(os.path.abspath(__file__))
 TEST_LOCATION = os.path.join(MODULE_LOCATION, 'resources', 'crispr_example.xml')
+
+# For testing reading of annotations
+ANNO_LOCATION = os.path.join(MODULE_LOCATION, 'SBOLTestSuite', 'SBOL2',
+                             'AnnotationOutput.xml')
 
 
 class TestDocument(unittest.TestCase):
@@ -161,6 +164,20 @@ class TestDocument(unittest.TestCase):
         md2 = doc.moduleDefinitions[md.displayId]
         self.assertEqual(md.identity, md2.identity)
 
+    def test_crispr_lookup(self):
+        doc = sbol.Document(TEST_LOCATION)
+        uri = 'http://sbols.org/CRISPR_Example/CRISPR_Template/1.0.0'
+        display_id = 'CRISPR_Template'
+        md = doc.moduleDefinitions[uri]
+        self.assertIsNotNone(md)
+        self.assertEqual(md.identity, rdflib.URIRef(uri))
+        self.assertEqual(md.displayId, rdflib.Literal(display_id))
+        # Test lookup by displayId. This was broken when loading from a file.
+        md = doc.moduleDefinitions[display_id]
+        self.assertIsNotNone(md)
+        self.assertEqual(md.identity, rdflib.URIRef(uri))
+        self.assertEqual(md.displayId, rdflib.Literal(display_id))
+
     def test_find_property_value(self):
         # find_property_value wasn't comparing against the passed
         # `value` parameter, so it was returning all identities in the
@@ -205,12 +222,12 @@ class TestDocument(unittest.TestCase):
         m = md.modules.create('bar')
         self.assertEqual(doc, m.doc)
 
-    def test_eq(self):
+    def test_compare(self):
         doc = sbol.Document()
         doc2 = sbol.Document()
-        self.assertEqual(doc, doc2)
+        self.assertTrue(doc.compare(doc2))
         doc.addNamespace('http://example.org#', 'bar')
-        self.assertNotEqual(doc, doc2)
+        self.assertFalse(doc.compare(doc2))
 
     def test_get_top_level(self):
         doc = sbol.Document()
@@ -317,7 +334,7 @@ class TestDocument(unittest.TestCase):
     def test_clone_document(self):
         doc = sbol.Document()
         doc2 = doc.copy()
-        self.assertEqual(doc, doc2)
+        self.assertTrue(doc.compare(doc2))
 
     def test_validate(self):
         doc = sbol2.Document()
@@ -327,15 +344,57 @@ class TestDocument(unittest.TestCase):
         expected = 'Valid.'
         self.assertEqual(result, expected)
 
-    def test_validate_invalid(self):
-        doc = sbol2.Document()
-        result = doc.request_validation('mumbo jumbo')
-        expected = 'Invalid.'
-        self.assertEqual(result[:len(expected)], expected)
-
     def test_validate_bad_url(self):
         sbol2.Config.setOption(sbol2.ConfigOptions.VALIDATOR_URL,
                                self.validator_url + 'foo/bar')
         doc = sbol2.Document()
         with self.assertRaises(sbol2.SBOLError):
             doc.validate()
+
+    def test_read_annotations(self):
+        # Test reading a file with annotations and make sure they end
+        # up where we expect them
+        doc = sbol2.Document(filename=ANNO_LOCATION)
+        # There is 1 component definition
+        self.assertEqual(len(doc.componentDefinitions), 1)
+        cd = doc.componentDefinitions[0]
+        info_uri = rdflib.URIRef('http://partsregistry.org/information')
+        sigma_uri = rdflib.URIRef('http://partsregistry.org/sigmafactor')
+        regulation_uri = rdflib.URIRef('http://partsregistry.org/regulation')
+        self.assertNotIn(info_uri, cd.properties)
+        self.assertIn(info_uri, cd.owned_objects)
+        # TODO What is the real API for accessing the extension object?
+        info = cd.owned_objects[info_uri][0]
+        self.assertIsNotNone(info)
+        self.assertEqual(info.getPropertyValue(sigma_uri),
+                         rdflib.Literal('//rnap/prokaryote/ecoli/sigma70'))
+        self.assertEqual(info.getPropertyValue(regulation_uri),
+                         rdflib.Literal('//regulation/constitutive'))
+
+    def test_recursive_add(self):
+        # Make sure that when an object gets added to a document
+        # all of its child objects also get added.
+        cd = sbol2.ComponentDefinition('cd')
+        comp = sbol2.Component('cd_c')
+        cd.components.add(comp)
+        # Use of cd.sequence is dubious because the sequence attribute
+        # isn't really there in SBOL 2.3. But it's the test case that
+        # found the bug with recursive addition of objects, so we use it.
+        seq = sbol2.Sequence('cd_seq')
+        cd.sequence = seq
+        doc = sbol2.Document()
+        doc.addComponentDefinition(cd)
+        # The cd and sequence should be in the document
+        # The component is not top level, so doesn't get added
+        self.assertEqual(2, len(doc))
+
+    def test_add_attachment(self):
+        doc = sbol2.Document()
+        test_attach = sbol2.Attachment("TEST")
+        doc.addAttachment(test_attach)
+        self.assertEqual(1, len(doc.attachments))
+        self.assertTrue(test_attach.compare(doc.attachments[0]))
+
+
+if __name__ == '__main__':
+    unittest.main()

@@ -1,9 +1,11 @@
 import collections.abc
 import logging
 import os
+import posixpath
+from typing import Any, Mapping, Union
+import warnings
 
 import rdflib
-from rdflib import URIRef
 
 from . import SBOL2Serialize
 from . import validation
@@ -14,6 +16,8 @@ from .component import Component, FunctionalComponent
 from .componentdefinition import ComponentDefinition
 from .config import ConfigOptions
 from .config import Config
+from .config import parseClassName
+from . import config
 from .config import parsePropertyName
 from .constants import *
 from .dbtl import Analysis, Build, Design, SampleRoster, Test
@@ -35,6 +39,7 @@ from .sbolerror import SBOLErrorCode
 from .sequence import Sequence
 from .sequenceannotation import SequenceAnnotation
 from .sequenceconstraint import SequenceConstraint
+from .toplevel import TopLevel
 
 import requests
 
@@ -101,7 +106,7 @@ class Document(Identified):
         self.graph = rdflib.Graph()
         # The Document's register of objects
         self.objectCache = {}  # Needed?
-        self.SBOLObjects = {}  # Needed?
+        self.SBOLObjects = {}
         self._namespaces = {}
         self.resource_namespaces = set()
         self.designs = OwnedObject(self, SYSBIO_DESIGN, Design,
@@ -158,11 +163,11 @@ class Document(Identified):
         if filename is not None:
             self.read(filename)
 
-    def __eq__(self, other):
-        if not super().__eq__(other):
+    def compare(self, other):
+        # Let the super class do the bulk of the comparison. Super
+        # compares owned objects and properties.
+        if not super().compare(other):
             return False
-        # super().__eq__ will have checked the types so we know other
-        # is a Document at this point.
         if self._namespaces != other._namespaces:
             return False
         return True
@@ -220,7 +225,7 @@ class Document(Identified):
                 self.owned_objects[sbol_obj.getTypeURI()].append(sbol_obj)
             sbol_obj.doc = self
             # Recurse into child objects and set their back-pointer to this Document
-            for key, obj_store in self.owned_objects.items():
+            for key, obj_store in sbol_obj.owned_objects.items():
                 for child_obj in obj_store:
                     if child_obj.doc != self:
                         self.add(child_obj)
@@ -309,6 +314,15 @@ class Document(Identified):
                 self.add(impl)
         else:
             self.add(implementation)
+
+    def addAttachment(self, attachment):
+        """Add an attachment to this document.
+        """
+        if isinstance(attachment, collections.abc.Iterable):
+            for a in attachment:
+                self.add(a)
+        else:
+            self.add(attachment)
 
     def create(self, uri):
         """
@@ -453,18 +467,9 @@ class Document(Identified):
             self.logger.debug("*** Internal namespaces data structure: ")
             for ns in self._namespaces:
                 self.logger.debug(ns)
-        # Find top-level objects
-        top_level_query = "PREFIX : <http://example.org/ns#> " \
-                          "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " \
-                          "PREFIX sbol: <http://sbols.org/v2#> " \
-                          "SELECT ?s ?o " \
-                          "{ ?s a ?o }"
-        sparql_results = self.graph.query(top_level_query)
-        for result in sparql_results:
-            if self.logger.isEnabledFor(logging.DEBUG):
-                self.logger.debug("Type of s: " + str(type(result.s)))  # DEBUG
-                self.logger.debug("Type of o: " + str(type(result.o)))  # DEBUG
-            self.parse_objects_inner(result.s, result.o)
+        # Instantiate all objects with an RDF type
+        for s, _, o in self.graph.triples((None, rdflib.RDF.type, None)):
+            self.parse_objects_inner(s, o)
         # Find everything in the triple store
         all_query = "PREFIX : <http://example.org/ns#> " \
                     "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " \
@@ -495,20 +500,26 @@ class Document(Identified):
                         obj = URIRef(lval)
                 self.parse_properties_inner(result.s, result.p, obj)
 
-        # Additional step - python version, only.
-        # Remove anything that isn't meant to be at the top level.
-        for result in all_results:
-            if str(result.p) != rdf_type:
-                obj = result.o
-                lval = str(obj)
-                if isinstance(result.o, URIRef) and pos != -1:
-                    if lval[:pos] == graphBaseURIStr:
-                        # This was a URI without a scheme.  Remove URI base
-                        lval = lval[pos:]
-                        obj = URIRef(lval)
-                self.remove_descendants()
-        # TODO parse annotation objects
-        # TODO dress document
+        # Remove objects from SBOLObjects if they are not TopLevel AND
+        # they have a parent object.
+        #
+        # Note: use a list of the keys so that we can modify the dict
+        # while we iterate.
+        for k in list(self.SBOLObjects.keys()):
+            so = self.SBOLObjects[k]
+            if isinstance(so, TopLevel):
+                continue
+            if so.parent:
+                # Not TopLevel and already has parent, remove from
+                # SBOLObjects
+                del self.SBOLObjects[k]
+                continue
+            self.logger.debug('Orphan %r', so)
+
+        # Handle the annotation objects
+        self.parse_annotation_objects()
+        # Dress document
+        self.dress_document()
 
     def parse_objects_inner(self, subject, obj):
         # Construct the top-level object if we haven't already done so
@@ -516,6 +527,9 @@ class Document(Identified):
         if subject not in self.SBOLObjects and obj in self.SBOL_DATA_MODEL_REGISTER:
             # Call constructor for the appropriate SBOLObject
             new_obj = self.SBOL_DATA_MODEL_REGISTER[obj]()
+            if isinstance(new_obj, Identified):
+                # Clear out the version. it will get set later
+                new_obj.version = ''
             if self.logger.isEnabledFor(logging.DEBUG):
                 self.logger.debug("New object type: " + str(type(new_obj)))
                 self.logger.debug("New object attrs: " + str(vars(new_obj)))
@@ -545,11 +559,7 @@ class Document(Identified):
             new_obj.doc = self
 
     def parse_properties_inner(self, subject, predicate, obj):
-        if self.logger.isEnabledFor(logging.DEBUG):
-            self.logger.debug("Adding: (" + str(subject) + " - " +
-                              str(type(subject)) + ", " + str(predicate) +
-                              " - " + str(type(predicate)) + ", " + str(obj) +
-                              " - " + str(type(obj)) + ")")
+        self.logger.debug('Adding (%r, %r, %r)', subject, predicate, obj)
         found = predicate.rfind('#')
         if found == -1:
             found = predicate.rfind('/')
@@ -581,13 +591,96 @@ class Document(Identified):
                 msg = msg.format(subject, type(subject))
                 self.logger.debug(msg)
 
-    def remove_descendants(self):
-        to_delete = []
-        for name, obj in self.SBOLObjects.items():
-            if not obj.is_top_level():
-                to_delete.append(name)
-        for name in to_delete:
-            del self.SBOLObjects[name]
+    def find_reference(self, uri):
+        """Find objects that reference the given URI. Returns a list of
+        objects. The list will be empty if no references were found.
+
+        """
+        references = []
+        for obj in self.SBOLObjects.values():
+            references.extend(obj.find_reference(uri))
+        return references
+
+    def parse_annotation_objects(self):
+        """Parse leftover objects from reading and link them up where they
+        belong. These are usually extension-type objects.
+
+        """
+        for uri, obj in self.SBOLObjects.items():
+            self.logger.debug('Possible annotation object %s', obj.identity)
+        annotation_objects = [obj for obj in self.SBOLObjects.values()
+                              if not isinstance(obj, TopLevel)]
+        for ao in annotation_objects:
+            self.logger.debug('Annotation object: %s', ao.identity)
+            if SBOL_PERSISTENT_IDENTITY in ao.properties:
+                # Copy to a new TopLevel object
+                tl = TopLevel(type_uri=ao.type, version=None)
+                for k, v in ao.properties.items():
+                    tl.properties[k] = v
+                for k, v in ao.owned_objects.items():
+                    tl.owned_objects[k] = v
+                tl.doc = self
+                self.SBOLObjects[tl.identity] = tl
+            else:
+                # Determine the RDF type of the member property that
+                # contains this kind of annotation object
+                ns = config.parseNamespace(ao.type)
+                self.logger.debug('anno ns = %r', ns)
+                class_name = config.parseClassName(ao.type)
+                self.logger.debug('anno class name = %r', class_name)
+                # lowercase the first character
+                property_name = class_name[0].lower() + class_name[1:]
+                self.logger.debug('anno property name = %r', property_name)
+                property_uri = rdflib.URIRef(posixpath.join(ns, property_name))
+                self.logger.debug('anno property uri = %r', property_uri)
+                matches = self.find_reference(ao.identity)
+                self.logger.debug('Found %d references', len(matches))
+                matches = [m for m in matches if property_uri in m.properties]
+                self.logger.debug('Found %d good references', len(matches))
+                if len(matches) > 1:
+                    msg = 'Invalid custom annotation object in SBOL document'
+                    raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_SERIALIZATION)
+                if len(matches) == 1:
+                    match = matches[0]
+                    if property_uri not in match.owned_objects:
+                        match.owned_objects[property_uri] = []
+                    match.owned_objects[property_uri].append(ao)
+                    ao.parent = match
+                    # Clean up the property
+                    self.logger.debug('match[%r] = %r', property_uri,
+                                      match.properties[property_uri])
+                    self.logger.debug('ao.identity = %r', ao.identity)
+                    match.properties[property_uri].remove(ao.identity)
+                    if len(match.properties[property_uri]) == 0:
+                        # Remove the empty property list
+                        del match.properties[property_uri]
+                    # Remove this annotation object from the list of
+                    # SBOLObjects
+                    del self.SBOLObjects[ao.identity]
+
+    def infer_resource_namespaces(self):
+        for obj in self.SBOLObjects.values():
+            if not isinstance(obj, Identified):
+                continue
+            if not (obj.persistentIdentity and obj.displayId and obj.version):
+                continue
+            # if object identity ends with compliant suffix, extract the
+            # start as a namespace
+            uri = obj.identity
+            compliant_suffix = posixpath.join(posixpath.sep, obj.displayId,
+                                              obj.version)
+            if uri.endswith(compliant_suffix):
+                self.resource_namespaces.add(uri[0:-len(compliant_suffix)])
+                continue
+            typed_suffix = posixpath.join(posixpath.sep, parseClassName(obj.rdf_type),
+                                          obj.displayId, obj.version)
+            if uri.endswith(typed_suffix):
+                self.resource_namespaces.add(uri[0:-len(typed_suffix)])
+
+    def dress_document(self):
+        self.infer_resource_namespaces()
+        # There is a lot more that is done in libSBOL Document::dress_document()
+        # TODO: do more of that here
 
     def convert_ntriples_encoding_to_ascii(self, s):
         s.replace("\\\"", "\"")
@@ -617,6 +710,7 @@ class Document(Identified):
         for object_store in self.owned_objects.values():
             object_store.clear()
         self._namespaces.clear()
+        self.resource_namespaces.clear()
         if clear_graph:
             self.graph = rdflib.Graph()  # create a new graph
 
@@ -664,76 +758,28 @@ class Document(Identified):
         for prefix, ns in self._namespaces.items():
             self.graph.bind(prefix, ns)
         # ASSUMPTION: Document does not have properties. Is this a valid assumption?
-        for typeURI, objlist in self.owned_objects.items():
-            for owned_obj in objlist:
-                owned_obj.build_graph(self.graph)
+        for obj in self.SBOLObjects.values():
+            obj.build_graph(self.graph)
         if self.logger.isEnabledFor(logging.DEBUG):
             for s, p, o in self.graph:
-                self.logger.debug((s, p, o))
-
-    def validation_options(self):
-        # Config validation options that have boolean values
-        config_options = [
-            ConfigOptions.CHECK_BEST_PRACTICES,
-            ConfigOptions.CHECK_COMPLETENESS,
-            ConfigOptions.CHECK_URI_COMPLIANCE,
-            ConfigOptions.DIFF_FILE_NAME,
-            ConfigOptions.FAIL_ON_FIRST_ERROR,
-            ConfigOptions.INSERT_TYPE,
-            ConfigOptions.LANGUAGE,
-            ConfigOptions.MAIN_FILE_NAME,
-            ConfigOptions.PROVIDE_DETAILED_STACK_TRACE,
-            ConfigOptions.SUBSET_URI,
-            ConfigOptions.TEST_EQUALITY,
-            ConfigOptions.URI_PREFIX,
-            ConfigOptions.VERSION
-        ]
-        options = {}
-        for opt in config_options:
-            options[opt.value] = Config.getOption(opt)
-        return dict(options=options)
-
-    # Online validation #
-    def request_validation(self, sbol_str):
-        json_request = self.validation_options()
-        return_file = Config.getOption(ConfigOptions.RETURN_FILE)
-        json_request[ConfigOptions.RETURN_FILE.value] = return_file
-        json_request['main_file'] = sbol_str
-
-        headers = {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'charsets': 'utf-8'
-        }
-
-        validator_url = Config.getOption(ConfigOptions.VALIDATOR_URL)
-
-        # Send the request to the online validation tool
-        response = requests.post(validator_url,
-                                 json=json_request,
-                                 headers=headers)
-        if response:
-            info = response.json()
-            if info['valid']:
-                result = "Valid."
-            else:
-                result = "Invalid."
-            errors = ' '.join(info['errors'])
-            if errors:
-                result = ' '.join([result, errors])
-            return result
-        else:
-            msg = 'Cannot validate online. HTTP post request failed with code {}: {}'
-            msg = msg.format(response.status_code, response.content)
-            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST)
+                self.logger.debug('Graph contains: %r', (s, p, o))
 
     def validate(self):
         """
         Run validation on this Document via the online validation tool.
 
         :return: A string containing a message with the validation results
+        :rtype: str
         """
-        return self.request_validation(self.writeString())
+        response = validate(self, config.options)
+        if response['valid']:
+            result = "Valid."
+        else:
+            result = "Invalid."
+        errors = ' '.join(response['errors'])
+        if errors:
+            result = ' '.join([result, errors])
+        return result
 
     def size(self):
         """
@@ -883,3 +929,84 @@ class Document(Identified):
         if version is None:
             version = self.version
         return super().copy(target_doc, target_namespace, version)
+
+    def exportToFormat(self, language: str, output_path: str):
+        # Copy the global config options. Shallow copy is ok because values
+        # are either bool or str.
+        options = config.options.copy()
+        options[ConfigOptions.LANGUAGE.value] = language
+        # We always want the return file
+        options[ConfigOptions.RETURN_FILE.value] = True
+        response = validate(self, options)
+
+        # What should we be expecting from the validator?
+        # Can we tell if there was an error?
+        # Is it if there are any errors? Or if 'Conversion failed.' is one of the errors?
+        # Or if response['result'] is not empty?
+        if response['errors'][0]:
+            msg = ' '.join(response['errors'])
+            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
+        if not response['result']:
+            msg = 'Validator returned no content'
+            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
+        # write the result to the desired output path
+        with open(output_path, 'w') as fp:
+            fp.write(response['result'])
+
+    def convert(self, language, output_path):
+        warnings.warn('Document.convert is now Document.exportToFormat',
+                      DeprecationWarning)
+        self.exportToFormat(language, output_path)
+
+
+def _make_validation_request(options: Mapping[str, Union[bool, str]]):
+    config_options = [
+        config.ConfigOptions.CHECK_BEST_PRACTICES.value,
+        config.ConfigOptions.CHECK_COMPLETENESS.value,
+        config.ConfigOptions.CHECK_URI_COMPLIANCE.value,
+        config.ConfigOptions.DIFF_FILE_NAME.value,
+        config.ConfigOptions.FAIL_ON_FIRST_ERROR.value,
+        config.ConfigOptions.INSERT_TYPE.value,
+        config.ConfigOptions.LANGUAGE.value,
+        config.ConfigOptions.MAIN_FILE_NAME.value,
+        config.ConfigOptions.PROVIDE_DETAILED_STACK_TRACE.value,
+        config.ConfigOptions.SUBSET_URI.value,
+        config.ConfigOptions.TEST_EQUALITY.value,
+        config.ConfigOptions.URI_PREFIX.value,
+        config.ConfigOptions.VERSION.value
+    ]
+    request_options = {}
+    for key in config_options:
+        request_options[key] = options[key]
+    return dict(options=request_options)
+
+
+def validate(doc: Document, options: Mapping[str, Any]):
+    """
+    :rtype: Dict[str, Any]
+    """
+    return_file_key = config.ConfigOptions.RETURN_FILE.value
+    validator_key = config.ConfigOptions.VALIDATOR_URL.value
+    json_request = _make_validation_request(options)
+    # We always want the return file
+    json_request[return_file_key] = options[return_file_key]
+    json_request['main_file'] = doc.writeString()
+
+    headers = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'charsets': 'utf-8'
+    }
+
+    validator_url = options[validator_key]
+
+    # Send the request to the online validation tool
+    response = requests.post(validator_url,
+                             json=json_request,
+                             headers=headers)
+    if response:
+        return response.json()
+    else:
+        msg = 'Validation failure. HTTP post request failed with code {}: {}'
+        msg = msg.format(response.status_code, response.content)
+        raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST)

@@ -1,8 +1,8 @@
-# SBOL For Developers
+# pySBOL2 For Developers
 
-[![Build Status](https://travis-ci.com/llotneb/SBOL.svg?branch=master)](https://travis-ci.com/llotneb/SBOL)
+[![Build Status](https://travis-ci.org/SynBioDex/pySBOL2.svg?branch=master)](https://travis-ci.org/SynBioDex/pySBOL2)
 
-**SBOL** is a pure Python implementation of the SBOL standard
+**pySBOL2** is a pure Python implementation of the SBOL standard
  [Synthetic Biology Open Language (SBOL)](http://www.sbolstandard.org/) - 
 an open standard for the representation of *in silico* biological designs.
 It draws from [libSBOL](https://github.com/SynBioDex/libSBOL)
@@ -17,37 +17,23 @@ Please note that this project uses
 so please use the `--recurse-submodules` option when cloning.
 
 ```shell
-git clone --recurse-submodules https://github.com/llotneb/SBOL.git 
+git clone --recurse-submodules https://github.com/SynBioDex/pySBOL2.git 
 python3 -m venv myenv
 source myenv/bin/activate
 pip install -U pip
-cd SBOL
+cd pySBOL2
 pip install -e .
 ```
 
-You should now be able to run the unit tests
+You should now be able to run the unit tests in the `test` directory:
 
 ```shell
-python3 -c "import sbol; sbol.testSBOL()"
-```
-
-## TESTING
-
-SBOL comes with a testing function to check the integrity of the library. To run the unit tests, simply execute the following command.
-```python
-import sbol
-sbol.testSBOL()
-```
-SBOL also comes with a suite of 'round-trip' tests to verify that serialization and deserialization of SBOL files works correctly.
-To run the round-trip tests, execute the following command.
-```python
-import sbol
-sbol.testRoundTrip()
+python3 -m unittest
 ```
 
 ## CODE STYLE
 
-We use [pycodestyle]() for our coding guidelines. `pycodestyle`
+We use [pycodestyle](https://pypi.org/project/pycodestyle/) for our coding guidelines. `pycodestyle`
 follows PEP8.  Please ensure that any contributions pass pycodetyle
 with a max line width of 90 characters.
 

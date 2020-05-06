@@ -3,12 +3,12 @@ import pathlib
 import unittest
 
 MODULE_LOCATION = os.path.dirname(os.path.abspath(__file__))
-# The sbol directory is one up from the test directory where this file
+# The sbol2 directory is a sibling to the test directory where this file
 # lives.
-SBOL_PATH = os.path.dirname(MODULE_LOCATION)
+SBOL_PATH = os.path.join(os.path.dirname(MODULE_LOCATION), 'sbol2')
 
 # Please don't increase this number!
-MAX_WILDCARD_IMPORTS = 2
+MAX_WILDCARD_IMPORTS = 1
 
 # -----------------------------------------------------------------
 # Locale Fix

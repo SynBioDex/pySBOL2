@@ -4,7 +4,12 @@ import unittest
 import requests
 
 import sbol2 as sbol
+import sbol2
 
+MODULE_LOCATION = os.path.dirname(os.path.abspath(__file__))
+CRISPR_LOCATION = os.path.join(MODULE_LOCATION, 'resources', 'crispr_example.xml')
+
+TEST_RESOURCE = 'https://synbiohub.utah.edu'
 
 if 'SBH_USER' in os.environ:
     username = os.environ['SBH_USER']
@@ -124,8 +129,6 @@ WHERE {
         except sbol.sbolerror.SBOLError as err:
             self.assertEqual(err.error_code(),
                              sbol.SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST)
-        except Throwable:
-            self.fail("Unknown exception raised")
         self.assertEqual(partShop.getUser(), user)
 
     def test_getSpoofedURL(self):
@@ -205,3 +208,19 @@ WHERE {
                              sbol.SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
         else:
             self.fail('Expected SBOLError')
+
+    @unittest.skipIf(password is None, "No password supplied")
+    def test_attach_file(self):
+        doc = sbol2.Document()
+        doc.displayId = 'test_attachment'
+        doc.name = 'test attachment'
+        desc = 'a test collection created by the sbol2 unit tests'
+        doc.description = desc
+        md = doc.moduleDefinitions.create('attachmd')
+        sbh = sbol2.PartShop(TEST_RESOURCE)
+        sbh.login(username, password)
+        sbh.submit(doc, overwrite=1)
+        md_uri = '{}/user/{}/{}/{}/{}'.format(sbh.getURL(), sbh.getUser(),
+                                              doc.displayId, md.displayId,
+                                              md.version)
+        sbh.attachFile(md_uri, CRISPR_LOCATION)

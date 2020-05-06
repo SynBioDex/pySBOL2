@@ -10,7 +10,39 @@ from .constants import *
 from .property import OwnedObject
 from .property import ReferencedObject
 from .property import URIProperty
+from .sbolerror import SBOLError
+from .sbolerror import SBOLErrorCode
 from . import validation
+
+
+# This is an internal function, not part of the public API
+def _compare_properties(obj1, obj2):
+    obj1_keys = obj1.properties.keys()
+    if sorted(obj1_keys) != sorted(obj2.properties.keys()):
+        return False
+    # Keys are equal, check values by converting to sets
+    for k in obj1_keys:
+        if set(obj1.properties[k]) != set(obj2.properties[k]):
+            return False
+    return True
+
+
+# This is an internal function, not part of the public API
+def _compare_owned_objects(obj1, obj2):
+    obj1_keys = obj1.owned_objects.keys()
+    if sorted(obj1_keys) != sorted(obj2.owned_objects.keys()):
+        return False
+    # Keys are equal, check values by converting to dicts
+    for k in obj1_keys:
+        # Recursively compare child objects
+        oo1 = {oo.identity: oo for oo in obj1.owned_objects[k]}
+        oo2 = {oo.identity: oo for oo in obj2.owned_objects[k]}
+        if oo1.keys() != oo2.keys():
+            return False
+        for uri in oo1:
+            if not oo1[uri].compare(oo2[uri]):
+                return False
+    return True
 
 
 class SBOLObject:
@@ -222,22 +254,18 @@ class SBOLObject:
         :return: A vector containing all objects found that contain
         the URI in a property value.
         """
-        raise NotImplementedError("Not yet implemented")
+        references = []
+        # Ask all the owned objects
+        for oo_list in self.owned_objects.values():
+            for oo in oo_list:
+                references.extend(oo.find_reference(uri))
+        # Check myself
+        for pvals in self.properties.values():
+            if uri in pvals:
+                references.append(self)
+        return references
 
-    # TODO: Can we deprecate this method?
-    def compare(self, comparand):
-        """Compare two SBOL objects or Documents. The behavior
-        is currently undefined for objects with custom annotations
-        or extension classes.
-
-        :param comparand: The object being compared to this one.
-        :return: True if the objects are identical,
-        False if they are different.
-        """
-        # TODO This may work differently than the original method...
-        return self == comparand
-
-    def __eq__(self, other):
+    def compare(self, other):
         """Compare two SBOLObjects. The behavior is currently undefined for
         objects with custom annotations or extension classes.
 
@@ -249,9 +277,9 @@ class SBOLObject:
             return False
         if self.rdf_type != other.rdf_type:
             return False
-        if self.properties != other.properties:
+        if not _compare_properties(self, other):
             return False
-        if self.owned_objects != other.owned_objects:
+        if not _compare_owned_objects(self, other):
             return False
         return True
 
@@ -379,10 +407,16 @@ class SBOLObject:
         graph.add((self._identity.getRawValue(), rdflib.RDF.type,
                    self.rdf_type))
         for typeURI, proplist in self.properties.items():
+            if typeURI in self._hidden_properties:
+                # Skip hidden properties
+                continue
             for prop in proplist:
                 graph.add((self._identity.getRawValue(),
                            typeURI, prop))
         for typeURI, objlist in self.owned_objects.items():
+            if typeURI in self._hidden_properties:
+                # Skip hidden properties
+                continue
             for owned_obj in objlist:
                 graph.add((self._identity.getRawValue(),
                            typeURI, URIRef(owned_obj.identity)))

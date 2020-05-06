@@ -1,9 +1,7 @@
 from deprecated import deprecated
 
-from rdflib import URIRef
-
 from .constants import *
-from .property import LiteralProperty
+from .property import LiteralProperty, URIProperty
 from .toplevel import TopLevel
 
 
@@ -34,8 +32,8 @@ class Sequence(TopLevel):
         super().__init__(type_uri, uri, version)
         self._elements = LiteralProperty(self, SBOL_ELEMENTS,
                                          '1', '1', [], elements)
-        self._encoding = LiteralProperty(self, SBOL_ENCODING,
-                                         '1', '1', [], encoding)
+        self._encoding = URIProperty(self, SBOL_ENCODING,
+                                     '1', '1', [], encoding)
 
     # The elements property is a REQUIRED String of characters that represents
     # the constituents of a biological or chemical molecule. For example,

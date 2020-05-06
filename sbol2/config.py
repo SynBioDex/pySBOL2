@@ -1,5 +1,5 @@
 from enum import Enum
-import random
+import warnings
 
 from .sbolerror import SBOLError
 from .sbolerror import SBOLErrorCode
@@ -181,6 +181,10 @@ class Config:
         # Convert a config option to its string value
         if isinstance(option, ConfigOptions):
             option = option.value
+        # ca-path is deprecated. It is no longer needed in native python
+        if option == 'ca-path':
+            warnings.warn('ca-path is no longer used', DeprecationWarning)
+            return
         if option not in options:
             msg = '{!r} is not a valid configuration option'.format(option)
             raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
@@ -205,6 +209,10 @@ class Config:
         # Convert a config option to its string value
         if isinstance(option, ConfigOptions):
             option = option.value
+        # ca-path is deprecated. It is no longer needed in native python
+        if option == 'ca-path':
+            warnings.warn('ca-path is no longer used', DeprecationWarning)
+            return ''
         if option in options:
             return options[option]
         else:

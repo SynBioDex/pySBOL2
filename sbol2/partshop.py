@@ -1,6 +1,8 @@
 import getpass
+import http
 import logging
 import os
+import posixpath
 
 import requests
 # For backward compatible HTTPError
@@ -282,3 +284,41 @@ class PartShop:
     #     doc.addNamespace("http://wiki.synbiohub.org/wiki/Terms/synbiohub#", "sbh")
     #     for id, toplevel_obj in doc.SBOLObjects:
     #         toplevel_obj.apply(None, None)  # TODO
+
+    def attachFile(self, top_level_uri, filepath):
+        """Attach a file to an object in SynBioHub.
+
+        Returns None if successful.
+
+        Raises SBOLError with code SBOL_ERROR_HTTP_UNAUTHORIZED if it
+        there is an HTTP Unauthorized response.
+
+        Raises SBOLError with code SBOL_ERROR_BAD_HTTP_REQUEST on any
+        other HTTP error. The actual status code is embedded in the
+        string message.
+
+        """
+        # Expand User
+        filepath = os.path.expanduser(filepath)
+        # HTTP request headers
+        headers = {
+            'Accept': 'text/plain',
+            'X-authorization': self.key
+        }
+        url = posixpath.join(top_level_uri, 'attach')
+        with open(filepath, 'rb') as fp:
+            files = {'file': fp}
+            response = requests.post(url, headers=headers, files=files)
+
+        if response.ok:
+            if Config.getOption(ConfigOptions.VERBOSE.value) is True:
+                print(response.text)
+            return
+        if response.status_code == http.HTTPStatus.UNAUTHORIZED:
+            # HTTP 401
+            msg = 'You must login with valid credentials before attaching a file'
+            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_HTTP_UNAUTHORIZED)
+        # Not sure what went wrong
+        msg = 'HTTP Error code {} trying to attach file.'
+        msg = msg.format(response.status_code)
+        raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST)

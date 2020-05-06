@@ -2,7 +2,7 @@
 
 # Run unit tests
 echo "Running unit tests..."
-python3 -c "import sbol2; sbol2.testSBOLHook()" # > /dev/null 2>&1
+python3 -m unittest discover -s test
 if [ $? != 0 ]; then
    cat <<\EOF
 Error: There were failing unit tests.
@@ -16,7 +16,7 @@ fi
 # Run style checker
 MAX_VIOLATIONS=25
 echo "Checking style..."
-pycodestyle --exclude=./venv,./sbol/venv . > style.txt
+pycodestyle sbol2 test > style.txt
 result=$(cat style.txt | wc -l)
 if [ "$result" -gt $MAX_VIOLATIONS ]; then
     cat <<EOF

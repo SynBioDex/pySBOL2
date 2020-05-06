@@ -69,7 +69,14 @@ class Property(ABC):
             raise ValueError("RDF type must be URIRef or str")
         self._lowerBound = lower_bound
         self._upperBound = upper_bound
-        self._validation_rules = []
+        # Validate validation rules
+        if validation_rules is None:
+            # Some constructors pass None for validation rules
+            # Convert to empty list
+            validation_rules = []
+        for vr in validation_rules:
+            if not callable(vr):
+                raise TypeError('Validation rule %r is not callable' % vr)
         self._validation_rules = validation_rules
         if initial_value is not None:
             self.value = initial_value
@@ -191,9 +198,6 @@ class Property(ABC):
         return int(self._upperBound)
 
     def validate(self, arg):
-        if arg is None:
-            # NOTE: Original libSBOL code has commented-out code for this case.
-            raise TypeError("arg cannot be None")
         for validation_rule in self._validation_rules:
             validation_rule(self._sbol_owner, arg)
 
@@ -350,7 +354,7 @@ class LiteralProperty(Property):
         self._sbol_owner.properties[self._rdf_type].append(new_value)
 
     def setPropertyValueList(self, new_value):
-        if not isinstance(new_value, collections.Iterable):
+        if not isinstance(new_value, collections.abc.Iterable):
             raise TypeError('{} must be an iterable'.format(self.getTypeURI()))
         # Special case. Should we really support this?
         # Convert a string to a list of that string
@@ -430,6 +434,7 @@ class OwnedObject(URIProperty):
         """
         super().__init__(property_owner, sbol_uri, lower_bound, upper_bound,
                          validation_rules, first_object)
+        self.validate(first_object)
         if not callable(builder):
             msg = '{!r} object is not callable'
             raise TypeError(msg.format(type(builder)))
@@ -487,7 +492,7 @@ class OwnedObject(URIProperty):
         # Add to parent object
         object_store.append(sbol_obj)
         # Run validation rules
-        # TODO
+        self.validate(sbol_obj)
 
     def __getitem__(self, id):
         if type(id) is int:
@@ -625,7 +630,7 @@ class OwnedObject(URIProperty):
         sbol_obj.update_uri()
 
         # Run validation rules
-        # TODO
+        self.validate(sbol_obj)
 
     @property
     def value(self):
@@ -790,7 +795,7 @@ class ReferencedObject(Property):
         if isinstance(new_value, str):
             # Turn it into a list
             new_value = [new_value]
-        if isinstance(new_value, collections.Iterable):
+        if isinstance(new_value, collections.abc.Iterable):
             # Convert the items to URIRefs
             new_value = list([self._to_uri(x) for x in new_value])
         self._sbol_owner.properties[self._rdf_type] = new_value

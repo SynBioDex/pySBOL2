@@ -1,3 +1,4 @@
+import collections
 import os
 import unittest
 import warnings
@@ -31,7 +32,7 @@ class TestObject(unittest.TestCase):
 
     def test_compare(self):
         # This didn't work because the SBOLObject.__eq__ method was
-        # broken.  See issue https://github.com/llotneb/SBOL/issues/62
+        # broken.  See issue #62.
         sbol.setHomespace('http://example.org/Unit_Test')
         doc = sbol.Document()
         md1 = doc.moduleDefinitions.create('Foo1')
@@ -66,8 +67,6 @@ class TestObject(unittest.TestCase):
     def test_set_property_value_deprecated(self):
         # Verify that setPropertyValue is deprecated
         md = sbol.ModuleDefinition('md')
-        # Enable all warnings
-        warnings.simplefilter("default")
         with warnings.catch_warnings(record=True) as warns:
             md.setPropertyValue('myprop', 'foo')
         self.assertEqual(len(warns), 1)
@@ -173,3 +172,57 @@ class TestObject(unittest.TestCase):
             self.assertEqual(md.this, md)
         # Verify that a warning was issued
         self.assertEqual(len(warns), 1)
+
+    def test_compare_properties(self):
+        # Test that two objects are equal even if a property is in a
+        # different order
+        expected1 = [sbol2.SBO_INHIBITION, sbol2.SBO_CONTROL]
+        expected2 = [sbol2.SBO_CONTROL, sbol2.SBO_INHIBITION]
+        md1 = sbol2.ModuleDefinition('md1')
+        md1.roles = expected1
+        md2 = sbol2.ModuleDefinition('md1')
+        md2.roles = expected2
+        self.assertTrue(md1.compare(md2))
+
+    def test_compare_owned_objects(self):
+        # Test that two objects are equal even if owned objects are in
+        # a different order
+        expected1 = [sbol2.Module('m1'), sbol2.Module('m2')]
+        expected2 = [sbol2.Module('m2'), sbol2.Module('m1')]
+        md1 = sbol2.ModuleDefinition('md1')
+        md1.modules = expected1
+        md2 = sbol2.ModuleDefinition('md1')
+        md2.modules = expected2
+        self.assertTrue(md1.compare(md2))
+
+    def test_compare_recursive(self):
+        # Test that the compare method is doing a recursive compare
+        m1a = sbol2.Module('m1')
+        m1b = sbol2.Module('m1')
+        # m1a and m1b compare True
+        self.assertTrue(m1a.compare(m1b))
+        m2 = sbol2.Module('m2')
+        # m2 is different from m1a and m1b
+        self.assertFalse(m2.compare(m1a))
+        self.assertFalse(m2.compare(m1b))
+
+        md1a = sbol2.ModuleDefinition('md1')
+        md1b = sbol2.ModuleDefinition('md1')
+        # md1a and md1b compare True
+        self.assertTrue(md1a.compare(md1b))
+        md1a.modules = [m1a]
+        md1b.modules = [m1b]
+        # md1a and md1b still compare True
+        self.assertTrue(md1a.compare(md1b))
+        md1a.modules = [m2]
+        # Now md1a and md1b compare False because of recursive
+        # comparison of modules
+        self.assertFalse(md1a.compare(md1b))
+
+    def test_is_hashable(self):
+        obj = sbol2.SBOLObject()
+        self.assertTrue(isinstance(obj, collections.abc.Hashable))
+        # Make sure the hash function returns a reasonable value. The
+        # hashable test above can be fooled according to the
+        # documentation.
+        self.assertTrue(isinstance(hash(obj), int))

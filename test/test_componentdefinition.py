@@ -85,12 +85,12 @@ class TestComponentDefinitions(unittest.TestCase):
     def testPrimaryStructureIteration(self):
         list_cd = []
         list_cd_true = ["R0010", "E0040", "B0032", "B0012"]
-        doc = Document()
-        gene = ComponentDefinition("BB0001")
-        promoter = ComponentDefinition("R0010")
-        rbs = ComponentDefinition("B0032")
-        cds = ComponentDefinition("E0040")
-        terminator = ComponentDefinition("B0012")
+        doc = sbol2.Document()
+        gene = sbol2.ComponentDefinition("BB0001")
+        promoter = sbol2.ComponentDefinition("R0010")
+        rbs = sbol2.ComponentDefinition("B0032")
+        cds = sbol2.ComponentDefinition("E0040")
+        terminator = sbol2.ComponentDefinition("B0012")
 
         doc.addComponentDefinition([gene, promoter, rbs, cds, terminator])
 
@@ -107,12 +107,12 @@ class TestComponentDefinitions(unittest.TestCase):
 
     @unittest.expectedFailure
     def testInsertDownstream(self):
-        doc = Document()
-        gene = ComponentDefinition("BB0001")
-        promoter = ComponentDefinition("R0010")
-        rbs = ComponentDefinition("B0032")
-        cds = ComponentDefinition("E0040")
-        terminator = ComponentDefinition("B0012")
+        doc = sbol2.Document()
+        gene = sbol2.ComponentDefinition("BB0001")
+        promoter = sbol2.ComponentDefinition("R0010")
+        rbs = sbol2.ComponentDefinition("B0032")
+        cds = sbol2.ComponentDefinition("E0040")
+        terminator = sbol2.ComponentDefinition("B0012")
 
         doc.addComponentDefinition([gene, promoter, rbs, cds, terminator])
         gene.assemblePrimaryStructure([promoter, rbs, cds])
@@ -214,7 +214,40 @@ class TestComponentDefinitions(unittest.TestCase):
         with self.assertRaises(TypeError):
             sa.locations.getRange()
 
+    def test_hidden_sequence(self):
+        # Sequence should be hidden when writing SBOL
+        doc = sbol2.Document()
+        cd = sbol2.ComponentDefinition('cd1', sbol2.BIOPAX_DNA)
+        cd.name = 'cd1-name'
+        cd.description = 'cd1-description'
+        seq = sbol2.Sequence('cd1_sequence', 'GCAT')
+        cd.sequence = seq
+        doc.addComponentDefinition(cd)
+        xml = doc.writeString()
+        graph = rdflib.Graph()
+        graph.parse(data=xml)
+        # We shouldn't find SBOL_SEQUENCE within the component definition
+        bad_triple = (cd.identity, sbol2.SBOL_SEQUENCE, None)
+        self.assertEqual([], list(graph.triples(bad_triple)))
+        good_triple = (cd.identity, sbol2.SBOL_SEQUENCE_PROPERTY, None)
+        good_triples = list(graph.triples(good_triple))
+        self.assertEqual(len(good_triples), 1)
+        self.assertEqual(good_triples[0], (cd.identity,
+                                           sbol2.SBOL_SEQUENCE_PROPERTY,
+                                           seq.identity))
 
+    def test_sequence_validation(self):
+        cd = sbol2.ComponentDefinition('cd1', sbol2.BIOPAX_DNA)
+        cd.name = 'cd1-name'
+        cd.description = 'cd1-description'
+        seq = sbol2.Sequence('cd1_sequence', 'GCAT')
+        cd.sequence = seq
+        self.assertEqual([seq.identity], cd.sequences)
+
+    @unittest.expectedFailure
+    def test_sequences_validation(self):
+        self.fail('Not yet implemented')
+        
 class TestAssemblyRoutines(unittest.TestCase):
 
     def test_inspect_primary_structure(self):
@@ -542,3 +575,6 @@ class TestAssemblyRoutines(unittest.TestCase):
         valid_primary_structure = [promoter.identity, rbs.identity, cds.identity,
                                    terminator.identity]
         self.assertEqual(primary_structure, valid_primary_structure)
+
+if __name__ == '__main__':
+    unittest.main()

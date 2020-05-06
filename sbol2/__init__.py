@@ -1,4 +1,4 @@
-__version__ = '1.0b2'
+__version__ = '1.0b3'
 
 # Anything imported here is part of the public API. Limit what gets
 # imported to only those things that are actually needed.
@@ -8,9 +8,11 @@ __version__ = '1.0b2'
 # instead of `__all__`, we will try to be careful about what gets
 # imported into this file. In the absence of __all__, all imported
 # symbols are also exported.
+from .attachment import Attachment
 from .collection import Collection
 from .combinatorialderivation import CombinatorialDerivation
 from .component import Component
+from .component import FunctionalComponent
 from .componentdefinition import ComponentDefinition
 from .config import Config, ConfigOptions
 from .config import getHomespace, hasHomespace, setHomespace
@@ -23,6 +25,7 @@ from .interaction import Interaction
 from .location import Location, Range, Cut, GenericLocation
 from .module import Module
 from .moduledefinition import ModuleDefinition
+from .object import SBOLObject
 from .participation import Participation
 from .partshop import PartShop
 from .property import IntProperty
@@ -38,33 +41,3 @@ from .sequence import Sequence
 from .sequenceannotation import SequenceAnnotation
 from .validation import is_alphanumeric_or_underscore
 from .validation import is_not_alphanumeric_or_underscore
-
-
-def testSBOL():
-    """
-    Function to test pySBOL API.
-    """
-    import sbol2.test as unit_tests
-    unit_tests.runTests()
-
-
-def testRoundTrip():
-    """
-    Function to run test suite for pySBOL
-    """
-    import sbol2.test as unit_tests
-    unit_tests.runRoundTripTests()
-
-
-def testSBOLHook():
-    """
-    Function to test pySBOL API. Exits 1 or 0 depending on whether
-    all tests pass.
-    :return:
-    """
-    import sbol2.test as unit_tests
-    result = unit_tests.runTests()
-    if result.wasSuccessful():
-        exit(0)
-    else:
-        exit(1)
