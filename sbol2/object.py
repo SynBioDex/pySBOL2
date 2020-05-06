@@ -471,7 +471,7 @@ class SBOLObject:
             result = result.value
         elif isinstance(result, OwnedObject):
             sbol_property = object.__getattribute__(self, name)
-            if sbol_property.getUpperBound() == '1':
+            if sbol_property.upper_bound == 1:
                 result = sbol_property.get()
             else:
                 result = sbol_property
