@@ -146,9 +146,6 @@ WHERE {
         part_shop.spoof(spoofed_url)
         self.assertEqual(part_shop.getSpoofedURL(), spoofed_url)
 
-    # This test is failing because the tang.ece.utah.edu SSL certificate has
-    # expired. Should we be using tang.ece.utah.edu?
-    @unittest.expectedFailure
     @unittest.skipIf(password is None, "No password supplied")
     def test_submit(self):
         # This test is derived from an etl-to-synbiohub_pipeline test
