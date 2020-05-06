@@ -32,5 +32,6 @@ setup(name='sbol2',
             'rdflib',
             'deprecated',
             'lxml',
-            'requests'
+            'requests',
+            'urllib3'
       ])
