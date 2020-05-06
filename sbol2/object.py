@@ -469,6 +469,12 @@ class SBOLObject:
             # Convert the ReferencedObject to a value instead of
             # returning the ReferencedObject itself
             result = result.value
+        elif isinstance(result, OwnedObject):
+            sbol_property = object.__getattribute__(self, name)
+            if sbol_property.upper_bound == 1:
+                result = sbol_property.get()
+            else:
+                result = sbol_property
         return result
 
     def _is_owned_object(self, name):
