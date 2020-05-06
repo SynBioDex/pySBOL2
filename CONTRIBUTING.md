@@ -17,10 +17,13 @@ Please note that this project uses
 so please use the `--recurse-submodules` option when cloning.
 
 ```shell
-git clone --recurse-submodules https://github.com/SynBioDex/pySBOL2.git 
-python3 -m venv myenv
-source myenv/bin/activate
+# Create and activate the virtual environment
+python3 -m venv sbol2env
+source sbol2env/bin/activate
 pip install -U pip
+
+# Clone and install pySBOL2
+git clone --recurse-submodules https://github.com/SynBioDex/pySBOL2.git 
 cd pySBOL2
 pip install -e .
 ```
@@ -34,7 +37,7 @@ python3 -m unittest
 ## CODE STYLE
 
 We use [pycodestyle](https://pypi.org/project/pycodestyle/) for our coding guidelines. `pycodestyle`
-follows PEP8.  Please ensure that any contributions pass pycodetyle
+follows PEP8.  Please ensure that any contributions pass pycodestyle
 with a max line width of 90 characters.
 
 ## GIT PRE-COMMIT HOOK
