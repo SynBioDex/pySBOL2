@@ -187,8 +187,8 @@ class ComponentDefinition(TopLevel):
         """
         raise NotImplementedError("Not yet implemented")
 
-    def assemblePrimaryStructure(self, primary_structure,
-                                 assembly_standard="", doc=None):
+    def assemblePrimaryStructure(self, primary_structure, assembly_method=None,
+                                 doc=None):
         """Assembles ComponentDefinition into a linear primary structure.
 
         The resulting data structure is a partial design,
@@ -206,9 +206,48 @@ class ComponentDefinition(TopLevel):
         to a Document before calling this method.
         :return: None
         """
-        raise NotImplementedError("Not yet implemented")
+        primary_structure = self.assemble(primary_structure, assembly_method, doc)
 
-    def compile(self):
+        # If user specifies a list of IDs rather than ComponentDefinitions, convert to
+        # list of ComponentDefinitions (Some parameter validation is done by the
+        # preceding call to ComponentDefinition.assemble)
+        doc = doc if doc else self.doc
+        if all(isinstance(c, str) for c in primary_structure):
+            component_identities = primary_structure[:]
+            primary_structure = []
+            for c_id in component_identities:
+                cdef = doc.componentDefinitions[c_id]
+                primary_structure.append(cdef)
+
+        self.types += [SO_LINEAR]
+
+        component_map = {}
+        for c in self.components:
+            if c.definition not in component_map:
+                component_map[c.definition] = [c]
+            else:
+                component_map[c.definition].append(c)
+        primary_structure_components = []
+        for cd in primary_structure:
+            primary_structure_components.append(component_map[cd.identity].pop())
+
+        # Iterate pairwise through the primary_structure, and place SequenceConstraints
+        # between adjacent ComponentDefinitions.
+        if len(self.sequenceConstraints):
+            self.sequenceConstraints.clear()
+        for upstream, downstream in zip(primary_structure_components[:-1],
+                                        primary_structure_components[1:]):
+            instance_count = 0
+            constraint_id = 'constraint_%d' % instance_count
+            while constraint_id in self.sequenceConstraints:
+                instance_count += 1
+                constraint_id = 'constraint_%d' % instance_count
+            sc = self.sequenceConstraints.create(constraint_id)
+            sc.subject = upstream
+            sc.object = downstream
+            sc.restriction = SBOL_RESTRICTION_PRECEDES
+
+    def compile(self, assembly_method=None):
         """Compiles an abstraction hierarchy of ComponentDefinitions
         into a nucleotide sequence.
 
@@ -217,7 +256,24 @@ class ComponentDefinition(TopLevel):
         :return: A string representing the nucleotide sequence
         for this ComponentDefinition.
         """
-        raise NotImplementedError("Not yet implemented")
+        if not self.doc:
+            raise ValueError('Cannot compile <%s>. The ComponentDefinition must belong '
+                             'to a Document in order to compile.' % self.identity)
+
+        if self.sequence is None:
+            if Config.getOption('sbol_compliant_uris'):
+                display_id = self.displayId
+                if not Config.getOption('sbol_typed_uris'):
+                    display_id += '_seq'
+                seq = self.doc.sequences.create(display_id)
+                self.sequence = seq
+                self.sequences = seq.identity
+            else:
+                seq = self.sequences.create(self.identity + '_seq')
+                self.sequence = seq
+                self.sequences = seq.identity
+
+        return self.sequence.compile(assembly_method=assembly_method)
 
     def updateSequence(self, composite_sequence=""):
         """Assemble a parent ComponentDefinition's Sequence
@@ -236,7 +292,7 @@ class ComponentDefinition(TopLevel):
         """
         raise NotImplementedError("Not yet implemented")
 
-    def hasUpstreamComponent(self, current_component):
+    def hasUpstreamComponent(self, component):
         """Checks if the specified Component has a Component upstream
         in linear arrangement on the DNA strand.
 
@@ -244,7 +300,15 @@ class ComponentDefinition(TopLevel):
         :param current_component: A Component in this ComponentDefinition.
         :return: True if found, False if not
         """
-        raise NotImplementedError("Not yet implemented")
+        if len(self.sequenceConstraints) < 1:
+            raise SBOLError(SBOL_ERROR_NOT_FOUND, 'Cannot determine upstream Component. '
+                            'Self has no SequenceConstraints')
+        else:
+            for sc in self.sequenceConstraints:
+                if sc.object == component.identity and \
+                      sc.restriction == SBOL_RESTRICTION_PRECEDES:
+                    return True
+            return False
 
     def getUpstreamComponent(self, current_component):
         """Get the upstream component.
@@ -254,7 +318,7 @@ class ComponentDefinition(TopLevel):
         """
         raise NotImplementedError("Not yet implemented")
 
-    def hasDownstreamComponent(self, current_component):
+    def hasDownstreamComponent(self, component):
         """Checks if the specified Component has a Component downstream
         in linear arrangement on the DNA strand.
 
@@ -262,7 +326,15 @@ class ComponentDefinition(TopLevel):
         :param current_component: A Component in this ComponentDefinition.
         :return: True if found, False if not.
         """
-        raise NotImplementedError("Not yet implemented")
+        if len(self.sequenceConstraints) < 1:
+            raise SBOLError(SBOL_ERROR_NOT_FOUND, 'Cannot determine upstream Component. '
+                            'Self has no SequenceConstraints')
+        else:
+            for sc in self.sequenceConstraints:
+                if sc.subject == component.identity and \
+                      sc.restriction == SBOL_RESTRICTION_PRECEDES:
+                    return True
+            return False
 
     def getDownstreamComponent(self, current_component):
         """Get the downstream component.
@@ -446,28 +518,6 @@ class ComponentDefinition(TopLevel):
     def getTypeURI(self):
         return SBOL_COMPONENT_DEFINITION
 
-    def hasUpstreamComponent(self, component):
-        if len(self.sequenceConstraints) < 1:
-            raise SBOLError(SBOL_ERROR_NOT_FOUND, 'Cannot determine upstream Component. '
-                            'Self has no SequenceConstraints')
-        else:
-            for sc in self.sequenceConstraints:
-                if sc.object == component.identity and \
-                      sc.restriction == SBOL_RESTRICTION_PRECEDES:
-                    return True
-            return False
-
-    def hasDownstreamComponent(self, component):
-        if len(self.sequenceConstraints) < 1:
-            raise SBOLError(SBOL_ERROR_NOT_FOUND, 'Cannot determine upstream Component. '
-                            'Self has no SequenceConstraints')
-        else:
-            for sc in self.sequenceConstraints:
-                if sc.subject == component.identity and \
-                      sc.restriction == SBOL_RESTRICTION_PRECEDES:
-                    return True
-            return False
-
     def getUpstreamComponent(self, component):
         if len(self.sequenceConstraints) < 1:
             raise SBOLError(SBOL_ERROR_NOT_FOUND, 'Cannot get upstream Component. Self '
@@ -626,69 +676,6 @@ class ComponentDefinition(TopLevel):
             instance_list.append(c)
         return component_list
 
-    def assemblePrimaryStructure(self, primary_structure, assembly_method=None,
-                                 doc=None):
-
-        primary_structure = self.assemble(primary_structure, assembly_method, doc)
-
-        # If user specifies a list of IDs rather than ComponentDefinitions, convert to
-        # list of ComponentDefinitions (Some parameter validation is done by the
-        # preceding call to ComponentDefinition.assemble)
-        doc = doc if doc else self.doc
-        if all(isinstance(c, str) for c in primary_structure):
-            component_identities = primary_structure[:]
-            primary_structure = []
-            for c_id in component_identities:
-                cdef = doc.componentDefinitions[c_id]
-                primary_structure.append(cdef)
-
-        self.types += [SO_LINEAR]
-
-        component_map = {}
-        for c in self.components:
-            if c.definition not in component_map:
-                component_map[c.definition] = [c]
-            else:
-                component_map[c.definition].append(c)
-        primary_structure_components = []
-        for cd in primary_structure:
-            primary_structure_components.append(component_map[cd.identity].pop())
-
-        # Iterate pairwise through the primary_structure, and place SequenceConstraints
-        # between adjacent ComponentDefinitions.
-        if len(self.sequenceConstraints):
-            self.sequenceConstraints.clear()
-        for upstream, downstream in zip(primary_structure_components[:-1],
-                                        primary_structure_components[1:]):
-            instance_count = 0
-            constraint_id = 'constraint_%d' % instance_count
-            while constraint_id in self.sequenceConstraints:
-                instance_count += 1
-                constraint_id = 'constraint_%d' % instance_count
-            sc = self.sequenceConstraints.create(constraint_id)
-            sc.subject = upstream
-            sc.object = downstream
-            sc.restriction = SBOL_RESTRICTION_PRECEDES
-
-    def compile(self, assembly_method=None):
-        if not self.doc:
-            raise ValueError('Cannot compile <%s>. The ComponentDefinition must belong '
-                             'to a Document in order to compile.' % self.identity)
-
-        if not self.sequence:
-            if Config.getOption('sbol_compliant_uris'):
-                display_id = self.displayId
-                if not Config.getOption('sbol_typed_uris'):
-                    display_id += '_seq'
-                seq = self.doc.sequences.create(display_id)
-                self.sequence = seq
-                self.sequences = seq.identity
-            else:
-                seq = self.sequences.create(self.identity + '_seq')
-                self.sequence = seq
-                self.sequences = seq.identity
-
-        return self.sequence.compile(assembly_method=assembly_method)
 
 def libsbol_rule_20(sbol_obj, arg):
     """Synchronizes ComponentDefinition.sequence with ComponentDefinition.sequences.
