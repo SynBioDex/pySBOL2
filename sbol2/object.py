@@ -463,7 +463,10 @@ class SBOLObject:
         elif isinstance(result, OwnedObject):
             sbol_property = object.__getattribute__(self, name)
             if sbol_property.upper_bound == 1:
-                result = sbol_property.get()
+                if len(sbol_property):
+                    result = sbol_property[0]
+                else:
+                    result = None
             else:
                 result = sbol_property
         return result
