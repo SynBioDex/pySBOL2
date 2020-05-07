@@ -29,7 +29,6 @@ class TestCrisprExample(unittest.TestCase):
             shutil.rmtree(self.temp_out_dir)
             self.temp_out_dir = None
 
-    @unittest.expectedFailure
     def test_crispr_example(self):
         cmd = [sys.executable, CRISPR_EXAMPLE]
         subprocess.check_call(cmd, cwd=self.temp_out_dir)
