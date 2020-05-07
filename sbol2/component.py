@@ -31,10 +31,10 @@ class Component(ComponentInstance):
     def __init__(self, uri=URIRef('example'), definition='',
                  access=SBOL_ACCESS_PUBLIC, version=VERSION_STRING):
         super().__init__(SBOL_COMPONENT, uri, definition, access, version)
-        self._roles = URIProperty(self, SBOL_ROLES, '0', '*', [])
+        self._roles = URIProperty(self, SBOL_ROLES, '0', '*',
+                                  [Component._role_set_role_integration])
         self._roleIntegration = URIProperty(self, SBOL_ROLE_INTEGRATION,
-                                            '0', '1', [],
-                                            SBOL_ROLE_INTEGRATION_MERGE)
+                                            '0', '1', [])
         self.sourceLocations = OwnedObject(self, SBOL_LOCATIONS, Location,
                                            '0', '*', [])
 
@@ -59,6 +59,19 @@ class Component(ComponentInstance):
     @roleIntegration.setter
     def roleIntegration(self, new_roleIntegration):
         self._roleIntegration.set(new_roleIntegration)
+
+    @staticmethod
+    def _role_set_role_integration(sbol_obj, arg):
+        """SBOL 2.3.0 says that if a Component has roles then it
+        MUST specify a roleIntegration.
+        """
+        if not isinstance(sbol_obj, Component):
+            raise TypeError('{!r} is not of type Component'.format(sbol_obj))
+        if arg:
+            if not sbol_obj.roleIntegration:
+                # If roles are specified and no roleIntegration is present
+                # default to mergeRoles
+                sbol_obj.roleIntegration = SBOL_ROLE_INTEGRATION_MERGE
 
 
 class FunctionalComponent(ComponentInstance):
