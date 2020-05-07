@@ -238,6 +238,7 @@ class URIProperty(Property):
         if self._rdf_type not in self._sbol_owner.properties:
             self._sbol_owner.properties[self._rdf_type] = []
         if initial_value is not None:
+            self.validate(initial_value)
             self.value = initial_value
 
     @property
@@ -266,6 +267,7 @@ class URIProperty(Property):
         self.set(new_value)
 
     def set(self, new_value):
+        self.validate(new_value)
         if self.getUpperBound() == '1':
             self.setSinglePropertyValue(new_value)
         else:
