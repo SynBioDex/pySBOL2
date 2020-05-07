@@ -11,8 +11,8 @@ from rdflib import URIRef
 class Location(Identified):
     """The Location class specifies the strand orientation of a Component."""
     def __init__(self, uri=URIRef('example'), orientation=SBOL_ORIENTATION_INLINE,
-                 type_uri=SBOL_LOCATION):
-        super().__init__(type_uri, uri)
+                 *, type_uri=SBOL_LOCATION, version=VERSION_STRING):
+        super().__init__(type_uri=type_uri, uri=uri, version=version)
         self._orientation = URIProperty(self, SBOL_ORIENTATION,
                                         '1', '1', [], orientation)
         self.sequence = ReferencedObject(self, SBOL_SEQUENCE_PROPERTY,
@@ -34,8 +34,9 @@ class Range(Location):
     Note that the index of the first location is 1,
     as is typical practice in biology, rather than 0,
     as is typical practice in computer science."""
-    def __init__(self, uri=URIRef('example'), start=1, end=2, type_uri=SBOL_RANGE):
-        super().__init__(uri=uri, type_uri=type_uri)
+    def __init__(self, uri=URIRef('example'), start=1, end=2,
+                 *, type_uri=SBOL_RANGE, version=VERSION_STRING):
+        super().__init__(uri=uri, type_uri=type_uri, version=version)
         self._start = IntProperty(self, SBOL_START, '0', '1', None, start)
         self._end = IntProperty(self, SBOL_END, '0', '1', None, end)
 
@@ -101,8 +102,9 @@ class Range(Location):
 class Cut(Location):
     """The Cut class specifies a location between
     two coordinates of a Sequence's elements."""
-    def __init__(self, uri=URIRef('example'), at=1, type_uri=SBOL_CUT):
-        super().__init__(uri=uri, type_uri=type_uri)
+    def __init__(self, uri=URIRef('example'), at=1,
+                 *, type_uri=SBOL_CUT, version=VERSION_STRING):
+        super().__init__(uri=uri, type_uri=type_uri, version=version)
         self._at = IntProperty(self, SBOL_AT, '1', '1', [], at)
 
     @property
@@ -121,8 +123,9 @@ class GenericLocation(Location):
     This class can also be used to set the orientation of a SequenceAnnotation
     and any associated Component when their parent ComponentDefinition is
     a partial design that lacks a Sequence."""
-    def __init__(self, uri=URIRef('example'), type_uri=SBOL_GENERIC_LOCATION):
-        super().__init__(uri=uri, type_uri=type_uri)
+    def __init__(self, uri=URIRef('example'),
+                 *, type_uri=SBOL_GENERIC_LOCATION, version=VERSION_STRING):
+        super().__init__(uri=uri, type_uri=type_uri, version=version)
 
 
 class OwnedLocation(OwnedObject):

@@ -96,27 +96,18 @@ class SBOLObject:
         self.parent = None
         self._default_namespace = None
         self._hidden_properties = []
-        if type(_rdf_type) is str:
-            self.rdf_type = URIRef(_rdf_type)
-        else:
-            self.rdf_type = _rdf_type
+        self.rdf_type = URIRef(_rdf_type)
         self._namespaces = {}
-        if not isinstance(uri, URIRef):
-            self.logger.debug("Property was not a URIRef: '" +
-                              str(uri) + "', " + str(type(uri)))
-            self._identity = URIProperty(self, SBOL_IDENTITY, '0', '1',
-                                         [validation.sbol_rule_10202], URIRef(uri))
-        else:
-            self._identity = URIProperty(self, SBOL_IDENTITY, '0', '1',
-                                         [validation.sbol_rule_10202], uri)
+        self._identity = URIProperty(self, SBOL_IDENTITY, '0', '1',
+                                     [validation.sbol_rule_10202])
+        uri = URIRef(uri)
         if hasHomespace():
             uri = posixpath.join(getHomespace(), uri)
-            self._identity = URIProperty(self, SBOL_IDENTITY,
-                                         '0', '1', [validation.sbol_rule_10202], uri)
+        self.identity = uri
 
     @property
     def logger(self):
-        logger = logging.getLogger('sbol')
+        logger = logging.getLogger('sbol2')
         if not logger.hasHandlers():
             # If there are no handlers, nobody has initialized
             # logging.  Configure logging here so we have a chance of
@@ -469,6 +460,12 @@ class SBOLObject:
             # Convert the ReferencedObject to a value instead of
             # returning the ReferencedObject itself
             result = result.value
+        elif isinstance(result, OwnedObject):
+            sbol_property = object.__getattribute__(self, name)
+            if sbol_property.upper_bound == 1:
+                result = sbol_property.get()
+            else:
+                result = sbol_property
         return result
 
     def _is_owned_object(self, name):

@@ -47,7 +47,7 @@ class PartShop:
 
     @property
     def logger(self):
-        logger = logging.getLogger('sbol')
+        logger = logging.getLogger('sbol2')
         if not logger.hasHandlers():
             # If there are no handlers, nobody has initialized
             # logging.  Configure logging here so we have a chance of
@@ -127,13 +127,13 @@ class PartShop:
                                     headers={'X-authorization': self.key,
                                              'Accept': 'text/plain'})
             if response.status_code == 404:
-                raise SBOLError(SBOLErrorCode.SBOL_ERROR_NOT_FOUND,
-                                'Part not found. Unable to pull: ' + query)
+                raise SBOLError('Part not found. Unable to pull: ' + query,
+                                SBOLErrorCode.SBOL_ERROR_NOT_FOUND,)
             elif response.status_code == 401:
-                raise SBOLError(SBOLErrorCode.SBOL_ERROR_HTTP_UNAUTHORIZED,
-                                'Please log in with valid credentials')
+                raise SBOLError('Please log in with valid credentials',
+                                SBOLErrorCode.SBOL_ERROR_HTTP_UNAUTHORIZED,)
             elif not response:
-                raise SBOLError(SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST, response)
+                raise SBOLError(response, SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST)
             # Add content to document
             serialization_format = Config.getOption('serialization_format')
             Config.setOption('serialization_format', serialization_format)
@@ -241,6 +241,7 @@ class PartShop:
             msg = 'You must login with valid credentials before removing'
             raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_HTTP_UNAUTHORIZED)
         # Not sure what went wrong
+        msg = 'Unknown error: ' + response
         raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST)
 
     def login(self, user_id, password=''):

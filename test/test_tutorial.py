@@ -4,7 +4,7 @@ import unittest
 
 import sbol2 as sbol
 
-LOGGER_NAME = 'sbol.test'
+LOGGER_NAME = 'sbol2.test'
 DEBUG_ENV_VAR = 'SBOL_TEST_DEBUG'
 MY_DIR = os.path.dirname(os.path.abspath(__file__))
 PARTS_FILE = os.path.join(MY_DIR, 'resources', 'tutorial', 'parts.xml')
