@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/SynBioDex/pySBOL2.svg?branch=master)](https://travis-ci.org/SynBioDex/pySBOL2)
 
 **pySBOL2** is a pure Python implementation of the SBOL standard
- [Synthetic Biology Open Language (SBOL)](http://www.sbolstandard.org/) - 
+ [Synthetic Biology Open Language (SBOL)](https://sbolstandard.org/) - 
 an open standard for the representation of *in silico* biological designs.
 It draws from [libSBOL](https://github.com/SynBioDex/libSBOL)
 and [pySBOL](https://github.com/SynBioDex/pySBOL).
