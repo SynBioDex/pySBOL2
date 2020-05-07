@@ -28,12 +28,11 @@ def sbolRule10102(sbol_obj, arg):
 def sbol_rule_10202(sbol_obj, arg):
     """The identity property of an Identified object
     MUST be globally unique."""
-    if not hasattr(sbol_obj, 'identity') or not isinstance(arg, str):
+    if not hasattr(sbol_obj, 'identity'):
         # Not applicable
         raise TypeError('Inappropriate types passed to sbol_rule_10202')
-    # if sbol_obj.doc is not None:
-    #     #     if sbol_obj.doc.
-    raise NotImplementedError("Not yet implemented")
+    if not isinstance(arg, str):
+        raise TypeError('Inappropriate arg passed to sbol_rule_10202')
 
 
 # The displayId property of an Identified object is OPTIONAL
