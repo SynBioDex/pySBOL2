@@ -96,23 +96,14 @@ class SBOLObject:
         self.parent = None
         self._default_namespace = None
         self._hidden_properties = []
-        if type(_rdf_type) is str:
-            self.rdf_type = URIRef(_rdf_type)
-        else:
-            self.rdf_type = _rdf_type
+        self.rdf_type = URIRef(_rdf_type)
         self._namespaces = {}
-        if not isinstance(uri, URIRef):
-            self.logger.debug("Property was not a URIRef: '" +
-                              str(uri) + "', " + str(type(uri)))
-            self._identity = URIProperty(self, SBOL_IDENTITY, '0', '1',
-                                         [validation.sbol_rule_10202], URIRef(uri))
-        else:
-            self._identity = URIProperty(self, SBOL_IDENTITY, '0', '1',
-                                         [validation.sbol_rule_10202], uri)
+        self._identity = URIProperty(self, SBOL_IDENTITY, '0', '1',
+                                     [validation.sbol_rule_10202])
+        uri = URIRef(uri)
         if hasHomespace():
             uri = posixpath.join(getHomespace(), uri)
-            self._identity = URIProperty(self, SBOL_IDENTITY,
-                                         '0', '1', [validation.sbol_rule_10202], uri)
+        self.identity = uri
 
     @property
     def logger(self):

@@ -10,8 +10,8 @@ from . import validation
 
 class Interaction(Identified):
     def __init__(self, uri='example', interaction_type=SBO_INTERACTION,
-                 *, type_uri=SBOL_INTERACTION):
-        super().__init__(type_uri, uri)
+                 *, type_uri=SBOL_INTERACTION, version=VERSION_STRING):
+        super().__init__(type_uri=type_uri, uri=uri, version=version)
         self.functionalComponents = OwnedObject(self,
                                                 SBOL_FUNCTIONAL_COMPONENTS,
                                                 FunctionalComponent,

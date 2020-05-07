@@ -238,6 +238,7 @@ class URIProperty(Property):
         if self._rdf_type not in self._sbol_owner.properties:
             self._sbol_owner.properties[self._rdf_type] = []
         if initial_value is not None:
+            self.validate(initial_value)
             self.value = initial_value
 
     @property
@@ -266,6 +267,7 @@ class URIProperty(Property):
         self.set(new_value)
 
     def set(self, new_value):
+        self.validate(new_value)
         if self.getUpperBound() == '1':
             self.setSinglePropertyValue(new_value)
         else:
@@ -463,7 +465,10 @@ class OwnedObject(URIProperty):
             if not issubclass(builder, self.builder):
                 msg = '{!r} is not a subclass of {!r}'
                 raise TypeError(msg.format(type(builder), type(self.builder)))
-        obj = builder(uri=uri)
+        builder_args = dict(uri=uri)
+        if self._sbol_owner and hasattr(self._sbol_owner, 'version'):
+            builder_args['version'] = self._sbol_owner.version
+        obj = builder(**builder_args)
         self.add(obj)
         return obj
 
