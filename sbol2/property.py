@@ -463,7 +463,10 @@ class OwnedObject(URIProperty):
             if not issubclass(builder, self.builder):
                 msg = '{!r} is not a subclass of {!r}'
                 raise TypeError(msg.format(type(builder), type(self.builder)))
-        obj = builder(uri=uri)
+        builder_args = dict(uri=uri)
+        if self._sbol_owner and hasattr(self._sbol_owner, 'version'):
+            builder_args['version'] = self._sbol_owner.version
+        obj = builder(**builder_args)
         self.add(obj)
         return obj
 
