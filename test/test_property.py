@@ -147,6 +147,7 @@ class TestProperty(unittest.TestCase):
         annotation_uri = rdflib.URIRef('http://examples.org#annotation_property')
         cd.annotation = sbol.property.OwnedObject(cd, annotation_uri, sbol.Identified,
                                                   '0', '1', None)
+        self.assertIsNone(cd.annotation)
         cd.annotation = sbol.Identified('foo')
         self.assertEqual(type(cd.annotation), sbol.Identified)
 
@@ -155,6 +156,7 @@ class TestProperty(unittest.TestCase):
         annotation_uri = rdflib.URIRef('http://examples.org#annotation_property')
         cd.annotations = sbol.property.OwnedObject(cd, annotation_uri, sbol.Identified,
                                                    '0', '*', None)
+        self.assertEqual(type(cd.annotations), sbol.property.OwnedObject)
         cd.annotations.add(sbol.Identified('foo_0'))
         cd.annotations.add(sbol.Identified('foo_1'))
         self.assertEqual(type(cd.annotations), sbol.property.OwnedObject)
