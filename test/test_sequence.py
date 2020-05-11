@@ -35,7 +35,6 @@ class TestSequence(unittest.TestCase):
 
         # List of displayIds
         listseq = ['CRP_b_seq', 'CRa_U6_seq', 'gRNA_b_seq', 'mKate_seq']
-        listseq = [rdflib.Literal(x) for x in listseq]
 
         listseq_read = [seq.displayId for seq in doc.sequences]
 

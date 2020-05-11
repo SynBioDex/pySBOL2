@@ -171,12 +171,12 @@ class TestDocument(unittest.TestCase):
         md = doc.moduleDefinitions[uri]
         self.assertIsNotNone(md)
         self.assertEqual(md.identity, rdflib.URIRef(uri))
-        self.assertEqual(md.displayId, rdflib.Literal(display_id))
+        self.assertEqual(md.displayId, display_id)
         # Test lookup by displayId. This was broken when loading from a file.
         md = doc.moduleDefinitions[display_id]
         self.assertIsNotNone(md)
         self.assertEqual(md.identity, rdflib.URIRef(uri))
-        self.assertEqual(md.displayId, rdflib.Literal(display_id))
+        self.assertEqual(md.displayId, display_id)
 
     def test_find_property_value(self):
         # find_property_value wasn't comparing against the passed

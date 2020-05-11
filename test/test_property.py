@@ -108,7 +108,7 @@ class TestProperty(unittest.TestCase):
         # Test setting to string
         expected = 'foo'
         tp.value = expected
-        self.assertEqual(tp.value, rdflib.Literal(expected))
+        self.assertEqual(tp.value, expected)
         # Test setting to None
         tp.value = None
         self.assertIsNone(tp.value)
@@ -126,14 +126,14 @@ class TestProperty(unittest.TestCase):
         # Test setting to string
         expected = 'foo'
         tp.value = expected
-        self.assertEqual(tp.value, [rdflib.Literal(expected)])
+        self.assertEqual(tp.value, [expected])
         # Test setting to None
         with self.assertRaises(TypeError):
             tp.value = None
         # Test setting to list
         expected = ['foo', 'bar']
         tp.value = expected
-        self.assertEqual(tp.value, [rdflib.Literal(x) for x in expected])
+        self.assertEqual(tp.value, expected)
         # Test setting to list of integers
         with self.assertRaises(TypeError):
             tp.value = [1, 2, 3]

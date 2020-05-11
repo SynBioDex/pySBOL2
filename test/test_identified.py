@@ -20,8 +20,7 @@ class TestIdentified(unittest.TestCase):
         sbol.Config.setOption('sbol_typed_uris', False)
         expected = 'CRISPR_Template'
         crispr_template = sbol.ModuleDefinition(expected)
-        self.assertEqual(str(crispr_template.displayId), expected)
-        self.assertEqual(crispr_template.displayId, rdflib.Literal(expected))
+        self.assertEqual(crispr_template.displayId, expected)
 
     def test_getPersistentIdentity_SBOLCompliant(self):
         sbol.setHomespace('http://sbols.org/CRISPR_Example')
@@ -37,8 +36,7 @@ class TestIdentified(unittest.TestCase):
         sbol.Config.setOption('sbol_compliant_uris', True)
         sbol.Config.setOption('sbol_typed_uris', False)
         crispr_template = sbol.ModuleDefinition('CRISPR_Template')
-        self.assertEqual(str(crispr_template.version), '1')
-        self.assertEqual(crispr_template.version, rdflib.Literal('1'))
+        self.assertEqual(crispr_template.version, '1')
 
     def test_setDisplayId_SBOLCompliant(self):
         sbol.setHomespace('http://sbols.org/CRISPR_Example')
@@ -47,7 +45,7 @@ class TestIdentified(unittest.TestCase):
         crispr_template = sbol.ModuleDefinition('CRISPR_Template')
         crispr_template.displayId = 'test'
         self.assertEqual(str(crispr_template.displayId), 'test')
-        self.assertEqual(crispr_template.displayId, rdflib.Literal('test'))
+        self.assertEqual(crispr_template.displayId, 'test')
 
     def test_setPersistentIdentity_SBOLCompliant(self):
         sbol.setHomespace('http://sbols.org/CRISPR_Example')
@@ -65,8 +63,7 @@ class TestIdentified(unittest.TestCase):
         sbol.Config.setOption('sbol_typed_uris', False)
         crispr_template = sbol.ModuleDefinition('CRISPR_Template')
         crispr_template.version = '2'
-        self.assertEqual(str(crispr_template.version), '2')
-        self.assertEqual(crispr_template.version, rdflib.Literal('2'))
+        self.assertEqual(crispr_template.version, '2')
 
     def test_getDisplayId_hasHomespace(self):
         sbol.setHomespace('http://sbols.org/CRISPR_Example')
@@ -89,8 +86,7 @@ class TestIdentified(unittest.TestCase):
         sbol.Config.setOption('sbol_compliant_uris', False)
         sbol.Config.setOption('sbol_typed_uris', False)
         crispr_template = sbol.ModuleDefinition('CRISPR_Template')
-        self.assertEqual(str(crispr_template.version), '1')
-        self.assertEqual(crispr_template.version, rdflib.Literal('1'))
+        self.assertEqual(crispr_template.version, '1')
 
     def test_setPersistentIdentity_hasHomespace(self):
         sbol.setHomespace('http://sbols.org/CRISPR_Example')
@@ -108,16 +104,14 @@ class TestIdentified(unittest.TestCase):
         sbol.Config.setOption('sbol_typed_uris', False)
         crispr_template = sbol.ModuleDefinition('CRISPR_Template')
         crispr_template.version = '2'
-        self.assertEqual(str(crispr_template.version), '2')
-        self.assertEqual(crispr_template.version, rdflib.Literal('2'))
+        self.assertEqual(crispr_template.version, '2')
 
     def test_name(self):
         d = sbol.Document()
         d.read(PARTS_LOCATION)
         cd = d.componentDefinitions['http://examples.org/ComponentDefinition/AmeR/1']
         expected_name = 'AmeR'
-        self.assertEqual(str(cd.name), expected_name)
-        self.assertEqual(cd.name, rdflib.Literal(expected_name))
+        self.assertEqual(cd.name, expected_name)
 
     def test_was_derived_from(self):
         d = sbol.Document()
@@ -156,7 +150,7 @@ class TestCopy(unittest.TestCase):
         i = sbol.Identified('i')
         i.name = 'foo'
         i_copy = i.copy()
-        self.assertEqual(i_copy.name, rdflib.Literal('foo'))
+        self.assertEqual(i_copy.name, 'foo')
 
     def test_copy_child_objects(self):
         doc = sbol.Document()
@@ -335,7 +329,7 @@ class TestCopy(unittest.TestCase):
         self.assertNotEqual(comp3.wasDerivedFrom[0], comp2.identity)
 
         # Confirm version is the same as the copied object
-        self.assertEqual(comp3.version, rdflib.Literal('2'))
+        self.assertEqual(comp3.version, '2')
 
 
 if __name__ == '__main__':

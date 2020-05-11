@@ -28,8 +28,8 @@ class TestCollection(unittest.TestCase):
         expected_identity = self.make_identity(self.homespace, name,
                                                sbol2.VERSION_STRING)
         self.assertEqual(c.identity, rdflib.URIRef(expected_identity))
-        self.assertEqual(c.displayId, rdflib.Literal(name))
-        self.assertEqual(c.version, rdflib.Literal(sbol2.VERSION_STRING))
+        self.assertEqual(c.displayId, name)
+        self.assertEqual(c.version, sbol2.VERSION_STRING)
         self.assertEqual(c.rdf_type, sbol2.SBOL_COLLECTION)
         doc = sbol2.Document()
         doc.addCollection(c)
@@ -41,8 +41,8 @@ class TestCollection(unittest.TestCase):
         expected_identity = self.make_identity(self.homespace, name,
                                                sbol2.VERSION_STRING)
         self.assertEqual(c.identity, rdflib.URIRef(expected_identity))
-        self.assertEqual(c.displayId, rdflib.Literal(name))
-        self.assertEqual(c.version, rdflib.Literal(sbol2.VERSION_STRING))
+        self.assertEqual(c.displayId, name)
+        self.assertEqual(c.version, sbol2.VERSION_STRING)
         self.assertEqual(c.rdf_type, sbol2.SBOL_COLLECTION)
         doc = sbol2.Document()
         doc.addCollection(c)
@@ -55,8 +55,8 @@ class TestCollection(unittest.TestCase):
         expected_identity = self.make_identity(self.homespace, name,
                                                version)
         self.assertEqual(c.identity, rdflib.URIRef(expected_identity))
-        self.assertEqual(c.displayId, rdflib.Literal(name))
-        self.assertEqual(c.version, rdflib.Literal(version))
+        self.assertEqual(c.displayId, name)
+        self.assertEqual(c.version, version)
         self.assertEqual(c.rdf_type, sbol2.SBOL_COLLECTION)
         doc = sbol2.Document()
         doc.addCollection(c)
@@ -70,8 +70,8 @@ class TestCollection(unittest.TestCase):
         expected_identity = self.make_identity(self.homespace, name,
                                                version, 'Collection2')
         self.assertEqual(c.identity, rdflib.URIRef(expected_identity))
-        self.assertEqual(c.displayId, rdflib.Literal(name))
-        self.assertEqual(c.version, rdflib.Literal(version))
+        self.assertEqual(c.displayId, name)
+        self.assertEqual(c.version, version)
         self.assertEqual(c.rdf_type, rdf_type)
         # Verify that when added to a document, this collection is not
         # in the list of collections. That's because the rdf_type is

@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 import collections
 import logging
 import math
-import os
 import posixpath
 
 import rdflib
@@ -378,9 +377,7 @@ class LiteralProperty(Property):
         property.append(new_value)
 
     def convert_to_user(self, value):
-        # Stored as a Literal, which is a str, which is what the user
-        # wants. This is a no-op.
-        return value
+        return str(value)
 
     def convert_from_user(self, value):
         # None is ok iff upper bound is 1 and lower bound is 0.

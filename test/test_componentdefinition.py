@@ -34,8 +34,7 @@ class TestComponentDefinitions(unittest.TestCase):
         doc.addComponentDefinition(test_CD)
         self.assertIsNotNone(doc.componentDefinitions.get(expected))
         displayId = doc.componentDefinitions.get(expected).displayId
-        self.assertEqual(str(displayId), expected)
-        self.assertEqual(displayId, rdflib.Literal(expected))
+        self.assertEqual(displayId, expected)
 
     def testRemoveComponentDefinition(self):
         test_CD = sbol2.ComponentDefinition("BB0001")
@@ -48,37 +47,19 @@ class TestComponentDefinitions(unittest.TestCase):
             doc.componentDefinitions.get("BB0001")
 
     def testCDDisplayId(self):
-        list_cd_read = []
         doc = sbol2.Document()
         doc.read(CRISPR_EXAMPLE)
-
         # List of displayIds
-        list_cd = ['CRP_b', 'CRa_U6', 'EYFP', 'EYFP_cds', 'EYFP_gene',
-                   'Gal4VP16', 'Gal4VP16_cds', 'Gal4VP16_gene',
-                   'cas9_gRNA_complex', 'cas9_generic',
-                   'cas9m_BFP', 'cas9m_BFP_cds',
-                   'cas9m_BFP_gRNA_b', 'cas9m_BFP_gene',
-                   'gRNA_b', 'gRNA_b_gene', 'gRNA_b_nc', 'gRNA_b_terminator',
-                   'gRNA_generic', 'mKate', 'mKate_cds', 'mKate_gene',
-                   'pConst', 'target', 'target_gene']
-
-        for CD in doc.componentDefinitions:
-            list_cd_read.append(CD.displayId)
-        # Sort the list. Does doc.componentDefintions make any
-        # guarantees about order?
-        list_cd_read.sort()
-        # Convert expected display ids to rdflib.Literals and compare
-        self.assertSequenceEqual(list_cd_read,
-                                 [rdflib.Literal(x) for x in list_cd])
-        # Convert CD display ids to strings and compare
-        self.assertSequenceEqual([str(x) for x in list_cd_read],
-                                 list_cd)
-        # Python 3 compatability
-        if sys.version_info[0] < 3:
-            self.assertItemsEqual(list_cd_read, list_cd)
-        else:
-            expected = [rdflib.Literal(x) for x in list_cd]
-            self.assertCountEqual(list_cd_read, expected)
+        expected = ['CRP_b', 'CRa_U6', 'EYFP', 'EYFP_cds', 'EYFP_gene',
+                    'Gal4VP16', 'Gal4VP16_cds', 'Gal4VP16_gene',
+                    'cas9_gRNA_complex', 'cas9_generic',
+                    'cas9m_BFP', 'cas9m_BFP_cds',
+                    'cas9m_BFP_gRNA_b', 'cas9m_BFP_gene',
+                    'gRNA_b', 'gRNA_b_gene', 'gRNA_b_nc', 'gRNA_b_terminator',
+                    'gRNA_generic', 'mKate', 'mKate_cds', 'mKate_gene',
+                    'pConst', 'target', 'target_gene']
+        actual = [cd.displayId for cd in doc.componentDefinitions]
+        self.assertCountEqual(actual, expected)
 
     # See Issue #64, CD.assemblePrimaryStructure is not implemented
     @unittest.expectedFailure  # See issue 64

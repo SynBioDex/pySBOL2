@@ -31,8 +31,8 @@ class TestImplementation(unittest.TestCase):
         expected_identity = self.make_identity(self.homespace, name,
                                                sbol.VERSION_STRING)
         self.assertEqual(c.identity, rdflib.URIRef(expected_identity))
-        self.assertEqual(c.displayId, rdflib.Literal(name))
-        self.assertEqual(c.version, rdflib.Literal(sbol.VERSION_STRING))
+        self.assertEqual(c.displayId, name)
+        self.assertEqual(c.version, sbol.VERSION_STRING)
         self.assertEqual(c.rdf_type, sbol.SBOL_IMPLEMENTATION)
         doc = sbol.Document()
         doc.addImplementation(c)
@@ -44,8 +44,8 @@ class TestImplementation(unittest.TestCase):
         expected_identity = self.make_identity(self.homespace, name,
                                                sbol.VERSION_STRING)
         self.assertEqual(c.identity, rdflib.URIRef(expected_identity))
-        self.assertEqual(c.displayId, rdflib.Literal(name))
-        self.assertEqual(c.version, rdflib.Literal(sbol.VERSION_STRING))
+        self.assertEqual(c.displayId, name)
+        self.assertEqual(c.version, sbol.VERSION_STRING)
         self.assertEqual(c.rdf_type, sbol.SBOL_IMPLEMENTATION)
         doc = sbol.Document()
         doc.addImplementation(c)
@@ -58,8 +58,8 @@ class TestImplementation(unittest.TestCase):
         expected_identity = self.make_identity(self.homespace, name,
                                                version)
         self.assertEqual(c.identity, rdflib.URIRef(expected_identity))
-        self.assertEqual(c.displayId, rdflib.Literal(name))
-        self.assertEqual(c.version, rdflib.Literal(version))
+        self.assertEqual(c.displayId, name)
+        self.assertEqual(c.version, version)
         self.assertEqual(c.rdf_type, sbol.SBOL_IMPLEMENTATION)
         doc = sbol.Document()
         doc.addImplementation(c)
@@ -73,8 +73,8 @@ class TestImplementation(unittest.TestCase):
         expected_identity = self.make_identity(self.homespace, name,
                                                version, 'Implementation2')
         self.assertEqual(c.identity, rdflib.URIRef(expected_identity))
-        self.assertEqual(c.displayId, rdflib.Literal(name))
-        self.assertEqual(c.version, rdflib.Literal(version))
+        self.assertEqual(c.displayId, name)
+        self.assertEqual(c.version, version)
         self.assertEqual(c.rdf_type, rdf_type)
         # Verify that when added to a document, this implementation is
         # not in the list of implementations. That's because the rdf_type
