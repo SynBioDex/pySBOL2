@@ -421,7 +421,7 @@ class TextProperty(LiteralProperty):
     pass
 
 
-class OwnedObject(URIProperty):
+class OwnedObject(Property):
     def __init__(self, property_owner, sbol_uri, builder, lower_bound, upper_bound,
                  validation_rules=None, first_object=None):
         """Initialize a container and optionally put the first object in it.
@@ -740,7 +740,7 @@ class OwnedObject(URIProperty):
             return len(object_store)
 
 
-class ReferencedObject(Property):
+class ReferencedObject(URIProperty):
     def __init__(self, property_owner, type_uri, reference_type_uri,
                  lower_bound, upper_bound, validation_rules,
                  initial_value=None):
