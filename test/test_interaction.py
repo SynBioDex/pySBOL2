@@ -30,7 +30,7 @@ class TestInteraction(unittest.TestCase):
         self.assertEqual(i.identity, expected_identity)
         self.assertEqual(i.displayId, name)
         self.assertEqual(i.version, sbol.VERSION_STRING)
-        self.assertEqual(i.rdf_type, sbol.SBOL_INTERACTION)
+        self.assertEqual(i.rdf_type, rdflib.URIRef(sbol.SBOL_INTERACTION))
         md = sbol.ModuleDefinition()
         md.interactions.add(i)
         self.assertEqual(len(md.interactions), 1)
@@ -43,7 +43,7 @@ class TestInteraction(unittest.TestCase):
         self.assertEqual(i.identity, expected_identity)
         self.assertEqual(i.displayId, name)
         self.assertEqual(i.version, sbol.VERSION_STRING)
-        self.assertEqual(i.rdf_type, sbol.SBOL_INTERACTION)
+        self.assertEqual(i.rdf_type, rdflib.URIRef(sbol.SBOL_INTERACTION))
         md = sbol.ModuleDefinition()
         md.interactions.add(i)
         self.assertEqual(len(md.interactions), 1)
@@ -56,7 +56,7 @@ class TestInteraction(unittest.TestCase):
         self.assertEqual(i.identity, expected_identity)
         self.assertEqual(i.displayId, name)
         self.assertEqual(i.types, [sbol.SBO_INHIBITION])
-        self.assertEqual(i.rdf_type, sbol.SBOL_INTERACTION)
+        self.assertEqual(i.rdf_type, rdflib.URIRef(sbol.SBOL_INTERACTION))
         md = sbol.ModuleDefinition()
         md.interactions.add(i)
         self.assertEqual(len(md.interactions), 1)
@@ -71,12 +71,12 @@ class TestInteraction(unittest.TestCase):
         self.assertEqual(i.identity, expected_identity)
         self.assertEqual(i.displayId, name)
         self.assertEqual(i.types, [sbol.SBO_INHIBITION])
-        self.assertEqual(i.rdf_type, rdf_type)
+        self.assertEqual(i.rdf_type, rdflib.URIRef(rdf_type))
         # Verify that when added to a module definition, this
         # interaction is in the list of interactions despite having a
         # different rdf_type. That's because the rdf_type is not taken
         # into account when adding to the module definition's
-        # ineractions property.
+        # interactions property.
         md = sbol.ModuleDefinition()
         md.interactions.add(i)
         self.assertEqual(len(md.interactions), 1)

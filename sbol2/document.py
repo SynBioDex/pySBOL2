@@ -223,11 +223,12 @@ class Document(Identified):
             # If TopLevel add to Document.
             if sbol_obj.is_top_level():
                 self.SBOLObjects[identity_uri] = sbol_obj
-            if sbol_obj.getTypeURI() in self.owned_objects:
+            type_uri = rdflib.URIRef(sbol_obj.getTypeURI())
+            if type_uri in self.owned_objects:
                 sbol_obj.parent = self  # Set back-pointer to parent object
                 # Add the object to the Document's property store,
                 # eg. componentDefinitions, moduleDefinitions, etc.
-                self.owned_objects[sbol_obj.getTypeURI()].append(sbol_obj)
+                self.owned_objects[type_uri].append(sbol_obj)
             sbol_obj.doc = self
             # Recurse into child objects and set their back-pointer to this Document
             for key, obj_store in sbol_obj.owned_objects.items():

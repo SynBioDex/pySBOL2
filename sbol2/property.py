@@ -454,10 +454,10 @@ class OwnedObject(Property):
         self.builder = builder
         # Register Property in owner Object
         if self._sbol_owner is not None:
-            self._sbol_owner.properties.pop(sbol_uri, None)
-            self._sbol_owner.owned_objects[sbol_uri] = []  # vector of SBOLObjects
+            self._sbol_owner.properties.pop(self._rdf_type, None)
+            self._sbol_owner.owned_objects[self._rdf_type] = []  # vector of SBOLObjects
             if first_object is not None:
-                self._sbol_owner.owned_objects[sbol_uri].append(first_object)
+                self._sbol_owner.owned_objects[self._rdf_type].append(first_object)
 
     def create(self, uri, builder=None):
         """Creates an instance appropriate for this owned object collection.

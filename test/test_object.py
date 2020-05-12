@@ -51,11 +51,11 @@ class TestObject(unittest.TestCase):
     def test_type(self):
         cd = sbol.ComponentDefinition('foo')
         expected = sbol.SBOL_COMPONENT_DEFINITION
-        self.assertEqual(cd.type, expected)
+        self.assertEqual(cd.type, rdflib.URIRef(expected))
         doc = sbol.Document()
         md = doc.moduleDefinitions.create('bar')
         expected = sbol.SBOL_MODULE_DEFINITION
-        self.assertEqual(md.type, expected)
+        self.assertEqual(md.type, rdflib.URIRef(expected))
 
     def test_cast(self):
         cd = sbol.ComponentDefinition('foo')
