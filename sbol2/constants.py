@@ -6,7 +6,7 @@ DEFAULT_NS = URIRef("http://examples.org/")
 
 # The URIs defined here determine the appearance of serialized RDF/XML nodes.
 # Change these URIs to change the appearance of an SBOL class or property name
-SBOL_URI = URIRef("http://sbols.org/v2")  # < Namespace for the SBOL standard.
+SBOL_URI = "http://sbols.org/v2"  # < Namespace for the SBOL standard.
 RDF_URI = URIRef("http://www.w3.org/1999/02/22-rdf-syntax-ns#")
 PURL_URI = URIRef("http://purl.org/dc/terms/")
 PROV_URI = URIRef("http://www.w3.org/ns/prov")
@@ -129,7 +129,7 @@ SBOL_RESTRICTION_SAME_ORIENTATION_AS = URIRef("#sameOrientationAs")
 # Option for SequenceConstraint::restriction property
 SBOL_RESTRICTION_OPPOSITE_ORIENTATION_AS = URIRef("#oppositeOrientationAs")
 # Option for Sequence::encoding property
-SBOL_ENCODING_IUPAC = URIRef("http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html")
+SBOL_ENCODING_IUPAC = "http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"
 # Option for Sequence::encoding property
 SBOL_ENCODING_IUPAC_PROTEIN = URIRef("http://www.chem.qmul.ac.uk/iupac/AminoAcid/")
 # Option for Sequence::encoding property
@@ -148,10 +148,10 @@ SBOL_REFINEMENT_VERIFY_IDENTICAL = URIRef(SBOL_URI + "#verifyIdentical")
 SBOL_REFINEMENT_MERGE = URIRef(SBOL_URI + "#merge")
 # Option for SequenceAnnotation::roleIntegration
 # or Component::roleIntegration property
-SBOL_ROLE_INTEGRATION_MERGE = URIRef(SBOL_URI + "#mergeRoles")
+SBOL_ROLE_INTEGRATION_MERGE = SBOL_URI + "#mergeRoles"
 # Option for SequenceAnnotation::roleIntegration
 # or Component::roleIntegration property
-SBOL_ROLE_INTEGRATION_OVERRIDE = URIRef(SBOL_URI + "#overrideRoles")
+SBOL_ROLE_INTEGRATION_OVERRIDE = SBOL_URI + "#overrideRoles"
 # Option for Usage::roles or Association::roles
 SBOL_DESIGN = URIRef(SBOL_URI + "#design")
 # Option for Usage::roles or Association::roles
@@ -181,11 +181,11 @@ PROVO_ENTITY = URIRef(PROVO + "#entity")
 # Systems Biology Ontology
 # Interaction.types
 # Namespace for Systems Biology Ontology (SBO) terms
-SBO = URIRef("http://identifiers.org/biomodels.sbo/SBO:")
+SBO = "http://identifiers.org/biomodels.sbo/SBO:"
 # An SBO term and possible value for an Interaction::type property
 SBO_INTERACTION = URIRef(SBO + "0000343")
 # An SBO term and possible value for an Interaction::type property
-SBO_INHIBITION = URIRef(SBO + "0000169")
+SBO_INHIBITION = SBO + "0000169"
 # An SBO term and possible value for an Interaction::type property
 SBO_GENETIC_PRODUCTION = URIRef(SBO + "0000589")
 # An SBO term and possible value for an Interaction::type property
@@ -217,7 +217,7 @@ SBO_STIMULATOR = URIRef(SBO + "0000459")
 # An SBO term and possible value for an Participant::role property
 SBO_REACTANT = URIRef(SBO + "0000010")
 # An SBO term and possible value for an Participant::role property
-SBO_PRODUCT = URIRef(SBO + "0000011")
+SBO_PRODUCT = SBO + "0000011"
 # An SBO term and possible value for an Participant::role property
 SBO_LIGAND = URIRef(SBO + "0000280")
 # An SBO term and possible value for an Participant::role property
@@ -257,13 +257,13 @@ SO_PLASMID = URIRef(SO + "0000155")
 # BioPAX is used to indicate macromolecular and molecular types
 # DNA
 # A BioPax term and possible value for ComponentDefinition::type property
-BIOPAX_DNA = URIRef("http://www.biopax.org/release/biopax-level3.owl#DnaRegion")
+BIOPAX_DNA = "http://www.biopax.org/release/biopax-level3.owl#DnaRegion"
 # RNA
 # A BioPax term and possible value for ComponentDefinition::type property
 BIOPAX_RNA = URIRef("http://www.biopax.org/release/biopax-level3.owl#RnaRegion")
 # PROTEIN
 # A BioPax term and possible value for ComponentDefinition::type property
-BIOPAX_PROTEIN = URIRef("http://www.biopax.org/release/biopax-level3.owl#Protein")
+BIOPAX_PROTEIN = "http://www.biopax.org/release/biopax-level3.owl#Protein"
 # SMALL_MOLECULE
 # A BioPax term and possible value for ComponentDefinition::type property
 BIOPAX_SMALL_MOLECULE = URIRef("http://www.biopax.org/release/biopax-level3.owl#SmallMolecule")

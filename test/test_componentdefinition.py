@@ -208,14 +208,15 @@ class TestComponentDefinitions(unittest.TestCase):
         graph = rdflib.Graph()
         graph.parse(data=xml)
         # We shouldn't find SBOL_SEQUENCE within the component definition
-        bad_triple = (cd.identity, sbol2.SBOL_SEQUENCE, None)
+        identity_uri = rdflib.URIRef(cd.identity)
+        bad_triple = (identity_uri, sbol2.SBOL_SEQUENCE, None)
         self.assertEqual([], list(graph.triples(bad_triple)))
-        good_triple = (cd.identity, sbol2.SBOL_SEQUENCE_PROPERTY, None)
+        good_triple = (identity_uri, sbol2.SBOL_SEQUENCE_PROPERTY, None)
         good_triples = list(graph.triples(good_triple))
         self.assertEqual(len(good_triples), 1)
-        self.assertEqual(good_triples[0], (cd.identity,
+        self.assertEqual(good_triples[0], (identity_uri,
                                            sbol2.SBOL_SEQUENCE_PROPERTY,
-                                           seq.identity))
+                                           rdflib.URIRef(seq.identity)))
 
     def test_sequence_validation(self):
         cd = sbol2.ComponentDefinition('cd1', sbol2.BIOPAX_DNA)

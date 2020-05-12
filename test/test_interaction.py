@@ -27,7 +27,7 @@ class TestInteraction(unittest.TestCase):
         i = sbol.Interaction()
         expected_identity = self.make_identity(self.homespace, name,
                                                sbol.VERSION_STRING)
-        self.assertEqual(i.identity, rdflib.URIRef(expected_identity))
+        self.assertEqual(i.identity, expected_identity)
         self.assertEqual(i.displayId, name)
         self.assertEqual(i.version, sbol.VERSION_STRING)
         self.assertEqual(i.rdf_type, sbol.SBOL_INTERACTION)
@@ -40,7 +40,7 @@ class TestInteraction(unittest.TestCase):
         i = sbol.Interaction(name)
         expected_identity = self.make_identity(self.homespace, name,
                                                sbol.VERSION_STRING)
-        self.assertEqual(i.identity, rdflib.URIRef(expected_identity))
+        self.assertEqual(i.identity, expected_identity)
         self.assertEqual(i.displayId, name)
         self.assertEqual(i.version, sbol.VERSION_STRING)
         self.assertEqual(i.rdf_type, sbol.SBOL_INTERACTION)
@@ -53,7 +53,7 @@ class TestInteraction(unittest.TestCase):
         i = sbol.Interaction(name, sbol.SBO_INHIBITION)
         expected_identity = self.make_identity(self.homespace, name,
                                                sbol.VERSION_STRING)
-        self.assertEqual(i.identity, rdflib.URIRef(expected_identity))
+        self.assertEqual(i.identity, expected_identity)
         self.assertEqual(i.displayId, name)
         self.assertEqual(i.types, [sbol.SBO_INHIBITION])
         self.assertEqual(i.rdf_type, sbol.SBOL_INTERACTION)
@@ -68,7 +68,7 @@ class TestInteraction(unittest.TestCase):
         expected_identity = self.make_identity(self.homespace, name,
                                                sbol.VERSION_STRING,
                                                'Interaction2')
-        self.assertEqual(i.identity, rdflib.URIRef(expected_identity))
+        self.assertEqual(i.identity, expected_identity)
         self.assertEqual(i.displayId, name)
         self.assertEqual(i.types, [sbol.SBO_INHIBITION])
         self.assertEqual(i.rdf_type, rdf_type)

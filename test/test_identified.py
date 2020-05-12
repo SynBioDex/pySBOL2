@@ -29,7 +29,7 @@ class TestIdentified(unittest.TestCase):
         crispr_template = sbol.ModuleDefinition('CRISPR_Template')
         expected = 'http://sbols.org/CRISPR_Example/CRISPR_Template'
         self.assertEqual(crispr_template.persistentIdentity,
-                         rdflib.URIRef(expected))
+                         expected)
 
     def test_getVersion_SBOLCompliant(self):
         sbol.setHomespace('http://sbols.org/CRISPR_Example')
@@ -54,8 +54,7 @@ class TestIdentified(unittest.TestCase):
         crispr_template = sbol.ModuleDefinition('CRISPR_Template')
         expected = 'test'
         crispr_template.persistentIdentity = expected
-        self.assertEqual(crispr_template.persistentIdentity,
-                         rdflib.URIRef(expected))
+        self.assertEqual(crispr_template.persistentIdentity, expected)
 
     def test_setVersion_SBOLCompliant(self):
         sbol.setHomespace('http://sbols.org/CRISPR_Example')
@@ -78,8 +77,7 @@ class TestIdentified(unittest.TestCase):
         sbol.Config.setOption('sbol_typed_uris', False)
         crispr_template = sbol.ModuleDefinition('CRISPR_Template')
         expected = 'http://sbols.org/CRISPR_Example/CRISPR_Template'
-        self.assertEqual(crispr_template.persistentIdentity,
-                         rdflib.URIRef(expected))
+        self.assertEqual(crispr_template.persistentIdentity, expected)
 
     def test_getVersion_hasHomespace(self):
         sbol.setHomespace('http://sbols.org/CRISPR_Example')
@@ -95,8 +93,7 @@ class TestIdentified(unittest.TestCase):
         crispr_template = sbol.ModuleDefinition('CRISPR_Template')
         expected = 'test'
         crispr_template.persistentIdentity = expected
-        self.assertEqual(crispr_template.persistentIdentity,
-                         rdflib.URIRef(expected))
+        self.assertEqual(crispr_template.persistentIdentity, expected)
 
     def test_setVersion_hasHomespace(self):
         sbol.setHomespace('http://sbols.org/CRISPR_Example')
@@ -118,7 +115,7 @@ class TestIdentified(unittest.TestCase):
         d.read(PARTS_LOCATION)
         cd = d.componentDefinitions['http://examples.org/ComponentDefinition/AmeR/1']
         uri = 'https://synbiohub.programmingbiology.org/public/Cello_Parts/AmeR/1'
-        expected = [rdflib.term.URIRef(uri)]
+        expected = [uri]
         self.assertEqual(cd.wasDerivedFrom, expected)
 
     def test_was_derived_from2(self):
@@ -133,7 +130,7 @@ class TestIdentified(unittest.TestCase):
         d.read(PARTS_LOCATION)
         cd = d.componentDefinitions['http://examples.org/ComponentDefinition/AmeR/1']
         uri = 'http://examples.org/Activity/CelloUCF2sbol_Activity/1'
-        expected = [rdflib.term.URIRef(uri)]
+        expected = [uri]
         self.assertEqual(cd.wasGeneratedBy, expected)
 
     def test_was_generated_by2(self):
@@ -192,10 +189,9 @@ class TestCopy(unittest.TestCase):
         comp_copy = comp.copy(None, old_homespace)
 
         # Verify new namespace was correctly substituted
-        self.assertEqual(comp_copy.identity, rdflib.URIRef('http://acme.com/cd/1'))
-        self.assertEqual(comp_copy.persistentIdentity,
-                         rdflib.URIRef('http://acme.com/cd'))
-        self.assertEqual(comp_copy.sequences[0], rdflib.URIRef('http://acme.com/seq/1'))
+        self.assertEqual(comp_copy.identity, 'http://acme.com/cd/1')
+        self.assertEqual(comp_copy.persistentIdentity, 'http://acme.com/cd')
+        self.assertEqual(comp_copy.sequences[0], 'http://acme.com/seq/1')
 
         # Verify wasDerivedFrom relationship
         self.assertEqual(comp_copy.wasDerivedFrom[0], comp.identity)
@@ -236,10 +232,9 @@ class TestCopy(unittest.TestCase):
 
         # Verify new namespace was correctly substituted and type token was successfully
         # removed
-        self.assertEqual(comp_copy.identity, rdflib.URIRef('http://acme.com/cd/1'))
-        self.assertEqual(comp_copy.persistentIdentity,
-                         rdflib.URIRef('http://acme.com/cd'))
-        self.assertEqual(comp_copy.sequences[0], rdflib.URIRef('http://acme.com/seq/1'))
+        self.assertEqual(comp_copy.identity, 'http://acme.com/cd/1')
+        self.assertEqual(comp_copy.persistentIdentity, 'http://acme.com/cd')
+        self.assertEqual(comp_copy.sequences[0], 'http://acme.com/seq/1')
 
         # Verify wasDerivedFrom relationship
         self.assertEqual(comp_copy.wasDerivedFrom[0], comp.identity)
@@ -267,11 +262,11 @@ class TestCopy(unittest.TestCase):
         # Verify new namespace was correctly substituted and type token was successfully
         # added
         self.assertEqual(comp_copy.identity,
-                         rdflib.URIRef('http://acme.com/ComponentDefinition/cd/1'))
+                         'http://acme.com/ComponentDefinition/cd/1')
         self.assertEqual(comp_copy.persistentIdentity,
-                         rdflib.URIRef('http://acme.com/ComponentDefinition/cd'))
+                         'http://acme.com/ComponentDefinition/cd')
         self.assertEqual(comp_copy.sequences[0],
-                         rdflib.URIRef('http://acme.com/Sequence/seq/1'))
+                         'http://acme.com/Sequence/seq/1')
 
         # Verify wasDerivedFrom relationship
         self.assertEqual(comp_copy.wasDerivedFrom[0], comp.identity)

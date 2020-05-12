@@ -4,7 +4,7 @@ import posixpath
 from deprecated import deprecated
 import rdflib
 
-from .config import getHomespace
+from .config import getHomespace, string_equal
 from .config import hasHomespace
 from .constants import *
 from .property import OwnedObject
@@ -169,7 +169,7 @@ class SBOLObject:
         None otherwise.
         """
         uri = rdflib.URIRef(uri)
-        if self.identity == uri:
+        if string_equal(self.identity, uri):
             return self
         for rdf_type, object_store in self.owned_objects.items():
             if rdf_type in self._hidden_properties:

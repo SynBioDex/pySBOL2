@@ -12,6 +12,7 @@ from .config import ConfigOptions
 from .config import getHomespace
 from .config import parseClassName
 from .config import parsePropertyName
+from .config import string_equal
 from .constants import *
 from .sbolerror import SBOLError
 from .sbolerror import SBOLErrorCode
@@ -253,13 +254,13 @@ class URIProperty(Property):
         properties = self._sbol_owner.properties[self._rdf_type]
         if len(properties) == 0:
             return None
-        return properties[-1]
+        return self.convert_to_user(properties[-1])
 
     def getPropertyValueList(self):
         if self._rdf_type not in self._sbol_owner.properties:
             return []
-        properties = self._sbol_owner.properties[self._rdf_type]
-        return properties.copy()
+        store = self._sbol_owner.properties[self._rdf_type]
+        return [self.convert_to_user(x) for x in store]
 
     @value.setter
     def value(self, new_value):
@@ -290,10 +291,9 @@ class URIProperty(Property):
             self._sbol_owner.properties[self._rdf_type] = []
             return
         if isinstance(value, str):
-            self._sbol_owner.properties[self._rdf_type] = [rdflib.URIRef(value)]
-            return
+            value = [value]
         if isinstance(value, collections.abc.Iterable):
-            new_value = [URIRef(v) for v in value]
+            new_value = [self.convert_from_user(v) for v in value]
             self._sbol_owner.properties[self._rdf_type] = new_value
             return
         # Unrecognized value. Raise type error
@@ -304,6 +304,20 @@ class URIProperty(Property):
         # Note: this is only called internally. This method is not
         # accessible from outside the library via the public API.
         self.value += [new_value]
+
+    def convert_to_user(self, value):
+        return str(value)
+
+    def convert_from_user(self, value):
+        # None is ok iff upper bound is 1 and lower bound is 0.
+        # If upper bound > 1, attribute is a list and None is not a valid list
+        # If lower bound > 0, attribute must have a value, so None is unacceptable
+        if value is None and self.upper_bound == 1 and self.lower_bound == 0:
+            return None
+        if not isinstance(value, str):
+            msg = '{} values must have type str'.format(self.getTypeURI())
+            raise TypeError(msg)
+        return URIRef(value)
 
 
 class LiteralProperty(Property):
@@ -530,7 +544,7 @@ class OwnedObject(Property):
         # Search this property's object store for the uri
         object_store = self._sbol_owner.owned_objects[self._rdf_type]
         for obj in object_store:
-            if id == obj.identity:
+            if string_equal(id, obj.identity):
                 return obj
         # If searching by the full URI fails, assume the user is searching
         # for an SBOL-compliant URI using the displayId only
@@ -596,7 +610,7 @@ class OwnedObject(Property):
             if Config.getOption(ConfigOptions.VERBOSE.value) is True:
                 print('Searching for non-TopLevel: ' + compliant_uri)
             for obj in object_store:
-                if obj.identity == compliant_uri:
+                if string_equal(obj.identity, compliant_uri):
                     return obj
 
     def get(self, uri=''):
@@ -696,7 +710,7 @@ class OwnedObject(Property):
                                     SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
                 obj = object_store[index]
                 if self._sbol_owner.getTypeURI() == SBOL_DOCUMENT:
-                    del obj.doc.SBOLObjects[obj.identity]
+                    del obj.doc.SBOLObjects[rdflib.URIRef(obj.identity)]
                 # Erase nested, hidden TopLevel objects from Document
                 if obj.doc is not None and obj.doc.find(obj.identity) is not None:
                     obj.doc = None  # TODO not sure what this does
@@ -710,11 +724,11 @@ class OwnedObject(Property):
             if self._rdf_type in self._sbol_owner.owned_objects:
                 object_store = self._sbol_owner.owned_objects[self._rdf_type]
                 for obj in object_store:
-                    if uri == obj.identity:
+                    if string_equal(uri, obj.identity):
                         object_store.remove(obj)  # TODO is there a better way?
                         # Erase TopLevel objects from Document
                         if self._sbol_owner.getTypeURI() == SBOL_DOCUMENT:
-                            del obj.doc.SBOLObjects[uri]
+                            del obj.doc.SBOLObjects[rdflib.URIRef(uri)]
                         # Erase nested, hidden TopLevel objects from Document
                         if obj.doc is not None and obj.doc.find(uri) is not None:
                             obj.doc = None  # TODO not sure what this does
@@ -726,7 +740,7 @@ class OwnedObject(Property):
                 object_store = self._sbol_owner.owned_objects[self._rdf_type]
                 for obj in object_store:
                     if obj.is_top_level() and obj.doc is not None:
-                        obj.doc.SBOLObjects.remove(obj.identity)
+                        obj.doc.SBOLObjects.remove(rdflib.URIRef(obj.identity))
                 object_store.clear()
 
     def __len__(self):
@@ -837,11 +851,10 @@ class ReferencedObject(URIProperty):
         if raw_value is None:
             return None
         if self._upperBound == '1':
-            return self._ensure_uri_ref(raw_value)
+            return self.convert_to_user(raw_value)
         else:
-            result = [self._ensure_uri_ref(rval) for rval in raw_value]
             # Return a list, not a generator. Consumers are expecting a list.
-            return list(result)
+            return [self.convert_to_user(rval) for rval in raw_value]
 
     @value.setter
     def value(self, new_value):

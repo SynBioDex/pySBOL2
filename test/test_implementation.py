@@ -30,7 +30,7 @@ class TestImplementation(unittest.TestCase):
         c = sbol.Implementation()
         expected_identity = self.make_identity(self.homespace, name,
                                                sbol.VERSION_STRING)
-        self.assertEqual(c.identity, rdflib.URIRef(expected_identity))
+        self.assertEqual(c.identity, expected_identity)
         self.assertEqual(c.displayId, name)
         self.assertEqual(c.version, sbol.VERSION_STRING)
         self.assertEqual(c.rdf_type, sbol.SBOL_IMPLEMENTATION)
@@ -43,7 +43,7 @@ class TestImplementation(unittest.TestCase):
         c = sbol.Implementation(name)
         expected_identity = self.make_identity(self.homespace, name,
                                                sbol.VERSION_STRING)
-        self.assertEqual(c.identity, rdflib.URIRef(expected_identity))
+        self.assertEqual(c.identity, expected_identity)
         self.assertEqual(c.displayId, name)
         self.assertEqual(c.version, sbol.VERSION_STRING)
         self.assertEqual(c.rdf_type, sbol.SBOL_IMPLEMENTATION)
@@ -57,7 +57,7 @@ class TestImplementation(unittest.TestCase):
         c = sbol.Implementation(name, version)
         expected_identity = self.make_identity(self.homespace, name,
                                                version)
-        self.assertEqual(c.identity, rdflib.URIRef(expected_identity))
+        self.assertEqual(c.identity, expected_identity)
         self.assertEqual(c.displayId, name)
         self.assertEqual(c.version, version)
         self.assertEqual(c.rdf_type, sbol.SBOL_IMPLEMENTATION)
@@ -72,7 +72,7 @@ class TestImplementation(unittest.TestCase):
         c = sbol.Implementation(name, version, type_uri=rdf_type)
         expected_identity = self.make_identity(self.homespace, name,
                                                version, 'Implementation2')
-        self.assertEqual(c.identity, rdflib.URIRef(expected_identity))
+        self.assertEqual(c.identity, expected_identity)
         self.assertEqual(c.displayId, name)
         self.assertEqual(c.version, version)
         self.assertEqual(c.rdf_type, rdf_type)

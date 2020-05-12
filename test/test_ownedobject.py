@@ -61,10 +61,10 @@ class TestOwnedObject(unittest.TestCase):
         doc = sbol.Document()
         md = doc.moduleDefinitions.create('foo')
         expected = 'http://examples.org/ModuleDefinition/foo/1'
-        self.assertEqual(md.identity, rdflib.URIRef(expected))
+        self.assertEqual(md.identity, expected)
         m = md.modules.create('bar')
         expected = 'http://examples.org/ModuleDefinition/foo/bar/1'
-        self.assertEqual(m.identity, rdflib.URIRef(expected))
+        self.assertEqual(m.identity, expected)
 
     def test_displayId_lookup(self):
         # Test lookup of an object by its display Id via the
