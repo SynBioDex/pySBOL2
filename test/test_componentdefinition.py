@@ -237,12 +237,18 @@ class TestComponentDefinitions(unittest.TestCase):
                                            seq.identity))
 
     def test_sequence_validation(self):
+        # sequence and sequences should be synced up
         cd = sbol2.ComponentDefinition('cd1', sbol2.BIOPAX_DNA)
-        cd.name = 'cd1-name'
-        cd.description = 'cd1-description'
         seq = sbol2.Sequence('cd1_sequence', 'GCAT')
         cd.sequence = seq
-        self.assertEqual([seq.identity], cd.sequences)
+        self.assertEqual([cd.sequence.identity], cd.sequences)
+
+        # now test whether this works in the context of a Document
+        doc = sbol2.Document()
+        cd = doc.componentDefinitions.create('cd1')
+        cd.sequence = seq
+        self.assertIsNotNone(cd.sequence)
+        self.assertEqual([cd.sequence.identity], cd.sequences)
 
     @unittest.expectedFailure
     def test_sequences_validation(self):
