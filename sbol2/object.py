@@ -12,6 +12,7 @@ from .property import ReferencedObject
 from .property import URIProperty
 from .sbolerror import SBOLError
 from .sbolerror import SBOLErrorCode
+from .uridict import URIDict
 from . import validation
 
 
@@ -90,8 +91,8 @@ class SBOLObject:
     def __init__(self, _rdf_type=rdflib.URIRef(UNDEFINED),
                  uri=rdflib.URIRef("example")):
         """Open-world constructor."""
-        self.owned_objects = {}  # map<rdf_type, vector<SBOLObject>>
-        self.properties = {}  # map<rdf_type, vector<SBOLObject>>
+        self.owned_objects = URIDict()  # map<rdf_type, vector<SBOLObject>>
+        self.properties = URIDict()  # map<rdf_type, vector<SBOLObject>>
         self.doc = None
         self.parent = None
         self._default_namespace = None
@@ -395,22 +396,25 @@ class SBOLObject:
         raise NotImplementedError("Implemented by child classes")
 
     def build_graph(self, graph):
-        graph.add((self._identity.getRawValue(), rdflib.RDF.type,
+        graph.add((rdflib.URIRef(self.identity),
+                   rdflib.RDF.type,
                    self.rdf_type))
         for typeURI, proplist in self.properties.items():
             if typeURI in self._hidden_properties:
                 # Skip hidden properties
                 continue
             for prop in proplist:
-                graph.add((self._identity.getRawValue(),
-                           typeURI, prop))
+                graph.add((rdflib.URIRef(self.identity),
+                           rdflib.URIRef(typeURI),
+                           prop))
         for typeURI, objlist in self.owned_objects.items():
             if typeURI in self._hidden_properties:
                 # Skip hidden properties
                 continue
             for owned_obj in objlist:
-                graph.add((self._identity.getRawValue(),
-                           typeURI, URIRef(owned_obj.identity)))
+                graph.add((rdflib.URIRef(self.identity),
+                           rdflib.URIRef(typeURI),
+                           URIRef(owned_obj.identity)))
                 owned_obj.build_graph(graph)
 
     def serialize_rdf2xml(self, graph):

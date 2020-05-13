@@ -57,8 +57,8 @@ class Property(ABC):
         (int, str, float supported)
         """
         # Ensure property_owner has a properties attribute of type
-        # dict.
-        if not isinstance(property_owner.properties, dict):
+        # dict. This is a "fail early" check.
+        if not isinstance(property_owner.properties, collections.Mapping):
             raise TypeError('property_owner.properties must be a dict')
         self._sbol_owner = property_owner
         if isinstance(type_uri, URIRef):
