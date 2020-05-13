@@ -6,6 +6,7 @@ from typing import Any, Dict, Mapping, Union
 import warnings
 
 import rdflib
+from rdflib import URIRef
 
 from . import SBOL2Serialize
 from . import validation

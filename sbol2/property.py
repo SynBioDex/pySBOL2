@@ -5,7 +5,7 @@ import math
 import posixpath
 
 import rdflib
-from rdflib import Literal
+from rdflib import Literal, URIRef
 
 from .config import Config
 from .config import ConfigOptions

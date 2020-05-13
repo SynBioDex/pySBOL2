@@ -1,3 +1,5 @@
+from rdflib import URIRef
+
 from .constants import *
 from .identified import Identified
 from .location import Location

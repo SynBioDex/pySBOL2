@@ -1,22 +1,20 @@
-from rdflib import URIRef
-
 # All SBOL objects will be created in the default namespace,
 # unless otherwise specified
-DEFAULT_NS = URIRef("http://examples.org/")
+DEFAULT_NS = "http://examples.org/"
 
 # The URIs defined here determine the appearance of serialized RDF/XML nodes.
 # Change these URIs to change the appearance of an SBOL class or property name
 SBOL_URI = "http://sbols.org/v2"  # < Namespace for the SBOL standard.
-RDF_URI = URIRef("http://www.w3.org/1999/02/22-rdf-syntax-ns#")
+RDF_URI = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 PURL_URI = "http://purl.org/dc/terms/"
 PROV_URI = "http://www.w3.org/ns/prov"
 PROVO = "http://www.w3.org/ns/prov"
 SYSBIO_URI = "http://sys-bio.org"
-# PROVO = URIRef("https://www.w3.org/TR/prov-o/")
+# PROVO = "https://www.w3.org/TR/prov-o/"
 
 # rdf nodes used in SBOL
-NODENAME_ABOUT = URIRef("rdf:about")
-NODENAME_RESOURCE = URIRef("rdf:resource")
+NODENAME_ABOUT = "rdf:about"
+NODENAME_RESOURCE = "rdf:resource"
 
 VERSION_STRING = "1"
 

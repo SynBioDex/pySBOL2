@@ -3,6 +3,7 @@ import posixpath
 
 from deprecated import deprecated
 import rdflib
+from rdflib import URIRef
 
 from .config import getHomespace, string_equal
 from .config import hasHomespace

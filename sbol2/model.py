@@ -1,3 +1,5 @@
+from rdflib import URIRef
+
 from .toplevel import TopLevel
 from .property import URIProperty
 from .constants import *
