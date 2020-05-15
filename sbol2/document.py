@@ -41,6 +41,7 @@ from .sequence import Sequence
 from .sequenceannotation import SequenceAnnotation
 from .sequenceconstraint import SequenceConstraint
 from .toplevel import TopLevel
+from .uridict import URIDict
 
 import requests
 
@@ -110,7 +111,8 @@ class Document(Identified):
 
         # The keys in SBOLObjects are URIRefs because our internal
         # representations use rdflib types.
-        self.SBOLObjects: Dict[rdflib.URIRef, SBOLObject] = {}
+        # self.SBOLObjects: Dict[rdflib.URIRef, SBOLObject] = {}
+        self.SBOLObjects = URIDict()
 
         self._namespaces = {}
         self.resource_namespaces = set()

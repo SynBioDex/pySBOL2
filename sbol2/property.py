@@ -761,7 +761,7 @@ class OwnedObject(Property):
                 object_store = self._sbol_owner.owned_objects[self._rdf_type]
                 for obj in object_store:
                     if obj.is_top_level() and obj.doc is not None:
-                        obj.doc.SBOLObjects.remove(rdflib.URIRef(obj.identity))
+                        obj.doc.SBOLObjects.remove(obj.identity)
                 object_store.clear()
 
     def __len__(self):
