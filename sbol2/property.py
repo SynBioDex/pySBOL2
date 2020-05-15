@@ -476,10 +476,19 @@ class OwnedObject(URIProperty):
         if self._sbol_owner is None:
             # Just silently do nothing?
             return
+
+        # If this is a top level object, add it and all its children recursively to the
+        # Document. (With some additional refactoring, this could probably all be handled
+        # from this method, thus eliminating need for a separate Document adder method)
         if sbol_obj.is_top_level() and self._sbol_owner.doc is not None:
-            # Is this really all we need to do?
             self._sbol_owner.doc.add(sbol_obj)
-            return
+            # If a property is hidden, don't return yet, because it still needs to be
+            # added as a child object. (By definition, a hidden owned object can be
+            # accessed from both the Document top level and as a child of another top
+            # level)
+            if not self._isHidden():
+                return
+
         # Not top level, add to the attribute
         object_store = self._sbol_owner.owned_objects[self._rdf_type]
         if sbol_obj in object_store:
