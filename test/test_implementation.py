@@ -33,7 +33,7 @@ class TestImplementation(unittest.TestCase):
         self.assertEqual(c.identity, expected_identity)
         self.assertEqual(c.displayId, name)
         self.assertEqual(c.version, sbol.VERSION_STRING)
-        self.assertEqual(c.rdf_type, rdflib.URIRef(sbol.SBOL_IMPLEMENTATION))
+        self.assertEqual(c.rdf_type, sbol.SBOL_IMPLEMENTATION)
         doc = sbol.Document()
         doc.addImplementation(c)
         self.assertEqual(len(doc.implementations), 1)
@@ -46,7 +46,7 @@ class TestImplementation(unittest.TestCase):
         self.assertEqual(c.identity, expected_identity)
         self.assertEqual(c.displayId, name)
         self.assertEqual(c.version, sbol.VERSION_STRING)
-        self.assertEqual(c.rdf_type, rdflib.URIRef(sbol.SBOL_IMPLEMENTATION))
+        self.assertEqual(c.rdf_type, sbol.SBOL_IMPLEMENTATION)
         doc = sbol.Document()
         doc.addImplementation(c)
         self.assertEqual(len(doc.implementations), 1)
@@ -60,7 +60,7 @@ class TestImplementation(unittest.TestCase):
         self.assertEqual(c.identity, expected_identity)
         self.assertEqual(c.displayId, name)
         self.assertEqual(c.version, version)
-        self.assertEqual(c.rdf_type, rdflib.URIRef(sbol.SBOL_IMPLEMENTATION))
+        self.assertEqual(c.rdf_type, sbol.SBOL_IMPLEMENTATION)
         doc = sbol.Document()
         doc.addImplementation(c)
         self.assertEqual(len(doc.implementations), 1)
@@ -75,7 +75,7 @@ class TestImplementation(unittest.TestCase):
         self.assertEqual(c.identity, expected_identity)
         self.assertEqual(c.displayId, name)
         self.assertEqual(c.version, version)
-        self.assertEqual(c.rdf_type, rdflib.URIRef(rdf_type))
+        self.assertEqual(c.rdf_type, rdf_type)
         # Verify that when added to a document, this implementation is
         # not in the list of implementations. That's because the rdf_type
         # is not SBOL_IMPLEMENTATION.

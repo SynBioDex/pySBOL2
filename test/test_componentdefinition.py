@@ -225,7 +225,6 @@ class TestComponentDefinitions(unittest.TestCase):
         cd.sequence = seq
         self.assertEqual([cd.sequence.identity], cd.sequences)
 
-
     def test_hidden_property_adder(self):
         # Assignment of a TopLevel object to a hidden property (in this case
         # assigning a Sequence object to the sequence property) should

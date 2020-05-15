@@ -16,8 +16,7 @@ class TestAttachment(unittest.TestCase):
         # This was a problem until the arguments to the constructor were
         # rearranged.
         test_attach = sbol2.Attachment("TEST")
-        self.assertEqual(rdflib.URIRef(sbol2.SBOL_ATTACHMENT),
-                         test_attach.rdf_type)
+        self.assertEqual(sbol2.SBOL_ATTACHMENT, test_attach.rdf_type)
 
 
 if __name__ == '__main__':

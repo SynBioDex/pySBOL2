@@ -61,12 +61,7 @@ class Property(ABC):
         if not isinstance(property_owner.properties, collections.abc.Mapping):
             raise TypeError('property_owner.properties must be a dict')
         self._sbol_owner = property_owner
-        if isinstance(type_uri, URIRef):
-            self._rdf_type = type_uri
-        elif isinstance(type_uri, str):
-            self._rdf_type = URIRef(type_uri)
-        else:
-            raise ValueError("RDF type must be URIRef or str")
+        self._rdf_type = str(type_uri)
         self._lowerBound = lower_bound
         self._upperBound = upper_bound
         # Validate validation rules

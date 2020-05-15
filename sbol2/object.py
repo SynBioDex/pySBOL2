@@ -98,7 +98,7 @@ class SBOLObject:
         self.parent = None
         self._default_namespace = None
         self._hidden_properties = []
-        self.rdf_type = URIRef(_rdf_type)
+        self.rdf_type = str(_rdf_type)
         self._namespaces = {}
         self._identity = URIProperty(self, SBOL_IDENTITY, '0', '1',
                                      [validation.sbol_rule_10202])
@@ -399,7 +399,7 @@ class SBOLObject:
     def build_graph(self, graph):
         graph.add((rdflib.URIRef(self.identity),
                    rdflib.RDF.type,
-                   self.rdf_type))
+                   rdflib.URIRef(self.rdf_type)))
         for typeURI, proplist in self.properties.items():
             if typeURI in self._hidden_properties:
                 # Skip hidden properties
