@@ -243,12 +243,16 @@ class TestComponentDefinitions(unittest.TestCase):
         cd.sequence = seq
         self.assertEqual([cd.sequence.identity], cd.sequences)
 
-        # now test whether this works in the context of a Document
+
+    def test_hidden_property_adder(self):
+        # Assignment of a TopLevel object to a hidden property (in this case
+        # assigning a Sequence object to the sequence property) should
+        # simultaneously add that object to the Document top level
         doc = sbol2.Document()
-        cd = doc.componentDefinitions.create('cd1')
-        cd.sequence = seq
+        cd = doc.componentDefinitions.create('cd')
+        cd.sequence = sbol2.Sequence('seq')
         self.assertIsNotNone(cd.sequence)
-        self.assertEqual([cd.sequence.identity], cd.sequences)
+        self.assertIs(cd.sequence, doc.getSequence(cd.sequence.identity))
 
     @unittest.expectedFailure
     def test_sequences_validation(self):
