@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Any
 import warnings
 
 from .sbolerror import SBOLError
@@ -334,3 +335,11 @@ def parseURLDomain(url):
 
 def parsePropertyName(uri):
     return parseClassName(uri)
+
+
+def string_equal(str1: Any, str2: Any) -> bool:
+    """Converts the two arguments to str and compares them, returning
+    the result. This helps when comparing a str with a rdflib.URIRef
+    or a rdflib.Literal.
+    """
+    return str(str1) == str(str2)

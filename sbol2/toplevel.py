@@ -1,5 +1,7 @@
 import posixpath
 
+from rdflib import URIRef
+
 from .config import Config
 from .config import ConfigOptions
 from .config import getHomespace
