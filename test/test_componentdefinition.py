@@ -219,12 +219,22 @@ class TestComponentDefinitions(unittest.TestCase):
                                            rdflib.URIRef(seq.identity)))
 
     def test_sequence_validation(self):
+        # sequence and sequences should be synced up
         cd = sbol2.ComponentDefinition('cd1', sbol2.BIOPAX_DNA)
-        cd.name = 'cd1-name'
-        cd.description = 'cd1-description'
         seq = sbol2.Sequence('cd1_sequence', 'GCAT')
         cd.sequence = seq
-        self.assertEqual([seq.identity], cd.sequences)
+        self.assertEqual([cd.sequence.identity], cd.sequences)
+
+
+    def test_hidden_property_adder(self):
+        # Assignment of a TopLevel object to a hidden property (in this case
+        # assigning a Sequence object to the sequence property) should
+        # simultaneously add that object to the Document top level
+        doc = sbol2.Document()
+        cd = doc.componentDefinitions.create('cd')
+        cd.sequence = sbol2.Sequence('seq')
+        self.assertIsNotNone(cd.sequence)
+        self.assertIs(cd.sequence, doc.getSequence(cd.sequence.identity))
 
     @unittest.expectedFailure
     def test_sequences_validation(self):
