@@ -59,7 +59,7 @@ class TestValidation(unittest.TestCase):
         cd.properties[sbol2.SBOL_SEQUENCE_PROPERTY] = expected
         libsbol_rule_20(cd, seq)
         # Expect sequences to remain the same, but they've all been
-        # converted to URIRefs
+        # converted to strings
         self.assertEqual([str(item) for item in expected],
                          cd.sequences)
 
