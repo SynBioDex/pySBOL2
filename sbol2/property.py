@@ -652,6 +652,23 @@ class OwnedObject(Property):
         # Run validation rules
         self.validate(sbol_obj)
 
+    def convert_to_user(self, value):
+        return str(value)
+
+    def getSinglePropertyValue(self):
+        if self._rdf_type not in self._sbol_owner.properties:
+            return None
+        properties = self._sbol_owner.properties[self._rdf_type]
+        if len(properties) == 0:
+            return None
+        return self.convert_to_user(properties[-1])
+
+    def getPropertyValueList(self):
+        if self._rdf_type not in self._sbol_owner.properties:
+            return []
+        store = self._sbol_owner.properties[self._rdf_type]
+        return [self.convert_to_user(x) for x in store]
+
     @property
     def value(self):
         if self._upperBound == '1':
