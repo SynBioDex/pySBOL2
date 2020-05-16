@@ -59,8 +59,9 @@ class TestValidation(unittest.TestCase):
         cd.properties[sbol2.SBOL_SEQUENCE_PROPERTY] = expected
         libsbol_rule_20(cd, seq)
         # Expect sequences to remain the same, but they've all been
-        # converted to URIRefs
-        self.assertEqual(expected, cd.sequences)
+        # converted to strings
+        self.assertEqual([str(item) for item in expected],
+                         cd.sequences)
 
     def test_libsbol_rule_20_empty_set_without(self):
         # This rule synchronized ComponentDefinition.sequence with

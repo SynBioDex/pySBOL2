@@ -36,7 +36,7 @@ class TestConfig(unittest.TestCase):
         sbol2.Config.setOption('sbol_typed_uris', False)
         crispr_template = sbol2.ModuleDefinition(CRISPR_URI)
         self.assertEqual(CRISPR_URI, str(crispr_template))
-        self.assertEqual(rdflib.URIRef(CRISPR_URI), crispr_template.identity)
+        self.assertEqual(CRISPR_URI, crispr_template.identity)
 
     def test_openworld_useHomespace(self):
         """See: https://pysbol2.readthedocs.io/en/latest/getting_started.html"""
@@ -48,7 +48,7 @@ class TestConfig(unittest.TestCase):
         sbol2.Config.setOption('sbol_typed_uris', False)
         crispr_template = sbol2.ModuleDefinition('CRISPR_Template')
         self.assertEqual(CRISPR_URI, str(crispr_template))
-        self.assertEqual(rdflib.URIRef(CRISPR_URI), crispr_template.identity)
+        self.assertEqual(CRISPR_URI, crispr_template.identity)
 
     def test_SBOLCompliant(self):
         """See: https://pysbol2.readthedocs.io/en/latest/getting_started.html"""
@@ -57,7 +57,7 @@ class TestConfig(unittest.TestCase):
         sbol2.Config.setOption('sbol_typed_uris', False)
         crispr_template = sbol2.ModuleDefinition('CRISPR_Template')
         self.assertEqual(CRISPR_URI_1, str(crispr_template))
-        self.assertEqual(rdflib.URIRef(CRISPR_URI_1), crispr_template.identity)
+        self.assertEqual(CRISPR_URI_1, crispr_template.identity)
 
     def test_SBOLCompliant_typed(self):
         """See: https://pysbol2.readthedocs.io/en/latest/getting_started.html"""
@@ -67,12 +67,12 @@ class TestConfig(unittest.TestCase):
         crispr_template_md = sbol2.ModuleDefinition('CRISPR_Template')
         expected_crispr_template_md = CRISPR_MD_URI_1
         self.assertEqual(expected_crispr_template_md, str(crispr_template_md))
-        self.assertEqual(rdflib.URIRef(expected_crispr_template_md),
+        self.assertEqual(expected_crispr_template_md,
                          crispr_template_md.identity)
         crispr_template_cd = sbol2.ComponentDefinition('CRISPR_Template')
         expected_crispr_template_cd = CRISPR_CD_URI_1
         self.assertEqual(expected_crispr_template_cd, str(crispr_template_cd))
-        self.assertEqual(rdflib.URIRef(expected_crispr_template_cd),
+        self.assertEqual(expected_crispr_template_cd,
                          crispr_template_cd.identity)
 
     def test_ca_path(self):

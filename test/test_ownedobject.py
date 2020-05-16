@@ -2,6 +2,7 @@ import unittest
 
 import rdflib
 
+import sbol2
 import sbol2 as sbol
 
 
@@ -61,10 +62,10 @@ class TestOwnedObject(unittest.TestCase):
         doc = sbol.Document()
         md = doc.moduleDefinitions.create('foo')
         expected = 'http://examples.org/ModuleDefinition/foo/1'
-        self.assertEqual(md.identity, rdflib.URIRef(expected))
+        self.assertEqual(md.identity, expected)
         m = md.modules.create('bar')
         expected = 'http://examples.org/ModuleDefinition/foo/bar/1'
-        self.assertEqual(m.identity, rdflib.URIRef(expected))
+        self.assertEqual(m.identity, expected)
 
     def test_displayId_lookup(self):
         # Test lookup of an object by its display Id via the
@@ -91,6 +92,10 @@ class TestOwnedObject(unittest.TestCase):
         m2 = sbol.Module('m2')
         md.modules = [m1, m2]
         self.assertEqual(list(md.modules), [m1, m2])
+
+    def test_value(self):
+        doc = sbol2.Document()
+        self.assertEqual([], doc.componentDefinitions.value)
 
     def test_set_no_doc(self):
         # Add a module when the parent module definition is not in a

@@ -27,9 +27,9 @@ class TestInteraction(unittest.TestCase):
         i = sbol.Interaction()
         expected_identity = self.make_identity(self.homespace, name,
                                                sbol.VERSION_STRING)
-        self.assertEqual(i.identity, rdflib.URIRef(expected_identity))
-        self.assertEqual(i.displayId, rdflib.Literal(name))
-        self.assertEqual(i.version, rdflib.Literal(sbol.VERSION_STRING))
+        self.assertEqual(i.identity, expected_identity)
+        self.assertEqual(i.displayId, name)
+        self.assertEqual(i.version, sbol.VERSION_STRING)
         self.assertEqual(i.rdf_type, sbol.SBOL_INTERACTION)
         md = sbol.ModuleDefinition()
         md.interactions.add(i)
@@ -40,9 +40,9 @@ class TestInteraction(unittest.TestCase):
         i = sbol.Interaction(name)
         expected_identity = self.make_identity(self.homespace, name,
                                                sbol.VERSION_STRING)
-        self.assertEqual(i.identity, rdflib.URIRef(expected_identity))
-        self.assertEqual(i.displayId, rdflib.Literal(name))
-        self.assertEqual(i.version, rdflib.Literal(sbol.VERSION_STRING))
+        self.assertEqual(i.identity, expected_identity)
+        self.assertEqual(i.displayId, name)
+        self.assertEqual(i.version, sbol.VERSION_STRING)
         self.assertEqual(i.rdf_type, sbol.SBOL_INTERACTION)
         md = sbol.ModuleDefinition()
         md.interactions.add(i)
@@ -53,8 +53,8 @@ class TestInteraction(unittest.TestCase):
         i = sbol.Interaction(name, sbol.SBO_INHIBITION)
         expected_identity = self.make_identity(self.homespace, name,
                                                sbol.VERSION_STRING)
-        self.assertEqual(i.identity, rdflib.URIRef(expected_identity))
-        self.assertEqual(i.displayId, rdflib.Literal(name))
+        self.assertEqual(i.identity, expected_identity)
+        self.assertEqual(i.displayId, name)
         self.assertEqual(i.types, [sbol.SBO_INHIBITION])
         self.assertEqual(i.rdf_type, sbol.SBOL_INTERACTION)
         md = sbol.ModuleDefinition()
@@ -68,15 +68,15 @@ class TestInteraction(unittest.TestCase):
         expected_identity = self.make_identity(self.homespace, name,
                                                sbol.VERSION_STRING,
                                                'Interaction2')
-        self.assertEqual(i.identity, rdflib.URIRef(expected_identity))
-        self.assertEqual(i.displayId, rdflib.Literal(name))
+        self.assertEqual(i.identity, expected_identity)
+        self.assertEqual(i.displayId, name)
         self.assertEqual(i.types, [sbol.SBO_INHIBITION])
         self.assertEqual(i.rdf_type, rdf_type)
         # Verify that when added to a module definition, this
         # interaction is in the list of interactions despite having a
         # different rdf_type. That's because the rdf_type is not taken
         # into account when adding to the module definition's
-        # ineractions property.
+        # interactions property.
         md = sbol.ModuleDefinition()
         md.interactions.add(i)
         self.assertEqual(len(md.interactions), 1)

@@ -1,5 +1,7 @@
 import unittest
 
+import rdflib
+
 import sbol2
 
 

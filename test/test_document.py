@@ -170,13 +170,13 @@ class TestDocument(unittest.TestCase):
         display_id = 'CRISPR_Template'
         md = doc.moduleDefinitions[uri]
         self.assertIsNotNone(md)
-        self.assertEqual(md.identity, rdflib.URIRef(uri))
-        self.assertEqual(md.displayId, rdflib.Literal(display_id))
+        self.assertEqual(md.identity, uri)
+        self.assertEqual(md.displayId, display_id)
         # Test lookup by displayId. This was broken when loading from a file.
         md = doc.moduleDefinitions[display_id]
         self.assertIsNotNone(md)
-        self.assertEqual(md.identity, rdflib.URIRef(uri))
-        self.assertEqual(md.displayId, rdflib.Literal(display_id))
+        self.assertEqual(md.identity, uri)
+        self.assertEqual(md.displayId, display_id)
 
     def test_find_property_value(self):
         # find_property_value wasn't comparing against the passed
@@ -276,11 +276,11 @@ class TestDocument(unittest.TestCase):
         doc.addImplementation(impl_gen(3))
         uri_template = '{}/impl{}/1'
         self.assertEqual(doc.implementations[0].identity,
-                         rdflib.URIRef(uri_template.format(homespace, '0')))
+                         uri_template.format(homespace, '0'))
         self.assertEqual(doc.implementations[1].identity,
-                         rdflib.URIRef(uri_template.format(homespace, '1')))
+                         uri_template.format(homespace, '1'))
         self.assertEqual(doc.implementations[2].identity,
-                         rdflib.URIRef(uri_template.format(homespace, '2')))
+                         uri_template.format(homespace, '2'))
 
     def test_getImplementation(self):
         homespace = 'http://sbols.org/sbol_test'

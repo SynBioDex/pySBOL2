@@ -2,10 +2,11 @@ import collections.abc
 import logging
 import os
 import posixpath
-from typing import Any, Mapping, Union
+from typing import Any, Dict, Mapping, Union
 import warnings
 
 import rdflib
+from rdflib import URIRef
 
 from . import SBOL2Serialize
 from . import validation
@@ -40,6 +41,7 @@ from .sequence import Sequence
 from .sequenceannotation import SequenceAnnotation
 from .sequenceconstraint import SequenceConstraint
 from .toplevel import TopLevel
+from .uridict import URIDict
 
 import requests
 
@@ -106,7 +108,12 @@ class Document(Identified):
         self.graph = rdflib.Graph()
         # The Document's register of objects
         self.objectCache = {}  # Needed?
-        self.SBOLObjects = {}
+
+        # The keys in SBOLObjects are URIRefs because our internal
+        # representations use rdflib types.
+        # self.SBOLObjects: Dict[rdflib.URIRef, SBOLObject] = {}
+        self.SBOLObjects = URIDict()
+
         self._namespaces = {}
         self.resource_namespaces = set()
         self.designs = OwnedObject(self, SYSBIO_DESIGN, Design,
@@ -209,20 +216,22 @@ class Document(Identified):
         :return: None
         """
         # Check for uniqueness of URI
-        if sbol_obj.identity in self.SBOLObjects:
-            raise SBOLError('Cannot add ' + str(sbol_obj.identity) +
+        identity_uri = rdflib.URIRef(sbol_obj.identity)
+        if identity_uri in self.SBOLObjects:
+            raise SBOLError('Cannot add ' + sbol_obj.identity +
                             ' to Document. An object with this identity '
                             'is already contained in the Document',
                             SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE)
         else:
             # If TopLevel add to Document.
             if sbol_obj.is_top_level():
-                self.SBOLObjects[sbol_obj.identity] = sbol_obj
-            if sbol_obj.getTypeURI() in self.owned_objects:
+                self.SBOLObjects[identity_uri] = sbol_obj
+            type_uri = rdflib.URIRef(sbol_obj.getTypeURI())
+            if type_uri in self.owned_objects:
                 sbol_obj.parent = self  # Set back-pointer to parent object
                 # Add the object to the Document's property store,
                 # eg. componentDefinitions, moduleDefinitions, etc.
-                self.owned_objects[sbol_obj.getTypeURI()].append(sbol_obj)
+                self.owned_objects[type_uri].append(sbol_obj)
             sbol_obj.doc = self
             # Recurse into child objects and set their back-pointer to this Document
             for key, obj_store in sbol_obj.owned_objects.items():
@@ -540,7 +549,8 @@ class Document(Identified):
                 values.clear()
             new_obj.identity = subject
             # Update document
-            self.SBOLObjects[new_obj.identity] = new_obj
+            identity_uri = rdflib.URIRef(new_obj.identity)
+            self.SBOLObjects[identity_uri] = new_obj
             new_obj.doc = self
             # For now, set the parent to the Document.
             # This may get overwritten later for child objects.
@@ -555,7 +565,8 @@ class Document(Identified):
             new_obj = SBOLObject()
             new_obj.identity = subject
             new_obj.rdf_type = obj
-            self.SBOLObjects[new_obj.identity] = new_obj
+            identity_uri = rdflib.URIRef(new_obj.identity)
+            self.SBOLObjects[identity_uri] = new_obj
             new_obj.doc = self
 
     def parse_properties_inner(self, subject, predicate, obj):
@@ -620,10 +631,12 @@ class Document(Identified):
                 for k, v in ao.owned_objects.items():
                     tl.owned_objects[k] = v
                 tl.doc = self
-                self.SBOLObjects[tl.identity] = tl
+                tl_identity_uri = rdflib.URIRef(tl.identity)
+                self.SBOLObjects[tl_identity_uri] = tl
             else:
                 # Determine the RDF type of the member property that
                 # contains this kind of annotation object
+                ao_identity_uri = rdflib.URIRef(ao.identity)
                 ns = config.parseNamespace(ao.type)
                 self.logger.debug('anno ns = %r', ns)
                 class_name = config.parseClassName(ao.type)
@@ -633,7 +646,7 @@ class Document(Identified):
                 self.logger.debug('anno property name = %r', property_name)
                 property_uri = rdflib.URIRef(posixpath.join(ns, property_name))
                 self.logger.debug('anno property uri = %r', property_uri)
-                matches = self.find_reference(ao.identity)
+                matches = self.find_reference(ao_identity_uri)
                 self.logger.debug('Found %d references', len(matches))
                 matches = [m for m in matches if property_uri in m.properties]
                 self.logger.debug('Found %d good references', len(matches))
@@ -650,13 +663,14 @@ class Document(Identified):
                     self.logger.debug('match[%r] = %r', property_uri,
                                       match.properties[property_uri])
                     self.logger.debug('ao.identity = %r', ao.identity)
-                    match.properties[property_uri].remove(ao.identity)
+                    match.properties[property_uri].remove(ao_identity_uri)
                     if len(match.properties[property_uri]) == 0:
                         # Remove the empty property list
                         del match.properties[property_uri]
                     # Remove this annotation object from the list of
                     # SBOLObjects
-                    del self.SBOLObjects[ao.identity]
+                    ao_identity_uri = rdflib.URIRef(ao.identity)
+                    del self.SBOLObjects[ao_identity_uri]
 
     def infer_resource_namespaces(self):
         for obj in self.SBOLObjects.values():

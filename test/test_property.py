@@ -95,11 +95,11 @@ class TestProperty(unittest.TestCase):
 
     def test_literal_property_properties(self):
         md = sbol.ModuleDefinition()
-        self.assertNotIn(sbol.UNDEFINED, md.properties)
+        self.assertNotIn(rdflib.URIRef(sbol.UNDEFINED), md.properties)
         sbol.property.LiteralProperty(md, sbol.UNDEFINED, '0', '*', [], 'foo')
         # Creating the property should also create the entry in the
         # parent properties dict
-        self.assertIn(sbol.UNDEFINED, md.properties)
+        self.assertIn(rdflib.URIRef(sbol.UNDEFINED), md.properties)
 
     def test_text_property_setting_single(self):
         md = sbol.ModuleDefinition()
@@ -108,7 +108,7 @@ class TestProperty(unittest.TestCase):
         # Test setting to string
         expected = 'foo'
         tp.value = expected
-        self.assertEqual(tp.value, rdflib.Literal(expected))
+        self.assertEqual(tp.value, expected)
         # Test setting to None
         tp.value = None
         self.assertIsNone(tp.value)
@@ -126,14 +126,14 @@ class TestProperty(unittest.TestCase):
         # Test setting to string
         expected = 'foo'
         tp.value = expected
-        self.assertEqual(tp.value, [rdflib.Literal(expected)])
+        self.assertEqual(tp.value, [expected])
         # Test setting to None
         with self.assertRaises(TypeError):
             tp.value = None
         # Test setting to list
         expected = ['foo', 'bar']
         tp.value = expected
-        self.assertEqual(tp.value, [rdflib.Literal(x) for x in expected])
+        self.assertEqual(tp.value, expected)
         # Test setting to list of integers
         with self.assertRaises(TypeError):
             tp.value = [1, 2, 3]
@@ -205,11 +205,11 @@ class TestProperty(unittest.TestCase):
 
         # Test conversion to URIRef
         c.definition = str(cd1.identity)
-        self.assertEqual(type(c.definition), rdflib.URIRef)
+        self.assertEqual(type(c.definition), str)
 
         cd0.sequences = [str(seq0a.identity), str(seq0b.identity)]
         self.assertEqual([type(s) for s in cd0.sequences],
-                         [rdflib.URIRef, rdflib.URIRef])
+                         [str, str])
 
         # Test unset
         c.definition = None
@@ -246,33 +246,31 @@ class TestProperty(unittest.TestCase):
         foo_uri = rdflib.URIRef(foo_str)
         bar_uri = rdflib.URIRef(bar_str)
         cd.roles = foo_str
-        self.assertEqual(cd.roles, [foo_uri])
+        self.assertEqual(cd.roles, [foo_str])
         # This used to append. Eek!
         cd.roles = bar_str
-        self.assertEqual(cd.roles, [bar_uri])
+        self.assertEqual(cd.roles, [bar_str])
         # This used to append. Eek!
         cd.roles = [foo_str, bar_str]
-        self.assertEqual(cd.roles, [foo_uri, bar_uri])
+        self.assertEqual(cd.roles, [foo_str, bar_str])
         with self.assertRaises(TypeError):
             cd.roles = 34
 
     def test_uri_property_append(self):
         cd = sbol.ComponentDefinition('cd')
-        foo_str = 'foo'
-        bar_str = 'bar'
-        foo_uri = rdflib.URIRef(foo_str)
-        bar_uri = rdflib.URIRef(bar_str)
-        cd.roles = foo_str
-        self.assertEqual(cd.roles, [foo_uri])
+        foo = 'foo'
+        bar = 'bar'
+        cd.roles = foo
+        self.assertEqual(cd.roles, [foo])
         # append has no effect. This is because the list that is
         # returned by `cd.roles` is not connected with the internal
         # data representation.
-        cd.roles.append(bar_str)
-        self.assertEqual(cd.roles, [foo_uri])
+        cd.roles.append(bar)
+        self.assertEqual(cd.roles, [foo])
         # The `+=` operator is a good way for users to append new
         # items to the list
-        cd.roles += [bar_str]
-        self.assertEqual(cd.roles, [foo_uri, bar_uri])
+        cd.roles += [bar]
+        self.assertEqual(cd.roles, [foo, bar])
 
     def test_owned_object_remove(self):
         md = sbol.ModuleDefinition('md')

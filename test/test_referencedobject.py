@@ -21,8 +21,8 @@ class TestReferencedObjects(unittest.TestCase):
         md = doc.moduleDefinitions[md_uri]
         # Work with the first interaction
         i = md.interactions[0]
-        # participant should be a URIRef
-        self.assertEqual(type(i.participations[0].participant), rdflib.URIRef)
+        # participant should be a str
+        self.assertEqual(type(i.participations[0].participant), str)
 
     def test_fc_definition(self):
         doc = sbol.Document()
@@ -32,8 +32,8 @@ class TestReferencedObjects(unittest.TestCase):
         fc_uri = ('http://sbols.org/CRISPR_Example/CRISPR_Template' +
                   '/cas9_gRNA_complex/1.0.0')
         fc = md.functionalComponents[fc_uri]
-        # definition should be a URIRef
-        self.assertEqual(type(fc.definition), rdflib.URIRef)
+        # definition should be a str
+        self.assertEqual(type(fc.definition), str)
 
     def test_cd_sequences(self):
         # Test a referenced object storing a list instead of a singleton
@@ -47,7 +47,7 @@ class TestReferencedObjects(unittest.TestCase):
         s2_uri = 'http://examples.org/Sequence/ECK120010818_sequence/1'
 
         # Ensure the URI is present, and as a string
-        self.assertTrue(rdflib.URIRef(s1_uri) in cd.sequences)
+        self.assertTrue(s1_uri in cd.sequences)
 
         # Cannot append sequences - it has no effect on the cd
         #
@@ -59,8 +59,8 @@ class TestReferencedObjects(unittest.TestCase):
         cd.sequences = [s1_uri, s2_uri]
         self.assertTrue(len(cd.sequences) == 2)
 
-        # Verify that none of the elements are instances of rdflib.URIRef
-        self.assertTrue(all([isinstance(uri, rdflib.URIRef) for uri in cd.sequences]))
+        # Verify that all of the elements are instances of str
+        self.assertTrue(all([isinstance(uri, str) for uri in cd.sequences]))
 
         # Verify that the attribute is still a ReferencedObject and
         # was not overwritten with the list.

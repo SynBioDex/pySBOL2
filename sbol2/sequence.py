@@ -1,4 +1,5 @@
 from deprecated import deprecated
+from rdflib import URIRef
 
 from .constants import *
 from .property import LiteralProperty, URIProperty
