@@ -306,13 +306,24 @@ class ComponentDefinition(TopLevel):
                     return True
             return False
 
-    def getUpstreamComponent(self, current_component):
+    def getUpstreamComponent(self, component):
         """Get the upstream component.
 
-        :param current_component: A Component in this ComponentDefinition.
+        :param component: A Component in this ComponentDefinition.
         :return: The upstream component.
         """
-        raise NotImplementedError("Not yet implemented")
+        if len(self.sequenceConstraints) < 1:
+            raise SBOLError(SBOL_ERROR_NOT_FOUND, 'Cannot get upstream Component. Self '
+                            'has no SequenceConstraints')
+        else:
+            upstream_component_id = None
+            for sc in self.sequenceConstraints:
+                if sc.object == component.identity and \
+                      sc.restriction == SBOL_RESTRICTION_PRECEDES:
+                    upstream_component = self.components[sc.subject]
+                    return upstream_component
+        raise SBOLError(SBOL_ERROR_END_OF_LIST, 'This component has no upstream '
+                        'component. Use hasUpstreamComponent to catch this error')
 
     def hasDownstreamComponent(self, component):
         """Checks if the specified Component has a Component downstream
@@ -332,13 +343,24 @@ class ComponentDefinition(TopLevel):
                     return True
             return False
 
-    def getDownstreamComponent(self, current_component):
+    def getDownstreamComponent(self, component):
         """Get the downstream component.
 
         :param current_component: A Component in this ComponentDefinition.
         :return: The downstream component.
         """
-        raise NotImplementedError("Not yet implemented")
+        if len(self.sequenceConstraints) < 1:
+            raise SBOLError(SBOL_ERROR_NOT_FOUND, 'Cannot get downstream Component. '
+                            'Self has no SequenceConstraints')
+        else:
+            upstream_component_id = None
+            for sc in self.sequenceConstraints:
+                if sc.subject == component.identity and \
+                      sc.restriction == SBOL_RESTRICTION_PRECEDES:
+                    upstream_component = self.components[sc.object]
+                    return upstream_component
+        raise SBOLError(SBOL_ERROR_END_OF_LIST, 'This component has no downstream '
+                        'component. Use hasDownstreamComponent to catch this error')
 
     def getFirstComponent(self):
         """Gets the first Component in a linear sequence.
@@ -513,34 +535,6 @@ class ComponentDefinition(TopLevel):
 
     def getTypeURI(self):
         return SBOL_COMPONENT_DEFINITION
-
-    def getUpstreamComponent(self, component):
-        if len(self.sequenceConstraints) < 1:
-            raise SBOLError(SBOL_ERROR_NOT_FOUND, 'Cannot get upstream Component. Self '
-                            'has no SequenceConstraints')
-        else:
-            upstream_component_id = None
-            for sc in self.sequenceConstraints:
-                if sc.object == component.identity and \
-                      sc.restriction == SBOL_RESTRICTION_PRECEDES:
-                    upstream_component = self.components[sc.subject]
-                    return upstream_component
-        raise SBOLError(SBOL_ERROR_END_OF_LIST, 'This component has no upstream '
-                        'component. Use hasUpstreamComponent to catch this error')
-
-    def getDownstreamComponent(self, component):
-        if len(self.sequenceConstraints) < 1:
-            raise SBOLError(SBOL_ERROR_NOT_FOUND, 'Cannot get downstream Component. '
-                            'Self has no SequenceConstraints')
-        else:
-            upstream_component_id = None
-            for sc in self.sequenceConstraints:
-                if sc.subject == component.identity and \
-                      sc.restriction == SBOL_RESTRICTION_PRECEDES:
-                    upstream_component = self.components[sc.object]
-                    return upstream_component
-        raise SBOLError(SBOL_ERROR_END_OF_LIST, 'This component has no downstream '
-                        'component. Use hasDownstreamComponent to catch this error')
 
     def getFirstComponent(self):
         # A Component's sequential position in the primary structure does not
