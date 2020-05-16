@@ -354,12 +354,12 @@ class ComponentDefinition(TopLevel):
         raise NotImplementedError("Not yet implemented")
 
     def getInSequentialOrder(self):
-        """Orders this ComponentDefinition's member Components
-        into a linear arrangement based on Sequence Constraints.
+        """Get the primary sequence of a design in terms of its sequentially ordered
+        Components.
 
-        :return: Primary sequence structure.
+        :return: A list of Components.
         """
-        raise NotImplementedError("Not yet implemented")
+        return self.getPrimaryStructureComponents()
 
     def hasUpstreamComponent(self, component):
         """Checks if the specified Component has a Component upstream
