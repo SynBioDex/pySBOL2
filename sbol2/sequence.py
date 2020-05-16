@@ -4,7 +4,7 @@ from rdflib import URIRef
 from .constants import *
 from .property import LiteralProperty, URIProperty
 from .toplevel import TopLevel
-
+from .config import Config
 
 class Sequence(TopLevel):
     """

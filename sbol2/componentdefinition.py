@@ -265,13 +265,9 @@ class ComponentDefinition(TopLevel):
                 display_id = self.displayId
                 if not Config.getOption('sbol_typed_uris'):
                     display_id += '_seq'
-                seq = self.doc.sequences.create(display_id)
-                self.sequence = seq
-                self.sequences = seq.identity
+                self.sequence = Sequence(display_id)
             else:
-                seq = self.sequences.create(self.identity + '_seq')
-                self.sequence = seq
-                self.sequences = seq.identity
+                self.sequence = Sequence(display_id + '_seq')
 
         return self.sequence.compile(assembly_method=assembly_method)
 

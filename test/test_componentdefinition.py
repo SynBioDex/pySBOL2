@@ -62,7 +62,6 @@ class TestComponentDefinitions(unittest.TestCase):
         self.assertCountEqual(actual, expected)
 
     # See Issue #64, CD.assemblePrimaryStructure is not implemented
-    @unittest.expectedFailure  # See issue 64
     def testPrimaryStructureIteration(self):
         list_cd = []
         list_cd_true = ["R0010", "E0040", "B0032", "B0012"]
@@ -310,7 +309,6 @@ class TestAssemblyRoutines(unittest.TestCase):
         self.assertEqual(primary_structure, [promoter.identity, RBS.identity,
                          CDS.identity, terminator.identity])
 
-    @unittest.expectedFailure
     def test_compile_sequence(self):
         doc = sbol2.Document()
         sbol2.Config.setOption('sbol_typed_uris', True)
@@ -341,7 +339,6 @@ class TestAssemblyRoutines(unittest.TestCase):
         self.assertEqual(target_seq, 'aaatttaaatttaaatttaaa')
         self.assertEqual(target_seq, gene.sequence.elements)
 
-    @unittest.expectedFailure
     def test_recursive_compile(self):
         doc = sbol2.Document()
         cd1 = sbol2.ComponentDefinition('cd1')
@@ -378,196 +375,195 @@ class TestAssemblyRoutines(unittest.TestCase):
         self.assertEquals(r4.start, 1)
         self.assertEquals(r4.end, 2)
 
-    # @unittest.expectedFailure
-    # def test_standard_assembly(self):
-    #     doc = sbol2.Document()
-    #     gene = sbol2.ComponentDefinition("BB0001")
-    #     promoter = sbol2.ComponentDefinition("R0010")
-    #     RBS = sbol2.ComponentDefinition("B0032")
-    #     CDS = sbol2.ComponentDefinition("E0040")
-    #     terminator = sbol2.ComponentDefinition("B0012")
+    @unittest.expectedFailure
+    def test_standard_assembly(self):
+        doc = sbol2.Document()
+        gene = sbol2.ComponentDefinition("BB0001")
+        promoter = sbol2.ComponentDefinition("R0010")
+        RBS = sbol2.ComponentDefinition("B0032")
+        CDS = sbol2.ComponentDefinition("E0040")
+        terminator = sbol2.ComponentDefinition("B0012")
 
-    #     promoter.sequence = sbol2.Sequence('R0010')
-    #     RBS.sequence = sbol2.Sequence('B0032')
-    #     CDS.sequence = sbol2.Sequence('E0040')
-    #     terminator.sequence = sbol2.Sequence('B0012')
+        promoter.sequence = sbol2.Sequence('R0010')
+        RBS.sequence = sbol2.Sequence('B0032')
+        CDS.sequence = sbol2.Sequence('E0040')
+        terminator.sequence = sbol2.Sequence('B0012')
 
-    #     promoter.sequence.elements = 'a'
-    #     RBS.sequence.elements = 't'
-    #     CDS.sequence.elements = 'c'
-    #     terminator.sequence.elements = 'g'
+        promoter.sequence.elements = 'a'
+        RBS.sequence.elements = 't'
+        CDS.sequence.elements = 'c'
+        terminator.sequence.elements = 'g'
 
-    #     promoter.roles = sbol2.SO_PROMOTER
-    #     RBS.roles = sbol2.SO_RBS
-    #     CDS.roles = sbol2.SO_CDS
-    #     terminator.roles = sbol2.SO_TERMINATOR
+        promoter.roles = sbol2.SO_PROMOTER
+        RBS.roles = sbol2.SO_RBS
+        CDS.roles = sbol2.SO_CDS
+        terminator.roles = sbol2.SO_TERMINATOR
 
-    #     doc.addComponentDefinition(gene)
-    #     gene.assemblePrimaryStructure([promoter, RBS, CDS, terminator],
-    #                                   IGEM_STANDARD_ASSEMBLY)
-    #     target_seq = gene.compile()
+        doc.addComponentDefinition(gene)
+        gene.assemblePrimaryStructure([promoter, RBS, CDS, terminator],
+                                      IGEM_STANDARD_ASSEMBLY)
+        target_seq = gene.compile()
 
-    #     self.assertEquals(target_seq, 'atactagagttactagctactagagg')
+        self.assertEquals(target_seq, 'atactagagttactagctactagagg')
 
-    # @unittest.expectedFailure
-    # def test_assemble_with_displayIds(self):
-    #     sbol2.Config.setOption('sbol_typed_uris', True)
+    def test_assemble_with_displayIds(self):
+        sbol2.Config.setOption('sbol_typed_uris', True)
 
-    #     doc = sbol2.Document()
-    #     gene = sbol2.ComponentDefinition("BB0001")
-    #     promoter = sbol2.ComponentDefinition("R0010")
-    #     RBS = sbol2.ComponentDefinition("B0032")
-    #     CDS = sbol2.ComponentDefinition("E0040")
-    #     terminator = sbol2.ComponentDefinition("B0012")
+        doc = sbol2.Document()
+        gene = sbol2.ComponentDefinition("BB0001")
+        promoter = sbol2.ComponentDefinition("R0010")
+        RBS = sbol2.ComponentDefinition("B0032")
+        CDS = sbol2.ComponentDefinition("E0040")
+        terminator = sbol2.ComponentDefinition("B0012")
 
-    #     promoter.sequence = sbol2.Sequence('R0010')
-    #     RBS.sequence = sbol2.Sequence('B0032')
-    #     CDS.sequence = sbol2.Sequence('E0040')
-    #     terminator.sequence = sbol2.Sequence('B0012')
+        promoter.sequence = sbol2.Sequence('R0010')
+        RBS.sequence = sbol2.Sequence('B0032')
+        CDS.sequence = sbol2.Sequence('E0040')
+        terminator.sequence = sbol2.Sequence('B0012')
 
-    #     promoter.sequence.elements = 'a'
-    #     RBS.sequence.elements = 't'
-    #     CDS.sequence.elements = 'c'
-    #     terminator.sequence.elements = 'g'
+        promoter.sequence.elements = 'a'
+        RBS.sequence.elements = 't'
+        CDS.sequence.elements = 'c'
+        terminator.sequence.elements = 'g'
 
-    #     promoter.roles = sbol2.SO_PROMOTER
-    #     RBS.roles = sbol2.SO_RBS
-    #     CDS.roles = sbol2.SO_CDS
-    #     terminator.roles = sbol2.SO_TERMINATOR
+        promoter.roles = sbol2.SO_PROMOTER
+        RBS.roles = sbol2.SO_RBS
+        CDS.roles = sbol2.SO_CDS
+        terminator.roles = sbol2.SO_TERMINATOR
 
-    #     doc.addComponentDefinition([gene, promoter, RBS, CDS, terminator])
-    #     gene.assemblePrimaryStructure(['R0010', 'B0032', 'E0040', 'B0012'])
-    #     primary_structure = gene.getPrimaryStructure()
-    #     primary_structure = [c.identity for c in primary_structure]
-    #     self.assertEqual(primary_structure, [promoter.identity, RBS.identity,
-    #                      CDS.identity, terminator.identity])
+        doc.addComponentDefinition([gene, promoter, RBS, CDS, terminator])
+        gene.assemblePrimaryStructure(['R0010', 'B0032', 'E0040', 'B0012'])
+        primary_structure = gene.getPrimaryStructure()
+        primary_structure = [c.identity for c in primary_structure]
+        self.assertEqual(primary_structure, [promoter.identity, RBS.identity,
+                         CDS.identity, terminator.identity])
 
-    #     target_seq = gene.compile()
-    #     self.assertEqual(target_seq, 'atcg')
+        target_seq = gene.compile()
+        self.assertEqual(target_seq, 'atcg')
 
-    # @unittest.expectedFailure
-    # def test_delete_upstream(self):
-    #     doc = sbol2.Document()
-    #     gene = sbol2.ComponentDefinition("BB0001")
-    #     promoter = sbol2.ComponentDefinition("R0010")
-    #     rbs = sbol2.ComponentDefinition("B0032")
-    #     cds = sbol2.ComponentDefinition("E0040")
-    #     terminator = sbol2.ComponentDefinition("B0012")
+    @unittest.expectedFailure
+    def test_delete_upstream(self):
+        doc = sbol2.Document()
+        gene = sbol2.ComponentDefinition("BB0001")
+        promoter = sbol2.ComponentDefinition("R0010")
+        rbs = sbol2.ComponentDefinition("B0032")
+        cds = sbol2.ComponentDefinition("E0040")
+        terminator = sbol2.ComponentDefinition("B0012")
 
-    #     doc.addComponentDefinition([gene, promoter, rbs, cds, terminator])
-    #     gene.assemblePrimaryStructure([promoter, rbs, cds, terminator])
-    #     primary_structure_components = gene.getPrimaryStructureComponents()
-    #     c_promoter = primary_structure_components[0]
-    #     c_rbs = primary_structure_components[1]
-    #     c_cds = primary_structure_components[2]
-    #     c_terminator = primary_structure_components[3]
+        doc.addComponentDefinition([gene, promoter, rbs, cds, terminator])
+        gene.assemblePrimaryStructure([promoter, rbs, cds, terminator])
+        primary_structure_components = gene.getPrimaryStructureComponents()
+        c_promoter = primary_structure_components[0]
+        c_rbs = primary_structure_components[1]
+        c_cds = primary_structure_components[2]
+        c_terminator = primary_structure_components[3]
 
-    #     gene.deleteUpstreamComponent(c_cds)
-    #     primary_structure = gene.getPrimaryStructure()
-    #     primary_structure = [cd.identity for cd in primary_structure]
-    #     valid_primary_structure = [promoter.identity, cds.identity,
-    #                               terminator.identity]
-    #     self.assertEqual(primary_structure, valid_primary_structure)
+        gene.deleteUpstreamComponent(c_cds)
+        primary_structure = gene.getPrimaryStructure()
+        primary_structure = [cd.identity for cd in primary_structure]
+        valid_primary_structure = [promoter.identity, cds.identity,
+                                   terminator.identity]
+        self.assertEqual(primary_structure, valid_primary_structure)
 
-    #     # Test deletion when the target Component is the first Component
-    #     gene.deleteUpstreamComponent(c_cds)
-    #     primary_structure = gene.getPrimaryStructure()
-    #     primary_structure = [cd.identity for cd in primary_structure]
-    #     valid_primary_structure = [cds.identity, terminator.identity]
-    #     self.assertEqual(primary_structure, valid_primary_structure)
+        # Test deletion when the target Component is the first Component
+        gene.deleteUpstreamComponent(c_cds)
+        primary_structure = gene.getPrimaryStructure()
+        primary_structure = [cd.identity for cd in primary_structure]
+        valid_primary_structure = [cds.identity, terminator.identity]
+        self.assertEqual(primary_structure, valid_primary_structure)
 
-    #     # Test failure when user tries to delete a Component upstream of the first
-    #     # Component
-    #     with self.assertRaises(ValueError):
-    #         gene.deleteUpstreamComponent(c_promoter)
-    #     # Test failure when the user supplies a Component that isn't part of the
-    #     # primary structure
-    #     with self.assertRaises(ValueError):
-    #         gene.deleteUpstreamComponent(Component())
+        # Test failure when user tries to delete a Component upstream of the first
+        # Component
+        with self.assertRaises(ValueError):
+            gene.deleteUpstreamComponent(c_promoter)
+        # Test failure when the user supplies a Component that isn't part of the
+        # primary structure
+        with self.assertRaises(ValueError):
+            gene.deleteUpstreamComponent(Component())
 
-    # @unittest.expectedFailure
-    # def test_delete_downstream(self):
-    #     doc = sbol2.Document()
-    #     gene = sbol2.ComponentDefinition("BB0001")
-    #     promoter = sbol2.ComponentDefinition("R0010")
-    #     rbs = sbol2.ComponentDefinition("B0032")
-    #     cds = sbol2.ComponentDefinition("E0040")
-    #     terminator = sbol2.ComponentDefinition("B0012")
+    @unittest.expectedFailure
+    def test_delete_downstream(self):
+        doc = sbol2.Document()
+        gene = sbol2.ComponentDefinition("BB0001")
+        promoter = sbol2.ComponentDefinition("R0010")
+        rbs = sbol2.ComponentDefinition("B0032")
+        cds = sbol2.ComponentDefinition("E0040")
+        terminator = sbol2.ComponentDefinition("B0012")
 
-    #     doc.addComponentDefinition([gene, promoter, rbs, cds, terminator])
-    #     gene.assemblePrimaryStructure([promoter, rbs, cds, terminator])
-    #     primary_structure_components = gene.getPrimaryStructureComponents()
-    #     c_promoter = primary_structure_components[0]
-    #     c_rbs = primary_structure_components[1]
-    #     c_cds = primary_structure_components[2]
-    #     c_terminator = primary_structure_components[3]
+        doc.addComponentDefinition([gene, promoter, rbs, cds, terminator])
+        gene.assemblePrimaryStructure([promoter, rbs, cds, terminator])
+        primary_structure_components = gene.getPrimaryStructureComponents()
+        c_promoter = primary_structure_components[0]
+        c_rbs = primary_structure_components[1]
+        c_cds = primary_structure_components[2]
+        c_terminator = primary_structure_components[3]
 
-    #     gene.deleteDownstreamComponent(c_rbs)
-    #     primary_structure = gene.getPrimaryStructure()
-    #     primary_structure = [cd.identity for cd in primary_structure]
-    #     valid_primary_structure = [promoter.identity, rbs.identity,
-    #                               terminator.identity]
-    #     self.assertEqual(primary_structure, valid_primary_structure)
+        gene.deleteDownstreamComponent(c_rbs)
+        primary_structure = gene.getPrimaryStructure()
+        primary_structure = [cd.identity for cd in primary_structure]
+        valid_primary_structure = [promoter.identity, rbs.identity,
+                                   terminator.identity]
+        self.assertEqual(primary_structure, valid_primary_structure)
 
-    #     # Test deletion when the target Component is the last Component
-    #     gene.deleteDownstreamComponent(c_rbs)
-    #     primary_structure = gene.getPrimaryStructure()
-    #     primary_structure = [cd.identity for cd in primary_structure]
-    #     valid_primary_structure = [promoter.identity, rbs.identity]
-    #     self.assertEqual(primary_structure, valid_primary_structure)
+        # Test deletion when the target Component is the last Component
+        gene.deleteDownstreamComponent(c_rbs)
+        primary_structure = gene.getPrimaryStructure()
+        primary_structure = [cd.identity for cd in primary_structure]
+        valid_primary_structure = [promoter.identity, rbs.identity]
+        self.assertEqual(primary_structure, valid_primary_structure)
 
-    #     # Test failure when user tries to delete Component upstream of the first
-    #     # Component
-    #     with self.assertRaises(ValueError):
-    #         gene.deleteDownstreamComponent(c_cds)
-    #     # Test failure when the user supplies a Component that isn't part of the
-    #     # primary structure
-    #     with self.assertRaises(ValueError):
-    #         gene.deleteDownstreamComponent(Component())
+        # Test failure when user tries to delete Component upstream of the first
+        # Component
+        with self.assertRaises(ValueError):
+            gene.deleteDownstreamComponent(c_cds)
+        # Test failure when the user supplies a Component that isn't part of the
+        # primary structure
+        with self.assertRaises(ValueError):
+            gene.deleteDownstreamComponent(Component())
 
-    # @unittest.expectedFailure
-    # def test_insert_downstream(self):
-    #     doc = sbol2.Document()
-    #     gene = sbol2.ComponentDefinition("BB0001")
-    #     promoter = sbol2.ComponentDefinition("R0010")
-    #     rbs = sbol2.ComponentDefinition("B0032")
-    #     cds = sbol2.ComponentDefinition("E0040")
-    #     terminator = sbol2.ComponentDefinition("B0012")
+    @unittest.expectedFailure
+    def test_insert_downstream(self):
+        doc = sbol2.Document()
+        gene = sbol2.ComponentDefinition("BB0001")
+        promoter = sbol2.ComponentDefinition("R0010")
+        rbs = sbol2.ComponentDefinition("B0032")
+        cds = sbol2.ComponentDefinition("E0040")
+        terminator = sbol2.ComponentDefinition("B0012")
 
-    #     doc.addComponentDefinition([gene, promoter, rbs, cds, terminator])
-    #     gene.assemblePrimaryStructure([promoter, rbs, cds])
-    #     primary_structure_components = gene.getPrimaryStructureComponents()
-    #     c_promoter = primary_structure_components[0]
-    #     c_rbs = primary_structure_components[1]
-    #     c_cds = primary_structure_components[2]
-    #     gene.insertDownstreamComponent(c_cds, terminator)
-    #     primary_structure = gene.getPrimaryStructure()
-    #     primary_structure = [cd.identity for cd in primary_structure]
-    #     valid_primary_structure = [promoter.identity, rbs.identity, cds.identity,
-    #                                terminator.identity]
-    #     self.assertEqual(primary_structure, valid_primary_structure)
+        doc.addComponentDefinition([gene, promoter, rbs, cds, terminator])
+        gene.assemblePrimaryStructure([promoter, rbs, cds])
+        primary_structure_components = gene.getPrimaryStructureComponents()
+        c_promoter = primary_structure_components[0]
+        c_rbs = primary_structure_components[1]
+        c_cds = primary_structure_components[2]
+        gene.insertDownstreamComponent(c_cds, terminator)
+        primary_structure = gene.getPrimaryStructure()
+        primary_structure = [cd.identity for cd in primary_structure]
+        valid_primary_structure = [promoter.identity, rbs.identity, cds.identity,
+                                   terminator.identity]
+        self.assertEqual(primary_structure, valid_primary_structure)
 
-    # @unittest.expectedFailure
-    # def test_insert_upstream(self):
-    #     doc = sbol2.Document()
-    #     gene = sbol2.ComponentDefinition("BB0001")
-    #     promoter = sbol2.ComponentDefinition("R0010")
-    #     rbs = sbol2.ComponentDefinition("B0032")
-    #     cds = sbol2.ComponentDefinition("E0040")
-    #     terminator = sbol2.ComponentDefinition("B0012")
+    @unittest.expectedFailure
+    def test_insert_upstream(self):
+        doc = sbol2.Document()
+        gene = sbol2.ComponentDefinition("BB0001")
+        promoter = sbol2.ComponentDefinition("R0010")
+        rbs = sbol2.ComponentDefinition("B0032")
+        cds = sbol2.ComponentDefinition("E0040")
+        terminator = sbol2.ComponentDefinition("B0012")
 
-    #     doc.addComponentDefinition([gene, promoter, rbs, cds, terminator])
-    #     gene.assemblePrimaryStructure([rbs, cds, terminator])
-    #     primary_structure_components = gene.getPrimaryStructureComponents()
-    #     c_rbs = primary_structure_components[0]
-    #     c_cds = primary_structure_components[1]
-    #     c_terminator = primary_structure_components[2]
-    #     gene.insertUpstreamComponent(c_rbs, promoter)
-    #     primary_structure = gene.getPrimaryStructure()
-    #     primary_structure = [cd.identity for cd in primary_structure]
-    #     valid_primary_structure = [promoter.identity, rbs.identity, cds.identity,
-    #                                terminator.identity]
-    #     self.assertEqual(primary_structure, valid_primary_structure)
+        doc.addComponentDefinition([gene, promoter, rbs, cds, terminator])
+        gene.assemblePrimaryStructure([rbs, cds, terminator])
+        primary_structure_components = gene.getPrimaryStructureComponents()
+        c_rbs = primary_structure_components[0]
+        c_cds = primary_structure_components[1]
+        c_terminator = primary_structure_components[2]
+        gene.insertUpstreamComponent(c_rbs, promoter)
+        primary_structure = gene.getPrimaryStructure()
+        primary_structure = [cd.identity for cd in primary_structure]
+        valid_primary_structure = [promoter.identity, rbs.identity, cds.identity,
+                                   terminator.identity]
+        self.assertEqual(primary_structure, valid_primary_structure)
 
 
 if __name__ == '__main__':
