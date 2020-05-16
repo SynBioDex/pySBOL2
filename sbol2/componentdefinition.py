@@ -166,7 +166,7 @@ class ComponentDefinition(TopLevel):
     def removeRole(self, index=0):
         self._roles.remove(index)
 
-    def assemble(self, components, assembly_standard="", doc=None):
+    def assemble(self, component_list, assembly_method=None, doc=None):
         """Assembles ComponentDefinitions into an abstraction hierarchy.
 
         The resulting data structure is a partial design,
@@ -174,10 +174,10 @@ class ComponentDefinition(TopLevel):
         To form a primary structure out of the ComponentDefinitions,
         call linearize after calling assemble.
         To fully realize the target sequence, use Sequence::assemble().
-        :param components: Either a list of URIs
+        :param component_list: Either a list of URIs
         for the constituent ComponentDefinitions or a list of subcomponents.
         A list of displayIds is also acceptable if using SBOL-compliant URIs.
-        :param assembly_standard: An optional argument
+        :param assembly_method: An optional argument
         such as IGEM_STANDARD_ASSEMBLY that affects how components
         are composed and the final target sequence.
         :param doc: The Document to which the assembled ComponentDefinitions
@@ -185,7 +185,80 @@ class ComponentDefinition(TopLevel):
         to a Document before calling this method.
         :return: None
         """
-        raise NotImplementedError("Not yet implemented")
+
+        # Due to the recursive nature of this routine, it is hard to completely
+        # validate that all the necessary preconditions for successful execution are met
+        # prior to execution. That means if a call fails, it may result in a modified
+        # and incomplete data structure that will be difficult to fix when the user is
+        # working interactively in the interpreter
+        if not Config.getOption('sbol_compliant_uris'):
+            raise EnvironmentError('Assemble method requires SBOL-compliance enabled')
+
+        # Validate doc
+        if not self.doc and not doc:
+            raise ValueError('Missing doc argument. If the ComponentDefinition does '
+                             'not belong to a Document, a target Document must be '
+                             'specified using the doc keyword argument.')
+        if doc and self.doc != doc:
+            raise ValueError('Invalid doc argument. Do not use the doc keyword '
+                             'argument if the ComponentDefinition already belongs '
+                             'to a Document')
+
+        # Validate component_list
+        doc = doc if doc else self.doc
+        if isinstance(component_list, list) and all(isinstance(c, ComponentDefinition)
+                                                    for c in component_list):
+            for cdef in component_list:
+                if cdef.doc and cdef.doc.this != doc.this:
+                    raise ValueError('Invalid component_list specified. Assembly '
+                                     'subcomponents must belong to the same Document '
+                                     'as self.')
+        elif isinstance(component_list, list) and all(isinstance(c, str)
+                                                      for c in component_list):
+            component_identities = component_list[:]
+            component_list = []
+            for c_id in component_identities:
+                if c_id not in doc.componentDefinitions:
+                    raise ValueError('Invalid component_list specified. '
+                                     'ComponentDefinition <%s> not found.' % c_id)
+                cdef = doc.componentDefinitions[c_id]
+                component_list.append(cdef)
+        else:
+            raise TypeError('Invalid component_list specified. Please provide a list '
+                            'of ComponentDefinitions or, alternatively, a list of '
+                            'ComponentDefinition displayIds')
+
+        if not self.doc:
+            doc.addComponentDefinition(self)
+        for cdef in component_list:
+            if not cdef.doc:
+                self.doc.addComponentDefinition(cdef)
+
+        if assembly_method:
+            component_list = assembly_method(component_list)
+            if not all(type(c) is ComponentDefinition for c in component_list):
+                raise TypeError('Invalid callback specified for assembly_method. The '
+                                'callback must return a list of ComponentDefinitions')
+
+        # Instantiate a Component for each ComponentDefinition in the list
+        instance_list = []
+        for cdef in component_list:
+
+            # Generate URI of new Component.  Check if an object with that URI is
+            # already instantiated.
+            instance_count = 0
+            component_id = self.persistentIdentity + "/" + cdef.displayId + "_" \
+                + str(instance_count) + "/" + self.version
+            while self.find(component_id):
+                # Find the last instance assigned
+                instance_count += 1
+                component_id = self.persistentIdentity + "/" + cdef.displayId + "_" \
+                    + str(instance_count) + "/" + self.version
+
+            c = self.components.create(cdef.displayId + "_" + str(instance_count))
+            c.definition = cdef.identity
+            instance_list.append(c)
+        return component_list
 
     def assemblePrimaryStructure(self, primary_structure, assembly_method=None,
                                  doc=None):
@@ -367,14 +440,38 @@ class ComponentDefinition(TopLevel):
 
         :return: The first component in sequential order.
         """
-        raise NotImplementedError("Not yet implemented")
+
+        # A Component's sequential position in the primary structure does not
+        # necessarily correspond with its index in the components list (Rather
+        # this must be determined by reasoning over SequenceConstraints)
+        if len(self.components) < 1:
+            raise SBOLError(SBOL_ERROR_NOT_FOUND, 'This ComponentDefinition has no '
+                            'components')
+
+        arbitrary_component = self.components[0]
+        next_component = arbitrary_component
+        while self.hasUpstreamComponent(next_component):
+            next_component = self.getUpstreamComponent(next_component)
+        return next_component
 
     def getLastComponent(self):
         """Gets the last Component in a linear sequence.
 
         :return: The last component in sequential order.
         """
-        raise NotImplementedError("Not yet implemented")
+
+        # A Component's sequential position in the primary structure does not
+        # necessarily correspond with its index in the components list (Rather
+        # this must be determined by reasoning over SequenceConstraints)
+        if len(self.components) < 1:
+            raise SBOLError(SBOL_ERROR_NOT_FOUND, 'This ComponentDefinition has no '
+                            'components')
+
+        arbitrary_component = self.components[0]
+        next_component = arbitrary_component
+        while self.hasDownstreamComponent(next_component):
+            next_component = self.getDownstreamComponent(next_component)
+        return next_component
 
     def applyToComponentHierarchy(self, callback=None, user_data=None):
         """Perform an operation on every Component in a structurally-linked
@@ -389,13 +486,42 @@ class ComponentDefinition(TopLevel):
         """
         raise NotImplementedError("Not yet implemented")
 
-    def getPrimaryStructure(self):
-        """Get the primary sequence of a design
-        in terms of its sequentially ordered Components.
+    def getPrimaryStructureComponents(self):
+        """Get the primary sequence of a design in terms of its sequentially ordered
+        Components.
 
-        :return: Primary structure.
+        :return: A list of Components.
         """
-        raise NotImplementedError("Not yet implemented")
+        subcomponents = []
+        if len(self.components) == 1:
+            subcomponents.append(self.components[0])
+        else:
+            # Check if this is a complete primary structure
+            # (note this isn't a perfect test)
+            if len(self.sequenceConstraints) != (len(self.components) - 1):
+                raise ValueError('ComponentDefinition <%s> does not appear to describe'
+                                 'a complete primary structure. It appears to be '
+                                 'missing SequenceConstraints.' % self.identity)
+
+            c_first = self.getFirstComponent()
+            subcomponents.append(c_first)
+            c_next = c_first
+            while self.hasDownstreamComponent(c_next):
+                c_next = self.getDownstreamComponent(c_next)
+                subcomponents.append(c_next)
+        return subcomponents
+
+    def getPrimaryStructure(self):
+        """Get the primary sequence of a design in terms of its sequentially ordered
+        ComponentDefinitions.
+
+        :return: A list of ComponentDefinitions.
+        """
+        if self.doc is None:
+            raise SBOLError(SBOL_ERROR_MISSING_DOCUMENT, 'Cannot get primary structure.'
+                            'Self must belong to a Document.')
+        component_ids = [c.definition for c in self.getPrimaryStructureComponents()]
+        return [self.doc.getComponentDefinition(c) for c in component_ids]
 
     def insertDownstream(self, target, component_to_insert):
         """Insert a Component downstream of another in a primary sequence,
@@ -535,136 +661,6 @@ class ComponentDefinition(TopLevel):
 
     def getTypeURI(self):
         return SBOL_COMPONENT_DEFINITION
-
-    def getFirstComponent(self):
-        # A Component's sequential position in the primary structure does not
-        # necessarily correspond with its index in the components list (Rather
-        # this must be determined by reasoning over SequenceConstraints)
-        if len(self.components) < 1:
-            raise SBOLError(SBOL_ERROR_NOT_FOUND, 'This ComponentDefinition has no '
-                            'components')
-
-        arbitrary_component = self.components[0]
-        next_component = arbitrary_component
-        while self.hasUpstreamComponent(next_component):
-            next_component = self.getUpstreamComponent(next_component)
-        return next_component
-
-    def getLastComponent(self):
-        # A Component's sequential position in the primary structure does not
-        # necessarily correspond with its index in the components list (Rather
-        # this must be determined by reasoning over SequenceConstraints)
-        if len(self.components) < 1:
-            raise SBOLError(SBOL_ERROR_NOT_FOUND, 'This ComponentDefinition has no '
-                            'components')
-
-        arbitrary_component = self.components[0]
-        next_component = arbitrary_component
-        while self.hasDownstreamComponent(next_component):
-            next_component = self.getDownstreamComponent(next_component)
-        return next_component
-
-    def getPrimaryStructureComponents(self):
-        subcomponents = []
-        if len(self.components) == 1:
-            subcomponents.append(self.components[0])
-        else:
-            # Check if this is a complete primary structure
-            # (note this isn't a perfect test)
-            if len(self.sequenceConstraints) != (len(self.components) - 1):
-                raise ValueError('ComponentDefinition <%s> does not appear to describe'
-                                 'a complete primary structure. It appears to be '
-                                 'missing SequenceConstraints.' % self.identity)
-
-            c_first = self.getFirstComponent()
-            subcomponents.append(c_first)
-            c_next = c_first
-            while self.hasDownstreamComponent(c_next):
-                c_next = self.getDownstreamComponent(c_next)
-                subcomponents.append(c_next)
-        return subcomponents
-
-    def getPrimaryStructure(self):
-        if self.doc is None:
-            raise SBOLError(SBOL_ERROR_MISSING_DOCUMENT, 'Cannot get primary structure.'
-                            'Self must belong to a Document.')
-        component_ids = [c.definition for c in self.getPrimaryStructureComponents()]
-        return [self.doc.getComponentDefinition(c) for c in component_ids]
-
-    def assemble(self, component_list, assembly_method=None, doc=None):
-        # Due to the recursive nature of this routine, it is hard to completely
-        # validate that all the necessary preconditions for successful execution are met
-        # prior to execution. That means if a call fails, it may result in a modified
-        # and incomplete data structure that will be difficult to fix when the user is
-        # working interactively in the interpreter
-        if not Config.getOption('sbol_compliant_uris'):
-            raise EnvironmentError('Assemble method requires SBOL-compliance enabled')
-
-        # Validate doc
-        if not self.doc and not doc:
-            raise ValueError('Missing doc argument. If the ComponentDefinition does '
-                             'not belong to a Document, a target Document must be '
-                             'specified using the doc keyword argument.')
-        if doc and self.doc != doc:
-            raise ValueError('Invalid doc argument. Do not use the doc keyword '
-                             'argument if the ComponentDefinition already belongs '
-                             'to a Document')
-
-        # Validate component_list
-        doc = doc if doc else self.doc
-        if isinstance(component_list, list) and all(isinstance(c, ComponentDefinition)
-                                                    for c in component_list):
-            for cdef in component_list:
-                if cdef.doc and cdef.doc.this != doc.this:
-                    raise ValueError('Invalid component_list specified. Assembly '
-                                     'subcomponents must belong to the same Document '
-                                     'as self.')
-        elif isinstance(component_list, list) and all(isinstance(c, str)
-                                                      for c in component_list):
-            component_identities = component_list[:]
-            component_list = []
-            for c_id in component_identities:
-                if c_id not in doc.componentDefinitions:
-                    raise ValueError('Invalid component_list specified. '
-                                     'ComponentDefinition <%s> not found.' % c_id)
-                cdef = doc.componentDefinitions[c_id]
-                component_list.append(cdef)
-        else:
-            raise TypeError('Invalid component_list specified. Please provide a list '
-                            'of ComponentDefinitions or, alternatively, a list of '
-                            'ComponentDefinition displayIds')
-
-        if not self.doc:
-            doc.addComponentDefinition(self)
-        for cdef in component_list:
-            if not cdef.doc:
-                self.doc.addComponentDefinition(cdef)
-
-        if assembly_method:
-            component_list = assembly_method(component_list)
-            if not all(type(c) is ComponentDefinition for c in component_list):
-                raise TypeError('Invalid callback specified for assembly_method. The '
-                                'callback must return a list of ComponentDefinitions')
-
-        # Instantiate a Component for each ComponentDefinition in the list
-        instance_list = []
-        for cdef in component_list:
-
-            # Generate URI of new Component.  Check if an object with that URI is
-            # already instantiated.
-            instance_count = 0
-            component_id = self.persistentIdentity + "/" + cdef.displayId + "_" \
-                + str(instance_count) + "/" + self.version
-            while self.find(component_id):
-                # Find the last instance assigned
-                instance_count += 1
-                component_id = self.persistentIdentity + "/" + cdef.displayId + "_" \
-                    + str(instance_count) + "/" + self.version
-
-            c = self.components.create(cdef.displayId + "_" + str(instance_count))
-            c.definition = cdef.identity
-            instance_list.append(c)
-        return component_list
 
 
 def libsbol_rule_20(sbol_obj, arg):
