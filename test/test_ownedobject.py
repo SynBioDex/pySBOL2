@@ -1,7 +1,5 @@
 import unittest
 
-import rdflib
-
 import sbol2
 import sbol2 as sbol
 
@@ -114,3 +112,14 @@ class TestOwnedObject(unittest.TestCase):
         self.assertEqual(m1, md.modules.find(m1.displayId))
         self.assertEqual(m1, md.modules.find(str(m1.displayId)))
         self.assertEqual(m1, md.modules.find('m1'))
+
+    def test_get_by_persistent_id(self):
+        # This grows out of an issue with SYNBICT
+        # Searching by persistent id was not working
+        sbol2.Config.setHomespace('http://synbict.org')
+        sbol2.Config.setOption(sbol2.ConfigOptions.SBOL_TYPED_URIS, False)
+        doc = sbol2.Document()
+        md = doc.moduleDefinitions.create('nand_circuit')
+        # Search by the persistent identity
+        search_string = md.persistentIdentity
+        self.assertEqual(md, doc.getModuleDefinition(search_string))
