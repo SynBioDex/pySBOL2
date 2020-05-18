@@ -539,6 +539,7 @@ class OwnedObject(Property):
         raise TypeError(errmsg)
 
     def get_uri(self, id):
+        id = str(id)
         if Config.getOption(ConfigOptions.VERBOSE.value) is True:
             print('SBOL compliant URIs are set to ' +
                   Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS.value))
@@ -548,8 +549,12 @@ class OwnedObject(Property):
         # Search this property's object store for the uri
         object_store = self._sbol_owner.owned_objects[self._rdf_type]
         for obj in object_store:
-            if string_equal(id, obj.identity):
+            if id == obj.identity:
                 return obj
+        # Now assume the search string is a persistent identity
+        obj = self.find_persistent_identity(id)
+        if obj is not None:
+            return obj
         # If searching by the full URI fails, assume the user is searching
         # for an SBOL-compliant URI using the displayId only
         # Form compliant URI for child object
@@ -572,6 +577,25 @@ class OwnedObject(Property):
             else:
                 msg = 'Object {} not found'.format(id)
                 raise SBOLError(msg, SBOLErrorCode.NOT_FOUND_ERROR)
+
+    def find_persistent_identity(self, search_uri):
+        if not Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS):
+            # Must be using compliant URIs to search by persistent identity
+            return None
+        # Search for persistent identity, returning the newest version
+        # Similar to the looping in find_resource, but we can do it better
+        # if a match, store it. If another match, check versions and keep
+        # the newer one.
+        found_object = None
+        found_version = -math.inf
+        object_store = self._sbol_owner.owned_objects[self._rdf_type]
+        for obj in object_store:
+            if obj.identity.startswith(search_uri):
+                obj_version = float(obj.version)
+                if obj_version > found_version:
+                    found_object = obj
+                    found_version = obj_version
+        return found_object
 
     def find_resource(self, uri, resource_namespaces, object_store,
                       parent_obj, typedURI=False):
