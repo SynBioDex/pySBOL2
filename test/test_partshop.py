@@ -228,7 +228,7 @@ WHERE {
     def test_search_general(self):
         sbh = sbol2.PartShop(TEST_RESOURCE)
         # sbh.login(username, password)
-        results = sbh.search_general("NAND")
+        results = sbh.search("NAND")
         # The response is a list
         self.assertEqual(list, type(results))
         # There are 25 items in the list (search returns more,
@@ -238,16 +238,13 @@ WHERE {
         self.assertTrue(all([isinstance(x, sbol2.Identified)
                              for x in results]))
 
-    # Exact search is not ready yet
-    @unittest.expectedFailure
     def test_search_exact(self):
-        sbh = sbol2.PartShop(TEST_RESOURCE)
-        # sbh.login(username, password)
+        igem = sbol.PartShop('https://synbiohub.org')
         limit = 10
-        results = sbh.search_exact(sbol2.SO_CDS,
-                                   sbol2.SBOL_COMPONENT_DEFINITION,
-                                   sbol2.SBOL_ROLES,
-                                   limit=limit)
+        results = igem.search(sbol2.SO_PROMOTER,
+                              sbol2.SBOL_COMPONENT_DEFINITION,
+                              sbol2.SBOL_ROLES,
+                              0, limit)
         # The response is a list
         self.assertEqual(list, type(results))
         # The response contains _limit_ items
@@ -255,3 +252,8 @@ WHERE {
         # The response items are all of type Identified
         self.assertTrue(all([isinstance(x, sbol2.Identified)
                              for x in results]))
+        doc = sbol2.Document()
+        igem.pull([x.identity for x in results], doc, False)
+        self.assertEqual(10, len(doc))
+        for cd in doc.componentDefinitions:
+            self.assertIn(sbol2.SO_PROMOTER, cd.roles)

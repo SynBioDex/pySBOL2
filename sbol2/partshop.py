@@ -346,7 +346,7 @@ class PartShop:
         if self.key:
             headers['X-authorization'] = self.key
 
-        self.logger.warning('search query: %s', url)
+        self.logger.info('search query: %s', url)
         response = requests.get(url, headers=headers)
         if not response:
             # Something went wrong
@@ -380,8 +380,6 @@ class PartShop:
             search_text = f"'{search_text}'"
         query[parseClassName(property_uri)] = search_text
         query = urllib.parse.urlencode(query)
-        # Unquote then requote to escape the equal signs
-        query = urllib.parse.quote(urllib.parse.unquote(query))
         params = dict(offset=offset, limit=limit)
         params = urllib.parse.urlencode(params)
         query_url = f'{search_url}/search/{query}&/?{params}'
