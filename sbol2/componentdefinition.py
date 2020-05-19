@@ -1,6 +1,5 @@
 from rdflib import URIRef
 
-
 from .component import Component
 from .config import Config
 from .constants import *

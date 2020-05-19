@@ -1,9 +1,7 @@
 import os
 import sys
 import unittest
-
 import rdflib
-
 import sbol2
 
 MODULE_LOCATION = os.path.dirname(os.path.abspath(__file__))
@@ -61,7 +59,6 @@ class TestComponentDefinitions(unittest.TestCase):
         actual = [cd.displayId for cd in doc.componentDefinitions]
         self.assertCountEqual(actual, expected)
 
-    # See Issue #64, CD.assemblePrimaryStructure is not implemented
     def testPrimaryStructureIteration(self):
         list_cd = []
         list_cd_true = ["R0010", "E0040", "B0032", "B0012"]
@@ -142,6 +139,7 @@ class TestComponentDefinitions(unittest.TestCase):
             'http://sbols.org/CRISPR_Example/gRNA_b_gene/CRa_U6/1.0.0': False
         }
         uri = 'http://sbols.org/CRISPR_Example/gRNA_b_gene/CRa_U6/1.0.0'
+        print(cd.getPrimaryStructure())
         c = cd.components.get(uri)
         self.assertTrue(cd.hasUpstreamComponent(c))
 
