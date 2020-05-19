@@ -224,3 +224,34 @@ WHERE {
                                               doc.displayId, md.displayId,
                                               md.version)
         sbh.attachFile(md_uri, CRISPR_LOCATION)
+
+    def test_search_general(self):
+        sbh = sbol2.PartShop(TEST_RESOURCE)
+        # sbh.login(username, password)
+        results = sbh.search_general("NAND")
+        # The response is a list
+        self.assertEqual(list, type(results))
+        # There are 25 items in the list (search returns more,
+        # but by default we get the first 25)
+        self.assertEqual(25, len(results))
+        # The response items are all of type Identified
+        self.assertTrue(all([isinstance(x, sbol2.Identified)
+                             for x in results]))
+
+    # Exact search is not ready yet
+    @unittest.expectedFailure
+    def test_search_exact(self):
+        sbh = sbol2.PartShop(TEST_RESOURCE)
+        # sbh.login(username, password)
+        limit = 10
+        results = sbh.search_exact(sbol2.SO_CDS,
+                                   sbol2.SBOL_COMPONENT_DEFINITION,
+                                   sbol2.SBOL_ROLES,
+                                   limit=limit)
+        # The response is a list
+        self.assertEqual(list, type(results))
+        # The response contains _limit_ items
+        self.assertEqual(limit, len(results))
+        # The response items are all of type Identified
+        self.assertTrue(all([isinstance(x, sbol2.Identified)
+                             for x in results]))

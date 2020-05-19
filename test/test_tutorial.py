@@ -3,6 +3,7 @@ import os
 import unittest
 
 import sbol2 as sbol
+import sbol2
 
 LOGGER_NAME = 'sbol2.test'
 DEBUG_ENV_VAR = 'SBOL_TEST_DEBUG'
@@ -58,8 +59,7 @@ class TestSbolTutorial(unittest.TestCase):
         self.assertEqual(len(list(doc.componentDefinitions)), 14)
         self.assertEqual(len(list(doc.moduleDefinitions)), 0)
 
-    @unittest.expectedFailure  # See Issue #25, PartShop has no attribute search
-    def test_partshop(self):
+    def get_device_from_synbiohub(self, doc):
         # Start an interface to igem's public part shop on
         # SynBioHub. Located at `https://synbiohub.org/public/igem`
         partshop = sbol.PartShop('https://synbiohub.org/public/igem')
@@ -70,4 +70,12 @@ class TestSbolTutorial(unittest.TestCase):
 
         # Import the medium strength device into your document
         medium_device_uri = records[0].identity
+        self.assertEqual(0, len(doc))
         partshop.pull(medium_device_uri, doc)
+        self.assertEqual(3, len(doc))
+
+    def test_tutorial(self):
+        doc = sbol2.Document()
+        # TODO: rename test_tutorial to get_device_from_xml
+        # self.get_device_from_xml(doc)
+        self.get_device_from_synbiohub(doc)

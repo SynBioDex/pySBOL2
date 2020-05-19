@@ -3,17 +3,20 @@ import http
 import logging
 import os
 import posixpath
+from typing import List, Optional
+import urllib.parse
 
 import requests
 # For backward compatible HTTPError
 import urllib3.exceptions
 
-from .config import Config
+from .config import Config, parseClassName
 from .config import ConfigOptions
 from .config import parseURLDomain
 from .constants import *
 from .sbolerror import SBOLError
 from .sbolerror import SBOLErrorCode
+from .identified import Identified
 
 
 class PartShop:
@@ -323,3 +326,77 @@ class PartShop:
         msg = 'HTTP Error code {} trying to attach file.'
         msg = msg.format(response.status_code)
         raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST)
+
+    def _make_search_item(self, item:dict) -> Identified:
+        obj = Identified()
+        obj.identity = item['uri']
+        obj.displayId = item['displayId']
+        obj.name = item['name']
+        obj.description = item['description']
+        obj.version = item['version']
+        return obj
+
+    def _search(self, url:str) -> List[Identified]:
+        """Given a URL, perform the search and parse the results.
+        The URL is formed by one of the other search methods: search_exact,
+        search_general, and search_advanced.
+        """
+        # Login is optional
+        headers = {'Accept': 'text/plain'}
+        if self.key:
+            headers['X-authorization'] = self.key
+
+        self.logger.warning('search query: %s', url)
+        response = requests.get(url, headers=headers)
+        if not response:
+            # Something went wrong
+            raise SBOLError(response, SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST)
+        # Everything looks good, parse and return the results
+        return [self._make_search_item(item) for item in (response.json())]
+
+    def search_general(self, search_text: str,
+               object_type: Optional[str] = SBOL_COMPONENT_DEFINITION,
+               offset: int = 0, limit: int = 25) -> List[Identified]:
+        # See https://synbiohub.github.io/api-docs/#search-metadata
+        search_url = parseURLDomain(self.resource)
+        query = dict(objectType=parseClassName(object_type))
+        query = urllib.parse.urlencode(query)
+        search_text = urllib.parse.quote(search_text)
+        params = dict(offset=offset, limit=limit)
+        params = urllib.parse.urlencode(params)
+        query_url = f'{search_url}/search/{query}&{search_text}/?{params}'
+        return self._search(query_url)
+
+    def search_exact(self, search_text: str,
+                     object_type: Optional[str] = SBOL_COMPONENT_DEFINITION,
+                     property_uri: Optional[str] = None,
+                     offset: int = 0, limit: int = 25) -> List[Identified]:
+        # See https://synbiohub.github.io/api-docs/#search-metadata
+        search_url = parseURLDomain(self.resource)
+        query = dict(objectType=parseClassName(object_type))
+        if search_text.startswith('http'):
+            search_text = f"<{search_text}>"
+        else:
+            search_text = f"'{search_text}'"
+        query[parseClassName(property_uri)] = search_text
+        query = urllib.parse.urlencode(query)
+        # Unquote then requote to escape the equal signs
+        query = urllib.parse.quote(urllib.parse.unquote(query))
+        params = dict(offset=offset, limit=limit)
+        params = urllib.parse.urlencode(params)
+        query_url = f'{search_url}/search/{query}&/?{params}'
+        return self._search(query_url)
+
+    def search(self, search_text: str,
+               object_type: Optional[str] = SBOL_COMPONENT_DEFINITION,
+               property_uri: Optional[str] = None,
+               offset: int = 0, limit: int = 25) -> List[Identified]:
+        # if search_text is a SearchQuery, dispatch to search_advanced
+
+        # if property_uri is not specified, do a general search
+        if property_uri is None:
+            return self.search_general(search_text, object_type, offset,
+                                       limit)
+        # property_uri is specified, do an exact search
+        return self.search_exact(search_text, object_type, property_uri,
+                                 offset, limit)
