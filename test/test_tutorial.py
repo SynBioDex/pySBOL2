@@ -25,7 +25,7 @@ class TestSbolTutorial(unittest.TestCase):
             self.logger.setLevel(logging.DEBUG)
             self.logger.debug('Debug logging enabled')
 
-    def test_tutorial_part_1(self):
+    def init_tutorial(self):
         # Set the default namespace (e.g. "http://my_namespace.org")
         namespace = "http://my_namespace.org"
         homespace = sbol.setHomespace(namespace)
@@ -41,6 +41,9 @@ class TestSbolTutorial(unittest.TestCase):
         self.assertIsInstance(doc, sbol.Document)
         self.assertEqual(len(doc), 0)
 
+        return doc
+
+    def get_device_from_xml(self, doc):
         # Load some generic parts from `parts.xml` into another Document
         generic_parts = sbol.Document(PARTS_FILE)
 
@@ -69,12 +72,32 @@ class TestSbolTutorial(unittest.TestCase):
 
         # Import the medium strength device into your document
         medium_device_uri = records[0].identity
-        self.assertEqual(0, len(doc))
+        self.assertEqual(32, len(doc))
         partshop.pull(medium_device_uri, doc)
-        self.assertEqual(3, len(doc))
+        self.assertEqual(35, len(doc))
+
+    def extract_cds_from_devices(self, doc):
+        # Extract the medium strength promoter `BBa_J23106` from your document.
+        # TODO: BBa_j23106 does not appear in the document
+        # medium_strength_promoter = doc.componentDefinitions['BBa_J23106']
+
+        # Extract the ribosomal binding site (rbs) `Q2` from your document.
+        self.rbs = doc.componentDefinitions['Q2']
+        self.assertEqual('http://my_namespace.org/ComponentDefinition/Q2/1',
+                         self.rbs.identity)
+
+        # Extract the coding region (cds) `LuxR` from your document.
+        self.cds = doc.componentDefinitions['LuxR']
+        self.assertEqual('http://my_namespace.org/ComponentDefinition/LuxR/1',
+                         self.cds.identity)
+
+        # Extract the terminator `ECK120010818` from your document.
+        self.terminator = doc.componentDefinitions['ECK120010818']
+        self.assertEqual('http://my_namespace.org/ComponentDefinition/ECK120010818/1',
+                         self.terminator.identity)
 
     def test_tutorial(self):
-        doc = sbol2.Document()
-        # TODO: rename test_tutorial to get_device_from_xml
-        # self.get_device_from_xml(doc)
+        doc = self.init_tutorial()
+        self.get_device_from_xml(doc)
         self.get_device_from_synbiohub(doc)
+        self.extract_cds_from_devices(doc)
