@@ -70,16 +70,16 @@ class TestSbolTutorial(unittest.TestCase):
         records = partshop.search('interlab')
 
         # Import the medium strength device into your document
-        medium_device_uri = records[0].identity
+        promoter_uri = 'https://synbiohub.org/public/iGEM_2016_interlab/Medium_2016Interlab/1'
         self.assertEqual(32, len(doc))
-        partshop.pull(medium_device_uri, doc)
-        self.assertEqual(35, len(doc))
+        partshop.pull(promoter_uri, doc)
+        self.assertEqual(51, len(doc))
 
     def extract_cds_from_devices(self, doc):
-        # Extract the medium strength promoter `BBa_J23106` from your document.
-        # TODO: BBa_j23106 does not appear in the document
-        # medium_strength_promoter = doc.componentDefinitions['BBa_J23106']
-        self.medium_strength_promoter = None
+        # Extract the promoter from your document.
+        promoter_uri = 'https://synbiohub.org/public/iGEM_2016_interlab/Medium_2016Interlab/1'
+        self.promoter = doc.componentDefinitions[promoter_uri]
+        self.assertEqual(promoter_uri, self.promoter.identity)
 
         # Extract the ribosomal binding site (rbs) `Q2` from your document.
         self.rbs = doc.componentDefinitions['Q2']
@@ -101,7 +101,7 @@ class TestSbolTutorial(unittest.TestCase):
         my_device = doc.componentDefinitions.create('my_device')
 
         # Assemble the new device from the promoter, rbs, cds, and terminator from above.
-        my_device.assemblePrimaryStructure([self.medium_strength_promoter,
+        my_device.assemblePrimaryStructure([self.promoter,
                                             self.rbs,
                                             self.cds,
                                             self.terminator])
