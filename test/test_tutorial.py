@@ -2,7 +2,6 @@ import logging
 import os
 import unittest
 
-import sbol2 as sbol
 import sbol2
 
 LOGGER_NAME = 'sbol2.test'
@@ -28,24 +27,24 @@ class TestSbolTutorial(unittest.TestCase):
     def init_tutorial(self):
         # Set the default namespace (e.g. "http://my_namespace.org")
         namespace = "http://my_namespace.org"
-        homespace = sbol.setHomespace(namespace)
+        homespace = sbol2.setHomespace(namespace)
 
         # Test homespace
         self.assertIsNone(homespace)
-        self.assertEqual(sbol.getHomespace(), namespace)
+        self.assertEqual(sbol2.getHomespace(), namespace)
 
         # Create a new SBOL document
-        doc = sbol.Document()
+        doc = sbol2.Document()
 
         # Test empty document
-        self.assertIsInstance(doc, sbol.Document)
+        self.assertIsInstance(doc, sbol2.Document)
         self.assertEqual(len(doc), 0)
 
         return doc
 
     def get_device_from_xml(self, doc):
         # Load some generic parts from `parts.xml` into another Document
-        generic_parts = sbol.Document(PARTS_FILE)
+        generic_parts = sbol2.Document(PARTS_FILE)
 
         # Test loaded document
         self.assertEqual(len(generic_parts), 32)
@@ -64,7 +63,7 @@ class TestSbolTutorial(unittest.TestCase):
     def get_device_from_synbiohub(self, doc):
         # Start an interface to igem's public part shop on
         # SynBioHub. Located at `https://synbiohub.org/public/igem`
-        partshop = sbol.PartShop('https://synbiohub.org/public/igem')
+        partshop = sbol2.PartShop('https://synbiohub.org/public/igem')
 
         # Search the part shop for parts from the iGEM interlab study
         # using the search term `interlab`
