@@ -1,14 +1,11 @@
-import logging
 import os
 import unittest
 
-import sbol2 as sbol
 import sbol2
 
-LOGGER_NAME = 'sbol2.test'
-DEBUG_ENV_VAR = 'SBOL_TEST_DEBUG'
 MY_DIR = os.path.dirname(os.path.abspath(__file__))
 PARTS_FILE = os.path.join(MY_DIR, 'resources', 'tutorial', 'parts.xml')
+PROMOTER_URI = 'https://synbiohub.org/public/iGEM_2016_interlab/Medium_2016Interlab/1'
 
 
 class TestSbolTutorial(unittest.TestCase):
@@ -18,31 +15,29 @@ class TestSbolTutorial(unittest.TestCase):
     """
 
     def setUp(self):
-        self.logger = logging.getLogger(LOGGER_NAME)
-        if not self.logger.hasHandlers():
-            logging.basicConfig()
-        if DEBUG_ENV_VAR in os.environ:
-            self.logger.setLevel(logging.DEBUG)
-            self.logger.debug('Debug logging enabled')
+        sbol2.Config.setOption(sbol2.ConfigOptions.SBOL_TYPED_URIS, True)
 
-    def test_tutorial_part_1(self):
+    def init_tutorial(self):
         # Set the default namespace (e.g. "http://my_namespace.org")
         namespace = "http://my_namespace.org"
-        homespace = sbol.setHomespace(namespace)
+        homespace = sbol2.setHomespace(namespace)
 
         # Test homespace
         self.assertIsNone(homespace)
-        self.assertEqual(sbol.getHomespace(), namespace)
+        self.assertEqual(sbol2.getHomespace(), namespace)
 
         # Create a new SBOL document
-        doc = sbol.Document()
+        doc = sbol2.Document()
 
         # Test empty document
-        self.assertIsInstance(doc, sbol.Document)
+        self.assertIsInstance(doc, sbol2.Document)
         self.assertEqual(len(doc), 0)
 
+        return doc
+
+    def get_device_from_xml(self, doc):
         # Load some generic parts from `parts.xml` into another Document
-        generic_parts = sbol.Document(PARTS_FILE)
+        generic_parts = sbol2.Document(PARTS_FILE)
 
         # Test loaded document
         self.assertEqual(len(generic_parts), 32)
@@ -61,20 +56,57 @@ class TestSbolTutorial(unittest.TestCase):
     def get_device_from_synbiohub(self, doc):
         # Start an interface to igem's public part shop on
         # SynBioHub. Located at `https://synbiohub.org/public/igem`
-        partshop = sbol.PartShop('https://synbiohub.org/public/igem')
+        partshop = sbol2.PartShop('https://synbiohub.org/public/igem')
 
         # Search the part shop for parts from the iGEM interlab study
         # using the search term `interlab`
         records = partshop.search('interlab')
 
         # Import the medium strength device into your document
-        medium_device_uri = records[0].identity
-        self.assertEqual(0, len(doc))
-        partshop.pull(medium_device_uri, doc)
-        self.assertEqual(3, len(doc))
+        self.assertEqual(32, len(doc))
+        partshop.pull(PROMOTER_URI, doc)
+        self.assertEqual(51, len(doc))
+
+    def extract_cds_from_devices(self, doc):
+        # Extract the promoter from your document.
+        self.promoter = doc.componentDefinitions[PROMOTER_URI]
+        self.assertEqual(PROMOTER_URI, self.promoter.identity)
+
+        # Extract the ribosomal binding site (rbs) `Q2` from your document.
+        self.rbs = doc.componentDefinitions['Q2']
+        self.assertEqual('http://my_namespace.org/ComponentDefinition/Q2/1',
+                         self.rbs.identity)
+
+        # Extract the coding region (cds) `LuxR` from your document.
+        self.cds = doc.componentDefinitions['LuxR']
+        self.assertEqual('http://my_namespace.org/ComponentDefinition/LuxR/1',
+                         self.cds.identity)
+
+        # Extract the terminator `ECK120010818` from your document.
+        self.terminator = doc.componentDefinitions['ECK120010818']
+        self.assertEqual('http://my_namespace.org/ComponentDefinition/ECK120010818/1',
+                         self.terminator.identity)
+
+    def create_new_device(self, doc: sbol2.Document):
+        # Create a new empty device named `my_device`
+        my_device = doc.componentDefinitions.create('my_device')
+
+        # Assemble the new device from the promoter, rbs, cds, and terminator from above.
+        my_device.assemblePrimaryStructure([self.promoter,
+                                            self.rbs,
+                                            self.cds,
+                                            self.terminator])
+
+        # Set the role of the device with the Sequence Ontology term `gene`
+        my_device.roles = sbol2.SO_GENE
+
+        # Compile the sequence for the new device
+        my_device.compile()
 
     def test_tutorial(self):
-        doc = sbol2.Document()
-        # TODO: rename test_tutorial to get_device_from_xml
-        # self.get_device_from_xml(doc)
+        doc = self.init_tutorial()
+        self.get_device_from_xml(doc)
         self.get_device_from_synbiohub(doc)
+        self.extract_cds_from_devices(doc)
+        # TODO: Add create_new_device after assemblePrimaryStructure is added
+        # self.create_new_device(doc)
