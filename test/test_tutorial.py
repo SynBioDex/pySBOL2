@@ -79,6 +79,7 @@ class TestSbolTutorial(unittest.TestCase):
         # Extract the medium strength promoter `BBa_J23106` from your document.
         # TODO: BBa_j23106 does not appear in the document
         # medium_strength_promoter = doc.componentDefinitions['BBa_J23106']
+        self.medium_strength_promoter = None
 
         # Extract the ribosomal binding site (rbs) `Q2` from your document.
         self.rbs = doc.componentDefinitions['Q2']
@@ -95,8 +96,26 @@ class TestSbolTutorial(unittest.TestCase):
         self.assertEqual('http://my_namespace.org/ComponentDefinition/ECK120010818/1',
                          self.terminator.identity)
 
+    def create_new_device(self, doc: sbol2.Document):
+        # Create a new empty device named `my_device`
+        my_device = doc.componentDefinitions.create('my_device')
+
+        # Assemble the new device from the promoter, rbs, cds, and terminator from above.
+        my_device.assemblePrimaryStructure([self.medium_strength_promoter,
+                                            self.rbs,
+                                            self.cds,
+                                            self.terminator])
+
+        # Set the role of the device with the Sequence Ontology term `gene`
+        my_device.roles = sbol2.SO_GENE
+
+        # Compile the sequence for the new device
+        my_device.compile()
+
     def test_tutorial(self):
         doc = self.init_tutorial()
         self.get_device_from_xml(doc)
         self.get_device_from_synbiohub(doc)
         self.extract_cds_from_devices(doc)
+        # TODO: Add create_new_device after assemblePrimaryStructure is added
+        # self.create_new_device(doc)
