@@ -344,10 +344,16 @@ def parseNamespace(uri):
 
 
 def replace_namespace(old_uri, target_namespace, rdf_type):
-    '''
+    """
     Utility function for mapping an SBOL object's identity into a new namespace. The
     rdf_type is used to map to and from sbol-typed namespaces.
-    '''
+    """
+
+    # Work around an issue where the Document itself is being copied and
+    # doesn't have its own URI, so old_uri is None. Return empty string
+    # because the identity is not allowed to be None.
+    if old_uri is None:
+        return ''
 
     # If the value is an SBOL-typed URI, replace both the namespace and class name
     class_name = parseClassName(rdf_type)
