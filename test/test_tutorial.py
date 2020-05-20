@@ -1,13 +1,11 @@
-import logging
 import os
 import unittest
 
 import sbol2
 
-LOGGER_NAME = 'sbol2.test'
-DEBUG_ENV_VAR = 'SBOL_TEST_DEBUG'
 MY_DIR = os.path.dirname(os.path.abspath(__file__))
 PARTS_FILE = os.path.join(MY_DIR, 'resources', 'tutorial', 'parts.xml')
+PROMOTER_URI = 'https://synbiohub.org/public/iGEM_2016_interlab/Medium_2016Interlab/1'
 
 
 class TestSbolTutorial(unittest.TestCase):
@@ -17,12 +15,7 @@ class TestSbolTutorial(unittest.TestCase):
     """
 
     def setUp(self):
-        self.logger = logging.getLogger(LOGGER_NAME)
-        if not self.logger.hasHandlers():
-            logging.basicConfig()
-        if DEBUG_ENV_VAR in os.environ:
-            self.logger.setLevel(logging.DEBUG)
-            self.logger.debug('Debug logging enabled')
+        sbol2.Config.setOption(sbol2.ConfigOptions.SBOL_TYPED_URIS, True)
 
     def init_tutorial(self):
         # Set the default namespace (e.g. "http://my_namespace.org")
@@ -70,16 +63,14 @@ class TestSbolTutorial(unittest.TestCase):
         records = partshop.search('interlab')
 
         # Import the medium strength device into your document
-        promoter_uri = 'https://synbiohub.org/public/iGEM_2016_interlab/Medium_2016Interlab/1'
         self.assertEqual(32, len(doc))
-        partshop.pull(promoter_uri, doc)
+        partshop.pull(PROMOTER_URI, doc)
         self.assertEqual(51, len(doc))
 
     def extract_cds_from_devices(self, doc):
         # Extract the promoter from your document.
-        promoter_uri = 'https://synbiohub.org/public/iGEM_2016_interlab/Medium_2016Interlab/1'
-        self.promoter = doc.componentDefinitions[promoter_uri]
-        self.assertEqual(promoter_uri, self.promoter.identity)
+        self.promoter = doc.componentDefinitions[PROMOTER_URI]
+        self.assertEqual(PROMOTER_URI, self.promoter.identity)
 
         # Extract the ribosomal binding site (rbs) `Q2` from your document.
         self.rbs = doc.componentDefinitions['Q2']

@@ -327,7 +327,7 @@ class PartShop:
         msg = msg.format(response.status_code)
         raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST)
 
-    def _make_search_item(self, item:dict) -> Identified:
+    def _make_search_item(self, item: dict) -> Identified:
         obj = Identified()
         obj.identity = item['uri']
         obj.displayId = item['displayId']
@@ -336,7 +336,7 @@ class PartShop:
         obj.version = item['version']
         return obj
 
-    def _search(self, url:str) -> List[Identified]:
+    def _search(self, url: str) -> List[Identified]:
         """Given a URL, perform the search and parse the results.
         The URL is formed by one of the other search methods: search_exact,
         search_general, and search_advanced.
@@ -355,8 +355,8 @@ class PartShop:
         return [self._make_search_item(item) for item in (response.json())]
 
     def search_general(self, search_text: str,
-               object_type: Optional[str] = SBOL_COMPONENT_DEFINITION,
-               offset: int = 0, limit: int = 25) -> List[Identified]:
+                       object_type: Optional[str] = SBOL_COMPONENT_DEFINITION,
+                       offset: int = 0, limit: int = 25) -> List[Identified]:
         # See https://synbiohub.github.io/api-docs/#search-metadata
         search_url = parseURLDomain(self.resource)
         query = dict(objectType=parseClassName(object_type))
