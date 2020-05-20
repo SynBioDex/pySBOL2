@@ -25,8 +25,7 @@ class TestSbolTutorial(unittest.TestCase):
             self.logger.setLevel(logging.DEBUG)
             self.logger.debug('Debug logging enabled')
 
-    @unittest.expectedFailure  # See Issue 24, Document has no attribute copy
-    def test_tutorial(self):
+    def test_tutorial_part_1(self):
         # Set the default namespace (e.g. "http://my_namespace.org")
         namespace = "http://my_namespace.org"
         homespace = sbol.setHomespace(namespace)

@@ -934,7 +934,7 @@ class Document(Identified):
         msg = msg.format(uri)
         raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
 
-    def copy(self, target_doc=None, target_namespace=None, version=None):
+    def copy(self, target_namespace=None, target_doc=None, version=None):
         # This enables the user to use the pattern doc2 = doc.copy() to clone a Document.
         # SWIG pySBOL assumes the user does NOT want to increment the Document's version
         # when creating a clone. (Whether or not these are the right semantics, that's
