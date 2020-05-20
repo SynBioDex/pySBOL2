@@ -224,3 +224,36 @@ WHERE {
                                               doc.displayId, md.displayId,
                                               md.version)
         sbh.attachFile(md_uri, CRISPR_LOCATION)
+
+    def test_search_general(self):
+        sbh = sbol2.PartShop(TEST_RESOURCE)
+        # sbh.login(username, password)
+        results = sbh.search("NAND")
+        # The response is a list
+        self.assertEqual(list, type(results))
+        # There are 25 items in the list (search returns more,
+        # but by default we get the first 25)
+        self.assertEqual(25, len(results))
+        # The response items are all of type Identified
+        self.assertTrue(all([isinstance(x, sbol2.Identified)
+                             for x in results]))
+
+    def test_search_exact(self):
+        igem = sbol.PartShop('https://synbiohub.org')
+        limit = 10
+        results = igem.search(sbol2.SO_PROMOTER,
+                              sbol2.SBOL_COMPONENT_DEFINITION,
+                              sbol2.SBOL_ROLES,
+                              0, limit)
+        # The response is a list
+        self.assertEqual(list, type(results))
+        # The response contains _limit_ items
+        self.assertEqual(limit, len(results))
+        # The response items are all of type Identified
+        self.assertTrue(all([isinstance(x, sbol2.Identified)
+                             for x in results]))
+        doc = sbol2.Document()
+        igem.pull([x.identity for x in results], doc, False)
+        self.assertEqual(10, len(doc))
+        for cd in doc.componentDefinitions:
+            self.assertIn(sbol2.SO_PROMOTER, cd.roles)
