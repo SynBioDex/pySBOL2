@@ -9,6 +9,7 @@ import sbol2 as sbol
 
 MODULE_LOCATION = os.path.dirname(os.path.abspath(__file__))
 TEST_LOCATION = os.path.join(MODULE_LOCATION, 'resources', 'crispr_example.xml')
+CRISPR_LOCATION = TEST_LOCATION
 
 # For testing reading of annotations
 ANNO_LOCATION = os.path.join(MODULE_LOCATION, 'SBOLTestSuite', 'SBOL2',
@@ -394,6 +395,28 @@ class TestDocument(unittest.TestCase):
         doc.addAttachment(test_attach)
         self.assertEqual(1, len(doc.attachments))
         self.assertTrue(test_attach.compare(doc.attachments[0]))
+
+    def test_get_extension_object(self):
+        doc = sbol2.Document(CRISPR_LOCATION)
+
+        # This returns an object. A TopLevel, not sure what type it is beyond that
+        obj = doc.getExtensionObject('http://sbols.org/CRISPR_Example/mKate_gene/1.0.0')
+        self.assertIsNotNone(obj)
+        self.assertTrue(isinstance(obj, sbol2.TopLevel))
+
+        # This raises a not found error
+        with self.assertRaises(sbol2.SBOLError) as cm:
+            doc.getExtensionObject('http://sbols.org/CRISPR_Example/mKate_genie/1.0.0')
+        raised = cm.exception
+        self.assertEqual(sbol2.SBOLErrorCode.SBOL_ERROR_NOT_FOUND, raised.error_code())
+
+    @unittest.expectedFailure
+    def test_add_extension_object(self):
+        # We need to construct and add an extension object
+        # It should then be accessible via getExtensionObject
+        # We can also peel back the curtain and make sure the object
+        #  is in doc.SBOLObjects and the URI is not in doc.OwnedObjects
+        self.fail('Not implemented yet')
 
 
 if __name__ == '__main__':
