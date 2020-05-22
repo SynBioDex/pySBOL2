@@ -24,20 +24,11 @@ If you get a permission error, try using the `--user` flag:
 pip install --user sbol2
 ```
 
-Alternatively if you want to be able to run unit tests (starting with 1.0b3)
-please install the source distribution using the `--no-binary sbol2` flag.
-The location of the unit tests will vary based on platform and other
-pip command line options you may have used.
-
-```shell
-pip install --no-binary sbol2 sbol2
-```
-
 ## CODE EXAMPLE
 
 This short example creates a Document, adds a ComponentDefinition
 to the Document, and then writes the resulting Document to an SBOL
-file.
+file. Other examples are in the [examples](examples) directory.
 
 ```
 import sbol2
@@ -46,6 +37,20 @@ doc = sbol2.Document()
 cd = sbol2.ComponentDefinition('cd1')
 doc.add(cd)
 doc.write('my-sbol.xml')
+```
+
+## UNIT TESTS
+
+The unit tests are not included when installing via pip. The unit
+tests are included in the source distribution. To access and
+run the unit tests without [checking out from git](CONTRIBUTING.md),
+download the source distribution, unpack it, and run the unit tests.
+
+```shell script
+pip download --no-binary sbol2 sbol2
+tar zxf sbol2-VERSION.tar.gz
+cd sbol2-VERSION
+python3 -m unittest discover test
 ```
 
 ## DOCUMENTATION
