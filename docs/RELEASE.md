@@ -18,7 +18,10 @@
 1. Create source and binary distributions
 
    ```shell
-   cd <pySBOL2>
+   # Remove any old builds
+   rm -rf dist build sbol2.egg-info
+   
+   # Build source and binary distributions
    python3 setup.py sdist bdist_wheel
    ```
 
@@ -30,7 +33,6 @@
 1. Upload packages to [pypi.org](https://pypi.org/project/sbol2/)
 
    ```shell
-   cd <pySBOL2>
    python3 -m twine upload dist/*
    ```
 

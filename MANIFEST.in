@@ -1,2 +1,8 @@
 # Include examples
 graft examples
+# Include test data
+graft test/resources
+graft test/SBOLTestSuite/SBOL2
+graft test/SBOLTestSuite/SBOL2_bp
+graft test/SBOLTestSuite/SBOL2_ic
+graft test/SBOLTestSuite/SBOL2_nc
