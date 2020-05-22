@@ -26,7 +26,7 @@ class TestObject(unittest.TestCase):
         d = sbol.Document()
         d.read(PARTS_LOCATION)
         cd = d.componentDefinitions['http://examples.org/ComponentDefinition/AmeR/1']
-        expected = rdflib.Literal('AmeR')
+        expected = 'AmeR'
         name = cd.getPropertyValue(sbol.SBOL_NAME)
         self.assertEqual(name, expected)
 
@@ -77,62 +77,62 @@ class TestObject(unittest.TestCase):
             self.deprecated_test_set_property_value()
 
     def deprecated_test_set_property_value(self):
+        # The bottom line is that SBOLObject.getPropertyValue() always
+        # returns a string. That's what pysbol did, and what sbol2
+        # should do.
         my_property = 'http://example.com/myproperty'
         md = sbol.ModuleDefinition('md1')
         # value argument must be of type string. If not, expect type error
         with self.assertRaises(TypeError):
             md.setPropertyValue(my_property, 2)
+        foo_str = 'foo'
+        bar_str = 'bar'
         with self.assertRaises(TypeError):
-            md.setPropertyValue(my_property, ['foo', 'bar'])
+            md.setPropertyValue(my_property, [foo_str, bar_str])
         # Test basic setting
         empty_str = ''
-        empty_literal = rdflib.Literal(empty_str)
-        foo_literal = rdflib.Literal('foo')
+        foo_literal = rdflib.Literal(foo_str)
         md.setPropertyValue(my_property, foo_literal)
-        self.assertEqual(md.getPropertyValue(my_property), foo_literal)
+        self.assertEqual(md.getPropertyValue(my_property), foo_str)
         # Test overwriting a single existing value
-        bar_literal = rdflib.Literal('bar')
-        md.setPropertyValue(my_property, bar_literal)
-        self.assertEqual(md.getPropertyValue(my_property), bar_literal)
+        md.setPropertyValue(my_property, bar_str)
+        self.assertEqual(md.getPropertyValue(my_property), bar_str)
         # Test setting an existing multi-value property
-        md.properties[rdflib.URIRef(my_property)] = [foo_literal, bar_literal]
-        self.assertEqual(md.getPropertyValue(my_property), foo_literal)
-        self.assertEqual(md.getPropertyValues(my_property), [foo_literal, bar_literal])
-        baz_literal = rdflib.Literal('baz')
-        md.setPropertyValue(my_property, baz_literal)
-        self.assertEqual(md.getPropertyValue(my_property), baz_literal)
-        self.assertEqual(md.getPropertyValues(my_property), [baz_literal, bar_literal])
+        md.properties[rdflib.URIRef(my_property)] = [foo_str, bar_str]
+        self.assertEqual(md.getPropertyValue(my_property), foo_str)
+        self.assertEqual(md.getPropertyValues(my_property), [foo_str, bar_str])
+        baz_str = 'baz'
+        md.setPropertyValue(my_property, baz_str)
+        self.assertEqual(md.getPropertyValue(my_property), baz_str)
+        self.assertEqual([baz_str, bar_str], md.getPropertyValues(my_property))
         # Unset the value
         md.setPropertyValue(my_property, empty_str)
-        self.assertEqual(md.getPropertyValue(my_property), empty_literal)
+        self.assertEqual(md.getPropertyValue(my_property), empty_str)
         # This may seem odd, but it is the way pySBOL/libSBOL worked,
         # so we do it for backward compatibility
-        self.assertEqual(md.getPropertyValues(my_property), [empty_literal, bar_literal])
+        self.assertEqual([empty_str, bar_str], md.getPropertyValues(my_property))
 
         # What about a plain string? Does that get converted to URIRef or Literal?
         #  If a value is present, mimic that value's type
         #  Else make the value a Literal
-        foo_str = 'foo'
-        bar_str = 'bar'
         foo_uri = rdflib.URIRef(foo_str)
-        bar_uri = rdflib.URIRef(bar_str)
         md2 = sbol.ModuleDefinition('md2')
         # String gets converted to Literal
         md2.setPropertyValue(my_property, foo_str)
-        self.assertEqual(md2.getPropertyValue(my_property), foo_literal)
+        self.assertEqual(md2.getPropertyValue(my_property), foo_str)
         # Ok to overwrite a Literal with a URIRef
         md2.setPropertyValue(my_property, foo_uri)
-        self.assertEqual(md2.getPropertyValue(my_property), foo_uri)
+        self.assertEqual(md2.getPropertyValue(my_property), foo_str)
         # Now setting a str value should convert it to a URIRef
         # because that's what is already there
         md2.setPropertyValue(my_property, bar_str)
-        self.assertEqual(md2.getPropertyValue(my_property), bar_uri)
+        self.assertEqual(md2.getPropertyValue(my_property), bar_str)
         # Ok to overwrite a URIRef with a Literal
         md2.setPropertyValue(my_property, foo_literal)
-        self.assertEqual(md2.getPropertyValue(my_property), foo_literal)
+        self.assertEqual(md2.getPropertyValue(my_property), foo_str)
         # Unsetting the value
         md2.setPropertyValue(my_property, '')
-        self.assertEqual(md2.getPropertyValue(my_property), empty_literal)
+        self.assertEqual(md2.getPropertyValue(my_property), empty_str)
 
     def test_serialize_property_value(self):
         # Set a property value to the empty string and verify that it
@@ -141,17 +141,15 @@ class TestObject(unittest.TestCase):
         # to have that happen correctly.
         my_property = 'http://example.com/myproperty'
         empty_str = ''
-        empty_literal = rdflib.Literal(empty_str)
         foo_str = 'foo'
-        foo_literal = rdflib.Literal(foo_str)
         doc = sbol.Document()
         md = doc.moduleDefinitions.create('md')
         with warnings.catch_warnings(record=True):
             md.setPropertyValue(my_property, foo_str)
-        self.assertEqual(md.getPropertyValue(my_property), foo_literal)
+        self.assertEqual(md.getPropertyValue(my_property), foo_str)
         with warnings.catch_warnings(record=True):
             md.setPropertyValue(my_property, empty_str)
-        self.assertEqual(md.getPropertyValue(my_property), empty_literal)
+        self.assertEqual(md.getPropertyValue(my_property), empty_str)
         # Now serialize the document to a string
         serialized = doc.writeString()
         doc2 = sbol.Document()
@@ -159,7 +157,7 @@ class TestObject(unittest.TestCase):
         self.assertEqual(len(doc2.moduleDefinitions), 1)
         md2 = doc2.moduleDefinitions[0]
         self.assertEqual(md2.displayId, md.displayId)
-        self.assertEqual(md2.getPropertyValue(my_property), empty_literal)
+        self.assertEqual(md2.getPropertyValue(my_property), empty_str)
 
     def test_this(self):
         # The `this` attribute should return the object itself. This

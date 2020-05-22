@@ -367,9 +367,9 @@ class TestDocument(unittest.TestCase):
         info = cd.owned_objects[info_uri][0]
         self.assertIsNotNone(info)
         self.assertEqual(info.getPropertyValue(sigma_uri),
-                         rdflib.Literal('//rnap/prokaryote/ecoli/sigma70'))
+                         '//rnap/prokaryote/ecoli/sigma70')
         self.assertEqual(info.getPropertyValue(regulation_uri),
-                         rdflib.Literal('//regulation/constitutive'))
+                         '//regulation/constitutive')
 
     def test_recursive_add(self):
         # Make sure that when an object gets added to a document
