@@ -281,22 +281,28 @@ class SBOLObject:
         """Get the value of a custom annotation property by its URI.
 
         :param property_uri: The URI for the property.
-        :return: The value of the property or SBOL_ERROR_NOT_FOUND.
+        :type property_uri: str
+        :return: The value of the property.
+        :rtype: str
+        :raises: SBOLError(SBOL_ERROR_NOT_FOUND) if property does not exist
         """
         values = self.getPropertyValues(property_uri)
-        if not values:
+        try:
+            return str(values[0])
+        except IndexError:
             return ''
-        return str(values[0])
 
-    def getPropertyValues(self, property_uri: str) -> List:
+    def getPropertyValues(self, property_uri: str) -> List[str]:
         """Get all values of a custom annotation property by its URI.
 
         :param property_uri: The URI for the property.
-        :return: A vector of property values or SBOL_ERROR_NOT_FOUND.
+        :type property_uri: str
+        :return: A vector of property values.
+        :rtype: list of strings
+        :raises: SBOLError(SBOL_ERROR_NOT_FOUND) if property does not exist
         """
-        key = rdflib.URIRef(property_uri)
         try:
-            return self.properties[key]
+            return [str(x) for x in self.properties[property_uri]]
         except KeyError as e:
             # no property by this name
             raise SBOLError('Property {} not found'.format(property_uri),
