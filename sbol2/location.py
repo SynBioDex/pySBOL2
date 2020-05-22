@@ -102,7 +102,7 @@ class Range(Location):
 class Cut(Location):
     """The Cut class specifies a location between
     two coordinates of a Sequence's elements."""
-    def __init__(self, uri=URIRef('example'), at=1,
+    def __init__(self, uri=URIRef('example'), at=0,
                  *, type_uri=SBOL_CUT, version=VERSION_STRING):
         super().__init__(uri=uri, type_uri=type_uri, version=version)
         self._at = IntProperty(self, SBOL_AT, '1', '1', [], at)
