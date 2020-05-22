@@ -1,5 +1,6 @@
 import logging
 import posixpath
+from typing import List
 
 from deprecated import deprecated
 import rdflib
@@ -276,16 +277,18 @@ class SBOLObject:
             return False
         return True
 
-    def getPropertyValue(self, property_uri):
+    def getPropertyValue(self, property_uri: str) -> str:
         """Get the value of a custom annotation property by its URI.
 
         :param property_uri: The URI for the property.
         :return: The value of the property or SBOL_ERROR_NOT_FOUND.
         """
         values = self.getPropertyValues(property_uri)
-        return values[0]
+        if not values:
+            return ''
+        return str(values[0])
 
-    def getPropertyValues(self, property_uri):
+    def getPropertyValues(self, property_uri: str) -> List:
         """Get all values of a custom annotation property by its URI.
 
         :param property_uri: The URI for the property.

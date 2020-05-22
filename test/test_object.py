@@ -226,3 +226,18 @@ class TestObject(unittest.TestCase):
         # hashable test above can be fooled according to the
         # documentation.
         self.assertTrue(isinstance(hash(obj), int))
+
+    def test_get_property(self):
+        # If a property is unset, return an empty string instead of
+        # an IndexError
+        fc = sbol2.FunctionalComponent()
+        self.assertEqual('', fc.getPropertyValue(sbol2.SBOL_NAME))
+
+        # getPropertyValue always returns a string, even if the
+        # property is an IntProperty
+        c = sbol.Cut()
+        self.assertEqual('0', c.getPropertyValue(sbol.SBOL_AT))
+
+
+if __name__ == '__main__':
+    unittest.main()
