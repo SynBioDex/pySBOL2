@@ -396,13 +396,31 @@ class TestDocument(unittest.TestCase):
         self.assertEqual(1, len(doc.attachments))
         self.assertTrue(test_attach.compare(doc.attachments[0]))
 
+
+class TopLevelExtension(sbol2.TopLevel):
+    def __init__(self, uri='example'):
+        super().__init__(uri=uri,
+                         type_uri='http://example.org/test#TopLevelExtension')
+
+
+class NonTopLevelExtension(sbol2.Identified):
+
+    MY_TYPE = 'http://example.org/test#NonTopLevelExtension'
+
+    def __init__(self, uri='example'):
+        super().__init__(uri=uri,
+                         type_uri=NonTopLevelExtension.MY_TYPE)
+
+
+class TestDocumentExtensionObjects(unittest.TestCase):
+
     def test_get_extension_object(self):
         doc = sbol2.Document(CRISPR_LOCATION)
 
         # This returns an object. A TopLevel, not sure what type it is beyond that
         obj = doc.getExtensionObject('http://sbols.org/CRISPR_Example/mKate_gene/1.0.0')
         self.assertIsNotNone(obj)
-        self.assertTrue(isinstance(obj, sbol2.TopLevel))
+        self.assertIsInstance(obj, sbol2.TopLevel)
 
         # This raises a not found error
         with self.assertRaises(sbol2.SBOLError) as cm:
@@ -410,13 +428,39 @@ class TestDocument(unittest.TestCase):
         raised = cm.exception
         self.assertEqual(sbol2.SBOLErrorCode.SBOL_ERROR_NOT_FOUND, raised.error_code())
 
-    @unittest.expectedFailure
     def test_add_extension_object(self):
         # We need to construct and add an extension object
         # It should then be accessible via getExtensionObject
         # We can also peel back the curtain and make sure the object
         #  is in doc.SBOLObjects and the URI is not in doc.OwnedObjects
-        self.fail('Not implemented yet')
+        # Three kinds of things to add:
+        #  1. An existing type, like ComponentDefinition
+        cd = sbol2.ComponentDefinition('cd')
+        doc = sbol2.Document()
+        doc.addExtensionObject(cd)
+        obj = doc.getExtensionObject(cd.identity)
+        self.assertEqual(cd, obj)
+
+        #  2. A new type that is a TopLevel
+        tle = TopLevelExtension('tle')
+        doc = sbol2.Document()
+        doc.addExtensionObject(tle)
+        obj = doc.getExtensionObject(tle.identity)
+        self.assertEqual(tle, obj)
+
+        #  3. A new type that is not a TopLevel
+        # This object won't be found. There is no way for the document to
+        # hold on to the object if it isn't a TopLevel
+        ntle = NonTopLevelExtension('ntle')
+        doc = sbol2.Document()
+        doc.addExtensionObject(ntle)
+        with self.assertRaises(sbol2.SBOLError) as cm:
+            obj = doc.getExtensionObject(ntle.identity)
+        raised = cm.exception
+        self.assertEqual(sbol2.SBOLErrorCode.SBOL_ERROR_NOT_FOUND,
+                         raised.error_code())
+        obj = doc.find(ntle.identity)
+        self.assertIsNone(obj)
 
 
 if __name__ == '__main__':
