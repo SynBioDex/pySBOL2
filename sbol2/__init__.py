@@ -19,6 +19,7 @@ from .config import getHomespace, hasHomespace, setHomespace
 from .constants import *
 from .dbtl import Design
 from .document import Document
+from .experiment import Experiment, ExperimentalData
 from .identified import Identified
 from .implementation import Implementation
 from .interaction import Interaction
