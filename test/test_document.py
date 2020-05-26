@@ -398,18 +398,21 @@ class TestDocument(unittest.TestCase):
 
 
 class TopLevelExtension(sbol2.TopLevel):
+
+    RDF_TYPE = 'http://example.org/test#TopLevelExtension'
+
     def __init__(self, uri='example'):
         super().__init__(uri=uri,
-                         type_uri='http://example.org/test#TopLevelExtension')
+                         type_uri=TopLevelExtension.RDF_TYPE)
 
 
 class NonTopLevelExtension(sbol2.Identified):
 
-    MY_TYPE = 'http://example.org/test#NonTopLevelExtension'
+    RDF_TYPE = 'http://example.org/test#NonTopLevelExtension'
 
     def __init__(self, uri='example'):
         super().__init__(uri=uri,
-                         type_uri=NonTopLevelExtension.MY_TYPE)
+                         type_uri=NonTopLevelExtension.RDF_TYPE)
 
 
 class TestDocumentExtensionObjects(unittest.TestCase):
@@ -418,15 +421,19 @@ class TestDocumentExtensionObjects(unittest.TestCase):
         doc = sbol2.Document(CRISPR_LOCATION)
 
         # This returns an object. A TopLevel, not sure what type it is beyond that
-        obj = doc.getExtensionObject('http://sbols.org/CRISPR_Example/mKate_gene/1.0.0')
+        uri = 'http://sbols.org/CRISPR_Example/mKate_gene/1.0.0'
+        obj = doc.getExtensionObject(uri)
         self.assertIsNotNone(obj)
         self.assertIsInstance(obj, sbol2.TopLevel)
 
-        # This raises a not found error
+        # This should raise a not found error because the URI is not
+        # contained in the CRISPR test data
+        uri = 'http://sbols.org/CRISPR_Example/mKate_genie/1.0.0'
         with self.assertRaises(sbol2.SBOLError) as cm:
-            doc.getExtensionObject('http://sbols.org/CRISPR_Example/mKate_genie/1.0.0')
+            doc.getExtensionObject(uri)
         raised = cm.exception
-        self.assertEqual(sbol2.SBOLErrorCode.SBOL_ERROR_NOT_FOUND, raised.error_code())
+        self.assertEqual(sbol2.SBOLErrorCode.SBOL_ERROR_NOT_FOUND,
+                         raised.error_code())
 
     def test_add_extension_object(self):
         # We need to construct and add an extension object
@@ -455,7 +462,7 @@ class TestDocumentExtensionObjects(unittest.TestCase):
         doc = sbol2.Document()
         doc.addExtensionObject(ntle)
         with self.assertRaises(sbol2.SBOLError) as cm:
-            obj = doc.getExtensionObject(ntle.identity)
+            doc.getExtensionObject(ntle.identity)
         raised = cm.exception
         self.assertEqual(sbol2.SBOLErrorCode.SBOL_ERROR_NOT_FOUND,
                          raised.error_code())
