@@ -1,6 +1,7 @@
 import logging
 import unittest
 import sbol2 as sbol
+import sbol2
 
 
 class TestModuleDefinition(unittest.TestCase):
@@ -46,6 +47,13 @@ class TestModuleDefinition(unittest.TestCase):
         sub = sbol.ModuleDefinition('sub')
         doc.addModuleDefinition([root, sub])
         root.assemble([sub])
+
+    def testAttachments(self):
+        # All TopLevels can have attachments
+        attachment = sbol2.Attachment('attachment')
+        md = sbol2.ModuleDefinition('md')
+        md.attachments = attachment.identity
+        self.assertEqual([attachment.identity], md.attachments)
 
 
 if __name__ == '__main__':
