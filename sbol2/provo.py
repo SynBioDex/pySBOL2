@@ -202,10 +202,10 @@ class Activity(TopLevel):
         self.agent = ReferencedObject(self, PROVO_AGENT, Agent,
                                       '0', '1', [validation.libsbol_rule_22])
         self._types = URIProperty(self, SBOL_TYPES, '0', '1', [])
-        self._startedAtTime = LiteralProperty(self, PROVO_STARTED_AT_TIME,
-                                              '0', '1', [])
-        self._endedAtTime = LiteralProperty(self, PROVO_ENDED_AT_TIME,
-                                            '0', '1', [])
+        self.startedAtTime = LiteralProperty(self, PROVO_STARTED_AT_TIME,
+                                             '0', '1', [])
+        self.endedAtTime = LiteralProperty(self, PROVO_ENDED_AT_TIME,
+                                           '0', '1', [])
         self.wasInformedBy = ReferencedObject(self, PROVO_WAS_INFORMED_BY,
                                               PROVO_ACTIVITY, '0', '*', [])
         self.usages = OwnedObject(self, PROVO_QUALIFIED_USAGE, Usage,
@@ -220,19 +220,3 @@ class Activity(TopLevel):
     @types.setter
     def types(self, new_types):
         self._types.set(new_types)
-
-    @property
-    def startedAtTime(self):
-        return self._startedAtTime.value
-
-    @startedAtTime.setter
-    def startedAtTime(self, new_startedAtTime):
-        self._startedAtTime.set(new_startedAtTime)
-
-    @property
-    def endedAtTime(self):
-        return self._endedAtTime.value
-
-    @endedAtTime.setter
-    def endedAtTime(self, new_endedAtTime):
-        self._endedAtTime.set(new_endedAtTime)

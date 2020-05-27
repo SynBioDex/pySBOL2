@@ -200,9 +200,6 @@ class TestDocument(unittest.TestCase):
         namespaces = [n[1] for n in doc.graph.namespace_manager.namespaces()]
         self.assertFalse('http://examples.org#' in namespaces)
         doc.addNamespace('http://examples.org#', 'examples')
-        cd.foo = sbol.property.LiteralProperty(cd, 'http://examples.org#foo',
-                                               '0', '1', None, 'bar')
-        namespaces = [n for n in doc.graph.namespace_manager.namespaces()]
         doc.readString(doc.writeString())
         namespaces = [n for n in doc.graph.namespace_manager.namespaces()]
         self.assertIn(('examples', rdflib.URIRef('http://examples.org#')),

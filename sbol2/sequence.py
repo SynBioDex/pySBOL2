@@ -32,23 +32,16 @@ class Sequence(TopLevel):
         from this one.
         """
         super().__init__(type_uri, uri, version)
-        self._elements = LiteralProperty(self, SBOL_ELEMENTS,
-                                         '1', '1', [], elements)
+
+        # The elements property is a REQUIRED String of characters that represents
+        # the constituents of a biological or chemical molecule. For example,
+        # these characters could represent the nucleotide bases
+        # of a molecule of DNA, the amino acid residues of a protein,
+        # or the atoms and chemical bonds of a small molecule.
+        self.elements = LiteralProperty(self, SBOL_ELEMENTS,
+                                        '1', '1', [], elements)
         self._encoding = URIProperty(self, SBOL_ENCODING,
                                      '1', '1', [], encoding)
-
-    # The elements property is a REQUIRED String of characters that represents
-    # the constituents of a biological or chemical molecule. For example,
-    # these characters could represent the nucleotide bases
-    # of a molecule of DNA, the amino acid residues of a protein,
-    # or the atoms and chemical bonds of a small molecule.
-    @property
-    def elements(self):
-        return str(self._elements.value)
-
-    @elements.setter
-    def elements(self, new_elements):
-        self._elements.value = new_elements
 
     # The encoding property is REQUIRED and has a data type of URI.
     # This property MUST indicate how the elements property of a Sequence

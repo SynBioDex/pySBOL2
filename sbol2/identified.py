@@ -87,13 +87,13 @@ class Identified(SBOLObject):
         super().__init__(type_uri, uri)
         self._persistentIdentity = URIProperty(self, SBOL_PERSISTENT_IDENTITY,
                                                '0', '1', None, URIRef(uri))
-        self._displayId = LiteralProperty(self, SBOL_DISPLAY_ID, '0', '1',
-                                          [validation.sbol_rule_10204])
-        self._version = LiteralProperty(self, SBOL_VERSION, '0', '1', None, version)
-        self._name = LiteralProperty(self, SBOL_NAME, '0', '1', None)
-        self._description = LiteralProperty(self, SBOL_DESCRIPTION, '0', '1', None)
+        self.displayId = LiteralProperty(self, SBOL_DISPLAY_ID, '0', '1',
+                                         [validation.sbol_rule_10204])
+        self.version = LiteralProperty(self, SBOL_VERSION, '0', '1', None, version)
+        self.name = LiteralProperty(self, SBOL_NAME, '0', '1', None)
+        self.description = LiteralProperty(self, SBOL_DESCRIPTION, '0', '1', None)
         if Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS.value) is True:
-            self._displayId.set(uri)
+            self.displayId = uri
             self._persistentIdentity.set(URIRef(posixpath.join(getHomespace(), uri)))
             if Config.getOption(ConfigOptions.SBOL_TYPED_URIS.value) is True:
                 if self.version:
@@ -133,38 +133,6 @@ class Identified(SBOLObject):
     @persistentIdentity.setter
     def persistentIdentity(self, new_persistentIdentity):
         self._persistentIdentity.set(new_persistentIdentity)
-
-    @property
-    def displayId(self):
-        return self._displayId.value
-
-    @displayId.setter
-    def displayId(self, new_displayId):
-        self._displayId.set(new_displayId)
-
-    @property
-    def version(self):
-        return self._version.value
-
-    @version.setter
-    def version(self, new_version):
-        self._version.set(new_version)
-
-    @property
-    def description(self):
-        return self._description.value
-
-    @description.setter
-    def description(self, new_description):
-        self._description.set(new_description)
-
-    @property
-    def name(self):
-        return self._name.value
-
-    @name.setter
-    def name(self, new_name):
-        self._name.set(new_name)
 
     @property
     def wasDerivedFrom(self):

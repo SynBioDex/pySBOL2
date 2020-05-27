@@ -9,7 +9,7 @@ from rdflib import URIRef
 from .config import getHomespace, string_equal
 from .config import hasHomespace
 from .constants import *
-from .property import IntProperty, OwnedObject
+from .property import LiteralProperty, OwnedObject
 from .property import ReferencedObject
 from .property import URIProperty
 from .sbolerror import SBOLError
@@ -470,11 +470,7 @@ class SBOLObject:
     def __getattribute__(self, name):
         # Call the default method
         result = object.__getattribute__(self, name)
-        if isinstance(result, ReferencedObject):
-            # Convert the ReferencedObject to a value instead of
-            # returning the ReferencedObject itself
-            result = result.value
-        elif isinstance(result, OwnedObject):
+        if isinstance(result, OwnedObject):
             sbol_property = object.__getattribute__(self, name)
             if sbol_property.upper_bound == 1:
                 if len(sbol_property):
@@ -483,7 +479,9 @@ class SBOLObject:
                     result = None
             else:
                 result = sbol_property
-        elif isinstance(result, IntProperty):
+        elif isinstance(result, (LiteralProperty, ReferencedObject)):
+            # Convert these as appropriate so the Property attributes are
+            # transparent and look like native types.
             result = result.value
         return result
 
@@ -498,7 +496,7 @@ class SBOLObject:
             attr = self.__dict__[name]
         except KeyError:
             return False
-        return isinstance(attr, (IntProperty, ReferencedObject))
+        return isinstance(attr, (LiteralProperty, ReferencedObject))
 
     def _set_transparent_attribute(self, name, value):
         self.__dict__[name].set(value)
