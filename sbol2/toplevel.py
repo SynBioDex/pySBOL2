@@ -7,6 +7,7 @@ from .config import ConfigOptions
 from .config import getHomespace
 from .constants import *
 from .identified import Identified
+from .property import ReferencedObject
 
 
 class TopLevel(Identified):
@@ -23,6 +24,8 @@ class TopLevel(Identified):
                     posixpath.join(getHomespace(),
                                    self.getClassName(type_uri),
                                    self.displayId))
+        self.attachments = ReferencedObject(self, SBOL_ATTACHMENTS,
+                                            SBOL_ATTACHMENT, '0', '*', [], [])
 
     def addToDocument(self, document):
         raise NotImplementedError("Not yet implemented")

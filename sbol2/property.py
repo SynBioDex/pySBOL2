@@ -223,6 +223,42 @@ class Property(ABC):
         else:
             return str(self._sbol_owner.properties[self._rdf_type])
 
+    @staticmethod
+    def guess_args(validators, initial_value):
+        """In pysbol there are 4 constructors for each Property. We have
+        to figure out which constructor the user intended to call based on
+        the arguments. The signatures are:
+            IntProperty(owner, rdf_type, low_bound, high_bound, ValidationRules, initial_value)
+            IntProperty(owner, rdf_type, low_bound, high_bound, ValidationRules)
+            IntProperty(owner, rdf_type, low_bound, high_bound, initial_value)
+            IntProperty(owner, rdf_type, low_bound, high_bound)
+
+        We have to guess which of the two 5-arg constructors the user
+        intended to call. If both validators and initial_value are None,
+        this is the 4-arg constructor, so return None for both. If neither
+        validators nor initial_value are None, this is the 6-arg constructor
+        so return the values as specified.
+
+        For the 5-arg cases, if the isinstance(initial_value, typeinfo) then
+        guess that hte 5th arg is an initial_value. Otherwise assume the 5th
+        arg is a list of validation rules.
+        """
+        if validators is None and initial_value is None:
+            # 4-arg constructor
+            return None, None
+        if initial_value is not None:
+            # 6-arg constructor
+            return validators, initial_value
+        if not isinstance(validators, collections.abc.Iterable):
+            # validation rules must be an iterable, like a list,
+            # so guess that it is an initial value
+            return None, validators
+        if all(callable(x) for x in validators):
+            # All the values are callable, so guess this is a list of validators
+            return validators, None
+        # If the 5th arg is not validators, guess that it is an initial value
+        return None, validators
+
 
 class URIProperty(Property):
 
@@ -318,7 +354,9 @@ class URIProperty(Property):
 class LiteralProperty(Property):
 
     def __init__(self, property_owner, type_uri, lower_bound, upper_bound,
-                 validation_rules, initial_value=None):
+                 validation_rules=None, initial_value=None):
+        validation_rules, initial_value = Property.guess_args(validation_rules,
+                                                              initial_value)
         super().__init__(property_owner, type_uri, lower_bound, upper_bound,
                          validation_rules)
         if self._rdf_type not in self._sbol_owner.properties:
