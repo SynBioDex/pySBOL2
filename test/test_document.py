@@ -445,6 +445,7 @@ class TestDocumentExtensionObjects(unittest.TestCase):
         cd = sbol2.ComponentDefinition('cd')
         doc = sbol2.Document()
         doc.addExtensionObject(cd)
+        self.assertEqual(1, len(doc.componentDefinitions))
         obj = doc.getExtensionObject(cd.identity)
         self.assertEqual(cd, obj)
 
