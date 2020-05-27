@@ -308,16 +308,17 @@ class TestDocument(unittest.TestCase):
         self.assertTrue(doc)
 
     def test_from_user_to_user(self):
-        # Test proper conversion of user-facing types from RDFlib types after
+        # Test proper conversion of user-facing types from RDFlib types
         # through the Property interfaces after serializing and de-serializing
         doc = sbol.Document()
         cd = doc.componentDefinitions.create('cd')
         cd.int_property = sbol.IntProperty(cd, 'http://examples.org', '0', '1', None, 42)
+        self.assertEqual(42, cd.int_property)
         doc2 = sbol.Document()
         doc2.readString(doc.writeString())
-        cd = doc2.componentDefinitions['cd']
-        cd.int_property = sbol.IntProperty(cd, 'http://examples.org', '0', '1', None)
-        self.assertEqual(cd.int_property.value, 42)
+        cd2 = doc2.componentDefinitions['cd']
+        cd2.int_property = sbol.IntProperty(cd, 'http://examples.org', '0', '1', None)
+        self.assertEqual(42, cd2.int_property)
 
     def test_range(self):
         # Test proper serializing and de-serializing of range properties

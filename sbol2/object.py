@@ -9,7 +9,7 @@ from rdflib import URIRef
 from .config import getHomespace, string_equal
 from .config import hasHomespace
 from .constants import *
-from .property import OwnedObject
+from .property import IntProperty, OwnedObject
 from .property import ReferencedObject
 from .property import URIProperty
 from .sbolerror import SBOLError
@@ -483,6 +483,8 @@ class SBOLObject:
                     result = None
             else:
                 result = sbol_property
+        elif isinstance(result, IntProperty):
+            result = result.value
         return result
 
     def _is_owned_object(self, name):
@@ -491,21 +493,22 @@ class SBOLObject:
         except KeyError:
             return False
 
-    def _is_referenced_object(self, name):
+    def _is_transparent_attribute(self, name):
         try:
-            return isinstance(self.__dict__[name], ReferencedObject)
+            attr = self.__dict__[name]
         except KeyError:
             return False
+        return isinstance(attr, (IntProperty, ReferencedObject))
 
-    def _set_referenced_object(self, name, value):
+    def _set_transparent_attribute(self, name, value):
         self.__dict__[name].set(value)
 
     def _set_owned_object(self, name, value):
         self.__dict__[name].set(value)
 
     def __setattr__(self, name, value):
-        if self._is_referenced_object(name):
-            self._set_referenced_object(name, value)
+        if self._is_transparent_attribute(name):
+            self._set_transparent_attribute(name, value)
             return
         if self._is_owned_object(name):
             self._set_owned_object(name, value)
