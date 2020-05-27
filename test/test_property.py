@@ -284,10 +284,114 @@ class TestProperty(unittest.TestCase):
         md = sbol2.ModuleDefinition()
         with self.assertRaises(TypeError):
             # No validation rules, so `'AND'` is interpreted
-            # as validation rules
+            # as validation rules.
             tp = sbol2.TextProperty(md, 'http://example.com#logic', '0', '1',
-                                    'AND')
+                                    'AND', 'initial_value')
         # Use an empty list to specify no validation rules
         tp = sbol2.TextProperty(md, 'http://example.com#logic', '0', '1',
                                 [], 'AND')
         # Should add a test for callable validation rules
+
+
+class TestIntProperty(unittest.TestCase):
+
+    def test_four_arg_constructor(self):
+        cd = sbol2.ComponentDefinition()
+        type_uri = 'http://example.com/test#testInt'
+        prop = sbol2.IntProperty(cd, type_uri, '0', '1')
+        self.assertEqual(None, prop.value)
+        self.assertEqual([], prop._validation_rules)
+
+    def test_five_arg_constructor_validators(self):
+        cd = sbol2.ComponentDefinition()
+        type_uri = 'http://example.com/test#testInt'
+        validation_rules = [print]
+        prop = sbol2.IntProperty(cd, type_uri, '0', '*', validation_rules)
+        self.assertEqual([], prop.value)
+        self.assertEqual(validation_rules, prop._validation_rules)
+
+    def test_five_arg_constructor_one_value(self):
+        cd = sbol2.ComponentDefinition()
+        type_uri = 'http://example.com/test#testInt'
+        initial_value = 2
+        prop = sbol2.IntProperty(cd, type_uri, '0', '1', initial_value)
+        self.assertEqual(initial_value, prop.value)
+        self.assertEqual([], prop._validation_rules)
+
+    def test_five_arg_constructor_values(self):
+        cd = sbol2.ComponentDefinition()
+        type_uri = 'http://example.com/test#testInt'
+        initial_value = [1, 2, 3]
+        prop = sbol2.IntProperty(cd, type_uri, '0', '*', initial_value)
+        self.assertEqual(initial_value, prop.value)
+        self.assertEqual([], prop._validation_rules)
+
+    def test_six_arg_constructor(self):
+        cd = sbol2.ComponentDefinition()
+        type_uri = 'http://example.com/test#testInt'
+        initial_value = 32
+        prop = sbol2.IntProperty(cd, type_uri, '0', '1', [], initial_value)
+        self.assertEqual(initial_value, prop.value)
+        self.assertEqual([], prop._validation_rules)
+
+    def test_six_arg_constructor_none(self):
+        cd = sbol2.ComponentDefinition()
+        type_uri = 'http://example.com/test#testInt'
+        initial_value = 32
+        prop = sbol2.IntProperty(cd, type_uri, '0', '1', None, initial_value)
+        self.assertEqual(initial_value, prop.value)
+        self.assertEqual([], prop._validation_rules)
+
+
+class TestTextProperty(unittest.TestCase):
+
+    def test_four_arg_constructor(self):
+        cd = sbol2.ComponentDefinition()
+        type_uri = 'http://example.com/test#testText'
+        prop = sbol2.TextProperty(cd, type_uri, '0', '1')
+        self.assertEqual(None, prop.value)
+        self.assertEqual([], prop._validation_rules)
+
+    def test_five_arg_constructor_validators(self):
+        cd = sbol2.ComponentDefinition()
+        type_uri = 'http://example.com/test#testText'
+        validation_rules = [print]
+        prop = sbol2.TextProperty(cd, type_uri, '0', '*', validation_rules)
+        self.assertEqual([], prop.value)
+        self.assertEqual(validation_rules, prop._validation_rules)
+
+    def test_five_arg_constructor_one_value(self):
+        cd = sbol2.ComponentDefinition()
+        type_uri = 'http://example.com/test#testText'
+        initial_value = 'omega'
+        prop = sbol2.TextProperty(cd, type_uri, '0', '1', initial_value)
+        self.assertEqual(initial_value, prop.value)
+        self.assertEqual([], prop._validation_rules)
+
+    def test_five_arg_constructor_values(self):
+        cd = sbol2.ComponentDefinition()
+        type_uri = 'http://example.com/test#testText'
+        initial_value = ['alpha', 'bravo', 'charlie']
+        prop = sbol2.TextProperty(cd, type_uri, '0', '*', initial_value)
+        self.assertEqual(initial_value, prop.value)
+        self.assertEqual([], prop._validation_rules)
+
+    def test_six_arg_constructor(self):
+        cd = sbol2.ComponentDefinition()
+        type_uri = 'http://example.com/test#testText'
+        initial_value = 'omega'
+        prop = sbol2.TextProperty(cd, type_uri, '0', '1', [], initial_value)
+        self.assertEqual(initial_value, prop.value)
+        self.assertEqual([], prop._validation_rules)
+
+    def test_six_arg_constructor_none(self):
+        cd = sbol2.ComponentDefinition()
+        type_uri = 'http://example.com/test#testText'
+        initial_value = 'omega'
+        prop = sbol2.TextProperty(cd, type_uri, '0', '1', None, initial_value)
+        self.assertEqual(initial_value, prop.value)
+        self.assertEqual([], prop._validation_rules)
+
+
+if __name__ == '__main__':
+    unittest.main()
