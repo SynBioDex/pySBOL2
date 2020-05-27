@@ -208,7 +208,7 @@ class ComponentDefinition(TopLevel):
         if isinstance(component_list, list) and all(isinstance(c, ComponentDefinition)
                                                     for c in component_list):
             for cdef in component_list:
-                if cdef.doc and cdef.doc.this != doc.this:
+                if cdef.doc and cdef.doc is not doc:
                     raise ValueError('Invalid component_list specified. Assembly '
                                      'subcomponents must belong to the same Document '
                                      'as self.')
