@@ -369,7 +369,8 @@ class ComponentDefinition(TopLevel):
         :return: True if found, False if not
         """
         if len(self.sequenceConstraints) < 1:
-            raise SBOLError(SBOL_ERROR_NOT_FOUND, 'Cannot determine upstream Component. '
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_NOT_FOUND,
+                            'Cannot determine upstream Component. '
                             'Self has no SequenceConstraints')
         else:
             for sc in self.sequenceConstraints:
@@ -385,7 +386,8 @@ class ComponentDefinition(TopLevel):
         :return: The upstream component.
         """
         if len(self.sequenceConstraints) < 1:
-            raise SBOLError(SBOL_ERROR_NOT_FOUND, 'Cannot get upstream Component. Self '
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_NOT_FOUND,
+                            'Cannot get upstream Component. Self '
                             'has no SequenceConstraints')
         else:
             upstream_component_id = None
@@ -394,7 +396,8 @@ class ComponentDefinition(TopLevel):
                       sc.restriction == SBOL_RESTRICTION_PRECEDES:
                     upstream_component = self.components[sc.subject]
                     return upstream_component
-        raise SBOLError(SBOL_ERROR_END_OF_LIST, 'This component has no upstream '
+        raise SBOLError(SBOLErrorCode.SBOL_ERROR_END_OF_LIST,
+                        'This component has no upstream '
                         'component. Use hasUpstreamComponent to catch this error')
 
     def hasDownstreamComponent(self, component):
@@ -406,7 +409,8 @@ class ComponentDefinition(TopLevel):
         :return: True if found, False if not.
         """
         if len(self.sequenceConstraints) < 1:
-            raise SBOLError(SBOL_ERROR_NOT_FOUND, 'Cannot determine upstream Component. '
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_NOT_FOUND,
+                            'Cannot determine upstream Component. '
                             'Self has no SequenceConstraints')
         else:
             for sc in self.sequenceConstraints:
@@ -422,7 +426,8 @@ class ComponentDefinition(TopLevel):
         :return: The downstream component.
         """
         if len(self.sequenceConstraints) < 1:
-            raise SBOLError(SBOL_ERROR_NOT_FOUND, 'Cannot get downstream Component. '
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_NOT_FOUND,
+                            'Cannot get downstream Component. '
                             'Self has no SequenceConstraints')
         else:
             upstream_component_id = None
@@ -431,7 +436,8 @@ class ComponentDefinition(TopLevel):
                       sc.restriction == SBOL_RESTRICTION_PRECEDES:
                     upstream_component = self.components[sc.object]
                     return upstream_component
-        raise SBOLError(SBOL_ERROR_END_OF_LIST, 'This component has no downstream '
+        raise SBOLError(SBOLErrorCode.SBOL_ERROR_END_OF_LIST,
+                        'This component has no downstream '
                         'component. Use hasDownstreamComponent to catch this error')
 
     def getFirstComponent(self):
@@ -444,7 +450,8 @@ class ComponentDefinition(TopLevel):
         # necessarily correspond with its index in the components list (Rather
         # this must be determined by reasoning over SequenceConstraints)
         if len(self.components) < 1:
-            raise SBOLError(SBOL_ERROR_NOT_FOUND, 'This ComponentDefinition has no '
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_NOT_FOUND,
+                            'This ComponentDefinition has no '
                             'components')
 
         arbitrary_component = self.components[0]
@@ -463,7 +470,8 @@ class ComponentDefinition(TopLevel):
         # necessarily correspond with its index in the components list (Rather
         # this must be determined by reasoning over SequenceConstraints)
         if len(self.components) < 1:
-            raise SBOLError(SBOL_ERROR_NOT_FOUND, 'This ComponentDefinition has no '
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_NOT_FOUND,
+                            'This ComponentDefinition has no '
                             'components')
 
         arbitrary_component = self.components[0]
@@ -517,7 +525,8 @@ class ComponentDefinition(TopLevel):
         :return: A list of ComponentDefinitions.
         """
         if self.doc is None:
-            raise SBOLError(SBOL_ERROR_MISSING_DOCUMENT, 'Cannot get primary structure.'
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_MISSING_DOCUMENT,
+                            'Cannot get primary structure.'
                             'Self must belong to a Document.')
         component_ids = [c.definition for c in self.getPrimaryStructureComponents()]
         return [self.doc.getComponentDefinition(c) for c in component_ids]
