@@ -6,6 +6,7 @@ from .property import LiteralProperty, URIProperty
 from .toplevel import TopLevel
 from .config import Config
 
+
 class Sequence(TopLevel):
     """
     The primary structure (eg, nucleotide or amino acid sequence)
