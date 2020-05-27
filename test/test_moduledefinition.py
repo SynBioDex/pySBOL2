@@ -1,24 +1,23 @@
-import logging
 import unittest
-import sbol2 as sbol
+import sbol2
 
 
 class TestModuleDefinition(unittest.TestCase):
 
     def setUp(self):
         # All tests in this file use the default homespace
-        sbol.setHomespace('http://examples.org')
+        sbol2.setHomespace('http://examples.org')
         # All tests in this file use SBOL compliant URIs
-        sbol.Config.setOption(sbol.ConfigOptions.SBOL_COMPLIANT_URIS.value, True)
-        sbol.Config.setOption(sbol.ConfigOptions.SBOL_TYPED_URIS.value, True)
+        sbol2.Config.setOption(sbol2.ConfigOptions.SBOL_COMPLIANT_URIS.value, True)
+        sbol2.Config.setOption(sbol2.ConfigOptions.SBOL_TYPED_URIS.value, True)
 
     # Borrowed from libSBOL/wrapper/unit_tests.py
     def testApplyCallbackRecursively(self):
         # Assemble module hierarchy
-        doc = sbol.Document()
-        root = sbol.ModuleDefinition('root')
-        sub = sbol.ModuleDefinition('sub')
-        leaf = sbol.ModuleDefinition('leaf')
+        doc = sbol2.Document()
+        root = sbol2.ModuleDefinition('root')
+        sub = sbol2.ModuleDefinition('sub')
+        leaf = sbol2.ModuleDefinition('leaf')
         doc.addModuleDefinition([root, sub, leaf])
         root.assemble([sub])
         sub.assemble([leaf])
@@ -41,11 +40,19 @@ class TestModuleDefinition(unittest.TestCase):
 
     def testAssemble(self):
         # Assemble module hierarchy
-        doc = sbol.Document()
-        root = sbol.ModuleDefinition('root')
-        sub = sbol.ModuleDefinition('sub')
+        doc = sbol2.Document()
+        root = sbol2.ModuleDefinition('root')
+        sub = sbol2.ModuleDefinition('sub')
         doc.addModuleDefinition([root, sub])
         root.assemble([sub])
+
+    def testAttachments(self):
+        # All TopLevels can have attachments
+        # TODO: There's a better test here involving a Document
+        attachment = sbol2.Attachment('attachment')
+        md = sbol2.ModuleDefinition('md')
+        md.attachments = attachment.identity
+        self.assertEqual([attachment.identity], md.attachments)
 
 
 if __name__ == '__main__':
