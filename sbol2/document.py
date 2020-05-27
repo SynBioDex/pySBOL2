@@ -972,6 +972,30 @@ class Document(Identified):
                       DeprecationWarning)
         self.exportToFormat(language, output_path)
 
+    def getExtensionObject(self, uri: str) -> SBOLObject:
+        """
+        :param uri: URI of the extension object
+        :type uri: str
+        :return: The matching SBOLObject
+        :rtype: SBOLObject
+        :raises: SBOLError if the given uri is not found
+        """
+        try:
+            return self.SBOLObjects[uri]
+        except KeyError:
+            raise SBOLError(f'Object {uri} was not found',
+                            SBOLErrorCode.SBOL_ERROR_NOT_FOUND)
+
+    def addExtensionObject(self, obj: SBOLObject) -> None:
+        """
+        :param obj: An SBOLObject to add to this document
+        :type obj: SBOLObject
+        :return: None
+        :rtype: None
+        """
+        # Just do an add
+        self.add(obj)
+
 
 def _make_validation_request(options: Mapping[str, Union[bool, str]]):
     config_options = [

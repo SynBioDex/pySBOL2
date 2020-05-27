@@ -9,6 +9,7 @@ import sbol2 as sbol
 
 MODULE_LOCATION = os.path.dirname(os.path.abspath(__file__))
 TEST_LOCATION = os.path.join(MODULE_LOCATION, 'resources', 'crispr_example.xml')
+CRISPR_LOCATION = TEST_LOCATION
 
 # For testing reading of annotations
 ANNO_LOCATION = os.path.join(MODULE_LOCATION, 'SBOLTestSuite', 'SBOL2',
@@ -394,6 +395,80 @@ class TestDocument(unittest.TestCase):
         doc.addAttachment(test_attach)
         self.assertEqual(1, len(doc.attachments))
         self.assertTrue(test_attach.compare(doc.attachments[0]))
+
+
+class TopLevelExtension(sbol2.TopLevel):
+
+    RDF_TYPE = 'http://example.org/test#TopLevelExtension'
+
+    def __init__(self, uri='example'):
+        super().__init__(uri=uri,
+                         type_uri=TopLevelExtension.RDF_TYPE)
+
+
+class NonTopLevelExtension(sbol2.Identified):
+
+    RDF_TYPE = 'http://example.org/test#NonTopLevelExtension'
+
+    def __init__(self, uri='example'):
+        super().__init__(uri=uri,
+                         type_uri=NonTopLevelExtension.RDF_TYPE)
+
+
+class TestDocumentExtensionObjects(unittest.TestCase):
+
+    def test_get_extension_object(self):
+        doc = sbol2.Document(CRISPR_LOCATION)
+
+        # This returns an object. A TopLevel, not sure what type it is beyond that
+        uri = 'http://sbols.org/CRISPR_Example/mKate_gene/1.0.0'
+        obj = doc.getExtensionObject(uri)
+        self.assertIsNotNone(obj)
+        self.assertIsInstance(obj, sbol2.TopLevel)
+
+        # This should raise a not found error because the URI is not
+        # contained in the CRISPR test data
+        uri = 'http://sbols.org/CRISPR_Example/mKate_genie/1.0.0'
+        with self.assertRaises(sbol2.SBOLError) as cm:
+            doc.getExtensionObject(uri)
+        raised = cm.exception
+        self.assertEqual(sbol2.SBOLErrorCode.SBOL_ERROR_NOT_FOUND,
+                         raised.error_code())
+
+    def test_add_extension_object(self):
+        # We need to construct and add an extension object
+        # It should then be accessible via getExtensionObject
+        # We can also peel back the curtain and make sure the object
+        #  is in doc.SBOLObjects and the URI is not in doc.OwnedObjects
+        # Three kinds of things to add:
+        #  1. An existing type, like ComponentDefinition
+        cd = sbol2.ComponentDefinition('cd')
+        doc = sbol2.Document()
+        doc.addExtensionObject(cd)
+        self.assertEqual(1, len(doc.componentDefinitions))
+        obj = doc.getExtensionObject(cd.identity)
+        self.assertEqual(cd, obj)
+
+        #  2. A new type that is a TopLevel
+        tle = TopLevelExtension('tle')
+        doc = sbol2.Document()
+        doc.addExtensionObject(tle)
+        obj = doc.getExtensionObject(tle.identity)
+        self.assertEqual(tle, obj)
+
+        #  3. A new type that is not a TopLevel
+        # This object won't be found. There is no way for the document to
+        # hold on to the object if it isn't a TopLevel
+        ntle = NonTopLevelExtension('ntle')
+        doc = sbol2.Document()
+        doc.addExtensionObject(ntle)
+        with self.assertRaises(sbol2.SBOLError) as cm:
+            doc.getExtensionObject(ntle.identity)
+        raised = cm.exception
+        self.assertEqual(sbol2.SBOLErrorCode.SBOL_ERROR_NOT_FOUND,
+                         raised.error_code())
+        obj = doc.find(ntle.identity)
+        self.assertIsNone(obj)
 
 
 if __name__ == '__main__':
