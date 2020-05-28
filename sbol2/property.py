@@ -761,6 +761,8 @@ class OwnedObject(Property):
         # TODO: This can leave the attribute empty if `add` fails.
         # Can we capture that and sent the old value back again?
         self._sbol_owner.owned_objects[self._rdf_type].clear()
+        if new_value is None:
+            return
         self.add(new_value)
 
     def setPropertyValueList(self, new_value):
