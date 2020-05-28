@@ -215,6 +215,16 @@ class TestComponentDefinitions(unittest.TestCase):
                                            rdflib.URIRef(sbol2.SBOL_SEQUENCE_PROPERTY),
                                            rdflib.URIRef(seq.identity)))
 
+    @unittest.expectedFailure
+    def test_remove_hidden_sequence(self):
+        doc = sbol2.Document()
+        cd = doc.componentDefinitions.create('cd1')
+        seq = sbol2.Sequence('cd1_sequence')
+        cd.sequence = seq
+        self.assertIn(seq.identity, doc.sequences)
+        cd.sequence = None
+        self.assertNotIn(seq.identity, doc.sequences)
+
     def test_sequence_validation(self):
         # sequence and sequences should be synced up
         cd = sbol2.ComponentDefinition('cd1', sbol2.BIOPAX_DNA)
