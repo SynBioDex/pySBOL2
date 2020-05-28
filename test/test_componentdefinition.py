@@ -563,6 +563,18 @@ class TestAssemblyRoutines(unittest.TestCase):
                                    terminator.identity]
         self.assertEqual(primary_structure, valid_primary_structure)
 
+    def test_add_remove_role(self):
+        cd = sbol2.ComponentDefinition('c1')
+        self.assertEqual([], cd.roles)
+        cd.addRole(sbol2.SO_PROMOTER)
+        self.assertEqual([sbol2.SO_PROMOTER], cd.roles)
+        cd.addRole(sbol2.SO_MISC)
+        self.assertEqual([sbol2.SO_PROMOTER, sbol2.SO_MISC], cd.roles)
+        cd.addRole(sbol2.SO_CDS)
+        self.assertEqual([sbol2.SO_PROMOTER, sbol2.SO_MISC, sbol2.SO_CDS], cd.roles)
+        cd.removeRole(1)
+        self.assertEqual([sbol2.SO_PROMOTER, sbol2.SO_CDS], cd.roles)
+
 
 if __name__ == '__main__':
     unittest.main()

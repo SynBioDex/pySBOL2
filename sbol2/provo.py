@@ -22,8 +22,8 @@ class Association(Identified):
     # The plan property is OPTIONAL and contains a URI that refers to a Plan.
     plan = None
 
-    def __init__(self, uri=URIRef("example"), agent=URIRef(""),
-                 role=URIRef(""), version=VERSION_STRING,
+    def __init__(self, uri=URIRef("example"), agent=None,
+                 role=None, version=VERSION_STRING,
                  rdf_type=PROVO_ASSOCIATION):
         """Constructor.
 
@@ -69,8 +69,8 @@ class Usage(Identified):
     # the usage of an entity referenced by the entity property.
     _roles = None
 
-    def __init__(self, uri=URIRef("example"), entity=URIRef(""),
-                 role=URIRef(""), version=VERSION_STRING,
+    def __init__(self, uri=URIRef("example"), entity=None,
+                 role=None, version=VERSION_STRING,
                  rdf_type=PROVO_USAGE):
         """Constructor.
 
