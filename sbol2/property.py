@@ -760,9 +760,10 @@ class OwnedObject(Property):
         #
         # TODO: This can leave the attribute empty if `add` fails.
         # Can we capture that and sent the old value back again?
-        self._sbol_owner.owned_objects[self._rdf_type].clear()
         if new_value is None:
+            self.remove(self.get().identity)
             return
+        self._sbol_owner.owned_objects[self._rdf_type].clear()
         self.add(new_value)
 
     def setPropertyValueList(self, new_value):
@@ -800,6 +801,7 @@ class OwnedObject(Property):
                 if obj.doc is not None and obj.doc.find(obj.identity) is not None:
                     obj.doc = None  # TODO not sure what this does
                 del object_store[index]
+                self.validate(None)
         else:
             raise Exception('This property is not defined in '
                             'the parent object')
@@ -817,6 +819,7 @@ class OwnedObject(Property):
                         # Erase nested, hidden TopLevel objects from Document
                         if obj.doc is not None and obj.doc.find(uri) is not None:
                             obj.doc = None  # TODO not sure what this does
+                        self.validate(None)
                         return obj
 
     def clear(self):
