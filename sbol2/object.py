@@ -9,9 +9,7 @@ from rdflib import URIRef
 from .config import getHomespace, string_equal
 from .config import hasHomespace
 from .constants import *
-from .property import LiteralProperty, OwnedObject
-from .property import ReferencedObject
-from .property import URIProperty
+from .property import LiteralProperty, OwnedObject, URIProperty
 from .sbolerror import SBOLError
 from .sbolerror import SBOLErrorCode
 from .uridict import URIDict
