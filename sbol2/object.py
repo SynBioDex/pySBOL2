@@ -9,7 +9,7 @@ from rdflib import URIRef
 from .config import getHomespace, string_equal
 from .config import hasHomespace
 from .constants import *
-from .property import LiteralProperty, OwnedObject, URIProperty
+from .property import Property, OwnedObject, URIProperty
 from .sbolerror import SBOLError
 from .sbolerror import SBOLErrorCode
 from .uridict import URIDict
@@ -417,7 +417,7 @@ class SBOLObject:
                 owned_obj.build_graph(graph)
 
     def __str__(self):
-        return str(self.identity)
+        return self.identity
 
     def is_top_level(self):
         return False
@@ -434,36 +434,25 @@ class SBOLObject:
                     result = None
             else:
                 result = sbol_property
-        elif isinstance(result, (LiteralProperty, URIProperty)):
-            # Convert these as appropriate so the Property attributes are
+        elif isinstance(result, Property):
+            # Else if attribute is any other kind of Property besides
+            # OwnedObject, convert so the Property attributes are
             # transparent and look like native types.
             result = result.value
         return result
-
-    def _is_owned_object(self, name):
-        try:
-            return isinstance(self.__dict__[name], OwnedObject)
-        except KeyError:
-            return False
 
     def _is_transparent_attribute(self, name):
         try:
             attr = self.__dict__[name]
         except KeyError:
             return False
-        return isinstance(attr, (LiteralProperty, URIProperty))
+        return isinstance(attr, Property)
 
     def _set_transparent_attribute(self, name, value):
-        self.__dict__[name].set(value)
-
-    def _set_owned_object(self, name, value):
         self.__dict__[name].set(value)
 
     def __setattr__(self, name, value):
         if self._is_transparent_attribute(name):
             self._set_transparent_attribute(name, value)
-            return
-        if self._is_owned_object(name):
-            self._set_owned_object(name, value)
             return
         object.__setattr__(self, name, value)
