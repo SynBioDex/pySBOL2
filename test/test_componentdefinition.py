@@ -575,6 +575,16 @@ class TestAssemblyRoutines(unittest.TestCase):
         cd.removeRole(1)
         self.assertEqual([sbol2.SO_PROMOTER, sbol2.SO_CDS], cd.roles)
 
+    def test_add_remove_type(self):
+        cd = sbol2.ComponentDefinition('c1')
+        self.assertEqual([sbol2.BIOPAX_DNA], cd.types)
+        cd.addType(sbol2.BIOPAX_RNA)
+        self.assertEqual([sbol2.BIOPAX_DNA, sbol2.BIOPAX_RNA], cd.types)
+        cd.addType(sbol2.BIOPAX_COMPLEX)
+        self.assertEqual([sbol2.BIOPAX_DNA, sbol2.BIOPAX_RNA, sbol2.BIOPAX_COMPLEX], cd.types)
+        cd.removeType(1)
+        self.assertEqual([sbol2.BIOPAX_DNA, sbol2.BIOPAX_COMPLEX], cd.types)
+
 
 if __name__ == '__main__':
     unittest.main()

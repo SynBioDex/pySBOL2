@@ -468,6 +468,38 @@ class TestDocumentExtensionObjects(unittest.TestCase):
         obj = doc.find(ntle.identity)
         self.assertIsNone(obj)
 
+    def test_add_remove_citation(self):
+        doc = sbol2.Document()
+        sbol1_spec = 'http://www.nature.com/nbt/journal/v32/n6/full/nbt.2891.html'
+        sbol2_spec = 'https://doi.org/10.1515/jib-2018-0001'
+        sbol3_spec = 'https://sbolstandard.org/wp-content/uploads/2020/04/SBOL3.0specification.pdf'
+        self.assertEqual([], doc.citations)
+        doc.addCitation(sbol1_spec)
+        self.assertEqual([sbol1_spec], doc.citations)
+        doc.addCitation(sbol2_spec)
+        self.assertEqual([sbol1_spec, sbol2_spec], doc.citations)
+        doc.addCitation(sbol3_spec)
+        expected = [sbol1_spec, sbol2_spec, sbol3_spec]
+        self.assertEqual(expected, doc.citations)
+        doc.removeCitation(1)
+        self.assertEqual([sbol1_spec, sbol3_spec], doc.citations)
+
+    def test_add_remove_keyword(self):
+        doc = sbol2.Document()
+        keyword1 = 'http://example.com/keyword#key1'
+        keyword2 = 'http://example.com/keyword#key2'
+        keyword3 = 'http://example.com/keyword#key3'
+        self.assertEqual([], doc.keywords)
+        doc.addKeyword(keyword1)
+        self.assertEqual([keyword1], doc.keywords)
+        doc.addKeyword(keyword2)
+        self.assertEqual([keyword1, keyword2], doc.keywords)
+        doc.addKeyword(keyword3)
+        expected = [keyword1, keyword2, keyword3]
+        self.assertEqual(expected, doc.keywords)
+        doc.removeKeyword(1)
+        self.assertEqual([keyword1, keyword3], doc.keywords)
+
 
 if __name__ == '__main__':
     unittest.main()
