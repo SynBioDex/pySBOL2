@@ -416,40 +416,6 @@ class SBOLObject:
                            URIRef(owned_obj.identity)))
                 owned_obj.build_graph(graph)
 
-    def serialize_rdf2xml(self, graph):
-        """Serialize the SBOLObject.
-
-        :param os: Output stream.
-        :param indentLevel:
-        :return: None
-        """
-        # Serialize properties
-        for rdf_type, vals in self.properties.items():
-            if rdf_type == 'http://sbols.org/v2#identity':
-                # This property is not serialized
-                continue
-            if len(vals) == 0:
-                #  No properties of this type
-                continue
-            predicate = self.doc.referenceNamespace(rdf_type)
-            for val in vals:
-                graph.add((self._identity.getRawValue(), predicate, val))
-        # Serialize owned objects
-        for name, object_store in self.owned_objects:
-            if len(object_store) == 0:
-                continue
-            # predicate = self.doc.referenceNamespace(name)
-            for obj in object_store:
-                # NOTE: couldn't we just use 'name'? (Would probably work the same,
-                # but wanted to follow the original implementation as closely as
-                # possible.)
-                typeURI = obj.getTypeURI()
-                if typeURI in self._hidden_properties:
-                    continue
-                rdfType = self.doc.referenceNamespace(typeURI)
-                graph.add((self._identity.getRawValue(), rdfType, obj.identity))
-                obj.serialize_rdf2xml(graph)  # recursive
-
     def __str__(self):
         return str(self.identity)
 
