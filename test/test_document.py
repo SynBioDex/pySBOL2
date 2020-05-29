@@ -472,7 +472,8 @@ class TestDocumentExtensionObjects(unittest.TestCase):
         doc = sbol2.Document()
         sbol1_spec = 'http://www.nature.com/nbt/journal/v32/n6/full/nbt.2891.html'
         sbol2_spec = 'https://doi.org/10.1515/jib-2018-0001'
-        sbol3_spec = 'https://sbolstandard.org/wp-content/uploads/2020/04/SBOL3.0specification.pdf'
+        sbol3_spec = ('https://sbolstandard.org/wp-content'
+                      '/uploads/2020/04/SBOL3.0specification.pdf')
         self.assertEqual([], doc.citations)
         doc.addCitation(sbol1_spec)
         self.assertEqual([sbol1_spec], doc.citations)

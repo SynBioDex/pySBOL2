@@ -107,7 +107,7 @@ class Identified(SBOLObject):
             else:
                 if self.version:
                     self.identity = URIRef(posixpath.join(getHomespace(),
-                                                           uri, self.version))
+                                                          uri, self.version))
                 else:
                     self.identity = URIRef(posixpath.join(getHomespace(), uri))
         elif hasHomespace():
