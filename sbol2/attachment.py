@@ -11,15 +11,7 @@ class Attachment(TopLevel):
                  *, type_uri=SBOL_ATTACHMENT, version=VERSION_STRING,
                  source=''):
         super().__init__(type_uri, uri, version)
-        self._source = URIProperty(self, SBOL_SOURCE, '1', '1', [], source)
+        self.source = URIProperty(self, SBOL_SOURCE, '1', '1', [], source)
         self.format = LiteralProperty(self, SBOL_URI + '#format', '0', '1', [])
         self.size = LiteralProperty(self, SBOL_URI + '#size', '0', '1', [])
         self.hash = LiteralProperty(self, SBOL_URI + '#hash', '0', '1', [])
-
-    @property
-    def source(self):
-        return self._source.value
-
-    @source.setter
-    def source(self, new_source):
-        self._source.set(new_source)

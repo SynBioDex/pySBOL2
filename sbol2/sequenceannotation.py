@@ -20,21 +20,17 @@ class SequenceAnnotation(Identified):
         self.component = None  # TODO support ReferencedObject
         self.locations = OwnedLocation(self, SBOL_LOCATIONS,
                                        '0', '*', [])
-        self._roles = URIProperty(self, SBOL_ROLES, '0', '*', [])
-
-    @property
-    def roles(self):
-        return self._roles.value
-
-    @roles.setter
-    def roles(self, new_roles):
-        self._roles.set(new_roles)
+        self.roles = URIProperty(self, SBOL_ROLES, '0', '*', [])
 
     def addRole(self, new_role):
-        self._roles.add(new_role)
+        val = self.roles
+        val.append(new_role)
+        self.roles = val
 
     def removeRole(self, index=0):
-        self._roles.remove(index)
+        val = self.roles
+        del val[index]
+        self.roles = val
 
     def precedes(self, comparand):
         """Tests if the comparand SequenceAnnotation precedes this one

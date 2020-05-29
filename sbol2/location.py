@@ -13,18 +13,10 @@ class Location(Identified):
     def __init__(self, uri=URIRef('example'), orientation=SBOL_ORIENTATION_INLINE,
                  *, type_uri=SBOL_LOCATION, version=VERSION_STRING):
         super().__init__(type_uri=type_uri, uri=uri, version=version)
-        self._orientation = URIProperty(self, SBOL_ORIENTATION,
-                                        '1', '1', [], orientation)
+        self.orientation = URIProperty(self, SBOL_ORIENTATION,
+                                       '1', '1', [], orientation)
         self.sequence = ReferencedObject(self, SBOL_SEQUENCE_PROPERTY,
                                          SBOL_SEQUENCE, '0', '1', [])
-
-    @property
-    def orientation(self):
-        return self._orientation.value
-
-    @orientation.setter
-    def orientation(self, new_orientation):
-        self._orientation.set(new_orientation)
 
 
 class Range(Location):

@@ -13,27 +13,15 @@ class Measurement(Identified):
                  unit='', version=VERSION_STRING):
         super().__init__(SBOL_MEASURE, uri, version)
         self.value = LiteralProperty(self, SBOL_VALUE, '1', '1', [], value)
-        self._unit = URIProperty(self, SBOL_UNIT, '1', '1', [], unit)
-        self._types = URIProperty(self, SBOL_TYPES, '0', '*', [])
-
-    @property
-    def unit(self):
-        return self._unit.value
-
-    @unit.setter
-    def unit(self, new_unit):
-        self._unit.set(new_unit)
-
-    @property
-    def types(self):
-        return self._types.value
-
-    @types.setter
-    def types(self, new_types):
-        self._types.set(new_types)
+        self.unit = URIProperty(self, SBOL_UNIT, '1', '1', [], unit)
+        self.types = URIProperty(self, SBOL_TYPES, '0', '*', [])
 
     def addType(self, new_type):
-        self._types.add(new_type)
+        val = self.types
+        val.append(new_type)
+        self.types = val
 
     def removeType(self, index=0):
-        self._types.remove(index)
+        val = self.types
+        del val[index]
+        self.types = val

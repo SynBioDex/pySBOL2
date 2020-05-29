@@ -20,10 +20,9 @@ class TopLevel(Identified):
         # TODO could this be moved into 'identified' constructor?
         if Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS.value) is True:
             if Config.getOption(ConfigOptions.SBOL_TYPED_URIS.value) is True:
-                self._persistentIdentity.set(
-                    posixpath.join(getHomespace(),
-                                   self.getClassName(type_uri),
-                                   self.displayId))
+                self.persistentIdentity = posixpath.join(getHomespace(),
+                                                         self.getClassName(type_uri),
+                                                         self.displayId)
         self.attachments = ReferencedObject(self, SBOL_ATTACHMENTS,
                                             SBOL_ATTACHMENT, '0', '*', [], [])
 

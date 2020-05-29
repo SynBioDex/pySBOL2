@@ -116,10 +116,10 @@ class ComponentDefinition(TopLevel):
         derived from this one
         """
         super().__init__(rdf_type, uri, version)
-        self._types = URIProperty(self, SBOL_TYPES,
-                                  '1', '*', None, component_type)
-        self._roles = URIProperty(self, SBOL_ROLES,
-                                  '0', '*', None)
+        self.types = URIProperty(self, SBOL_TYPES,
+                                 '1', '*', None, component_type)
+        self.roles = URIProperty(self, SBOL_ROLES,
+                                 '0', '*', None)
         self.sequence = OwnedObject(self, SBOL_SEQUENCE,
                                     Sequence,
                                     '0', '1', [libsbol_rule_20])
@@ -136,34 +136,25 @@ class ComponentDefinition(TopLevel):
                                                '0', '*', None)
         self._hidden_properties = [SBOL_SEQUENCE]
 
-    @property
-    def types(self):
-        return self._types.value
-
-    @types.setter
-    def types(self, new_types):
-        # perform validation prior to setting the value of the types property
-        self._types.set(new_types)
-
-    def addType(self, new_types):
-        self._types.add(new_types)
+    def addType(self, new_type):
+        val = self.types
+        val.append(new_type)
+        self.types = val
 
     def removeType(self, index=0):
-        self._types.remove(index)
-
-    @property
-    def roles(self):
-        return self._roles.value
-
-    @roles.setter
-    def roles(self, new_roles):
-        self._roles.set(new_roles)
+        val = self.types
+        del val[index]
+        self.types = val
 
     def addRole(self, new_role):
-        self._roles.add(new_role)
+        val = self.roles
+        val.append(new_role)
+        self.roles = val
 
     def removeRole(self, index=0):
-        self._roles.remove(index)
+        val = self.roles
+        del val[index]
+        self.roles = val
 
     def assemble(self, component_list, assembly_method=None, doc=None):
         """Assembles ComponentDefinitions into an abstraction hierarchy.

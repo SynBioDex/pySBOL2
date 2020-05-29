@@ -101,8 +101,8 @@ class SBOLObject:
         self._hidden_properties = []
         self.rdf_type = str(_rdf_type)
         self._namespaces = {}
-        self._identity = URIProperty(self, SBOL_IDENTITY, '0', '1',
-                                     [validation.sbol_rule_10202])
+        self.identity = URIProperty(self, SBOL_IDENTITY, '0', '1',
+                                    [validation.sbol_rule_10202])
         uri = URIRef(uri)
         if hasHomespace():
             uri = posixpath.join(getHomespace(), uri)
@@ -120,15 +120,6 @@ class SBOLObject:
 
     def __uri__(self):
         return self.identity
-
-    @property
-    def identity(self):
-        # Return the value associated with the identity property
-        return self._identity.value
-
-    @identity.setter
-    def identity(self, new_identity):
-        self._identity.value = new_identity
 
     @property
     def type(self):
@@ -479,7 +470,7 @@ class SBOLObject:
                     result = None
             else:
                 result = sbol_property
-        elif isinstance(result, (LiteralProperty, ReferencedObject)):
+        elif isinstance(result, (LiteralProperty, URIProperty)):
             # Convert these as appropriate so the Property attributes are
             # transparent and look like native types.
             result = result.value
@@ -496,7 +487,7 @@ class SBOLObject:
             attr = self.__dict__[name]
         except KeyError:
             return False
-        return isinstance(attr, (LiteralProperty, ReferencedObject))
+        return isinstance(attr, (LiteralProperty, URIProperty))
 
     def _set_transparent_attribute(self, name, value):
         self.__dict__[name].set(value)

@@ -14,53 +14,33 @@ class ComponentInstance(Identified):
         self.definition = ReferencedObject(self, SBOL_DEFINITION,
                                            SBOL_COMPONENT_DEFINITION,
                                            '1', '1', [], definition)
-        self._access = URIProperty(self, SBOL_ACCESS, '0', '1', [], access)
+        self.access = URIProperty(self, SBOL_ACCESS, '0', '1', [], access)
         self.mapsTos = OwnedObject(self, SBOL_MAPS_TOS, MapsTo,
                                    '0', '*', [])
         self.measurements = OwnedObject(self, SBOL_MEASUREMENTS, Measurement,
                                         '0', '*', [])
-
-    @property
-    def access(self):
-        return self._access.value
-
-    @access.setter
-    def access(self, new_access):
-        self._access.set(new_access)
 
 
 class Component(ComponentInstance):
     def __init__(self, uri=URIRef('example'), definition='',
                  access=SBOL_ACCESS_PUBLIC, version=VERSION_STRING):
         super().__init__(SBOL_COMPONENT, uri, definition, access, version)
-        self._roles = URIProperty(self, SBOL_ROLES, '0', '*',
-                                  [Component._role_set_role_integration])
-        self._roleIntegration = URIProperty(self, SBOL_ROLE_INTEGRATION,
-                                            '0', '1', [])
+        self.roles = URIProperty(self, SBOL_ROLES, '0', '*',
+                                 [Component._role_set_role_integration])
+        self.roleIntegration = URIProperty(self, SBOL_ROLE_INTEGRATION,
+                                           '0', '1', [])
         self.sourceLocations = OwnedObject(self, SBOL_LOCATIONS, Location,
                                            '0', '*', [])
 
-    @property
-    def roles(self):
-        return self._roles.value
-
-    @roles.setter
-    def roles(self, new_roles):
-        self._roles.set(new_roles)
-
     def addRole(self, new_role):
-        self._roles.add(new_role)
+        val = self.roles
+        val.append(new_role)
+        self.roles = val
 
     def removeRole(self, index=0):
-        self._roles.remove(index)
-
-    @property
-    def roleIntegration(self):
-        return self._roleIntegration.value
-
-    @roleIntegration.setter
-    def roleIntegration(self, new_roleIntegration):
-        self._roleIntegration.set(new_roleIntegration)
+        val = self.roles
+        del val[index]
+        self.roles = val
 
     @staticmethod
     def _role_set_role_integration(sbol_obj, arg):
@@ -82,16 +62,8 @@ class FunctionalComponent(ComponentInstance):
                  version=VERSION_STRING):
         super().__init__(SBOL_FUNCTIONAL_COMPONENT, uri,
                          definition, access, version)
-        self._direction = URIProperty(self, SBOL_DIRECTION,
-                                      '1', '1', [], direction)
-
-    @property
-    def direction(self):
-        return self._direction.value
-
-    @direction.setter
-    def direction(self, new_direction):
-        self._direction.set(new_direction)
+        self.direction = URIProperty(self, SBOL_DIRECTION,
+                                     '1', '1', [], direction)
 
     def connect(self, interface_component):
         raise NotImplementedError("Not yet implemented")
