@@ -54,6 +54,18 @@ class TestModuleDefinition(unittest.TestCase):
         md.attachments = attachment.identity
         self.assertEqual([attachment.identity], md.attachments)
 
+    def test_add_remove_role(self):
+        md = sbol2.ModuleDefinition('c1')
+        self.assertEqual([], md.roles)
+        md.addRole(sbol2.SO_PROMOTER)
+        self.assertEqual([sbol2.SO_PROMOTER], md.roles)
+        md.addRole(sbol2.SO_MISC)
+        self.assertEqual([sbol2.SO_PROMOTER, sbol2.SO_MISC], md.roles)
+        md.addRole(sbol2.SO_CDS)
+        self.assertEqual([sbol2.SO_PROMOTER, sbol2.SO_MISC, sbol2.SO_CDS], md.roles)
+        md.removeRole(1)
+        self.assertEqual([sbol2.SO_PROMOTER, sbol2.SO_CDS], md.roles)
+
 
 if __name__ == '__main__':
     unittest.main()

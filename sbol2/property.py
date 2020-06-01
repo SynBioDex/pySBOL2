@@ -228,7 +228,8 @@ class Property(ABC):
         """In pysbol there are 4 constructors for each Property. We have
         to figure out which constructor the user intended to call based on
         the arguments. The signatures are:
-            IntProperty(owner, rdf_type, low_bound, high_bound, ValidationRules, initial_value)
+            IntProperty(owner, rdf_type, low_bound, high_bound, ValidationRules,
+                        initial_value)
             IntProperty(owner, rdf_type, low_bound, high_bound, ValidationRules)
             IntProperty(owner, rdf_type, low_bound, high_bound, initial_value)
             IntProperty(owner, rdf_type, low_bound, high_bound)
@@ -682,7 +683,11 @@ class OwnedObject(Property):
     def get(self, uri=''):
         # TODO: orig getter contains a size check when uri is a constant string
         if uri == '':
-            return self._sbol_owner.owned_objects[self._rdf_type][0]
+            object_store = self._sbol_owner.owned_objects[self._rdf_type]
+            if object_store:
+                return object_store[0]
+            else:
+                return None
         else:
             return self.__getitem__(uri)
 
@@ -760,6 +765,11 @@ class OwnedObject(Property):
         #
         # TODO: This can leave the attribute empty if `add` fails.
         # Can we capture that and sent the old value back again?
+        if new_value is None:
+            value = self.get()
+            if value is not None:
+                self.remove(value.identity)
+            return
         self._sbol_owner.owned_objects[self._rdf_type].clear()
         self.add(new_value)
 
@@ -795,6 +805,7 @@ class OwnedObject(Property):
                 if self._sbol_owner.getTypeURI() == SBOL_DOCUMENT:
                     del obj.doc.SBOLObjects[rdflib.URIRef(obj.identity)]
                 del object_store[index]
+                self.validate(None)
         else:
             raise Exception('This property is not defined in '
                             'the parent object')

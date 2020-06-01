@@ -22,8 +22,8 @@ class Association(Identified):
     # The plan property is OPTIONAL and contains a URI that refers to a Plan.
     plan = None
 
-    def __init__(self, uri=URIRef("example"), agent=URIRef(""),
-                 role=URIRef(""), version=VERSION_STRING,
+    def __init__(self, uri=URIRef("example"), agent=None,
+                 role=None, version=VERSION_STRING,
                  rdf_type=PROVO_ASSOCIATION):
         """Constructor.
 
@@ -40,23 +40,19 @@ class Association(Identified):
         super().__init__(rdf_type, uri, version)
         self.agent = ReferencedObject(self, PROVO_AGENT_PROPERTY, PROVO_AGENT,
                                       '1', '1', [], agent)
-        self._roles = URIProperty(self, PROVO_HAD_ROLE, '1', '*', [], role)
+        self.roles = URIProperty(self, PROVO_HAD_ROLE, '1', '*', [], role)
         self.plan = ReferencedObject(self, PROVO_HAD_PLAN, PROVO_PLAN,
                                      '0', '1', [])
 
-    @property
-    def roles(self):
-        return self._roles.value
-
-    @roles.setter
-    def roles(self, new_roles):
-        self._roles.set(new_roles)
-
     def addRole(self, new_role):
-        self._roles.add(new_role)
+        val = self.roles
+        val.append(new_role)
+        self.roles = val
 
     def removeRole(self, index=0):
-        self._roles.remove(index)
+        val = self.roles
+        del val[index]
+        self.roles = val
 
 
 class Usage(Identified):
@@ -69,8 +65,8 @@ class Usage(Identified):
     # the usage of an entity referenced by the entity property.
     _roles = None
 
-    def __init__(self, uri=URIRef("example"), entity=URIRef(""),
-                 role=URIRef(""), version=VERSION_STRING,
+    def __init__(self, uri=URIRef("example"), entity=None,
+                 role=None, version=VERSION_STRING,
                  rdf_type=PROVO_USAGE):
         """Constructor.
 
@@ -84,30 +80,18 @@ class Usage(Identified):
         :param type: The RDF type for an extension class derived from this one.
         """
         super().__init__(rdf_type, uri, version)
-        self._entity = URIProperty(self, PROVO_ENTITY, '1', '1', [], entity)
-        self._roles = URIProperty(self, PROVO_HAD_ROLE, '1', '*', [], role)
-
-    @property
-    def entity(self):
-        return self._entity.value
-
-    @entity.setter
-    def entity(self, new_entity):
-        self._entity.set(new_entity)
-
-    @property
-    def roles(self):
-        return self._roles.value
-
-    @roles.setter
-    def roles(self, new_roles):
-        self._roles.set(new_roles)
+        self.entity = URIProperty(self, PROVO_ENTITY, '1', '1', [], entity)
+        self.roles = URIProperty(self, PROVO_HAD_ROLE, '1', '*', [], role)
 
     def addRole(self, new_role):
-        self._roles.add(new_role)
+        val = self.roles
+        val.append(new_role)
+        self.roles = val
 
     def removeRole(self, index=0):
-        self._roles.remove(index)
+        val = self.roles
+        del val[index]
+        self.roles = val
 
 
 class Agent(TopLevel):
@@ -201,38 +185,14 @@ class Activity(TopLevel):
                                 '0', '1', [validation.libsbol_rule_22])
         self.agent = ReferencedObject(self, PROVO_AGENT, Agent,
                                       '0', '1', [validation.libsbol_rule_22])
-        self._types = URIProperty(self, SBOL_TYPES, '0', '1', [])
-        self._startedAtTime = LiteralProperty(self, PROVO_STARTED_AT_TIME,
-                                              '0', '1', [])
-        self._endedAtTime = LiteralProperty(self, PROVO_ENDED_AT_TIME,
-                                            '0', '1', [])
+        self.types = URIProperty(self, SBOL_TYPES, '0', '1', [])
+        self.startedAtTime = LiteralProperty(self, PROVO_STARTED_AT_TIME,
+                                             '0', '1', [])
+        self.endedAtTime = LiteralProperty(self, PROVO_ENDED_AT_TIME,
+                                           '0', '1', [])
         self.wasInformedBy = ReferencedObject(self, PROVO_WAS_INFORMED_BY,
                                               PROVO_ACTIVITY, '0', '*', [])
         self.usages = OwnedObject(self, PROVO_QUALIFIED_USAGE, Usage,
                                   '0', '*', [])
         self.associations = OwnedObject(self, PROVO_QUALIFIED_ASSOCIATION,
                                         Association, '0', '*', [])
-
-    @property
-    def types(self):
-        return self._types.value
-
-    @types.setter
-    def types(self, new_types):
-        self._types.set(new_types)
-
-    @property
-    def startedAtTime(self):
-        return self._startedAtTime.value
-
-    @startedAtTime.setter
-    def startedAtTime(self, new_startedAtTime):
-        self._startedAtTime.set(new_startedAtTime)
-
-    @property
-    def endedAtTime(self):
-        return self._endedAtTime.value
-
-    @endedAtTime.setter
-    def endedAtTime(self, new_endedAtTime):
-        self._endedAtTime.set(new_endedAtTime)

@@ -12,7 +12,7 @@ class VariableComponent(Identified):
         super().__init__(type_uri, uri, version)
         self.variable = ReferencedObject(self, SBOL_VARIABLE,
                                          SBOL_COMPONENT, '0', '1', [])
-        self._repeat = URIProperty(self, SBOL_OPERATOR, '1', '1', [], repeat)
+        self.repeat = URIProperty(self, SBOL_OPERATOR, '1', '1', [], repeat)
         self.variants = ReferencedObject(self, SBOL_VARIANTS,
                                          SBOL_COMPONENT_DEFINITION,
                                          '0', '*', [])
@@ -25,14 +25,6 @@ class VariableComponent(Identified):
                                                    SBOL_COMBINATORIAL_DERIVATION,
                                                    '0', '*', [])
 
-    @property
-    def repeat(self):
-        return self._repeat.value
-
-    @repeat.setter
-    def repeat(self, new_repeat):
-        self._repeat.set(new_repeat)
-
 
 class CombinatorialDerivation(TopLevel):
 
@@ -42,18 +34,10 @@ class CombinatorialDerivation(TopLevel):
                  version=VERSION_STRING):
         super().__init__(type_uri, uri, version)
         # TODO in original source, it doesn't look like strategy is used
-        self._strategy = URIProperty(self, SBOL_STRATEGY, '1', '1', [])
+        self.strategy = URIProperty(self, SBOL_STRATEGY, '1', '1', [])
         self.masterTemplate = ReferencedObject(self, SBOL_TEMPLATE,
                                                SBOL_COMBINATORIAL_DERIVATION,
                                                '0', '1', [])
         self.variableComponents = OwnedObject(self, SBOL_VARIABLE_COMPONENTS,
                                               VariableComponent,
                                               '0', '*', [])
-
-    @property
-    def strategy(self):
-        return self._strategy.value
-
-    @strategy.setter
-    def strategy(self, new_strategy):
-        self._strategy.set(new_strategy)

@@ -2,6 +2,7 @@ import unittest
 import os
 
 import sbol2
+
 # backward compatibility
 import sbol2 as sbol
 
@@ -150,6 +151,12 @@ class TestProperty(unittest.TestCase):
         self.assertIsNone(cd.annotation)
         cd.annotation = sbol.Identified('foo')
         self.assertEqual(type(cd.annotation), sbol.Identified)
+
+        # Test unsetting
+        cd.annotation = None
+        self.assertEqual(cd.annotation, None)
+        cd.annotation = None
+        self.assertEqual(cd.annotation, None)
 
     def test_owned_object_multiple(self):
         cd = sbol.ComponentDefinition('cd')
