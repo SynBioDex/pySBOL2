@@ -91,7 +91,7 @@ class ModuleDefinition(TopLevel):
         derived from this one (optional)
         """
         super().__init__(sbol_type_uri, uri, version)
-        self._roles = URIProperty(self, SBOL_ROLES, '0', '*', None)
+        self.roles = URIProperty(self, SBOL_ROLES, '0', '*', None)
         self.models = ReferencedObject(self, SBOL_MODELS,
                                        SBOL_MODEL, '0', '*', [])
         self.functionalComponents = OwnedObject(self,
@@ -104,19 +104,15 @@ class ModuleDefinition(TopLevel):
                                         Interaction,
                                         '0', '*', [validation.libsbol_rule_17])
 
-    @property
-    def roles(self):
-        return self._roles.value
-
-    @roles.setter
-    def roles(self, new_roles):
-        self._roles.set(new_roles)
-
     def addRole(self, new_role):
-        self._roles.add(new_role)
+        val = self.roles
+        val.append(new_role)
+        self.roles = val
 
     def removeRole(self, index=0):
-        self._roles.remove(index)
+        val = self.roles
+        del val[index]
+        self.roles = val
 
     def setOutput(self, output):
         """Defines an output for a sub-Module.

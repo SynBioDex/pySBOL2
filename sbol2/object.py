@@ -9,9 +9,7 @@ from rdflib import URIRef
 from .config import getHomespace, string_equal
 from .config import hasHomespace
 from .constants import *
-from .property import OwnedObject
-from .property import ReferencedObject
-from .property import URIProperty
+from .property import Property, OwnedObject, URIProperty
 from .sbolerror import SBOLError
 from .sbolerror import SBOLErrorCode
 from .uridict import URIDict
@@ -101,8 +99,8 @@ class SBOLObject:
         self._hidden_properties = []
         self.rdf_type = str(_rdf_type)
         self._namespaces = {}
-        self._identity = URIProperty(self, SBOL_IDENTITY, '0', '1',
-                                     [validation.sbol_rule_10202])
+        self.identity = URIProperty(self, SBOL_IDENTITY, '0', '1',
+                                    [validation.sbol_rule_10202])
         uri = URIRef(uri)
         if hasHomespace():
             uri = posixpath.join(getHomespace(), uri)
@@ -120,15 +118,6 @@ class SBOLObject:
 
     def __uri__(self):
         return self.identity
-
-    @property
-    def identity(self):
-        # Return the value associated with the identity property
-        return self._identity.value
-
-    @identity.setter
-    def identity(self, new_identity):
-        self._identity.value = new_identity
 
     @property
     def type(self):
@@ -427,42 +416,8 @@ class SBOLObject:
                            URIRef(owned_obj.identity)))
                 owned_obj.build_graph(graph)
 
-    def serialize_rdf2xml(self, graph):
-        """Serialize the SBOLObject.
-
-        :param os: Output stream.
-        :param indentLevel:
-        :return: None
-        """
-        # Serialize properties
-        for rdf_type, vals in self.properties.items():
-            if rdf_type == 'http://sbols.org/v2#identity':
-                # This property is not serialized
-                continue
-            if len(vals) == 0:
-                #  No properties of this type
-                continue
-            predicate = self.doc.referenceNamespace(rdf_type)
-            for val in vals:
-                graph.add((self._identity.getRawValue(), predicate, val))
-        # Serialize owned objects
-        for name, object_store in self.owned_objects:
-            if len(object_store) == 0:
-                continue
-            # predicate = self.doc.referenceNamespace(name)
-            for obj in object_store:
-                # NOTE: couldn't we just use 'name'? (Would probably work the same,
-                # but wanted to follow the original implementation as closely as
-                # possible.)
-                typeURI = obj.getTypeURI()
-                if typeURI in self._hidden_properties:
-                    continue
-                rdfType = self.doc.referenceNamespace(typeURI)
-                graph.add((self._identity.getRawValue(), rdfType, obj.identity))
-                obj.serialize_rdf2xml(graph)  # recursive
-
     def __str__(self):
-        return str(self.identity)
+        return self.identity
 
     def is_top_level(self):
         return False
@@ -470,11 +425,7 @@ class SBOLObject:
     def __getattribute__(self, name):
         # Call the default method
         result = object.__getattribute__(self, name)
-        if isinstance(result, ReferencedObject):
-            # Convert the ReferencedObject to a value instead of
-            # returning the ReferencedObject itself
-            result = result.value
-        elif isinstance(result, OwnedObject):
+        if isinstance(result, OwnedObject):
             sbol_property = object.__getattribute__(self, name)
             if sbol_property.upper_bound == 1:
                 if len(sbol_property):
@@ -483,31 +434,25 @@ class SBOLObject:
                     result = None
             else:
                 result = sbol_property
+        elif isinstance(result, Property):
+            # Else if attribute is any other kind of Property besides
+            # OwnedObject, convert so the Property attributes are
+            # transparent and look like native types.
+            result = result.value
         return result
 
-    def _is_owned_object(self, name):
+    def _is_transparent_attribute(self, name):
         try:
-            return isinstance(self.__dict__[name], OwnedObject)
+            attr = self.__dict__[name]
         except KeyError:
             return False
+        return isinstance(attr, Property)
 
-    def _is_referenced_object(self, name):
-        try:
-            return isinstance(self.__dict__[name], ReferencedObject)
-        except KeyError:
-            return False
-
-    def _set_referenced_object(self, name, value):
-        self.__dict__[name].set(value)
-
-    def _set_owned_object(self, name, value):
+    def _set_transparent_attribute(self, name, value):
         self.__dict__[name].set(value)
 
     def __setattr__(self, name, value):
-        if self._is_referenced_object(name):
-            self._set_referenced_object(name, value)
-            return
-        if self._is_owned_object(name):
-            self._set_owned_object(name, value)
+        if self._is_transparent_attribute(name):
+            self._set_transparent_attribute(name, value)
             return
         object.__setattr__(self, name, value)

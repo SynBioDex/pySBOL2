@@ -23,6 +23,18 @@ class TestComponent(unittest.TestCase):
         self.assertEqual(sbol2.SBOL_ROLE_INTEGRATION_OVERRIDE,
                          c.roleIntegration)
 
+    def test_add_remove_role(self):
+        c = sbol2.Component('c1')
+        self.assertEqual([], c.roles)
+        c.addRole(sbol2.SO_PROMOTER)
+        self.assertEqual([sbol2.SO_PROMOTER], c.roles)
+        c.addRole(sbol2.SO_MISC)
+        self.assertEqual([sbol2.SO_PROMOTER, sbol2.SO_MISC], c.roles)
+        c.addRole(sbol2.SO_CDS)
+        self.assertEqual([sbol2.SO_PROMOTER, sbol2.SO_MISC, sbol2.SO_CDS], c.roles)
+        c.removeRole(1)
+        self.assertEqual([sbol2.SO_PROMOTER, sbol2.SO_CDS], c.roles)
+
 
 if __name__ == '__main__':
     unittest.main()

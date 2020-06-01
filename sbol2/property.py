@@ -228,7 +228,8 @@ class Property(ABC):
         """In pysbol there are 4 constructors for each Property. We have
         to figure out which constructor the user intended to call based on
         the arguments. The signatures are:
-            IntProperty(owner, rdf_type, low_bound, high_bound, ValidationRules, initial_value)
+            IntProperty(owner, rdf_type, low_bound, high_bound, ValidationRules,
+                        initial_value)
             IntProperty(owner, rdf_type, low_bound, high_bound, ValidationRules)
             IntProperty(owner, rdf_type, low_bound, high_bound, initial_value)
             IntProperty(owner, rdf_type, low_bound, high_bound)

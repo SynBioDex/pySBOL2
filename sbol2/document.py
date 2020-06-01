@@ -161,10 +161,10 @@ class Document(Identified):
         self.experimentalData = OwnedObject(self, SBOL_EXPERIMENTAL_DATA,
                                             ExperimentalData,
                                             '0', '*', None)
-        self._citations = URIProperty(self, PURL_URI + "bibliographicCitation",
-                                      '0', '*', None)
-        self._keywords = URIProperty(self, PURL_URI + "elements/1.1/subject",
+        self.citations = URIProperty(self, PURL_URI + "bibliographicCitation",
                                      '0', '*', None)
+        self.keywords = URIProperty(self, PURL_URI + "elements/1.1/subject",
+                                    '0', '*', None)
         # I am my own document
         self.doc = self
         if filename is not None:
@@ -179,33 +179,25 @@ class Document(Identified):
             return False
         return True
 
-    @property
-    def citations(self):
-        return self._citations.value
-
-    @citations.setter
-    def citations(self, new_citations):
-        self._citations.set(new_citations)
-
     def addCitation(self, new_citation):
-        self._citations.add(new_citation)
+        val = self.citations
+        val.append(new_citation)
+        self.citations = val
 
     def removeCitation(self, index=0):
-        self._citations.remove(index)
-
-    @property
-    def keywords(self):
-        return self._keywords.value
-
-    @keywords.setter
-    def keywords(self, new_keywords):
-        self._keywords.set(new_keywords)
+        val = self.citations
+        del val[index]
+        self.citations = val
 
     def addKeyword(self, new_keyword):
-        self._keywords.add(new_keyword)
+        val = self.keywords
+        val.append(new_keyword)
+        self.keywords = val
 
     def removeKeyword(self, index=0):
-        self._keywords.remove(index)
+        val = self.keywords
+        del val[index]
+        self.keywords = val
 
     def add(self, sbol_obj):
         """

@@ -15,13 +15,5 @@ class SequenceConstraint(Identified):
                                         '1', '1', [], subject)
         self.object = ReferencedObject(self, SBOL_OBJECT, SBOL_COMPONENT,
                                        '1', '1', [], obj)
-        self._restriction = URIProperty(self, SBOL_RESTRICTION,
-                                        '1', '1', [], restriction)
-
-    @property
-    def restriction(self):
-        return self._restriction.value
-
-    @restriction.setter
-    def restriction(self, new_restriction):
-        self._restriction.set(new_restriction)
+        self.restriction = URIProperty(self, SBOL_RESTRICTION,
+                                       '1', '1', [], restriction)

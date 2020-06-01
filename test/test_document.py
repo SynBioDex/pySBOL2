@@ -201,9 +201,6 @@ class TestDocument(unittest.TestCase):
         namespaces = [n[1] for n in doc.graph.namespace_manager.namespaces()]
         self.assertFalse('http://examples.org#' in namespaces)
         doc.addNamespace('http://examples.org#', 'examples')
-        cd.foo = sbol.property.LiteralProperty(cd, 'http://examples.org#foo',
-                                               '0', '1', None, 'bar')
-        namespaces = [n for n in doc.graph.namespace_manager.namespaces()]
         doc.readString(doc.writeString())
         namespaces = [n for n in doc.graph.namespace_manager.namespaces()]
         self.assertIn(('examples', rdflib.URIRef('http://examples.org#')),
@@ -309,16 +306,17 @@ class TestDocument(unittest.TestCase):
         self.assertTrue(doc)
 
     def test_from_user_to_user(self):
-        # Test proper conversion of user-facing types from RDFlib types after
+        # Test proper conversion of user-facing types from RDFlib types
         # through the Property interfaces after serializing and de-serializing
         doc = sbol.Document()
         cd = doc.componentDefinitions.create('cd')
         cd.int_property = sbol.IntProperty(cd, 'http://examples.org', '0', '1', None, 42)
+        self.assertEqual(42, cd.int_property)
         doc2 = sbol.Document()
         doc2.readString(doc.writeString())
-        cd = doc2.componentDefinitions['cd']
-        cd.int_property = sbol.IntProperty(cd, 'http://examples.org', '0', '1', None)
-        self.assertEqual(cd.int_property.value, 42)
+        cd2 = doc2.componentDefinitions['cd']
+        cd2.int_property = sbol.IntProperty(cd, 'http://examples.org', '0', '1', None)
+        self.assertEqual(42, cd2.int_property)
 
     def test_range(self):
         # Test proper serializing and de-serializing of range properties
@@ -469,6 +467,39 @@ class TestDocumentExtensionObjects(unittest.TestCase):
                          raised.error_code())
         obj = doc.find(ntle.identity)
         self.assertIsNone(obj)
+
+    def test_add_remove_citation(self):
+        doc = sbol2.Document()
+        sbol1_spec = 'http://www.nature.com/nbt/journal/v32/n6/full/nbt.2891.html'
+        sbol2_spec = 'https://doi.org/10.1515/jib-2018-0001'
+        sbol3_spec = ('https://sbolstandard.org/wp-content'
+                      '/uploads/2020/04/SBOL3.0specification.pdf')
+        self.assertEqual([], doc.citations)
+        doc.addCitation(sbol1_spec)
+        self.assertEqual([sbol1_spec], doc.citations)
+        doc.addCitation(sbol2_spec)
+        self.assertEqual([sbol1_spec, sbol2_spec], doc.citations)
+        doc.addCitation(sbol3_spec)
+        expected = [sbol1_spec, sbol2_spec, sbol3_spec]
+        self.assertEqual(expected, doc.citations)
+        doc.removeCitation(1)
+        self.assertEqual([sbol1_spec, sbol3_spec], doc.citations)
+
+    def test_add_remove_keyword(self):
+        doc = sbol2.Document()
+        keyword1 = 'http://example.com/keyword#key1'
+        keyword2 = 'http://example.com/keyword#key2'
+        keyword3 = 'http://example.com/keyword#key3'
+        self.assertEqual([], doc.keywords)
+        doc.addKeyword(keyword1)
+        self.assertEqual([keyword1], doc.keywords)
+        doc.addKeyword(keyword2)
+        self.assertEqual([keyword1, keyword2], doc.keywords)
+        doc.addKeyword(keyword3)
+        expected = [keyword1, keyword2, keyword3]
+        self.assertEqual(expected, doc.keywords)
+        doc.removeKeyword(1)
+        self.assertEqual([keyword1, keyword3], doc.keywords)
 
 
 if __name__ == '__main__':

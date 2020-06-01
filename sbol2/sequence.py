@@ -32,23 +32,16 @@ class Sequence(TopLevel):
         from this one.
         """
         super().__init__(type_uri, uri, version)
-        self._elements = LiteralProperty(self, SBOL_ELEMENTS,
-                                         '1', '1', [], elements)
-        self._encoding = URIProperty(self, SBOL_ENCODING,
-                                     '1', '1', [], encoding)
 
-    # The elements property is a REQUIRED String of characters that represents
-    # the constituents of a biological or chemical molecule. For example,
-    # these characters could represent the nucleotide bases
-    # of a molecule of DNA, the amino acid residues of a protein,
-    # or the atoms and chemical bonds of a small molecule.
-    @property
-    def elements(self):
-        return str(self._elements.value)
-
-    @elements.setter
-    def elements(self, new_elements):
-        self._elements.value = new_elements
+        # The elements property is a REQUIRED String of characters that represents
+        # the constituents of a biological or chemical molecule. For example,
+        # these characters could represent the nucleotide bases
+        # of a molecule of DNA, the amino acid residues of a protein,
+        # or the atoms and chemical bonds of a small molecule.
+        self.elements = LiteralProperty(self, SBOL_ELEMENTS,
+                                        '1', '1', [], elements)
+        self.encoding = URIProperty(self, SBOL_ENCODING,
+                                    '1', '1', [], encoding)
 
     # The encoding property is REQUIRED and has a data type of URI.
     # This property MUST indicate how the elements property of a Sequence
@@ -71,13 +64,6 @@ class Sequence(TopLevel):
     # | DNA, RNA                  | IUPAC DNA, RNA | SBOL_ENCODING_IUPAC         | http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html |
     # | Protein                   | IUPAC Protein  | SBOL_ENCODING_IUPAC_PROTEIN | http://www.chem.qmul.ac.uk/iupac/AminoAcid/      |
     # | Small Molecule            | SMILES         | SBOL_ENCODING_SMILES        | http://www.opensmiles.org/opensmiles.html        |
-    @property
-    def encoding(self):
-        return self._encoding.value
-
-    @encoding.setter
-    def encoding(self, new_encoding):
-        self._encoding.value = new_encoding
 
     def assemble(self, composite_sequence=""):
         """Calculates the complete sequence of a high-level Component

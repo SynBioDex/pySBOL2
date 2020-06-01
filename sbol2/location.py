@@ -13,18 +13,10 @@ class Location(Identified):
     def __init__(self, uri=URIRef('example'), orientation=SBOL_ORIENTATION_INLINE,
                  *, type_uri=SBOL_LOCATION, version=VERSION_STRING):
         super().__init__(type_uri=type_uri, uri=uri, version=version)
-        self._orientation = URIProperty(self, SBOL_ORIENTATION,
-                                        '1', '1', [], orientation)
+        self.orientation = URIProperty(self, SBOL_ORIENTATION,
+                                       '1', '1', [], orientation)
         self.sequence = ReferencedObject(self, SBOL_SEQUENCE_PROPERTY,
                                          SBOL_SEQUENCE, '0', '1', [])
-
-    @property
-    def orientation(self):
-        return self._orientation.value
-
-    @orientation.setter
-    def orientation(self, new_orientation):
-        self._orientation.set(new_orientation)
 
 
 class Range(Location):
@@ -37,24 +29,8 @@ class Range(Location):
     def __init__(self, uri=URIRef('example'), start=1, end=2,
                  *, type_uri=SBOL_RANGE, version=VERSION_STRING):
         super().__init__(uri=uri, type_uri=type_uri, version=version)
-        self._start = IntProperty(self, SBOL_START, '0', '1', None, start)
-        self._end = IntProperty(self, SBOL_END, '0', '1', None, end)
-
-    @property
-    def start(self):
-        return self._start.value
-
-    @start.setter
-    def start(self, val):
-        self._start.set(val)
-
-    @property
-    def end(self):
-        return self._end.value
-
-    @end.setter
-    def end(self, val):
-        self._end.set(val)
+        self.start = IntProperty(self, SBOL_START, '0', '1', None, start)
+        self.end = IntProperty(self, SBOL_END, '0', '1', None, end)
 
     def precedes(self, comparand):
         if self.end < comparand.start:
@@ -105,15 +81,7 @@ class Cut(Location):
     def __init__(self, uri=URIRef('example'), at=0,
                  *, type_uri=SBOL_CUT, version=VERSION_STRING):
         super().__init__(uri=uri, type_uri=type_uri, version=version)
-        self._at = IntProperty(self, SBOL_AT, '1', '1', [], at)
-
-    @property
-    def at(self):
-        return self._at.value
-
-    @at.setter
-    def at(self, new_at):
-        self._at.set(new_at)
+        self.at = IntProperty(self, SBOL_AT, '1', '1', [], at)
 
 
 class GenericLocation(Location):
