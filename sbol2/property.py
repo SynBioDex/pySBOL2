@@ -682,7 +682,11 @@ class OwnedObject(Property):
     def get(self, uri=''):
         # TODO: orig getter contains a size check when uri is a constant string
         if uri == '':
-            return self._sbol_owner.owned_objects[self._rdf_type][0]
+            object_store = self._sbol_owner.owned_objects[self._rdf_type]
+            if object_store:
+                return object_store[0]
+            else:
+                return None
         else:
             return self.__getitem__(uri)
 
@@ -761,7 +765,9 @@ class OwnedObject(Property):
         # TODO: This can leave the attribute empty if `add` fails.
         # Can we capture that and sent the old value back again?
         if new_value is None:
-            self.remove(self.get().identity)
+            value = self.get()
+            if value is not None:
+                self.remove(value.identity)
             return
         self._sbol_owner.owned_objects[self._rdf_type].clear()
         self.add(new_value)

@@ -155,6 +155,8 @@ class TestProperty(unittest.TestCase):
         # Test unsetting
         cd.annotation = None
         self.assertEqual(cd.annotation, None)
+        cd.annotation = None
+        self.assertEqual(cd.annotation, None)
 
     def test_owned_object_multiple(self):
         cd = sbol.ComponentDefinition('cd')
