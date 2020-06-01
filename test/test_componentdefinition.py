@@ -217,13 +217,14 @@ class TestComponentDefinitions(unittest.TestCase):
 
     @unittest.expectedFailure
     def test_remove_hidden_sequence(self):
+        # Objects contained in a hidden property shouldn't persist if they are
+        # removed from the Document top level
         doc = sbol2.Document()
         cd = doc.componentDefinitions.create('cd1')
-        seq = sbol2.Sequence('cd1_sequence')
-        cd.sequence = seq
-        self.assertIn(seq.identity, doc.sequences)
-        cd.sequence = None
-        self.assertNotIn(seq.identity, doc.sequences)
+        cd.sequence = sbol2.Sequence('cd1_sequence')
+        self.assertIn('cd1_sequence', doc.sequences)
+        doc.sequences.remove('cd1_sequence')
+        self.assertIsNone(cd.sequence)
 
     def test_sequence_validation(self):
         # sequence and sequences should be synced up
