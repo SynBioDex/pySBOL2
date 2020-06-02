@@ -820,6 +820,7 @@ class OwnedObject(Property):
                         # Erase TopLevel objects from Document
                         if self._sbol_owner.getTypeURI() == SBOL_DOCUMENT:
                             del obj.doc.SBOLObjects[rdflib.URIRef(uri)]
+                        self.validate(None)
                         return obj
 
     def clear(self):
