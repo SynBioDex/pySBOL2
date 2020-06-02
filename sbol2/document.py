@@ -573,11 +573,7 @@ class Document(Identified):
                         # del self.SBOLObjects[obj]
                 else:
                     # Extension data
-                    if predicate not in parent.properties:
-                        parent.properties[predicate] = []
-                        parent.properties[predicate].append(obj)
-                    else:
-                        parent.properties[predicate].append(obj)
+                    parent.properties[predicate] = [obj]
             else:
                 msg = 'Subject {} ({}) not found in my SBOLObjects'
                 msg = msg.format(subject, type(subject))
