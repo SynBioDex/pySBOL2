@@ -471,13 +471,6 @@ class Document(Identified):
         # Instantiate all objects with an RDF type
         for s, _, o in self.graph.triples((None, rdflib.RDF.type, None)):
             self.parse_objects_inner(s, o)
-        # Find everything in the triple store
-        all_query = "PREFIX : <http://example.org/ns#> " \
-                    "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " \
-                    "PREFIX sbol: <http://sbols.org/v2#> " \
-                    "SELECT ?s ?p ?o " \
-                    "{ ?s ?p ?o }"
-        all_results = self.graph.query(all_query)
         # Find the graph base uri.  This is the location of the sbol
         # file, and begins with the "file://" scheme.  Any URI in the
         # file without a scheme will appear relative to this URI, after
@@ -489,17 +482,17 @@ class Document(Identified):
         if pos != -1:
             pos += 1
         rdf_type = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
-        for result in all_results:
+        for result_s, result_p, result_o in self.graph:
             # Look for properties
-            if str(result.p) != rdf_type:
-                obj = result.o
+            if str(result_p) != rdf_type:
+                obj = result_o
                 lval = str(obj)
-                if isinstance(result.o, URIRef) and pos != -1:
+                if isinstance(result_o, URIRef) and pos != -1:
                     if lval[:pos] == graphBaseURIStr:
                         # This was a URI without a scheme.  Remove URI base
                         lval = lval[pos:]
                         obj = URIRef(lval)
-                self.parse_properties_inner(result.s, result.p, obj)
+                self.parse_properties_inner(result_s, result_p, obj)
 
         # Remove objects from SBOLObjects if they are not TopLevel AND
         # they have a parent object.
