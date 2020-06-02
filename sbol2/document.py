@@ -532,8 +532,7 @@ class Document(Identified):
                 values.clear()
             new_obj.identity = subject
             # Update document
-            identity_uri = rdflib.URIRef(new_obj.identity)
-            self.SBOLObjects[identity_uri] = new_obj
+            self.SBOLObjects[new_obj.identity] = new_obj
             new_obj.doc = self
             # For now, set the parent to the Document.
             # This may get overwritten later for child objects.
@@ -548,8 +547,7 @@ class Document(Identified):
             new_obj = SBOLObject()
             new_obj.identity = subject
             new_obj.rdf_type = obj
-            identity_uri = rdflib.URIRef(new_obj.identity)
-            self.SBOLObjects[identity_uri] = new_obj
+            self.SBOLObjects[new_obj.identity] = new_obj
             new_obj.doc = self
 
     def parse_properties_inner(self, subject, predicate, obj):
