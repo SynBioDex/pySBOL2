@@ -481,17 +481,15 @@ class Document(Identified):
         pos = graphBaseURIStr.rfind('/')
         if pos != -1:
             pos += 1
-        rdf_type = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+        rdf_type = rdflib.RDF.type
         for result_s, result_p, result_o in self.graph:
             # Look for properties
-            if str(result_p) != rdf_type:
+            if result_p != rdf_type:
                 obj = result_o
-                lval = str(obj)
                 if isinstance(result_o, URIRef) and pos != -1:
-                    if lval[:pos] == graphBaseURIStr:
+                    if obj[:pos] == graphBaseURIStr:
                         # This was a URI without a scheme.  Remove URI base
-                        lval = lval[pos:]
-                        obj = URIRef(lval)
+                        obj = URIRef(obj[pos:])
                 self.parse_properties_inner(result_s, result_p, obj)
 
         # Remove objects from SBOLObjects if they are not TopLevel AND
