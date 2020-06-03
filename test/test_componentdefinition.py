@@ -215,6 +215,17 @@ class TestComponentDefinitions(unittest.TestCase):
                                            rdflib.URIRef(sbol2.SBOL_SEQUENCE_PROPERTY),
                                            rdflib.URIRef(seq.identity)))
 
+    @unittest.expectedFailure  # See #272
+    def test_remove_hidden_sequence(self):
+        # Objects contained in a hidden property shouldn't persist if they are
+        # removed from the Document top level
+        doc = sbol2.Document()
+        cd = doc.componentDefinitions.create('cd1')
+        cd.sequence = sbol2.Sequence('cd1_sequence')
+        self.assertIn('cd1_sequence', doc.sequences)
+        doc.sequences.remove('cd1_sequence')
+        self.assertIsNone(cd.sequence)
+
     def test_sequence_validation(self):
         # sequence and sequences should be synced up
         cd = sbol2.ComponentDefinition('cd1', sbol2.BIOPAX_DNA)
@@ -336,6 +347,32 @@ class TestAssemblyRoutines(unittest.TestCase):
 
         self.assertEqual(target_seq, 'aaatttaaatttaaatttaaa')
         self.assertEqual(target_seq, gene.sequence.elements)
+
+    def test_compile_autoconstruct_sequence(self):
+        # Ensure that autoconstruction of Sequence URIs works correctly with
+        # different configuration options
+        root_id = 'root'
+        sub_id = 'sub'
+        sbol2.Config.setOption('sbol_compliant_uris', True)
+        sbol2.Config.setOption('sbol_typed_uris', True)
+        doc = sbol2.Document()
+        root = doc.componentDefinitions.create(root_id)
+        sub = doc.componentDefinitions.create(sub_id)
+        root.compile([sub])
+        expected_identity = sbol2.getHomespace() + '/Sequence/' + root_id + '/1'
+        self.assertEqual(root.sequence.identity, expected_identity)
+
+        sbol2.Config.setOption('sbol_compliant_uris', True)
+        sbol2.Config.setOption('sbol_typed_uris', False)
+        doc = sbol2.Document()
+        root = doc.componentDefinitions.create(root_id)
+        sub = doc.componentDefinitions.create(sub_id)
+        root.compile([sub])
+        expected_identity = sbol2.getHomespace() + '/' + root_id + '_seq/1'
+        self.assertEqual(root.sequence.identity, expected_identity)
+
+        sbol2.Config.setOption('sbol_compliant_uris', True)
+        sbol2.Config.setOption('sbol_typed_uris', True)
 
     def test_recursive_compile(self):
         doc = sbol2.Document()

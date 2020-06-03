@@ -324,13 +324,10 @@ class ComponentDefinition(TopLevel):
                              'to a Document in order to compile.' % self.identity)
 
         if self.sequence is None:
-            if Config.getOption('sbol_compliant_uris'):
-                display_id = self.displayId
-                if not Config.getOption('sbol_typed_uris'):
-                    display_id += '_seq'
-                self.sequence = Sequence(display_id)
-            else:
-                self.sequence = Sequence(display_id + '_seq')
+            sequence_id = self.displayId + '_seq'
+            if Config.getOption('sbol_compliant_uris') and Config.getOption('sbol_typed_uris'):
+                sequence_id = self.displayId
+            self.sequence = Sequence(sequence_id)
 
         return self.sequence.compile(assembly_method=assembly_method)
 
