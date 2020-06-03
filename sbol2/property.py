@@ -804,9 +804,6 @@ class OwnedObject(Property):
                 obj = object_store[index]
                 if self._sbol_owner.getTypeURI() == SBOL_DOCUMENT:
                     del obj.doc.SBOLObjects[rdflib.URIRef(obj.identity)]
-                # Erase nested, hidden TopLevel objects from Document
-                if obj.doc is not None and obj.doc.find(obj.identity) is not None:
-                    obj.doc = None  # TODO not sure what this does
                 del object_store[index]
                 self.validate(None)
         else:
@@ -823,9 +820,6 @@ class OwnedObject(Property):
                         # Erase TopLevel objects from Document
                         if self._sbol_owner.getTypeURI() == SBOL_DOCUMENT:
                             del obj.doc.SBOLObjects[rdflib.URIRef(uri)]
-                        # Erase nested, hidden TopLevel objects from Document
-                        if obj.doc is not None and obj.doc.find(uri) is not None:
-                            obj.doc = None  # TODO not sure what this does
                         self.validate(None)
                         return obj
 

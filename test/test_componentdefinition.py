@@ -215,6 +215,17 @@ class TestComponentDefinitions(unittest.TestCase):
                                            rdflib.URIRef(sbol2.SBOL_SEQUENCE_PROPERTY),
                                            rdflib.URIRef(seq.identity)))
 
+    @unittest.expectedFailure  # See #272
+    def test_remove_hidden_sequence(self):
+        # Objects contained in a hidden property shouldn't persist if they are
+        # removed from the Document top level
+        doc = sbol2.Document()
+        cd = doc.componentDefinitions.create('cd1')
+        cd.sequence = sbol2.Sequence('cd1_sequence')
+        self.assertIn('cd1_sequence', doc.sequences)
+        doc.sequences.remove('cd1_sequence')
+        self.assertIsNone(cd.sequence)
+
     def test_sequence_validation(self):
         # sequence and sequences should be synced up
         cd = sbol2.ComponentDefinition('cd1', sbol2.BIOPAX_DNA)
