@@ -1,10 +1,11 @@
+from typing import Union
+
 from rdflib import URIRef
 
 from .component import Component
 from .config import Config
 from .constants import *
 from .toplevel import TopLevel
-from . import validation
 from .property import OwnedObject, ReferencedObject, URIProperty
 from .sbolerror import SBOLError, SBOLErrorCode
 from .sequence import Sequence
@@ -90,8 +91,6 @@ class ComponentDefinition(TopLevel):
 
     sequences = None  # ReferencedObject
 
-    sequence = None  # OwnedObject<Sequence>
-
     sequenceAnnotations = None  # OwnedObject<SequenceAnnotation>
 
     sequenceConstraints = None  # OwnedObject<SequenceConstraint>
@@ -120,12 +119,8 @@ class ComponentDefinition(TopLevel):
                                  '1', '*', None, component_type)
         self.roles = URIProperty(self, SBOL_ROLES,
                                  '0', '*', None)
-        self.sequence = OwnedObject(self, SBOL_SEQUENCE,
-                                    Sequence,
-                                    '0', '1', [libsbol_rule_20])
         self.sequences = ReferencedObject(self, SBOL_SEQUENCE_PROPERTY,
-                                          SBOL_SEQUENCE, '0', '*',
-                                          [validation.libsbol_rule_21])
+                                          SBOL_SEQUENCE, '0', '*', None)
         self.sequenceAnnotations = OwnedObject(self, SBOL_SEQUENCE_ANNOTATIONS,
                                                SequenceAnnotation,
                                                '0', '*', None)
@@ -134,7 +129,46 @@ class ComponentDefinition(TopLevel):
         self.sequenceConstraints = OwnedObject(self, SBOL_SEQUENCE_CONSTRAINTS,
                                                SequenceConstraint,
                                                '0', '*', None)
-        self._hidden_properties = [SBOL_SEQUENCE]
+        # This caches a sequence object so that it can be added
+        # to a document later
+        self._sequence_cache: Union[Sequence, None] = None
+
+    @property
+    def sequence(self):
+        seqs = self.sequences
+        if not seqs:
+            return None
+        seq_uri = seqs[0]
+        if self._sequence_cache and self._sequence_cache.identity == seq_uri:
+            return self._sequence_cache
+        # Not in the cache, try to look up in the document
+        if self.doc:
+            try:
+                return self.doc.find(seq_uri)
+            except NotImplementedError:
+                raise
+
+    @sequence.setter
+    def sequence(self, sequence: Union[Sequence, None]):
+        if not sequence:
+            # TODO: How to remove an orphaned sequence from the document?
+            self.sequences = None
+            self._sequence_cache = None
+            return
+        if self.doc:
+            try:
+                self.doc.add(sequence)
+            except SBOLError as e:
+                if e.error_code() != SBOLErrorCode.DUPLICATE_URI_ERROR:
+                    raise
+        self._sequence_cache = sequence
+        self.sequences = [sequence.identity]
+
+    def added_to_document(self, doc):
+        super().added_to_document(doc)
+        # Add the sequence to the document
+        if self._sequence_cache:
+            doc.add(self._sequence_cache)
 
     def addType(self, new_type):
         val = self.types
@@ -657,22 +691,3 @@ class ComponentDefinition(TopLevel):
 
     def getTypeURI(self):
         return SBOL_COMPONENT_DEFINITION
-
-
-def libsbol_rule_20(sbol_obj, arg):
-    """Synchronizes ComponentDefinition.sequence with ComponentDefinition.sequences.
-    """
-    if not isinstance(sbol_obj, ComponentDefinition):
-        msg = 'Expected {}, got {}'
-        msg = msg.format(ComponentDefinition.__name__, type(sbol_obj).__name__)
-        raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
-    if arg is None:
-        # Clearing out sequence. What should we do with sequences?
-        # Should we clear sequences?
-        return
-    if not isinstance(arg, Sequence):
-        msg = 'Expected {}, got {}'
-        msg = msg.format(Sequence.__name__, type(arg).__name__)
-        raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
-    if arg.identity not in sbol_obj.sequences:
-        sbol_obj.sequences = [arg.identity]
