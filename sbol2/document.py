@@ -1040,3 +1040,148 @@ def validate(doc: Document, options: Mapping[str, Any]):
         msg = 'Validation failure. HTTP post request failed with code {}: {}'
         msg = msg.format(response.status_code, response.content)
         raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST)
+
+
+def IGEM_STANDARD_ASSEMBLY(parts_list):
+    if not all(type(part) is ComponentDefinition for part in parts_list):
+        raise TypeError()
+    doc = parts_list[0].doc
+    G0000_uri = 'https://synbiohub.org/public/igem/BBa_G0000/1'
+    G0000_seq_uri = 'https://synbiohub.org/public/igem/BBa_G0000_sequence/1'
+    G0002_uri = 'https://synbiohub.org/public/igem/BBa_G0002/1'
+    G0002_seq_uri = 'https://synbiohub.org/public/igem/BBa_G0002_sequence/1'
+    if not (G0000_uri in doc.componentDefinitions and G0002_uri in doc.componentDefinitions and G0000_seq_uri \
+            in doc.sequences and G0002_seq_uri in doc.sequences):
+        doc.readString('''<?xml version="1.0" encoding="utf-8"?>
+                   <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/"
+                   xmlns:dcterms="http://purl.org/dc/terms/"
+                   xmlns:gbconv="http://sbols.org/genBankConversion#"
+                   xmlns:genbank="http://www.ncbi.nlm.nih.gov/genbank#"
+                   xmlns:igem="http://wiki.synbiohub.org/wiki/Terms/igem#"
+                   xmlns:ncbi="http://www.ncbi.nlm.nih.gov#"
+                   xmlns:obo="http://purl.obolibrary.org/obo/"
+                   xmlns:om="http://www.ontology-of-units-of-measure.org/resource/om-2/"
+                   xmlns:prov="http://www.w3.org/ns/prov#"
+                   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+                   xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+                   xmlns:sbh="http://wiki.synbiohub.org/wiki/Terms/synbiohub#"
+                   xmlns:sbol="http://sbols.org/v2#"
+                   xmlns:sybio="http://www.sybio.ncl.ac.uk#"
+                   xmlns:synbiohub="http://synbiohub.org#"
+                   xmlns:xsd="http://www.w3.org/2001/XMLSchema#dateTime/">
+                   <sbol:ComponentDefinition rdf:about="https://synbiohub.org/public/igem/BBa_G0000/1">
+                   <dc:creator>Reshma Shetty</dc:creator>
+                   <dcterms:created>2007-07-22T11:00:00Z</dcterms:created>
+                   <dcterms:description>SpeI/XbaI scar for RBS-CDS junctions</dcterms:description>
+                   <dcterms:modified>2015-08-31T04:07:27Z</dcterms:modified>
+                   <dcterms:title>scar</dcterms:title>
+                   <sbol:displayId>BBa_G0000</sbol:displayId>
+                   <sbol:persistentIdentity rdf:resource="https://synbiohub.org/public/igem/BBa_G0000"/>
+                   <sbol:role rdf:resource="http://identifiers.org/so/SO:0000110"/>
+                   <sbol:role rdf:resource="http://wiki.synbiohub.org/wiki/Terms/igem#partType/DNA"/>
+                   <sbol:sequence rdf:resource="https://synbiohub.org/public/igem/BBa_G0000_sequence/1"/>
+                   <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
+                   <sbol:version>1</sbol:version>
+                   <igem:discontinued>false</igem:discontinued>
+                   <igem:dominant>true</igem:dominant>
+                   <igem:experience rdf:resource="http://wiki.synbiohub.org/wiki/Terms/igem#experience/None"/>
+                   <igem:group_u_list>_41_</igem:group_u_list>
+                   <igem:m_user_id>0</igem:m_user_id>
+                   <igem:owner_id>126</igem:owner_id>
+                   <igem:owning_group_id>162</igem:owning_group_id>
+                   <igem:sampleStatus>Not in stock</igem:sampleStatus>
+                   <igem:status rdf:resource="http://wiki.synbiohub.org/wiki/Terms/igem#status/Unavailable"/>
+                   <sbh:bookmark>false</sbh:bookmark>
+                   <sbh:mutableDescription>This is the sequence of the SpeI/XbaI scar for RBS-CDS junctions in BioBricks standard assembly.</sbh:mutableDescription>
+                   <sbh:mutableNotes>This is a shorter scar to ensure proper spacing between the RBS and CDS.</sbh:mutableNotes>
+                   <sbh:mutableProvenance>SpeI/XbaI scar</sbh:mutableProvenance>
+                   <sbh:ownedBy rdf:resource="https://synbiohub.org/user/james"/>
+                   <sbh:ownedBy rdf:resource="https://synbiohub.org/user/myers"/>
+                   <sbh:star>false</sbh:star>
+                   <sbh:topLevel rdf:resource="https://synbiohub.org/public/igem/BBa_G0000/1"/>
+                   <prov:wasDerivedFrom rdf:resource="http://parts.igem.org/Part:BBa_G0000"/>
+                   <prov:wasGeneratedBy rdf:resource="https://synbiohub.org/public/igem/igem2sbol/1"/>
+                   </sbol:ComponentDefinition>
+                   <sbol:Sequence rdf:about="https://synbiohub.org/public/igem/BBa_G0000_sequence/1">
+                   <sbol:displayId>BBa_G0000_sequence</sbol:displayId>
+                   <sbol:elements>tactag</sbol:elements>
+                   <sbol:encoding rdf:resource="http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"/>
+                   <sbol:persistentIdentity rdf:resource="https://synbiohub.org/public/igem/BBa_G0000_sequence"/>
+                   <sbol:version>1</sbol:version>
+                   <sbh:ownedBy rdf:resource="https://synbiohub.org/user/james"/>
+                   <sbh:ownedBy rdf:resource="https://synbiohub.org/user/myers"/>
+                   <sbh:topLevel rdf:resource="https://synbiohub.org/public/igem/BBa_G0000_sequence/1"/>
+                   <prov:wasDerivedFrom rdf:resource="http://parts.igem.org/Part:BBa_G0000"/>
+                   <prov:wasGeneratedBy rdf:resource="https://synbiohub.org/public/igem/igem2sbol/1"/>
+                   </sbol:Sequence>
+                   <sbol:ComponentDefinition rdf:about="https://synbiohub.org/public/igem/BBa_G0002/1">
+                   <dc:creator>Reshma Shetty</dc:creator>
+                   <dcterms:created>2007-02-26T12:00:00Z</dcterms:created>
+                   <dcterms:description>SpeI/XbaI mixed site</dcterms:description>
+                   <dcterms:modified>2015-08-31T04:07:27Z</dcterms:modified>
+                   <dcterms:title>SX scar</dcterms:title>
+                   <sbol:displayId>BBa_G0002</sbol:displayId>
+                   <sbol:persistentIdentity rdf:resource="https://synbiohub.org/public/igem/BBa_G0002"/>
+                   <sbol:role rdf:resource="http://identifiers.org/so/SO:0000110"/>
+                   <sbol:role rdf:resource="http://wiki.synbiohub.org/wiki/Terms/igem#partType/DNA"/>
+                   <sbol:sequence rdf:resource="https://synbiohub.org/public/igem/BBa_G0002_sequence/1"/>
+                   <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
+                   <sbol:version>1</sbol:version>
+                   <igem:discontinued>false</igem:discontinued>
+                   <igem:dominant>true</igem:dominant>
+                   <igem:experience rdf:resource="http://wiki.synbiohub.org/wiki/Terms/igem#experience/None"/>
+                   <igem:group_u_list>_41_</igem:group_u_list>
+                   <igem:m_user_id>0</igem:m_user_id>
+                   <igem:owner_id>126</igem:owner_id>
+                   <igem:owning_group_id>70</igem:owning_group_id>
+                   <igem:sampleStatus>Not in stock</igem:sampleStatus>
+                   <igem:status rdf:resource="http://wiki.synbiohub.org/wiki/Terms/igem#status/Unavailable"/>
+                   <sbh:bookmark>false</sbh:bookmark>
+                   <sbh:mutableDescription>XbaI/SpeI mixed site.  Simply used to aid in entry of parts into the registry.</sbh:mutableDescription>
+                   <sbh:mutableNotes>None.</sbh:mutableNotes>
+                   <sbh:mutableProvenance>XbaI and SpeI sites</sbh:mutableProvenance>
+                   <sbh:ownedBy rdf:resource="https://synbiohub.org/user/james"/>
+                   <sbh:ownedBy rdf:resource="https://synbiohub.org/user/myers"/>
+                   <sbh:star>false</sbh:star>
+                   <sbh:topLevel rdf:resource="https://synbiohub.org/public/igem/BBa_G0002/1"/>
+                   <prov:wasDerivedFrom rdf:resource="http://parts.igem.org/Part:BBa_G0002"/>
+                   <prov:wasGeneratedBy rdf:resource="https://synbiohub.org/public/igem/igem2sbol/1"/>
+                   </sbol:ComponentDefinition>
+                   <sbol:Sequence rdf:about="https://synbiohub.org/public/igem/BBa_G0002_sequence/1">
+                   <sbol:displayId>BBa_G0002_sequence</sbol:displayId>
+                   <sbol:elements>tactagag</sbol:elements>
+                   <sbol:encoding rdf:resource="http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"/>
+                   <sbol:persistentIdentity rdf:resource="https://synbiohub.org/public/igem/BBa_G0002_sequence"/>
+                   <sbol:version>1</sbol:version>
+                   <sbh:ownedBy rdf:resource="https://synbiohub.org/user/james"/>
+                   <sbh:ownedBy rdf:resource="https://synbiohub.org/user/myers"/>
+                   <sbh:topLevel rdf:resource="https://synbiohub.org/public/igem/BBa_G0002_sequence/1"/>
+                   <prov:wasDerivedFrom rdf:resource="http://parts.igem.org/Part:BBa_G0002"/>
+                   <prov:wasGeneratedBy rdf:resource="https://synbiohub.org/public/igem/igem2sbol/1"/>
+                   </sbol:Sequence>
+                   <prov:Activity rdf:about="https://synbiohub.org/public/igem/igem2sbol/1">
+                   <dc:creator>Chris J. Myers</dc:creator>
+                   <dc:creator>James Alastair McLaughlin</dc:creator>
+                   <dcterms:description>Conversion of the iGEM parts registry to SBOL2.1</dcterms:description>
+                   <dcterms:title>iGEM to SBOL conversion</dcterms:title>
+                   <sbol:displayId>igem2sbol</sbol:displayId>
+                   <sbol:persistentIdentity rdf:resource="https://synbiohub.org/public/igem/igem2sbol"/>
+                   <sbol:version>1</sbol:version>
+                   <sbh:ownedBy rdf:resource="https://synbiohub.org/user/james"/>
+                   <sbh:ownedBy rdf:resource="https://synbiohub.org/user/myers"/>
+                   <sbh:topLevel rdf:resource="https://synbiohub.org/public/igem/igem2sbol/1"/>
+                   <prov:endedAtTime>2017-03-06T15:00:00.000Z</prov:endedAtTime>
+                   </prov:Activity>
+                   </rdf:RDF>''')
+
+    G0000 = doc.componentDefinitions[G0000_uri]
+    G0002 = doc.componentDefinitions[G0002_uri]
+    new_parts_list = []
+    for upstream, downstream in zip(parts_list[:-1], parts_list[1:]):
+        new_parts_list.append(upstream)
+        if SO_RBS in upstream.roles and SO_CDS in downstream.roles:
+            new_parts_list.append(G0000)
+        else:
+            new_parts_list.append(G0002)
+    new_parts_list.append(downstream)
+    return new_parts_list

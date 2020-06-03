@@ -18,7 +18,7 @@ from .config import Config, ConfigOptions
 from .config import getHomespace, hasHomespace, setHomespace
 from .constants import *
 from .dbtl import Design
-from .document import Document
+from .document import Document, IGEM_STANDARD_ASSEMBLY
 from .experiment import Experiment, ExperimentalData
 from .identified import Identified
 from .implementation import Implementation

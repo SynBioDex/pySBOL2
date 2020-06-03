@@ -436,7 +436,7 @@ class TestAssemblyRoutines(unittest.TestCase):
 
         doc.addComponentDefinition(gene)
         gene.assemblePrimaryStructure([promoter, RBS, CDS, terminator],
-                                      IGEM_STANDARD_ASSEMBLY)
+                                      sbol2.IGEM_STANDARD_ASSEMBLY)
         target_seq = gene.compile()
 
         self.assertEqual(target_seq, 'atactagagttactagctactagagg')
