@@ -348,6 +348,32 @@ class TestAssemblyRoutines(unittest.TestCase):
         self.assertEqual(target_seq, 'aaatttaaatttaaatttaaa')
         self.assertEqual(target_seq, gene.sequence.elements)
 
+    def test_compile_autoconstruct_sequence(self):
+        # Ensure that autoconstruction of Sequence URIs works correctly with
+        # different configuration options
+        root_id = 'root'
+        sub_id = 'sub'
+        sbol2.Config.setOption('sbol_compliant_uris', True)
+        sbol2.Config.setOption('sbol_typed_uris', True)
+        doc = sbol2.Document()
+        root = doc.componentDefinitions.create(root_id)
+        sub = doc.componentDefinitions.create(sub_id)
+        root.compile([sub])
+        expected_identity = sbol2.getHomespace() + '/Sequence/' + root_id + '/1'
+        self.assertEqual(root.sequence.identity, expected_identity)
+
+        sbol2.Config.setOption('sbol_compliant_uris', True)
+        sbol2.Config.setOption('sbol_typed_uris', False)
+        doc = sbol2.Document()
+        root = doc.componentDefinitions.create(root_id)
+        sub = doc.componentDefinitions.create(sub_id)
+        root.compile([sub])
+        expected_identity = sbol2.getHomespace() + '/' + root_id + '_seq/1'
+        self.assertEqual(root.sequence.identity, expected_identity)
+
+        sbol2.Config.setOption('sbol_compliant_uris', True)
+        sbol2.Config.setOption('sbol_typed_uris', True)
+
     def test_recursive_compile(self):
         doc = sbol2.Document()
         cd1 = sbol2.ComponentDefinition('cd1')
