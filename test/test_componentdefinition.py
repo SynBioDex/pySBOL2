@@ -215,7 +215,6 @@ class TestComponentDefinitions(unittest.TestCase):
                                            rdflib.URIRef(sbol2.SBOL_SEQUENCE_PROPERTY),
                                            rdflib.URIRef(seq.identity)))
 
-    @unittest.expectedFailure  # See #272
     def test_remove_hidden_sequence(self):
         # Objects contained in a hidden property shouldn't persist if they are
         # removed from the Document top level
