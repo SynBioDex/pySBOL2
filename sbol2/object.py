@@ -426,14 +426,11 @@ class SBOLObject:
         # Call the default method
         result = object.__getattribute__(self, name)
         if isinstance(result, OwnedObject):
-            sbol_property = object.__getattribute__(self, name)
-            if sbol_property.upper_bound == 1:
-                if len(sbol_property):
-                    result = sbol_property[0]
+            if result.getUpperBound() == '1':
+                if result:
+                    result = result[0]
                 else:
                     result = None
-            else:
-                result = sbol_property
         elif isinstance(result, Property):
             # Else if attribute is any other kind of Property besides
             # OwnedObject, convert so the Property attributes are
