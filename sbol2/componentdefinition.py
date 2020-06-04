@@ -138,20 +138,26 @@ class ComponentDefinition(TopLevel):
         seqs = self.sequences
         if not seqs:
             return None
-        seq_uri = seqs[0]
-        if self._sequence_cache and self._sequence_cache.identity == seq_uri:
-            return self._sequence_cache
-        # Not in the cache, try to look up in the document
         if self.doc:
+            # In a document we always look up the sequence in case
+            # the sequence has been removed.
+            seq_uri = seqs[0]
             try:
-                return self.doc.find(seq_uri)
-            except NotImplementedError:
-                raise
+                return self.doc.sequences[seq_uri]
+            except SBOLError as e:
+                if e.error_code() != SBOLErrorCode.NOT_FOUND_ERROR:
+                    raise
+                return None
+        else:
+            # Not in a document, try to use the cache if available
+            if self._sequence_cache and self._sequence_cache.identity in seqs:
+                return self._sequence_cache
+            return None
 
     @sequence.setter
     def sequence(self, sequence: Union[Sequence, None]):
         if not sequence:
-            # TODO: How to remove an orphaned sequence from the document?
+            # Unsetting the sequence
             self.sequences = None
             self._sequence_cache = None
             return
@@ -161,7 +167,10 @@ class ComponentDefinition(TopLevel):
             except SBOLError as e:
                 if e.error_code() != SBOLErrorCode.DUPLICATE_URI_ERROR:
                     raise
-        self._sequence_cache = sequence
+        else:
+            # Not in a document. Cache the sequence in case we get added
+            # to a document later.
+            self._sequence_cache = sequence
         self.sequences = [sequence.identity]
 
     def added_to_document(self, doc):
