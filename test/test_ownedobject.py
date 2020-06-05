@@ -123,3 +123,30 @@ class TestOwnedObject(unittest.TestCase):
         # Search by the persistent identity
         search_string = md.persistentIdentity
         self.assertEqual(md, doc.getModuleDefinition(search_string))
+
+    def test_remove_by_display_id(self):
+        doc = sbol2.Document()
+        cd = doc.componentDefinitions.create('cd1')
+        self.assertIn(cd.displayId, doc.componentDefinitions)
+        self.assertIn(cd.identity, doc.SBOLObjects)
+        doc.componentDefinitions.remove(cd.displayId)
+        self.assertNotIn(cd.displayId, doc.componentDefinitions)
+        self.assertNotIn(cd.identity, doc.SBOLObjects)
+
+    def test_remove_by_identity(self):
+        doc = sbol2.Document()
+        cd = doc.componentDefinitions.create('cd1')
+        self.assertIn(cd.identity, doc.componentDefinitions)
+        self.assertIn(cd.identity, doc.SBOLObjects)
+        doc.componentDefinitions.remove(cd.identity)
+        self.assertNotIn(cd.identity, doc.componentDefinitions)
+        self.assertNotIn(cd.identity, doc.SBOLObjects)
+
+    def test_remove_by_persistent_identity(self):
+        doc = sbol2.Document()
+        cd = doc.componentDefinitions.create('cd1')
+        self.assertIn(cd.persistentIdentity, doc.componentDefinitions)
+        self.assertIn(cd.identity, doc.SBOLObjects)
+        doc.componentDefinitions.remove(cd.persistentIdentity)
+        self.assertNotIn(cd.persistentIdentity, doc.componentDefinitions)
+        self.assertNotIn(cd.identity, doc.SBOLObjects)

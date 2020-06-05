@@ -215,7 +215,6 @@ class TestComponentDefinitions(unittest.TestCase):
                                            rdflib.URIRef(sbol2.SBOL_SEQUENCE_PROPERTY),
                                            rdflib.URIRef(seq.identity)))
 
-    @unittest.expectedFailure  # See #272
     def test_remove_hidden_sequence(self):
         # Objects contained in a hidden property shouldn't persist if they are
         # removed from the Document top level
@@ -232,6 +231,16 @@ class TestComponentDefinitions(unittest.TestCase):
         seq = sbol2.Sequence('cd1_sequence', 'GCAT')
         cd.sequence = seq
         self.assertEqual([cd.sequence.identity], cd.sequences)
+
+    def test_nonexistent_sequence(self):
+        # If a ComponentDefinition is in a Document and has a URI in
+        # sequences that is not in the document,
+        # ComponentDefinition.sequence should return None.
+        doc = sbol2.Document()
+        cd = sbol2.ComponentDefinition('cd')
+        doc.add(cd)
+        cd.sequences = ['http://example.com/sbol2/sequence/1']
+        self.assertIsNone(cd.sequence)
 
     def test_hidden_property_adder(self):
         # Assignment of a TopLevel object to a hidden property (in this case

@@ -811,17 +811,16 @@ class OwnedObject(Property):
                             'the parent object')
 
     def removeOwnedObject_str(self, uri):
-        if self._sbol_owner is not None:
-            if self._rdf_type in self._sbol_owner.owned_objects:
-                object_store = self._sbol_owner.owned_objects[self._rdf_type]
-                for obj in object_store:
-                    if string_equal(uri, obj.identity):
-                        object_store.remove(obj)  # TODO is there a better way?
-                        # Erase TopLevel objects from Document
-                        if self._sbol_owner.getTypeURI() == SBOL_DOCUMENT:
-                            del obj.doc.SBOLObjects[rdflib.URIRef(uri)]
-                        self.validate(None)
-                        return obj
+        if not self._sbol_owner:
+            return
+        obj = self.find(uri)
+        object_store = self._sbol_owner.owned_objects[self._rdf_type]
+        object_store.remove(obj)
+        # Erase TopLevel objects from Document
+        if self._sbol_owner.rdf_type == SBOL_DOCUMENT:
+            del obj.doc.SBOLObjects[obj.identity]
+        self.validate(None)
+        return obj
 
     def clear(self):
         if self._sbol_owner is not None:

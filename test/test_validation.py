@@ -1,10 +1,7 @@
 import unittest
 
-import rdflib
-
 import sbol2
 from sbol2.validation import sbol_rule_10202
-from sbol2.componentdefinition import libsbol_rule_20
 
 
 class TestValidation(unittest.TestCase):
@@ -34,47 +31,6 @@ class TestValidation(unittest.TestCase):
     def test_sbol_rule_10202(self):
         with self.assertRaises(TypeError):
             sbol_rule_10202(None, None)
-
-    def test_libsbol_rule_20_empty(self):
-        # This rule synchronized ComponentDefinition.sequence with
-        # ComponentDefinition.sequences
-        cd = sbol2.ComponentDefinition('cd1')
-        seq = sbol2.Sequence('seq1', 'GCAT')
-        with self.assertRaises(sbol2.SBOLError):
-            libsbol_rule_20('foo', seq)
-        with self.assertRaises(sbol2.SBOLError):
-            libsbol_rule_20(cd, 'foo')
-        cd.sequence = seq
-        self.assertEqual([seq.identity], cd.sequences)
-
-    def test_libsbol_rule_20_empty_set_with(self):
-        # This rule synchronized ComponentDefinition.sequence with
-        # ComponentDefinition.sequences
-        cd = sbol2.ComponentDefinition('cd1')
-        seq = sbol2.Sequence('seq1', 'GCAT')
-        expected = [rdflib.URIRef('http://example.com/foo/1'),
-                    seq.identity,
-                    rdflib.URIRef('https://sbolstandard.org/bar/1')]
-        # Go behind the scenes for the purposes of testing
-        cd.properties[sbol2.SBOL_SEQUENCE_PROPERTY] = expected
-        libsbol_rule_20(cd, seq)
-        # Expect sequences to remain the same, but they've all been
-        # converted to strings
-        self.assertEqual([str(item) for item in expected],
-                         cd.sequences)
-
-    def test_libsbol_rule_20_empty_set_without(self):
-        # This rule synchronized ComponentDefinition.sequence with
-        # ComponentDefinition.sequences
-        cd = sbol2.ComponentDefinition('cd1')
-        seq = sbol2.Sequence('seq1', 'GCAT')
-        expected = ['http://example.com/foo/1',
-                    'https://sbolstandard.org/bar/1']
-        cd.sequences = expected
-        cd.sequence = seq
-        # Expect sequences to be overwritten to be only
-        # the assigned sequence
-        self.assertEqual([seq.identity], cd.sequences)
 
 
 if __name__ == '__main__':
