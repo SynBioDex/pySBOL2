@@ -412,15 +412,10 @@ class Document(Identified):
         :param sbol_str: A string formatted in SBOL.
         :return: None
         """
-        if not self.graph:
-            self.graph = rdflib.Graph()
         # Save any changes we've made to the graph.
         self.update_graph()
         # Use rdflib to automatically merge the graphs together
         self.graph.parse(data=sbol_str, format="application/rdf+xml")
-        # Clean up our internal data structures.
-        # (There's probably a more efficient way to merge.)
-        self.clear(clear_graph=False)
         # Base our internal representation on the new graph.
         self.parse_all()
 
@@ -430,8 +425,6 @@ class Document(Identified):
 
         :return: A string representation of the objects in this Document.
         """
-        if not self.graph:
-            self.graph = rdflib.Graph()
         # Save any changes we've made to the graph.
         self.update_graph()
         # Write graph to string
@@ -454,9 +447,6 @@ class Document(Identified):
         self.update_graph()
         # Use rdflib to automatically merge the graphs together
         self.graph.parse(filename, format="application/rdf+xml")
-        # Clean up our internal data structures.
-        # (There's probably a more efficient way to merge.)
-        self.clear(clear_graph=False)
         # Base our internal representation on the new graph.
         self.parse_all()
 
@@ -565,14 +555,15 @@ class Document(Identified):
                 # a list property, an owned property or a referenced property
                 if predicate in parent.properties:
                     # triple is a property
-                    parent.properties[predicate].append(obj)
+                    if obj not in parent.properties[predicate]:
+                        parent.properties[predicate].append(obj)
                 elif predicate in parent.owned_objects:
                     # triple is an owned object
                     owned_obj = self.SBOLObjects[obj]
                     if owned_obj is not None:
-                        parent.owned_objects[predicate].append(owned_obj)
-                        owned_obj.parent = parent
-                        # del self.SBOLObjects[obj]
+                        if owned_obj not in parent.owned_objects[predicate]:
+                            parent.owned_objects[predicate].append(owned_obj)
+                            owned_obj.parent = parent
                 else:
                     # Extension data
                     parent.properties[predicate] = [obj]
