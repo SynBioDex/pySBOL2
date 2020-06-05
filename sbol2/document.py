@@ -226,7 +226,7 @@ class Document(Identified):
                 self.owned_objects[type_uri].append(sbol_obj)
             sbol_obj.doc = self
             # Notify the object that it has been added
-            sbol_obj.added_to_document(self)
+            sbol_obj._added_to_document(self)
             # Recurse into child objects and set their back-pointer to this Document
             for key, obj_store in sbol_obj.owned_objects.items():
                 for child_obj in obj_store:

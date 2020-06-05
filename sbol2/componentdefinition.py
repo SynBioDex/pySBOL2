@@ -173,8 +173,8 @@ class ComponentDefinition(TopLevel):
             self._sequence_cache = sequence
         self.sequences = [sequence.identity]
 
-    def added_to_document(self, doc):
-        super().added_to_document(doc)
+    def _added_to_document(self, doc):
+        super()._added_to_document(doc)
         # Add the sequence to the document
         if self._sequence_cache:
             doc.add(self._sequence_cache)

@@ -454,7 +454,7 @@ class SBOLObject:
             return
         object.__setattr__(self, name, value)
 
-    def added_to_document(self, doc):
+    def _added_to_document(self, doc):
         """Classes can override this method to do extra work when
         being added to a document."""
         pass
