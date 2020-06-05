@@ -232,6 +232,16 @@ class TestComponentDefinitions(unittest.TestCase):
         cd.sequence = seq
         self.assertEqual([cd.sequence.identity], cd.sequences)
 
+    def test_nonexistent_sequence(self):
+        # If a ComponentDefinition is in a Document and has a URI in
+        # sequences that is not in the document,
+        # ComponentDefinition.sequence should return None.
+        doc = sbol2.Document()
+        cd = sbol2.ComponentDefinition('cd')
+        doc.add(cd)
+        cd.sequences = ['http://example.com/sbol2/sequence/1']
+        self.assertIsNone(cd.sequence)
+
     def test_hidden_property_adder(self):
         # Assignment of a TopLevel object to a hidden property (in this case
         # assigning a Sequence object to the sequence property) should
