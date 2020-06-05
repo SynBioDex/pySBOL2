@@ -1,4 +1,4 @@
-__version__ = '1.0b5'
+__version__ = '1.0b6'
 
 # Anything imported here is part of the public API. Limit what gets
 # imported to only those things that are actually needed.
