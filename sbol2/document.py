@@ -473,13 +473,6 @@ class Document(Identified):
         # Instantiate all objects with an RDF type
         for s, _, o in self.graph.triples((None, rdflib.RDF.type, None)):
             self.parse_objects_inner(s, o)
-        # Find everything in the triple store
-        all_query = "PREFIX : <http://example.org/ns#> " \
-                    "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " \
-                    "PREFIX sbol: <http://sbols.org/v2#> " \
-                    "SELECT ?s ?p ?o " \
-                    "{ ?s ?p ?o }"
-        all_results = self.graph.query(all_query)
         # Find the graph base uri.  This is the location of the sbol
         # file, and begins with the "file://" scheme.  Any URI in the
         # file without a scheme will appear relative to this URI, after
@@ -490,18 +483,16 @@ class Document(Identified):
         pos = graphBaseURIStr.rfind('/')
         if pos != -1:
             pos += 1
-        rdf_type = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
-        for result in all_results:
+        rdf_type = rdflib.RDF.type
+        for result_s, result_p, result_o in self.graph:
             # Look for properties
-            if str(result.p) != rdf_type:
-                obj = result.o
-                lval = str(obj)
-                if isinstance(result.o, URIRef) and pos != -1:
-                    if lval[:pos] == graphBaseURIStr:
+            if result_p != rdf_type:
+                obj = result_o
+                if isinstance(result_o, URIRef) and pos != -1:
+                    if obj[:pos] == graphBaseURIStr:
                         # This was a URI without a scheme.  Remove URI base
-                        lval = lval[pos:]
-                        obj = URIRef(lval)
-                self.parse_properties_inner(result.s, result.p, obj)
+                        obj = URIRef(obj[pos:])
+                self.parse_properties_inner(result_s, result_p, obj)
 
         # Remove objects from SBOLObjects if they are not TopLevel AND
         # they have a parent object.
@@ -543,8 +534,7 @@ class Document(Identified):
                 values.clear()
             new_obj.identity = subject
             # Update document
-            identity_uri = rdflib.URIRef(new_obj.identity)
-            self.SBOLObjects[identity_uri] = new_obj
+            self.SBOLObjects[new_obj.identity] = new_obj
             new_obj.doc = self
             # For now, set the parent to the Document.
             # This may get overwritten later for child objects.
@@ -559,8 +549,7 @@ class Document(Identified):
             new_obj = SBOLObject()
             new_obj.identity = subject
             new_obj.rdf_type = obj
-            identity_uri = rdflib.URIRef(new_obj.identity)
-            self.SBOLObjects[identity_uri] = new_obj
+            self.SBOLObjects[new_obj.identity] = new_obj
             new_obj.doc = self
 
     def parse_properties_inner(self, subject, predicate, obj):
@@ -586,11 +575,7 @@ class Document(Identified):
                         # del self.SBOLObjects[obj]
                 else:
                     # Extension data
-                    if predicate not in parent.properties:
-                        parent.properties[predicate] = []
-                        parent.properties[predicate].append(obj)
-                    else:
-                        parent.properties[predicate].append(obj)
+                    parent.properties[predicate] = [obj]
             else:
                 msg = 'Subject {} ({}) not found in my SBOLObjects'
                 msg = msg.format(subject, type(subject))
