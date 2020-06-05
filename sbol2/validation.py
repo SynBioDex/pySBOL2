@@ -156,10 +156,6 @@ def libsbol_rule_18(sbol_obj, arg):
     pass
 
 
-def libsbol_rule_21(sbol_obj, arg):
-    raise NotImplementedError("Not yet implemented")
-
-
 def libsbol_rule_22(sbol_obj, arg):
     # raise NotImplementedError("Not yet implemented")
     pass
