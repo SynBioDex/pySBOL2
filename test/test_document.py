@@ -501,6 +501,38 @@ class TestDocumentExtensionObjects(unittest.TestCase):
         doc.removeKeyword(1)
         self.assertEqual([keyword1, keyword3], doc.keywords)
 
+    def test_version(self):
+        doc = sbol2.Document()
+        self.assertIsNotNone(doc.version)
+        old_version = doc.version
+        doc.append(CRISPR_LOCATION)
+        self.assertIsNotNone(doc.version)
+        self.assertEqual(old_version, doc.version)
+
+    def test_idempotent_read(self):
+        doc = sbol2.Document()
+        doc.read(CRISPR_LOCATION)
+        old_len = len(doc)
+        cd_uri = 'http://sbols.org/CRISPR_Example/gRNA_b/1.0.0'
+        cd = doc.componentDefinitions[cd_uri]
+        self.assertEqual(1, len(cd.roles))
+
+        # Now load the same file again and make sure the size of the
+        # document didn't increase, and the number of roles on the
+        # ComponentDefinition didn't increase.
+        doc.append(CRISPR_LOCATION)
+        self.assertEqual(old_len, len(doc))
+        cd = doc.componentDefinitions[cd_uri]
+        self.assertEqual(1, len(cd.roles))
+
+        # Now load the file one more time and make sure the size of the
+        # document didn't increase, and the number of roles on the
+        # ComponentDefinition didn't increase.
+        doc.append(CRISPR_LOCATION)
+        self.assertEqual(old_len, len(doc))
+        cd = doc.componentDefinitions[cd_uri]
+        self.assertEqual(1, len(cd.roles))
+
 
 if __name__ == '__main__':
     unittest.main()

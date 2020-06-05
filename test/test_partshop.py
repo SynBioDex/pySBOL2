@@ -257,3 +257,18 @@ WHERE {
         self.assertEqual(10, len(doc))
         for cd in doc.componentDefinitions:
             self.assertIn(sbol2.SO_PROMOTER, cd.roles)
+
+    def test_pull_doc_version(self):
+        # After a pull the document version was erroneously set to None (#281)
+        doc = sbol.Document()
+        self.assertIsNotNone(doc.version)
+        old_version = doc.version
+        igem = sbol.PartShop('https://synbiohub.org')
+        igem.pull('https://synbiohub.org/public/igem/BBa_R0010/1', doc)
+        self.assertEqual(3, len(doc))
+        self.assertIsNotNone(doc.version)
+        self.assertEqual(old_version, doc.version)
+
+
+if __name__ == '__main__':
+    unittest.main()
