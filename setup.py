@@ -33,5 +33,6 @@ setup(name='sbol2',
             'deprecated',
             'lxml',
             'requests',
-            'urllib3'
+            'urllib3',
+            'packaging'
       ])
