@@ -126,20 +126,22 @@ class TestComponentDefinitions(unittest.TestCase):
                                    cds.identity, terminator.identity]
         self.assertListEqual(primary_structure, valid_primary_structure)
 
-    @unittest.expectedFailure
     def testHasUpstreamComponent(self):
         uri = 'http://sbols.org/CRISPR_Example/gRNA_b_gene/1.0.0'
         doc = sbol2.Document()
         doc.read(CRISPR_EXAMPLE)
         cd = doc.componentDefinitions.get(uri)
         self.assertIsNotNone(cd)
-        comps = {
-            'http://sbols.org/CRISPR_Example/gRNA_b_gene/CRa_U6/1.0.0': True,
-            'http://sbols.org/CRISPR_Example/gRNA_b_gene/CRa_U6/1.0.0': True,
-            'http://sbols.org/CRISPR_Example/gRNA_b_gene/CRa_U6/1.0.0': False
-        }
+        # First element, has no upstream component
         uri = 'http://sbols.org/CRISPR_Example/gRNA_b_gene/CRa_U6/1.0.0'
-        print(cd.getPrimaryStructure())
+        c = cd.components.get(uri)
+        self.assertFalse(cd.hasUpstreamComponent(c))
+        # Second element has above as upstream component
+        uri = 'http://sbols.org/CRISPR_Example/gRNA_b_gene/gRNA_b_nc/1.0.0'
+        c = cd.components.get(uri)
+        self.assertTrue(cd.hasUpstreamComponent(c))
+        # Third element has both above as upstream components
+        uri = 'http://sbols.org/CRISPR_Example/gRNA_b_gene/gRNA_b_terminator/1.0.0'
         c = cd.components.get(uri)
         self.assertTrue(cd.hasUpstreamComponent(c))
 

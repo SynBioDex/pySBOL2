@@ -29,9 +29,10 @@ setup(name='sbol2',
       keywords='synthetic biology',
       packages=['sbol2'],
       install_requires=[
-            'rdflib',
+            'rdflib>=5.0',
             'deprecated',
             'lxml',
             'requests',
-            'urllib3'
+            'urllib3',
+            'packaging>=20.0'
       ])

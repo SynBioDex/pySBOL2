@@ -6,6 +6,7 @@ import posixpath
 
 import rdflib
 from rdflib import Literal, URIRef
+import packaging.version as pv
 
 from .config import Config
 from .config import ConfigOptions
@@ -626,11 +627,11 @@ class OwnedObject(Property):
         # if a match, store it. If another match, check versions and keep
         # the newer one.
         found_object = None
-        found_version = -math.inf
+        found_version = pv.NegativeInfinity
         object_store = self._sbol_owner.owned_objects[self._rdf_type]
         for obj in object_store:
             if obj.identity.startswith(search_uri):
-                obj_version = float(obj.version)
+                obj_version = pv.parse(obj.version)
                 if obj_version > found_version:
                     found_object = obj
                     found_version = obj_version
