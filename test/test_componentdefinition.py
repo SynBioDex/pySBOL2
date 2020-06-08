@@ -421,7 +421,6 @@ class TestAssemblyRoutines(unittest.TestCase):
         self.assertEqual(r4.start, 1)
         self.assertEqual(r4.end, 2)
 
-    @unittest.expectedFailure
     def test_standard_assembly(self):
         doc = sbol2.Document()
         gene = sbol2.ComponentDefinition("BB0001")
@@ -447,7 +446,7 @@ class TestAssemblyRoutines(unittest.TestCase):
 
         doc.addComponentDefinition(gene)
         gene.assemblePrimaryStructure([promoter, RBS, CDS, terminator],
-                                      IGEM_STANDARD_ASSEMBLY)
+                                      sbol2.IGEM_STANDARD_ASSEMBLY)
         target_seq = gene.compile()
 
         self.assertEqual(target_seq, 'atactagagttactagctactagagg')

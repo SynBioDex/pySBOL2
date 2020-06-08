@@ -5,7 +5,19 @@ import sbol2
 
 MY_DIR = os.path.dirname(os.path.abspath(__file__))
 PARTS_FILE = os.path.join(MY_DIR, 'resources', 'tutorial', 'parts.xml')
-PROMOTER_URI = 'https://synbiohub.org/public/iGEM_2016_interlab/Medium_2016Interlab/1'
+PROMOTER_URI = 'https://synbiohub.org/public/igem/BBa_R0040/1'
+
+expected_sequence = '\
+tccctatcagtgatagagattgacatccctatcagtgatagagatactgagcactactagagGCCATGCCATTGGCTTTTGATAGAGGAC\
+AACTACTAGtactagATGAACATTAAAAATATAAATGCTAATGAGAAGATAATTGATAAAATTAAAACTTGTAATAATAATAAAGATATTAATCAAT\
+GTTTATCTGAAATAGCAAAGATAATACATTGTGAATATTACCTATTCGCTATTATCTATCCTCACTCAATAATTAAACCTGATGTTTCAATTATAGA\
+TAATTACCCTGAAAAATGGCGTAAATATTATGATGATGCCGGACTACTAGAATATGACCCTGTAGTCGATTACTCTAAGTCCCATCATTCACCAATT\
+AATTGGAACGTATTCGAAAAAAAAACAATAAAAAAAGAGTCTCCGAATGTAATAAAAGAAGCACAGGAATCGGGACTCATTACTGGATTTAGCTTTC\
+CAATTCATACTGCAAGTAATGGTTTTGGAATGCTCAGTTTTGCTCATTCAGATAAAGATATTTATACTGACAGTTTATTTTTACACGCTAGTACAAA\
+TGTACCATTAATGCTTCCTTCTTTAGTCGATAATTATCAAAAAATAAATACGACACGTAAAAAGTCAGATTCTATTTTAACAAAAAGAGAAAAAGAA\
+TGCTTAGCGTGGGCGAGTGAAGGAAAAAGTACATGGGATATTTCAAAAATACTTGGCTGCAGTGAGCGTACTGTCACTTTTCATTTAACCAATACTC\
+AAATGAAACTCAATACAACTAACCGCTGCCAAAGTATTTCTAAAGCAATTTTAACTGGCGCCATTAATTGTCCATACCTTAAAAATTAAtactagag\
+GTCAGTTTCACCTGTTTTACGTAAAAACCCGCTTCGGCGGGTTTTTACTTTTGG'
 
 
 class TestSbolTutorial(unittest.TestCase):
@@ -65,7 +77,7 @@ class TestSbolTutorial(unittest.TestCase):
         # Import the medium strength device into your document
         self.assertEqual(32, len(doc))
         partshop.pull(PROMOTER_URI, doc)
-        self.assertEqual(51, len(doc))
+        self.assertEqual(35, len(doc))
 
     def extract_cds_from_devices(self, doc):
         # Extract the promoter from your document.
@@ -95,18 +107,21 @@ class TestSbolTutorial(unittest.TestCase):
         my_device.assemblePrimaryStructure([self.promoter,
                                             self.rbs,
                                             self.cds,
-                                            self.terminator])
+                                            self.terminator],
+                                           sbol2.IGEM_STANDARD_ASSEMBLY)
+        # Expecting the 4 components above plus 3 assembly scars
+        self.assertEqual(7, len(my_device.getPrimaryStructure()))
 
         # Set the role of the device with the Sequence Ontology term `gene`
-        my_device.roles = sbol2.SO_GENE
+        my_device.roles = [sbol2.SO_GENE]
 
         # Compile the sequence for the new device
         my_device.compile()
+        self.assertEqual(expected_sequence, my_device.sequence.elements)
 
     def test_tutorial(self):
         doc = self.init_tutorial()
         self.get_device_from_xml(doc)
         self.get_device_from_synbiohub(doc)
         self.extract_cds_from_devices(doc)
-        # TODO: Add create_new_device after assemblePrimaryStructure is added
-        # self.create_new_device(doc)
+        self.create_new_device(doc)

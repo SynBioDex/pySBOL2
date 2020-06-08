@@ -9,7 +9,6 @@ TEST_LOCATION = os.path.join(MODULE_LOCATION, 'resources', 'crispr_example.xml')
 
 class TestConstants(unittest.TestCase):
 
-    @unittest.expectedFailure  # See issue 55
     def test_igem_standard_assembly(self):
         # IGEM_STANDARD_ASSEMBLY is a function in pySBOL.
         self.assertTrue(callable(sbol.IGEM_STANDARD_ASSEMBLY),
