@@ -419,7 +419,6 @@ class TestAssemblyRoutines(unittest.TestCase):
         self.assertEqual(r4.start, 1)
         self.assertEqual(r4.end, 2)
 
-    @unittest.expectedFailure
     def test_standard_assembly(self):
         doc = sbol2.Document()
         gene = sbol2.ComponentDefinition("BB0001")
