@@ -88,7 +88,7 @@ class Identified(SBOLObject):
         self.persistentIdentity = URIProperty(self, SBOL_PERSISTENT_IDENTITY,
                                               '0', '1', None, URIRef(uri))
         self.displayId = TextProperty(self, SBOL_DISPLAY_ID, '0', '1',
-                                         [validation.sbol_rule_10204])
+                                      [validation.sbol_rule_10204])
         self.version = LiteralProperty(self, SBOL_VERSION, '0', '1', None, version)
         self.name = TextProperty(self, SBOL_NAME, '0', '1', None)
         self.description = TextProperty(self, SBOL_DESCRIPTION, '0', '1', None)
