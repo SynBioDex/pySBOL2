@@ -36,7 +36,6 @@ class TestProperty(unittest.TestCase):
         plasmid.removeRole()
         self.assertEqual(len(plasmid.roles), 1)
 
-    @unittest.expectedFailure  # See #93
     def test_unsetSingletonProperty(self):
         doc = sbol.Document()
         cd = doc.componentDefinitions.create('cd')

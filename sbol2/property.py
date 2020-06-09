@@ -463,8 +463,12 @@ class TextProperty(LiteralProperty):
     # methods out of LiteralProperty and into TextProperty. Then make
     # LiteralProperty an abstract base class.
 
-    # For now, this class is just an alias to LiteralProperty
-    pass
+    def convert_to_user(self, value):
+        result = str(value)
+        if result == '':
+            # special case, empty strings are equivalent to None
+            return None
+        return result
 
 
 class OwnedObject(Property):
