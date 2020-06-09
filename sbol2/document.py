@@ -208,7 +208,7 @@ class Document(Identified):
         :return: None
         """
         # Check for uniqueness of URI
-        identity_uri = rdflib.URIRef(sbol_obj.identity)
+        identity_uri = sbol_obj.identity
         if identity_uri in self.SBOLObjects:
             raise SBOLError('Cannot add ' + sbol_obj.identity +
                             ' to Document. An object with this identity '

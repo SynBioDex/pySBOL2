@@ -307,17 +307,13 @@ class URIProperty(Property):
             self.setPropertyValueList(new_value)
 
     def setSinglePropertyValue(self, new_value):
-        if type(new_value) is list:
-            raise TypeError('The ' + str(self.getTypeURI()) +
-                            ' property does not accept list arguments.')
-        if self._rdf_type not in self._sbol_owner.properties:
-            self._sbol_owner.properties[self._rdf_type] = []
+        new_value = self.convert_from_user(new_value)
+        # clear out any old value
+        self._sbol_owner.properties[self._rdf_type].clear()
         if new_value is None:
+            # We've already cleared the value, do nothing else.
             return
-        elif len(self._sbol_owner.properties[self._rdf_type]) == 0:
-            self._sbol_owner.properties[self._rdf_type].append(URIRef(new_value))
-        else:
-            self._sbol_owner.properties[self._rdf_type][-1] = URIRef(new_value)
+        self._sbol_owner.properties[self._rdf_type].append(new_value)
 
     def setPropertyValueList(self, value):
         if value is None:
@@ -339,7 +335,11 @@ class URIProperty(Property):
         self.value += [new_value]
 
     def convert_to_user(self, value):
-        return str(value)
+        result = str(value)
+        if result == '':
+            # special case, empty strings are equivalent to None
+            return None
+        return result
 
     def convert_from_user(self, value):
         # None is ok iff upper bound is 1 and lower bound is 0.

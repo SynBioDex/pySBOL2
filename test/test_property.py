@@ -36,7 +36,7 @@ class TestProperty(unittest.TestCase):
         plasmid.removeRole()
         self.assertEqual(len(plasmid.roles), 1)
 
-    def test_unsetSingletonProperty(self):
+    def test_unset_text_property(self):
         doc = sbol.Document()
         cd = doc.componentDefinitions.create('cd')
         cd.name = 'foo'
@@ -47,6 +47,18 @@ class TestProperty(unittest.TestCase):
         self.assertEqual(cd.name, 'foo')
         cd.name = ''
         self.assertEqual(cd.name, None)
+
+    def test_unset_uri_property(self):
+        doc = sbol.Document()
+        cd = doc.componentDefinitions.create('cd')
+        cd.persistentIdentity = 'foo'
+        self.assertEqual('foo', cd.persistentIdentity)
+        cd.persistentIdentity = None
+        self.assertEqual(None, cd.persistentIdentity)
+        cd.persistentIdentity = 'foo'
+        self.assertEqual('foo', cd.persistentIdentity)
+        cd.persistentIdentity = ''
+        self.assertEqual(None, cd.persistentIdentity)
 
     def test_unsetListProperty(self):
         plasmid = sbol.ComponentDefinition('pBB1', sbol.BIOPAX_DNA, '1.0.0')
