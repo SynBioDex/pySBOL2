@@ -254,10 +254,6 @@ class TestComponentDefinitions(unittest.TestCase):
         self.assertIsNotNone(cd.sequence)
         self.assertIs(cd.sequence, doc.getSequence(cd.sequence.identity))
 
-    @unittest.expectedFailure
-    def test_sequences_validation(self):
-        self.fail('Not yet implemented')
-
 
 class TestAssemblyRoutines(unittest.TestCase):
 
