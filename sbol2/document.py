@@ -208,7 +208,7 @@ class Document(Identified):
         :return: None
         """
         # Check for uniqueness of URI
-        identity_uri = rdflib.URIRef(sbol_obj.identity)
+        identity_uri = sbol_obj.identity
         if identity_uri in self.SBOLObjects:
             raise SBOLError('Cannot add ' + sbol_obj.identity +
                             ' to Document. An object with this identity '
@@ -1033,8 +1033,8 @@ def IGEM_STANDARD_ASSEMBLY(parts_list):
     G0000_seq_uri = 'https://synbiohub.org/public/igem/BBa_G0000_sequence/1'
     G0002_uri = 'https://synbiohub.org/public/igem/BBa_G0002/1'
     G0002_seq_uri = 'https://synbiohub.org/public/igem/BBa_G0002_sequence/1'
-    if not (G0000_uri in doc.componentDefinitions and G0002_uri in doc.componentDefinitions and G0000_seq_uri \
-            in doc.sequences and G0002_seq_uri in doc.sequences):
+    if not (G0000_uri in doc.componentDefinitions and G0002_uri in doc.componentDefinitions
+            and G0000_seq_uri in doc.sequences and G0002_seq_uri in doc.sequences):
         doc.readString('''<?xml version="1.0" encoding="utf-8"?>
                    <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/"
                    xmlns:dcterms="http://purl.org/dc/terms/"
