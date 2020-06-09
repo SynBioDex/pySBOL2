@@ -688,9 +688,14 @@ class Document(Identified):
 
         :return: None
         """
+        # Properties to keep, which don't make sense to clear
+        keepers = [SBOL_VERSION]
         self.SBOLObjects.clear()
-        for name, vals in self.properties.items():
-            vals.clear()
+        for name, value in self.properties.items():
+            if name in keepers:
+                # Do not erase properties on the keepers list
+                continue
+            value.clear()
         for object_store in self.owned_objects.values():
             object_store.clear()
         self._namespaces.clear()
