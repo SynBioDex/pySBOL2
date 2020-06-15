@@ -1,4 +1,4 @@
-__version__ = '1.0b5'
+__version__ = '1.0b6'
 
 # Anything imported here is part of the public API. Limit what gets
 # imported to only those things that are actually needed.
@@ -18,7 +18,7 @@ from .config import Config, ConfigOptions
 from .config import getHomespace, hasHomespace, setHomespace
 from .constants import *
 from .dbtl import Design
-from .document import Document
+from .document import Document, IGEM_STANDARD_ASSEMBLY
 from .experiment import Experiment, ExperimentalData
 from .identified import Identified
 from .implementation import Implementation

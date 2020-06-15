@@ -126,20 +126,22 @@ class TestComponentDefinitions(unittest.TestCase):
                                    cds.identity, terminator.identity]
         self.assertListEqual(primary_structure, valid_primary_structure)
 
-    @unittest.expectedFailure
     def testHasUpstreamComponent(self):
         uri = 'http://sbols.org/CRISPR_Example/gRNA_b_gene/1.0.0'
         doc = sbol2.Document()
         doc.read(CRISPR_EXAMPLE)
         cd = doc.componentDefinitions.get(uri)
         self.assertIsNotNone(cd)
-        comps = {
-            'http://sbols.org/CRISPR_Example/gRNA_b_gene/CRa_U6/1.0.0': True,
-            'http://sbols.org/CRISPR_Example/gRNA_b_gene/CRa_U6/1.0.0': True,
-            'http://sbols.org/CRISPR_Example/gRNA_b_gene/CRa_U6/1.0.0': False
-        }
+        # First element, has no upstream component
         uri = 'http://sbols.org/CRISPR_Example/gRNA_b_gene/CRa_U6/1.0.0'
-        print(cd.getPrimaryStructure())
+        c = cd.components.get(uri)
+        self.assertFalse(cd.hasUpstreamComponent(c))
+        # Second element has above as upstream component
+        uri = 'http://sbols.org/CRISPR_Example/gRNA_b_gene/gRNA_b_nc/1.0.0'
+        c = cd.components.get(uri)
+        self.assertTrue(cd.hasUpstreamComponent(c))
+        # Third element has both above as upstream components
+        uri = 'http://sbols.org/CRISPR_Example/gRNA_b_gene/gRNA_b_terminator/1.0.0'
         c = cd.components.get(uri)
         self.assertTrue(cd.hasUpstreamComponent(c))
 
@@ -215,12 +217,32 @@ class TestComponentDefinitions(unittest.TestCase):
                                            rdflib.URIRef(sbol2.SBOL_SEQUENCE_PROPERTY),
                                            rdflib.URIRef(seq.identity)))
 
+    def test_remove_hidden_sequence(self):
+        # Objects contained in a hidden property shouldn't persist if they are
+        # removed from the Document top level
+        doc = sbol2.Document()
+        cd = doc.componentDefinitions.create('cd1')
+        cd.sequence = sbol2.Sequence('cd1_sequence')
+        self.assertIn('cd1_sequence', doc.sequences)
+        doc.sequences.remove('cd1_sequence')
+        self.assertIsNone(cd.sequence)
+
     def test_sequence_validation(self):
         # sequence and sequences should be synced up
         cd = sbol2.ComponentDefinition('cd1', sbol2.BIOPAX_DNA)
         seq = sbol2.Sequence('cd1_sequence', 'GCAT')
         cd.sequence = seq
         self.assertEqual([cd.sequence.identity], cd.sequences)
+
+    def test_nonexistent_sequence(self):
+        # If a ComponentDefinition is in a Document and has a URI in
+        # sequences that is not in the document,
+        # ComponentDefinition.sequence should return None.
+        doc = sbol2.Document()
+        cd = sbol2.ComponentDefinition('cd')
+        doc.add(cd)
+        cd.sequences = ['http://example.com/sbol2/sequence/1']
+        self.assertIsNone(cd.sequence)
 
     def test_hidden_property_adder(self):
         # Assignment of a TopLevel object to a hidden property (in this case
@@ -231,10 +253,6 @@ class TestComponentDefinitions(unittest.TestCase):
         cd.sequence = sbol2.Sequence('seq')
         self.assertIsNotNone(cd.sequence)
         self.assertIs(cd.sequence, doc.getSequence(cd.sequence.identity))
-
-    @unittest.expectedFailure
-    def test_sequences_validation(self):
-        self.fail('Not yet implemented')
 
 
 class TestAssemblyRoutines(unittest.TestCase):
@@ -337,6 +355,32 @@ class TestAssemblyRoutines(unittest.TestCase):
         self.assertEqual(target_seq, 'aaatttaaatttaaatttaaa')
         self.assertEqual(target_seq, gene.sequence.elements)
 
+    def test_compile_autoconstruct_sequence(self):
+        # Ensure that autoconstruction of Sequence URIs works correctly with
+        # different configuration options
+        root_id = 'root'
+        sub_id = 'sub'
+        sbol2.Config.setOption('sbol_compliant_uris', True)
+        sbol2.Config.setOption('sbol_typed_uris', True)
+        doc = sbol2.Document()
+        root = doc.componentDefinitions.create(root_id)
+        sub = doc.componentDefinitions.create(sub_id)
+        root.compile([sub])
+        expected_identity = sbol2.getHomespace() + '/Sequence/' + root_id + '/1'
+        self.assertEqual(root.sequence.identity, expected_identity)
+
+        sbol2.Config.setOption('sbol_compliant_uris', True)
+        sbol2.Config.setOption('sbol_typed_uris', False)
+        doc = sbol2.Document()
+        root = doc.componentDefinitions.create(root_id)
+        sub = doc.componentDefinitions.create(sub_id)
+        root.compile([sub])
+        expected_identity = sbol2.getHomespace() + '/' + root_id + '_seq/1'
+        self.assertEqual(root.sequence.identity, expected_identity)
+
+        sbol2.Config.setOption('sbol_compliant_uris', True)
+        sbol2.Config.setOption('sbol_typed_uris', True)
+
     def test_recursive_compile(self):
         doc = sbol2.Document()
         cd1 = sbol2.ComponentDefinition('cd1')
@@ -373,7 +417,6 @@ class TestAssemblyRoutines(unittest.TestCase):
         self.assertEqual(r4.start, 1)
         self.assertEqual(r4.end, 2)
 
-    @unittest.expectedFailure
     def test_standard_assembly(self):
         doc = sbol2.Document()
         gene = sbol2.ComponentDefinition("BB0001")
@@ -399,7 +442,7 @@ class TestAssemblyRoutines(unittest.TestCase):
 
         doc.addComponentDefinition(gene)
         gene.assemblePrimaryStructure([promoter, RBS, CDS, terminator],
-                                      IGEM_STANDARD_ASSEMBLY)
+                                      sbol2.IGEM_STANDARD_ASSEMBLY)
         target_seq = gene.compile()
 
         self.assertEqual(target_seq, 'atactagagttactagctactagagg')

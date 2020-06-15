@@ -6,6 +6,7 @@ import posixpath
 
 import rdflib
 from rdflib import Literal, URIRef
+import packaging.version as pv
 
 from .config import Config
 from .config import ConfigOptions
@@ -306,17 +307,13 @@ class URIProperty(Property):
             self.setPropertyValueList(new_value)
 
     def setSinglePropertyValue(self, new_value):
-        if type(new_value) is list:
-            raise TypeError('The ' + str(self.getTypeURI()) +
-                            ' property does not accept list arguments.')
-        if self._rdf_type not in self._sbol_owner.properties:
-            self._sbol_owner.properties[self._rdf_type] = []
+        new_value = self.convert_from_user(new_value)
+        # clear out any old value
+        self._sbol_owner.properties[self._rdf_type].clear()
         if new_value is None:
+            # We've already cleared the value, do nothing else.
             return
-        elif len(self._sbol_owner.properties[self._rdf_type]) == 0:
-            self._sbol_owner.properties[self._rdf_type].append(URIRef(new_value))
-        else:
-            self._sbol_owner.properties[self._rdf_type][-1] = URIRef(new_value)
+        self._sbol_owner.properties[self._rdf_type].append(new_value)
 
     def setPropertyValueList(self, value):
         if value is None:
@@ -338,7 +335,11 @@ class URIProperty(Property):
         self.value += [new_value]
 
     def convert_to_user(self, value):
-        return str(value)
+        result = str(value)
+        if result == '':
+            # special case, empty strings are equivalent to None
+            return None
+        return result
 
     def convert_from_user(self, value):
         # None is ok iff upper bound is 1 and lower bound is 0.
@@ -462,8 +463,12 @@ class TextProperty(LiteralProperty):
     # methods out of LiteralProperty and into TextProperty. Then make
     # LiteralProperty an abstract base class.
 
-    # For now, this class is just an alias to LiteralProperty
-    pass
+    def convert_to_user(self, value):
+        result = str(value)
+        if result == '':
+            # special case, empty strings are equivalent to None
+            return None
+        return result
 
 
 class OwnedObject(Property):
@@ -626,11 +631,11 @@ class OwnedObject(Property):
         # if a match, store it. If another match, check versions and keep
         # the newer one.
         found_object = None
-        found_version = -math.inf
+        found_version = pv.NegativeInfinity
         object_store = self._sbol_owner.owned_objects[self._rdf_type]
         for obj in object_store:
             if obj.identity.startswith(search_uri):
-                obj_version = float(obj.version)
+                obj_version = pv.parse(obj.version)
                 if obj_version > found_version:
                     found_object = obj
                     found_version = obj_version
@@ -804,9 +809,6 @@ class OwnedObject(Property):
                 obj = object_store[index]
                 if self._sbol_owner.getTypeURI() == SBOL_DOCUMENT:
                     del obj.doc.SBOLObjects[rdflib.URIRef(obj.identity)]
-                # Erase nested, hidden TopLevel objects from Document
-                if obj.doc is not None and obj.doc.find(obj.identity) is not None:
-                    obj.doc = None  # TODO not sure what this does
                 del object_store[index]
                 self.validate(None)
         else:
@@ -814,20 +816,16 @@ class OwnedObject(Property):
                             'the parent object')
 
     def removeOwnedObject_str(self, uri):
-        if self._sbol_owner is not None:
-            if self._rdf_type in self._sbol_owner.owned_objects:
-                object_store = self._sbol_owner.owned_objects[self._rdf_type]
-                for obj in object_store:
-                    if string_equal(uri, obj.identity):
-                        object_store.remove(obj)  # TODO is there a better way?
-                        # Erase TopLevel objects from Document
-                        if self._sbol_owner.getTypeURI() == SBOL_DOCUMENT:
-                            del obj.doc.SBOLObjects[rdflib.URIRef(uri)]
-                        # Erase nested, hidden TopLevel objects from Document
-                        if obj.doc is not None and obj.doc.find(uri) is not None:
-                            obj.doc = None  # TODO not sure what this does
-                        self.validate(None)
-                        return obj
+        if not self._sbol_owner:
+            return
+        obj = self.find(uri)
+        object_store = self._sbol_owner.owned_objects[self._rdf_type]
+        object_store.remove(obj)
+        # Erase TopLevel objects from Document
+        if self._sbol_owner.rdf_type == SBOL_DOCUMENT:
+            del obj.doc.SBOLObjects[obj.identity]
+        self.validate(None)
+        return obj
 
     def clear(self):
         if self._sbol_owner is not None:

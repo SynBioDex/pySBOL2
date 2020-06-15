@@ -1,7 +1,7 @@
 from .constants import *
 from .identified import Identified
 from .location import OwnedLocation
-from .property import OwnedObject, URIProperty
+from .property import OwnedObject, URIProperty, ReferencedObject
 
 
 class SequenceAnnotation(Identified):
@@ -17,7 +17,8 @@ class SequenceAnnotation(Identified):
         of the form "major.minor.patch".
         """
         super().__init__(SBOL_SEQUENCE_ANNOTATION, uri, version)
-        self.component = None  # TODO support ReferencedObject
+        self.component = ReferencedObject(self, SBOL_COMPONENT_PROPERTY,
+                                          SBOL_COMPONENT, '0', '1', None)
         self.locations = OwnedLocation(self, SBOL_LOCATIONS,
                                        '0', '*', [])
         self.roles = URIProperty(self, SBOL_ROLES, '0', '*', [])

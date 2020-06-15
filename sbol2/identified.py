@@ -9,7 +9,7 @@ from .config import getHomespace
 from .config import hasHomespace
 from .constants import *
 from .property import LiteralProperty
-from .property import ReferencedObject
+from .property import ReferencedObject, TextProperty
 from .property import URIProperty
 from .sbolerror import SBOLError
 from .sbolerror import SBOLErrorCode
@@ -87,11 +87,11 @@ class Identified(SBOLObject):
         super().__init__(type_uri, uri)
         self.persistentIdentity = URIProperty(self, SBOL_PERSISTENT_IDENTITY,
                                               '0', '1', None, URIRef(uri))
-        self.displayId = LiteralProperty(self, SBOL_DISPLAY_ID, '0', '1',
-                                         [validation.sbol_rule_10204])
+        self.displayId = TextProperty(self, SBOL_DISPLAY_ID, '0', '1',
+                                      [validation.sbol_rule_10204])
         self.version = LiteralProperty(self, SBOL_VERSION, '0', '1', None, version)
-        self.name = LiteralProperty(self, SBOL_NAME, '0', '1', None)
-        self.description = LiteralProperty(self, SBOL_DESCRIPTION, '0', '1', None)
+        self.name = TextProperty(self, SBOL_NAME, '0', '1', None)
+        self.description = TextProperty(self, SBOL_DESCRIPTION, '0', '1', None)
         if Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS.value) is True:
             self.displayId = uri
             self.persistentIdentity = URIRef(posixpath.join(getHomespace(), uri))

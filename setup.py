@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='sbol2',
-      version='1.0b5',
+      version='1.0b6',
       description='Pure Python implementation of SBOL 2 standard',
       url='https://github.com/SynBioDex/pySBOL2',
       author='Bryan Bartley',
@@ -29,9 +29,10 @@ setup(name='sbol2',
       keywords='synthetic biology',
       packages=['sbol2'],
       install_requires=[
-            'rdflib',
+            'rdflib>=5.0',
             'deprecated',
             'lxml',
             'requests',
-            'urllib3'
+            'urllib3',
+            'packaging>=20.0'
       ])

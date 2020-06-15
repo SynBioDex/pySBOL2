@@ -290,4 +290,3 @@ SYSBIO_ANALYSIS = SYSBIO_URI + "#Analysis"
 SYSBIO_SAMPLE_ROSTER = SYSBIO_URI + "#SampleRoster"
 
 IGEM_URI = "http://wiki.synbiohub.org/wiki/Terms/igem"
-IGEM_STANDARD_ASSEMBLY = IGEM_URI + "#assembly/RFC10"

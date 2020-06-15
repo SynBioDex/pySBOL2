@@ -158,11 +158,11 @@ class Sequence(TopLevel):
                 if not cdef.sequence:
                     if Config.getOption('sbol_compliant_uris'):
                         seq = self.doc.sequences.create(cdef.displayId)
-                        cdef.sequence = seq
+                        # cdef.sequence = seq
                         cdef.sequences = seq.identity
                     else:
                         seq = self.doc.sequences.create(cdef.identity + '_seq')
-                        cdef.sequence = seq
+                        # cdef.sequence = seq
                         cdef.sequences = seq.identity
                 seq = cdef.sequence
 
