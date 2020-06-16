@@ -795,9 +795,9 @@ class OwnedObject(Property):
     def remove(self, identifier):
         """id can be either an integer index or a string URI"""
         if type(identifier) is int:
-            self.removeOwnedObject_int(identifier)
+            return self.removeOwnedObject_int(identifier)
         elif isinstance(identifier, str):
-            self.removeOwnedObject_str(identifier)
+            return self.removeOwnedObject_str(identifier)
         else:
             msg = 'id parameter must be an integer index or a string uri.'
             msg += ' Got {} of type {}'.format(identifier,
@@ -816,6 +816,7 @@ class OwnedObject(Property):
                     del obj.doc.SBOLObjects[rdflib.URIRef(obj.identity)]
                 del object_store[index]
                 self.validate(None)
+                return obj
         else:
             raise Exception('This property is not defined in '
                             'the parent object')
