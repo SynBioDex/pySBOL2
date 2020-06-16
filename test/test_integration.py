@@ -108,7 +108,6 @@ class TestIntegrate(unittest.TestCase):
         self.integrated_cd.compile()
         self.assertEqual(self.integrated_cd.sequence.elements, 'atcggg')
 
-    @unittest.expectedFailure
     def testMissingDocument(self):
         # Test that compile fails with a raised exception when
         # this CD or the insert is not associated with a Document
