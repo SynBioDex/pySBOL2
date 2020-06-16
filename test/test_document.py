@@ -187,10 +187,14 @@ class TestDocument(unittest.TestCase):
         sbol.Config.setOption('sbol_compliant_uris', True)
         sbol.Config.setOption('sbol_typed_uris', True)
         doc = sbol.Document()
-        md = doc.moduleDefinitions.create('foo')
+        cd = doc.moduleDefinitions.create('foo')
+        cd.roles = sbol.SO_PROMOTER
         test_uri = 'http://examples.org/does/not/exist/1'
         matches = doc.find_property_value(sbol.SBOL_IDENTITY, test_uri)
         self.assertEqual(len(matches), 0)
+        matches = doc.find_property_value(sbol.SBOL_ROLES, sbol.SO_PROMOTER)
+        self.assertEqual(len(matches), 1)
+        self.assertEqual(matches[0], cd)
 
     def test_add_namespace(self):
         doc = sbol.Document()
