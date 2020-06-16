@@ -108,7 +108,7 @@ class TestProperty(unittest.TestCase):
     def test_literal_property_properties(self):
         md = sbol.ModuleDefinition()
         self.assertNotIn(rdflib.URIRef(sbol.UNDEFINED), md.properties)
-        sbol.property.LiteralProperty(md, sbol.UNDEFINED, '0', '*', [], 'foo')
+        sbol.property.TextProperty(md, sbol.UNDEFINED, '0', '*', [], 'foo')
         # Creating the property should also create the entry in the
         # parent properties dict
         self.assertIn(rdflib.URIRef(sbol.UNDEFINED), md.properties)

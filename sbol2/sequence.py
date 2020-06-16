@@ -2,7 +2,7 @@ from deprecated import deprecated
 from rdflib import URIRef
 
 from .constants import *
-from .property import LiteralProperty, URIProperty
+from .property import URIProperty, TextProperty
 from .toplevel import TopLevel
 from .config import Config
 
@@ -38,8 +38,8 @@ class Sequence(TopLevel):
         # these characters could represent the nucleotide bases
         # of a molecule of DNA, the amino acid residues of a protein,
         # or the atoms and chemical bonds of a small molecule.
-        self.elements = LiteralProperty(self, SBOL_ELEMENTS,
-                                        '1', '1', [], elements)
+        self.elements = TextProperty(self, SBOL_ELEMENTS,
+                                     '1', '1', [], elements)
         self.encoding = URIProperty(self, SBOL_ENCODING,
                                     '1', '1', [], encoding)
 

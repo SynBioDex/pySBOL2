@@ -280,9 +280,9 @@ class TestCopy(unittest.TestCase):
         cd = sbol.ComponentDefinition('cd')
         doc.addComponentDefinition(cd)
         doc.addNamespace(extension_namespace, extension_prefix)
-        cd.extension_property = sbol.property.LiteralProperty(cd, extension_namespace +
-                                                              'extension_property', '0',
-                                                              '1', None, 'foo')
+        cd.extension_property = sbol.property.TextProperty(cd, extension_namespace +
+                                                           'extension_property', '0',
+                                                           '1', None, 'foo')
         cd_copy = cd.copy(target_doc)
         self.assertTrue(target_doc._namespaces[extension_prefix] ==
                         rdflib.URIRef(extension_namespace))
