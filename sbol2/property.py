@@ -457,6 +457,23 @@ class IntProperty(LiteralProperty):
         return Literal(value)
 
 
+class FloatProperty(LiteralProperty):
+
+    def convert_to_user(self, value):
+        return float(value)
+
+    def convert_from_user(self, value):
+        # None is ok iff upper bound is 1 and lower bound is 0.
+        # If upper bound > 1, attribute is a list and None is not a valid list
+        # If lower bound > 0, attribute must have a value, so None is unacceptable
+        if value is None and self.upper_bound == 1 and self.lower_bound == 0:
+            return None
+        if not isinstance(value, float):
+            msg = '{} values must have type float'.format(self.getTypeURI())
+            raise TypeError(msg)
+        return Literal(value)
+
+
 class TextProperty(LiteralProperty):
 
     # In the future, pull the convert_to_user and convert_from_user
