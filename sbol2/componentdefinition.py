@@ -700,3 +700,113 @@ class ComponentDefinition(TopLevel):
 
     def getTypeURI(self):
         return SBOL_COMPONENT_DEFINITION
+
+    def integrateAtBaseCoordinate(self, target_cd, insert_cd, base_coordinate):
+        """
+        Construct SBOL representing a genetic insert. Inserts insert_cd
+        into self at base_coordinate.
+        
+        This method constructs a new ComponentDefinition that is annotated
+        with the original sequence and the inserted sequence such that the
+        new DNA sequence can be generated. This method does not generate
+        the new sequence itself.
+        
+        The new sequence is not generated to avoid duplicating very long
+        sequences in memory when they are not needed.
+        
+        """
+        
+        def autoconstruct_id(sbol_owned_object_property, display_id):
+            instance_count = 0
+            auto_id = '%s_%d' %(display_id, instance_count)
+            while sbol_owned_object_property.find(auto_id):
+                instance_count += 1
+                auto_id = '%s_%d' %(display_id, instance_count)
+            return auto_id
+
+        if not self.doc:
+            raise ValueError('Integration failed. ComponentDefinition <%s> must be added to a Document in order to proceed with integration.' \
+                             %self.identity)
+        if not target_cd.doc or target_cd.doc.this != self.doc.this:
+            raise ValueError('Integration failed. The target_cd <%s> must be added to the same Document as self before proceeding.' \
+                             %target_cd.identity)
+        if not insert_cd.doc or insert_cd.doc.this != self.doc.this:
+            raise ValueError('Integration failed. The insert_cd <%s> must be added to the same Document as self before proceeding.' \
+                             %insert_cd.identity)
+        if not target_cd.sequence:
+            raise ValueError('Integration failed. The target_cd <%s> is not associated with a Sequence. ' \
+                             'The sequence property should point to a valid Sequence before proceeding.' %self.identity)
+        if not target_cd.sequence.elements:
+            raise ValueError('Integration failed. The elements property of Sequence <%s> must be set before proceeding.' \
+                             'The sequence property should point to a valid Sequence before proceeding.'
+                             %self.sequence.identity)
+        if not insert_cd.sequence:
+            raise ValueError('Integration failed. The insert_cd <%s> is not associated with a Sequence. ' \
+                             'The sequence property must point to a valid Sequence before proceeding.' \
+                             %insert_cd.identity)
+        if not insert_cd.sequence.elements:
+            raise ValueError('Integration failed. The elements property of Sequence <%s> must be set before proceeding.' \
+                             'The sequence property should point to a valid Sequence before proceeding.'
+                             %insert_cd.sequence.identity)
+
+        target_cd_comp = None
+        insert_cd_comp = None
+        for c in self.components:
+            if c.definition == target_cd.identity:
+                if not target_cd_comp:
+                    target_cd_comp = c
+                else:
+                    raise ValueError('Integration failed. Self contains more than one instance of %s' %target_cd.identity) 
+            if c.definition == insert_cd.identity:
+                if not insert_cd_comp:
+                    insert_cd_comp = c
+                else:
+                    raise ValueError('Integration failed. Self contains more than one instance of %s' %insert_cd.identity)
+
+        orig_len = len(target_cd.sequence.elements)
+        insert_len = len(insert_cd.sequence.elements)
+
+        # Keep base_coordinate in bounds
+        if base_coordinate < 1:
+            raise ValueError('Insert failed. The base_coordinate must be a base coordinate equal to or greater than 1')
+        if base_coordinate > orig_len + 1:
+            raise ValueError('Insert failed. The base_coordinate exceeds the length of the target sequence.')
+
+        target_cd_comp = None
+        if base_coordinate > 1:
+            # Now link target_cd into the structure of the new
+            # ComponentDefinition
+            if not target_cd_comp:
+                target_cd_comp = self.components.create(autoconstruct_id(self.components, target_cd.displayId))
+                target_cd_comp.definition = target_cd
+            source_loc = target_cd_comp.sourceLocations.createRange(autoconstruct_id(target_cd_comp.sourceLocations, target_cd.displayId))
+            source_loc.start = 1
+            source_loc.end = base_coordinate - 1
+
+        # Now link the insert to the new cd
+        if not insert_cd_comp:
+            insert_cd_comp = self.components.create(autoconstruct_id(self.components, insert_cd.displayId))
+            insert_cd_comp.definition = insert_cd
+
+        target_cd_comp_1 = None
+        if base_coordinate <= orig_len:
+            target_cd_comp_1 = self.components.create(autoconstruct_id(self.components, target_cd.displayId))
+            target_cd_comp_1.definition = target_cd
+            source_loc_1 = target_cd_comp_1.sourceLocations.createRange(autoconstruct_id(target_cd_comp_1.sourceLocations, target_cd.displayId))
+            # source_loc_1 = target_cd_comp_1.sourceLocations.create(autoconstruct_id(target_cd_comp_1.sourceLocations,
+            #                                                                         target_cd.displayId),
+            #                                                        Range)
+            source_loc_1.start = base_coordinate
+            source_loc_1.end = orig_len
+
+        if target_cd_comp:
+            sc0 = self.sequenceConstraints.create(autoconstruct_id(self.sequenceConstraints, self.displayId))
+            sc0.subject = target_cd_comp
+            sc0.object = insert_cd_comp
+            sc0.restriction = SBOL_RESTRICTION_PRECEDES
+         
+        if target_cd_comp_1:
+            sc1 = self.sequenceConstraints.create(autoconstruct_id(self.sequenceConstraints, self.displayId))
+            sc1.subject = insert_cd_comp
+            sc1.object = target_cd_comp_1
+            sc1.restriction = SBOL_RESTRICTION_PRECEDES
