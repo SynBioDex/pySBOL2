@@ -815,6 +815,7 @@ class OwnedObject(Property):
                 if self._sbol_owner.getTypeURI() == SBOL_DOCUMENT:
                     del obj.doc.SBOLObjects[rdflib.URIRef(obj.identity)]
                 del object_store[index]
+                obj.doc = None
                 self.validate(None)
                 return obj
         else:
@@ -830,6 +831,7 @@ class OwnedObject(Property):
         # Erase TopLevel objects from Document
         if self._sbol_owner.rdf_type == SBOL_DOCUMENT:
             del obj.doc.SBOLObjects[obj.identity]
+        obj.doc = None
         self.validate(None)
         return obj
 

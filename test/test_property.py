@@ -290,6 +290,8 @@ class TestProperty(unittest.TestCase):
         obj = md.modules.remove(m2.identity)
         self.assertEqual(list(md.modules), [m1])
         self.assertEqual(obj.identity, m2.identity)
+        self.assertIsNone(obj.doc)
+        self.assertIsNone(m2.doc)
 
     def test_validation_rules(self):
         md = sbol2.ModuleDefinition()
