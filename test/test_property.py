@@ -188,17 +188,9 @@ class TestProperty(unittest.TestCase):
         # find something that is in the collection
         md2 = doc.moduleDefinitions.find('foo')
         self.assertEqual(md, md2)
-        # find something that is not in the collection
-        with self.assertRaises(sbol.SBOLError):
-            doc.moduleDefinitions.find('bar')
-        # confirm we get the expected error code
-        try:
-            doc.moduleDefinitions.find('bar')
-        except sbol.SBOLError as err:
-            self.assertEqual(err.error_code(),
-                             sbol.SBOLErrorCode.NOT_FOUND_ERROR)
-        else:
-            self.fail('Expected SBOLError')
+        # Try to find something that is not in the collection,
+        # which should return False as pysbol did
+        self.assertFalse(doc.moduleDefinitions.find('bar'))
 
     def test_referenced_object(self):
         # Test referenced object property is initialized to correct types

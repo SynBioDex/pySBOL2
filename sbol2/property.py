@@ -577,7 +577,12 @@ class OwnedObject(Property):
 
     def find(self, query):
         if isinstance(query, str):
-            return self.get_uri(rdflib.URIRef(query))
+            try:
+                return self.get_uri(rdflib.URIRef(query))
+            except SBOLError as e:
+                if e.error_code() == SBOLErrorCode.NOT_FOUND_ERROR:
+                    return False
+                raise
         errmsg = 'Invalid find query {} of type {}'
         errmsg = errmsg.format(query, type(query).__name__)
         raise TypeError(errmsg)
