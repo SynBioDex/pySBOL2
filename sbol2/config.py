@@ -126,7 +126,9 @@ class Config:
         :return: True if Homespace is set, False otherwise.
         """
         homespace = ConfigOptions.HOMESPACE.value
-        return homespace in options and options[homespace] is not None and options[homespace] != ""
+        return (homespace in options and
+                options[homespace] is not None and
+                options[homespace] != "")
 
     @staticmethod
     def setFileFormat(_file_format):

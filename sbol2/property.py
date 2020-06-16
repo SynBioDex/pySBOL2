@@ -577,7 +577,12 @@ class OwnedObject(Property):
 
     def find(self, query):
         if isinstance(query, str):
-            return self.get_uri(rdflib.URIRef(query))
+            try:
+                return self.get_uri(rdflib.URIRef(query))
+            except SBOLError as e:
+                if e.error_code() == SBOLErrorCode.NOT_FOUND_ERROR:
+                    return False
+                raise
         errmsg = 'Invalid find query {} of type {}'
         errmsg = errmsg.format(query, type(query).__name__)
         raise TypeError(errmsg)
@@ -790,9 +795,9 @@ class OwnedObject(Property):
     def remove(self, identifier):
         """id can be either an integer index or a string URI"""
         if type(identifier) is int:
-            self.removeOwnedObject_int(identifier)
+            return self.removeOwnedObject_int(identifier)
         elif isinstance(identifier, str):
-            self.removeOwnedObject_str(identifier)
+            return self.removeOwnedObject_str(identifier)
         else:
             msg = 'id parameter must be an integer index or a string uri.'
             msg += ' Got {} of type {}'.format(identifier,
@@ -810,7 +815,9 @@ class OwnedObject(Property):
                 if self._sbol_owner.getTypeURI() == SBOL_DOCUMENT:
                     del obj.doc.SBOLObjects[rdflib.URIRef(obj.identity)]
                 del object_store[index]
+                obj.doc = None
                 self.validate(None)
+                return obj
         else:
             raise Exception('This property is not defined in '
                             'the parent object')
@@ -824,6 +831,7 @@ class OwnedObject(Property):
         # Erase TopLevel objects from Document
         if self._sbol_owner.rdf_type == SBOL_DOCUMENT:
             del obj.doc.SBOLObjects[obj.identity]
+        obj.doc = None
         self.validate(None)
         return obj
 
