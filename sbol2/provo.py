@@ -3,7 +3,7 @@ from rdflib import URIRef
 from . import validation
 from .constants import *
 from .identified import Identified
-from .property import LiteralProperty
+from .property import DateTimeProperty
 from .property import OwnedObject
 from .property import ReferencedObject
 from .property import URIProperty
@@ -186,10 +186,10 @@ class Activity(TopLevel):
         self.agent = ReferencedObject(self, PROVO_AGENT, Agent,
                                       '0', '1', [validation.libsbol_rule_22])
         self.types = URIProperty(self, SBOL_TYPES, '0', '1', [])
-        self.startedAtTime = LiteralProperty(self, PROVO_STARTED_AT_TIME,
-                                             '0', '1', [])
-        self.endedAtTime = LiteralProperty(self, PROVO_ENDED_AT_TIME,
-                                           '0', '1', [])
+        self.startedAtTime = DateTimeProperty(self, PROVO_STARTED_AT_TIME,
+                                              '0', '1', [])
+        self.endedAtTime = DateTimeProperty(self, PROVO_ENDED_AT_TIME,
+                                            '0', '1', [])
         self.wasInformedBy = ReferencedObject(self, PROVO_WAS_INFORMED_BY,
                                               PROVO_ACTIVITY, '0', '*', [])
         self.usages = OwnedObject(self, PROVO_QUALIFIED_USAGE, Usage,
