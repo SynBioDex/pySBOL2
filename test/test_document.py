@@ -194,6 +194,7 @@ class TestDocument(unittest.TestCase):
         self.assertEqual(len(matches), 0)
         matches = doc.find_property_value(sbol.SBOL_ROLES, sbol.SO_PROMOTER)
         self.assertEqual(len(matches), 1)
+        self.assertEqual(matches[0], cd)
 
     def test_add_namespace(self):
         doc = sbol.Document()
