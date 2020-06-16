@@ -177,7 +177,14 @@ class ComponentDefinition(TopLevel):
         super()._added_to_document(doc)
         # Add the sequence to the document
         if self._sequence_cache:
-            doc.add(self._sequence_cache)
+            try:
+                doc.add(self._sequence_cache)
+            except SBOLError as e:
+                if e.error_code() == SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE:
+                    # The sequence is already in the document, this is ok.
+                    pass
+                else:
+                    raise
 
     def addType(self, new_type):
         val = self.types
