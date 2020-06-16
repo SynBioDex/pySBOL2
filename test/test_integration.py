@@ -7,7 +7,7 @@ class TestIntegrate(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        setHomespace('https://example.com') 
+        setHomespace('https://example.com')
 
     def setUp(self):
         self.doc = Document()
@@ -24,7 +24,8 @@ class TestIntegrate(unittest.TestCase):
         self.wt_cd.sequence.elements = 'atcg'
         self.insert_cd.sequence.elements = 'gg'
         self.integrated_cd.integrateAtBaseCoordinate(self.wt_cd, self.insert_cd, 3)
-        components = [c for c in self.integrated_cd.components if c.definition == self.wt_cd.identity]
+        components = [c for c in self.integrated_cd.components
+                      if c.definition == self.wt_cd.identity]
         self.assertEqual(len(components), 2)
         self.assertEqual(len(components[0].sourceLocations), 1)
         self.assertEqual(len(components[1].sourceLocations), 1)
@@ -41,11 +42,13 @@ class TestIntegrate(unittest.TestCase):
         self.integrated_cd.integrateAtBaseCoordinate(self.wt_cd, self.insert_cd, 3)
         primary_structure = self.integrated_cd.getPrimaryStructure()
         primary_structure = [c.identity for c in primary_structure]
-        self.assertListEqual(primary_structure, [self.wt_cd.identity, self.insert_cd.identity, self.wt_cd.identity])        
+        self.assertListEqual(primary_structure, [self.wt_cd.identity,
+                                                 self.insert_cd.identity,
+                                                 self.wt_cd.identity])
 
     def testIntegrationNegative(self):
         # An exception should be raised if user tries to insert
-        # at a negative base coordinate 
+        # at a negative base coordinate
         with self.assertRaises(ValueError):
             self.wt_cd.sequence.elements = 'atcg'
             self.insert_cd.sequence.elements = 'gg'
