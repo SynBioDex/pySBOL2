@@ -4,6 +4,7 @@ import collections
 import logging
 import math
 import posixpath
+from typing import Any, Union
 
 import dateutil.parser
 import rdflib
@@ -453,26 +454,27 @@ class IntProperty(LiteralProperty):
         # If lower bound > 0, attribute must have a value, so None is unacceptable
         if value is None and self.upper_bound == 1 and self.lower_bound == 0:
             return None
-        if not isinstance(value, int):
-            msg = '{} values must have type int'.format(self.getTypeURI())
-            raise TypeError(msg)
+        # Convert to int. If conversion fails a ValueError is raised
+        value = int(value)
         return Literal(value)
 
 
 class FloatProperty(LiteralProperty):
 
-    def convert_to_user(self, value):
+    def convert_to_user(self, value: rdflib.Literal) -> float:
         return float(value)
 
-    def convert_from_user(self, value):
+    def convert_from_user(self, value: Any) -> Union[rdflib.Literal, None]:
+        """
+        :raises: ValueError if value cannot be converted to float
+        """
         # None is ok iff upper bound is 1 and lower bound is 0.
         # If upper bound > 1, attribute is a list and None is not a valid list
         # If lower bound > 0, attribute must have a value, so None is unacceptable
         if value is None and self.upper_bound == 1 and self.lower_bound == 0:
             return None
-        if not isinstance(value, float):
-            msg = '{} values must have type float'.format(self.getTypeURI())
-            raise TypeError(msg)
+        # Convert to float. If conversion fails a ValueError is raised
+        value = float(value)
         return Literal(value)
 
 
@@ -491,7 +493,7 @@ class DateTimeProperty(LiteralProperty):
             value = dateutil.parser.parse(value)
         if not isinstance(value, datetime.datetime):
             msg = '{} values must have type datetime'.format(self.getTypeURI())
-            raise TypeError(msg)
+            raise ValueError(msg)
         return Literal(value)
 
 
