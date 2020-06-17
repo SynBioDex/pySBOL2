@@ -30,7 +30,7 @@ setup(name='sbol2',
       packages=['sbol2'],
       install_requires=[
             'rdflib>=5.0',
-            'dateutil',
+            'python-dateutil',
             'deprecated',
             'lxml',
             'requests',
