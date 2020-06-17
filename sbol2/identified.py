@@ -250,10 +250,12 @@ class Identified(SBOLObject):
                 new_obj.version = self.version
 
         # Now set up the identity based on the persistentIdentity and maybe version
-        if Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS) and new_obj.version:
-            new_obj.identity = posixpath.join(new_obj.persistentIdentity, new_obj.version)
-        else:
-            new_obj.identity = new_obj.persistentIdentity
+        # In the case of a Document there is no persistentIdentity so skip this block
+        if new_obj.persistentIdentity:
+            if Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS) and new_obj.version:
+                new_obj.identity = posixpath.join(new_obj.persistentIdentity, new_obj.version)
+            else:
+                new_obj.identity = new_obj.persistentIdentity
 
         # Assign the new object to the target Document
         if target_doc:
