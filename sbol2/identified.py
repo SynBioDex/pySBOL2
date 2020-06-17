@@ -8,13 +8,13 @@ from .config import ConfigOptions
 from .config import getHomespace
 from .config import hasHomespace
 from .constants import *
-from .property import LiteralProperty
 from .property import ReferencedObject, TextProperty
 from .property import URIProperty
 from .sbolerror import SBOLError
 from .sbolerror import SBOLErrorCode
 from .config import parseClassName
 from . import validation
+from .versionproperty import VersionProperty
 
 
 class Identified(SBOLObject):
@@ -89,7 +89,7 @@ class Identified(SBOLObject):
                                               '0', '1', None, URIRef(uri))
         self.displayId = TextProperty(self, SBOL_DISPLAY_ID, '0', '1',
                                       [validation.sbol_rule_10204])
-        self.version = LiteralProperty(self, SBOL_VERSION, '0', '1', None, version)
+        self.version = VersionProperty(self, SBOL_VERSION, '0', '1', None, version)
         self.name = TextProperty(self, SBOL_NAME, '0', '1', None)
         self.description = TextProperty(self, SBOL_DESCRIPTION, '0', '1', None)
         if Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS.value) is True:
@@ -99,7 +99,7 @@ class Identified(SBOLObject):
                 if self.version:
                     self.identity = URIRef(posixpath.join(getHomespace(),
                                                           self.getClassName(type_uri),
-                                                          uri, self.version))
+                                                          uri, str(self.version)))
                 else:
                     self.identity = URIRef(posixpath.join(getHomespace(),
                                                           self.getClassName(type_uri),
@@ -107,7 +107,7 @@ class Identified(SBOLObject):
             else:
                 if self.version:
                     self.identity = URIRef(posixpath.join(getHomespace(),
-                                                          uri, self.version))
+                                                          uri, str(self.version)))
                 else:
                     self.identity = URIRef(posixpath.join(getHomespace(), uri))
         elif hasHomespace():
@@ -249,7 +249,7 @@ class Identified(SBOLObject):
             # object.  However, if user is copying into a different Document, then copy
             # the original object's version without incrementing
             if new_obj.doc and new_obj.doc is self.doc and not target_namespace:
-                new_obj.version.incrementMajor()
+                new_obj.version = VersionProperty.increment_major(self.version)
             else:
                 new_obj.version = self.version
 

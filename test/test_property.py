@@ -21,7 +21,7 @@ class TestProperty(unittest.TestCase):
 
     def test_noListProperty(self):
         plasmid = sbol.ComponentDefinition('pBB1', sbol.BIOPAX_DNA, '1.0.0')
-        with self.assertRaises(TypeError):
+        with self.assertRaises(ValueError):
             plasmid.version = ['1', '2']
 
     def test_addPropertyToList(self):
@@ -246,7 +246,7 @@ class TestProperty(unittest.TestCase):
         r.start = 42
         self.assertEqual(type(r.start), int)
         self.assertEqual(r.start, 42)
-        with self.assertRaises(TypeError):
+        with self.assertRaises(ValueError):
             r.start = 'forty-two'
 
     def test_uri_property_list(self):
