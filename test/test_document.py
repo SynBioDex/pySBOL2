@@ -1,6 +1,9 @@
+import io
 import locale
 import os
+import tempfile
 import unittest
+import unittest.mock
 
 import rdflib
 
@@ -543,6 +546,35 @@ class TestDocumentExtensionObjects(unittest.TestCase):
         self.assertEqual(old_len, len(doc))
         cd = doc.componentDefinitions[cd_uri]
         self.assertEqual(1, len(cd.roles))
+
+    def test_write_validation(self):
+        # Test that write performs validation if requested
+        # and skips validation if requested.
+        doc = sbol2.Document()
+        doc.moduleDefinitions.create('md1')
+        validate = sbol2.Config.getOption(sbol2.ConfigOptions.VALIDATE)
+        sbol2.Config.setOption(sbol2.ConfigOptions.VALIDATE, True)
+        verbose = sbol2.Config.getOption(sbol2.ConfigOptions.VERBOSE)
+        sbol2.Config.setOption(sbol2.ConfigOptions.VERBOSE, True)
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            test_file = os.path.join(tmpdirname, 'test.xml')
+            with unittest.mock.patch('sys.stdout', new=io.StringIO()) as fake_out:
+                # Write to disk
+                result = doc.write(test_file)
+                self.assertEqual('Valid.', result)
+                # Expect timing output
+                output = fake_out.getvalue().strip()
+                self.assertTrue(output.startswith('Validation request took'))
+                self.assertTrue(output.endswith('seconds'))
+        sbol2.Config.setOption(sbol2.ConfigOptions.VALIDATE, False)
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            test_file = os.path.join(tmpdirname, 'test.xml')
+            # Write to disk
+            result = doc.write(test_file)
+            self.assertTrue(result.startswith('Validation disabled.'))
+        # Reset validate to its original value
+        sbol2.Config.setOption(sbol2.ConfigOptions.VALIDATE, validate)
+        sbol2.Config.setOption(sbol2.ConfigOptions.VERBOSE, verbose)
 
 
 if __name__ == '__main__':
