@@ -1,3 +1,4 @@
+import datetime
 import unittest
 import os
 
@@ -378,6 +379,16 @@ class TestIntProperty(unittest.TestCase):
         cut.at = v
         self.assertEqual(int(v), cut.at)
 
+    def test_init_store(self):
+        # Ensure that property constructors initialize the parent
+        # object's value store
+        obj = sbol2.SBOLObject()
+        type_uri = 'http://example.com#thing'
+        obj.thing = sbol2.IntProperty(obj, type_uri, '0', '*')
+        self.assertIn(type_uri, obj.properties)
+        self.assertEqual([], obj.properties[type_uri])
+        self.assertEqual([], obj.thing)
+
 
 class TestTextProperty(unittest.TestCase):
 
@@ -428,6 +439,16 @@ class TestTextProperty(unittest.TestCase):
         self.assertEqual(initial_value, prop.value)
         self.assertEqual([], prop._validation_rules)
 
+    def test_init_store(self):
+        # Ensure that property constructors initialize the parent
+        # object's value store
+        obj = sbol2.SBOLObject()
+        type_uri = 'http://example.com#thing'
+        obj.thing = sbol2.TextProperty(obj, type_uri, '0', '*')
+        self.assertIn(type_uri, obj.properties)
+        self.assertEqual([], obj.properties[type_uri])
+        self.assertEqual([], obj.thing)
+
 
 class TestFloatProperty(unittest.TestCase):
 
@@ -449,6 +470,77 @@ class TestFloatProperty(unittest.TestCase):
         v = 15
         m.value = v
         self.assertEqual(float(v), m.value)
+
+    def test_init_store(self):
+        # Ensure that property constructors initialize the parent
+        # object's value store
+        obj = sbol2.SBOLObject()
+        type_uri = 'http://example.com#thing'
+        obj.thing = sbol2.FloatProperty(obj, type_uri, '0', '*')
+        self.assertIn(type_uri, obj.properties)
+        self.assertEqual([], obj.properties[type_uri])
+        self.assertEqual([], obj.thing)
+
+
+class TestDateTimeProperty(unittest.TestCase):
+
+    def test_values(self):
+        # Activity class uses DateTimeProperty
+        # Make sure we can set a DateTimeProperty via a variety of formats
+        # that can be parsed by dateutil
+        activity = sbol2.Activity('a1')
+        self.assertIsNone(activity.startedAtTime)
+        # set with datetime
+        v = datetime.datetime.now()
+        activity.startedAtTime = v
+        self.assertEqual(v, activity.startedAtTime)
+        # set with string
+        dt = datetime.datetime.now()
+        v = str(dt)
+        activity.startedAtTime = v
+        self.assertEqual(dt, activity.startedAtTime)
+        # set with string in ISO format
+        dt = datetime.datetime.now()
+        v = dt.isoformat()
+        activity.startedAtTime = v
+        self.assertEqual(dt, activity.startedAtTime)
+
+    def test_init_store(self):
+        # Ensure that property constructors initialize the parent
+        # object's value store
+        obj = sbol2.SBOLObject()
+        type_uri = 'http://example.com#thing'
+        obj.thing = sbol2.DateTimeProperty(obj, type_uri, '0', '*')
+        self.assertIn(type_uri, obj.properties)
+        self.assertEqual([], obj.properties[type_uri])
+        self.assertEqual([], obj.thing)
+
+
+class TestReferencedObject(unittest.TestCase):
+
+    def test_init_store(self):
+        # Ensure that property constructors initialize the parent
+        # object's value store
+        obj = sbol2.SBOLObject()
+        type_uri = 'http://example.com#thing'
+        ref_uri = 'http://example.com#other_thing'
+        obj.thing = sbol2.ReferencedObject(obj, type_uri, ref_uri, '0', '*', [])
+        self.assertIn(type_uri, obj.properties)
+        self.assertEqual([], obj.properties[type_uri])
+        self.assertEqual([], obj.thing)
+
+
+class TestURIProperty(unittest.TestCase):
+
+    def test_init_store(self):
+        # Ensure that property constructors initialize the parent
+        # object's value store
+        obj = sbol2.SBOLObject()
+        type_uri = 'http://example.com#thing'
+        obj.thing = sbol2.URIProperty(obj, type_uri, '0', '*', [])
+        self.assertIn(type_uri, obj.properties)
+        self.assertEqual([], obj.properties[type_uri])
+        self.assertEqual([], obj.thing)
 
 
 if __name__ == '__main__':
