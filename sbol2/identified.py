@@ -253,7 +253,8 @@ class Identified(SBOLObject):
         # In the case of a Document there is no persistentIdentity so skip this block
         if new_obj.persistentIdentity:
             if Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS) and new_obj.version:
-                new_obj.identity = posixpath.join(new_obj.persistentIdentity, new_obj.version)
+                new_obj.identity = posixpath.join(new_obj.persistentIdentity,
+                                                  new_obj.version)
             else:
                 new_obj.identity = new_obj.persistentIdentity
 
