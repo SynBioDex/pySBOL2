@@ -21,7 +21,7 @@ class TestProperty(unittest.TestCase):
 
     def test_noListProperty(self):
         plasmid = sbol.ComponentDefinition('pBB1', sbol.BIOPAX_DNA, '1.0.0')
-        with self.assertRaises(TypeError):
+        with self.assertRaises(ValueError):
             plasmid.version = ['1', '2']
 
     def test_addPropertyToList(self):
@@ -108,7 +108,7 @@ class TestProperty(unittest.TestCase):
     def test_literal_property_properties(self):
         md = sbol.ModuleDefinition()
         self.assertNotIn(rdflib.URIRef(sbol.UNDEFINED), md.properties)
-        sbol.property.LiteralProperty(md, sbol.UNDEFINED, '0', '*', [], 'foo')
+        sbol.property.TextProperty(md, sbol.UNDEFINED, '0', '*', [], 'foo')
         # Creating the property should also create the entry in the
         # parent properties dict
         self.assertIn(rdflib.URIRef(sbol.UNDEFINED), md.properties)
@@ -246,7 +246,7 @@ class TestProperty(unittest.TestCase):
         r.start = 42
         self.assertEqual(type(r.start), int)
         self.assertEqual(r.start, 42)
-        with self.assertRaises(TypeError):
+        with self.assertRaises(ValueError):
             r.start = 'forty-two'
 
     def test_uri_property_list(self):
@@ -355,6 +355,29 @@ class TestIntProperty(unittest.TestCase):
         self.assertEqual(initial_value, prop.value)
         self.assertEqual([], prop._validation_rules)
 
+    def test_values(self):
+        # Cut class uses IntProperty
+        # Make sure we can set a IntProperty via a variety of types
+        # that can be coerced to float
+        cut = sbol2.Cut('m1')
+        self.assertEqual(0, cut.at)
+        # set with float
+        v = 2.54
+        cut.at = v
+        self.assertEqual(int(v), cut.at)
+        # set with string
+        v = '32'
+        cut.at = v
+        self.assertEqual(int(v), cut.at)
+        # set with string float
+        v = '1.37'
+        with self.assertRaises(ValueError):
+            cut.at = v
+        # set with int
+        v = 15
+        cut.at = v
+        self.assertEqual(int(v), cut.at)
+
 
 class TestTextProperty(unittest.TestCase):
 
@@ -404,6 +427,28 @@ class TestTextProperty(unittest.TestCase):
         prop = sbol2.TextProperty(cd, type_uri, '0', '1', None, initial_value)
         self.assertEqual(initial_value, prop.value)
         self.assertEqual([], prop._validation_rules)
+
+
+class TestFloatProperty(unittest.TestCase):
+
+    def test_values(self):
+        # Measurement class uses FloatProperty
+        # Make sure we can set a FloatProperty via a variety of types
+        # that can be coerced to float
+        m = sbol2.Measurement('m1')
+        self.assertEqual(0.0, m.value)
+        # set with float
+        v = 2.54
+        m.value = v
+        self.assertEqual(v, m.value)
+        # set with string
+        v = '1.37'
+        m.value = v
+        self.assertEqual(float(v), m.value)
+        # set with int
+        v = 15
+        m.value = v
+        self.assertEqual(float(v), m.value)
 
 
 if __name__ == '__main__':

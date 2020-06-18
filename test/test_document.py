@@ -199,8 +199,8 @@ class TestDocument(unittest.TestCase):
     def test_add_namespace(self):
         doc = sbol.Document()
         cd = doc.componentDefinitions.create('cd')
-        cd.foo = sbol.property.LiteralProperty(cd, 'http://examples.org#foo',
-                                               '0', '1', None, 'bar')
+        cd.foo = sbol.property.TextProperty(cd, 'http://examples.org#foo',
+                                            '0', '1', None, 'bar')
         doc.readString(doc.writeString())
         namespaces = [n[1] for n in doc.graph.namespace_manager.namespaces()]
         self.assertFalse('http://examples.org#' in namespaces)

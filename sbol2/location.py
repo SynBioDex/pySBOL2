@@ -1,7 +1,6 @@
 from .identified import Identified
 from .constants import *
 from .property import IntProperty
-from .property import LiteralProperty
 from .property import OwnedObject
 from .property import ReferencedObject
 from .property import URIProperty

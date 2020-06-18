@@ -280,14 +280,13 @@ class TestCopy(unittest.TestCase):
         cd = sbol.ComponentDefinition('cd')
         doc.addComponentDefinition(cd)
         doc.addNamespace(extension_namespace, extension_prefix)
-        cd.extension_property = sbol.property.LiteralProperty(cd, extension_namespace +
-                                                              'extension_property', '0',
-                                                              '1', None, 'foo')
+        cd.extension_property = sbol.property.TextProperty(cd, extension_namespace +
+                                                           'extension_property', '0',
+                                                           '1', None, 'foo')
         cd_copy = cd.copy(target_doc)
         self.assertTrue(target_doc._namespaces[extension_prefix] ==
                         rdflib.URIRef(extension_namespace))
 
-    @unittest.expectedFailure
     def test_copy_and_increment_version(self):
         # When copying an object within the same Document, the version should be
         # automatically incrememented
@@ -297,8 +296,8 @@ class TestCopy(unittest.TestCase):
         doc.addComponentDefinition(comp)
 
         comp_copy = comp.copy()
-        self.assertEqual(comp.version, rdflib.Literal('1.0.0'))
-        self.assertEqual(comp_copy.version, rdflib.Literal('2.0.0'))
+        self.assertEqual(comp.version, '1.0.0')
+        self.assertEqual(comp_copy.version, '2.0.0')
         self.assertEqual(comp_copy.identity, comp.persistentIdentity + '/2.0.0')
         self.assertEqual(comp_copy.wasDerivedFrom[0], comp.identity)
         self.assertEqual(comp_copy.types[0], sbol.constants.BIOPAX_DNA)

@@ -14,7 +14,7 @@ EOF
 fi 
 
 # Run style checker
-MAX_VIOLATIONS=25
+MAX_VIOLATIONS=23
 echo "Checking style..."
 pycodestyle sbol2 test > style.txt
 result=$(cat style.txt | wc -l)
