@@ -23,6 +23,16 @@ class TestVersionProperty(unittest.TestCase):
         cd.version = v
         self.assertEqual(v, cd.version)
 
+    def test_init_store(self):
+        # Ensure that property constructors initialize the parent
+        # object's value store
+        obj = sbol2.SBOLObject()
+        type_uri = 'http://example.com#thing'
+        obj.thing = sbol2.VersionProperty(obj, type_uri, '0', '*')
+        self.assertIn(type_uri, obj.properties)
+        self.assertEqual([], obj.properties[type_uri])
+        self.assertEqual([], obj.thing)
+
 
 if __name__ == '__main__':
     unittest.main()

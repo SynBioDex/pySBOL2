@@ -150,3 +150,13 @@ class TestOwnedObject(unittest.TestCase):
         doc.componentDefinitions.remove(cd.persistentIdentity)
         self.assertNotIn(cd.persistentIdentity, doc.componentDefinitions)
         self.assertNotIn(cd.identity, doc.SBOLObjects)
+
+    def test_init_store(self):
+        # Ensure that property constructors initialize the parent
+        # object's value store
+        obj = sbol2.SBOLObject()
+        type_uri = 'http://example.com#thing'
+        obj.thing = sbol2.OwnedObject(obj, type_uri, int, '0', '*')
+        self.assertIn(type_uri, obj.owned_objects)
+        self.assertEqual([], obj.owned_objects[type_uri])
+        self.assertEqual([], obj.thing.value)
