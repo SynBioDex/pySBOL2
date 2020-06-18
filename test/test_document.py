@@ -398,6 +398,13 @@ class TestDocument(unittest.TestCase):
         self.assertEqual(1, len(doc.attachments))
         self.assertTrue(test_attach.compare(doc.attachments[0]))
 
+    def test_get_collection(self):
+        doc = sbol2.Document()
+        self.assertTrue(hasattr(doc, 'getCollection'))
+        c1 = doc.collections.create('c1')
+        self.assertEqual(c1, doc.getCollection('c1'))
+        self.assertEqual(c1, doc.getCollection(c1.identity))
+
 
 class TopLevelExtension(sbol2.TopLevel):
 
