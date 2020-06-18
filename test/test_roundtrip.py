@@ -19,6 +19,9 @@ class TestRoundTripSBOL2(unittest.TestCase):
     def setUp(self):
         # Create temp directory
         self.temp_out_dir = tempfile.mkdtemp()
+        # Disable validation to avoid unnecessary round trips
+        # to the online validator
+        sbol2.Config.setOption(sbol2.ConfigOptions.VALIDATE, False)
         self.logger = logging.getLogger('sbol2.test')
         if not self.logger.hasHandlers():
             logging.basicConfig()

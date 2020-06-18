@@ -2,6 +2,7 @@ import collections.abc
 import logging
 import os
 import posixpath
+import time
 from typing import Any, Dict, Mapping, Union
 import warnings
 
@@ -395,6 +396,16 @@ class Document(Identified):
         or empty string if validation is disabled.
         """
         self.doc_serialize_rdf2xml(filename)
+        # Optionally validate
+        result = 'Validation disabled. To enable use of the online validation tool, use'
+        result += ' Config.setOption(ConfigOptions.VALIDATE, True)'
+        if Config.getOption(ConfigOptions.VALIDATE):
+            t_start = time.time()
+            result = self.validate()
+            if Config.getOption(ConfigOptions.VERBOSE):
+                t_end = time.time()
+                print(f'Validation request took {t_end - t_start} seconds')
+        return result
 
     def read(self, filename):
         """
