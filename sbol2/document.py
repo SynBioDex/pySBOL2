@@ -381,6 +381,9 @@ class Document(Identified):
     def getImplementation(self, uri):
         return self.implementations.get(uri)
 
+    def getCollection(self, uri: str) -> Collection:
+        return self.collections.get(uri)
+
     # File I/O #
     def write(self, filename):
         """
