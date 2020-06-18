@@ -54,7 +54,8 @@ cas9_gRNA_complex_fc.access = SBOL_ACCESS_PUBLIC
 cas9_gRNA_complex_fc.direction = SBOL_DIRECTION_IN_OUT
 cas9_gRNA_complex_fc.version = version
 
-cas9_gRNA_complex_participation = Cas9Complex_Formation.participations.create('cas9_gRNA_complex')
+cas9_gRNA_complex_participation = \
+    Cas9Complex_Formation.participations.create('cas9_gRNA_complex')
 cas9_gRNA_complex_participation.roles = [SBO_PRODUCT]
 cas9_gRNA_complex_participation.participant = cas9_gRNA_complex_fc.identity
 
@@ -81,72 +82,75 @@ target_participation = EYFP_production.participations.create('target')
 target_participation.roles = [SBO_PRODUCT]
 target_participation.participant = target_fc.identity
 
-target_generic_gene_inhibition = CRISPR_Template.interactions.create('target_gene_inhibition')
+target_generic_gene_inhibition = \
+    CRISPR_Template.interactions.create('target_gene_inhibition')
 target_generic_gene_inhibition.types = [SBO_INHIBITION]
 
-cas9_gRNA_complex_participation1 = target_generic_gene_inhibition.participations.create('cas9_gRNA_complex')
+cas9_gRNA_complex_participation1 = \
+    target_generic_gene_inhibition.participations.create('cas9_gRNA_complex')
 cas9_gRNA_complex_participation1.roles = [SBO_INHIBITOR]
 cas9_gRNA_complex_participation1.participant = cas9_gRNA_complex_fc.identity
-	
-target_gene_participation2 = target_generic_gene_inhibition.participations.create('target_gene')
+
+target_gene_participation2 = \
+    target_generic_gene_inhibition.participations.create('target_gene')
 target_gene_participation2.roles = [SBO_PROMOTER]
 target_gene_participation2.participant = target_gene_fc.identity
 
-CRa_U6_seq_elements = ('GGTTTACCGAGCTCTTATTGGTTTTCAAACTTCATTGACTGTGCC' 
-										'AAGGTCGGGCAGGAAGAGGGCCTATTTCCCATGATTCCTTCATAT' 
-										'TTGCATATACGATACAAGGCTGTTAGAGAGATAATTAGAATTAAT' 
-										'TTGACTGTAAACACAAAGATATTAGTACAAAATACGTGACGTAGA' 
-										'AAGTAATAATTTCTTGGGTAGTTTGCAGTTTTAAAATTATGTTTT' 
-										'AAAATGGACTATCATATGCTTACCGTAACTTGAAATATAGAACCG' 
-										'ATCCTCCCATTGGTATATATTATAGAACCGATCCTCCCATTGGCT' 
-										'TGTGGAAAGGACGAAACACCGTACCTCATCAGGAACATGTGTTTA' 
-										'AGAGCTATGCTGGAAACAGCAGAAATAGCAAGTTTAAATAAGGCT' 
-										'AGTCCGTTATCAACTTGAAAAAGTGGCACCGAGTCGGTGCTTTTT' 
-										'TTGGTGCGTTTTTATGCTTGTAGTATTGTATAATGTTTTT')
+CRa_U6_seq_elements = ('GGTTTACCGAGCTCTTATTGGTTTTCAAACTTCATTGACTGTGCC'
+                       'AAGGTCGGGCAGGAAGAGGGCCTATTTCCCATGATTCCTTCATAT'
+                       'TTGCATATACGATACAAGGCTGTTAGAGAGATAATTAGAATTAAT'
+                       'TTGACTGTAAACACAAAGATATTAGTACAAAATACGTGACGTAGA'
+                       'AAGTAATAATTTCTTGGGTAGTTTGCAGTTTTAAAATTATGTTTT'
+                       'AAAATGGACTATCATATGCTTACCGTAACTTGAAATATAGAACCG'
+                       'ATCCTCCCATTGGTATATATTATAGAACCGATCCTCCCATTGGCT'
+                       'TGTGGAAAGGACGAAACACCGTACCTCATCAGGAACATGTGTTTA'
+                       'AGAGCTATGCTGGAAACAGCAGAAATAGCAAGTTTAAATAAGGCT'
+                       'AGTCCGTTATCAACTTGAAAAAGTGGCACCGAGTCGGTGCTTTTT'
+                       'TTGGTGCGTTTTTATGCTTGTAGTATTGTATAATGTTTTT')
 CRa_U6_seq = Sequence('CRa_U6_seq', CRa_U6_seq_elements, SBOL_ENCODING_IUPAC, version)
 doc.addSequence(CRa_U6_seq)
 
-gRNA_b_elements = ('AAGGTCGGGCAGGAAGAGGGCCTATTTCCCATGATTCCTTCATAT' 
-		'TTGCATATACGATACAAGGCTGTTAGAGAGATAATTAGAATTAAT' 
-		'TTGACTGTAAACACAAAGATATTAGTACAAAATACGTGACGTAGA' 
-		'AAGTAATAATTTCTTGGGTAGTTTGCAGTTTTAAAATTATGTTTT' 
-		'AAAATGGACTATCATATGCTTACCGTAACTTGAAAGTATTTCGAT' 
-		'TTCTTGGCTTTATATATCTTGTGGAAAGGACGAAACACCGTACCT' 
-		'CATCAGGAACATGTGTTTAAGAGCTATGCTGGAAACAGCAGAAAT' 
-		'AGCAAGTTTAAATAAGGCTAGTCCGTTATCAACTTGAAAAAGTGG' 
-		'CACCGAGTCGGTGCTTTTTTT')
+gRNA_b_elements = ('AAGGTCGGGCAGGAAGAGGGCCTATTTCCCATGATTCCTTCATAT'
+                   'TTGCATATACGATACAAGGCTGTTAGAGAGATAATTAGAATTAAT'
+                   'TTGACTGTAAACACAAAGATATTAGTACAAAATACGTGACGTAGA'
+                   'AAGTAATAATTTCTTGGGTAGTTTGCAGTTTTAAAATTATGTTTT'
+                   'AAAATGGACTATCATATGCTTACCGTAACTTGAAAGTATTTCGAT'
+                   'TTCTTGGCTTTATATATCTTGTGGAAAGGACGAAACACCGTACCT'
+                   'CATCAGGAACATGTGTTTAAGAGCTATGCTGGAAACAGCAGAAAT'
+                   'AGCAAGTTTAAATAAGGCTAGTCCGTTATCAACTTGAAAAAGTGG'
+                   'CACCGAGTCGGTGCTTTTTTT')
 gRNA_b_seq = Sequence('gRNA_b_seq', gRNA_b_elements, SBOL_ENCODING_IUPAC, version)
 doc.addSequence(gRNA_b_seq)
 
-mKate_seq_elements = ('TCTAAGGGCGAAGAGCTGATTAAGGAGAACATGCACATGAAGCTG' 
-		'TACATGGAGGGCACCGTGAACAACCACCACTTCAAGTGCACATCC' 
-		'GAGGGCGAAGGCAAGCCCTACGAGGGCACCCAGACCATGAGAATC' 
-		'AAGGTGGTCGAGGGCGGCCCTCTCCCCTTCGCCTTCGACATCCTG' 
-		'GCTACCAGCTTCATGTACGGCAGCAAAACCTTCATCAACCACACC' 
-		'CAGGGCATCCCCGACTTCTTTAAGCAGTCCTTCCCTGAGGTAAGT' 
-		'GGTCCTACCTCATCAGGAACATGTGTTTTAGAGCTAGAAATAGCA' 
-		'AGTTAAAATAAGGCTAGTCCGTTATCAACTTGAAAAAGTGGCACC' 
-		'GAGTCGGTGCTACTAACTCTCGAGTCTTCTTTTTTTTTTTCACAG' 
-		'GGCTTCACATGGGAGAGAGTCACCACATACGAAGACGGGGGCGTG' 
-		'CTGACCGCTACCCAGGACACCAGCCTCCAGGACGGCTGCCTCATC' 
-		'TACAACGTCAAGATCAGAGGGGTGAACTTCCCATCCAACGGCCCT' 
-		'GTGATGCAGAAGAAAACACTCGGCTGGGAGGCCTCCACCGAGATG' 
-		'CTGTACCCCGCTGACGGCGGCCTGGAAGGCAGAAGCGACATGGCC' 
-		'CTGAAGCTCGTGGGCGGGGGCCACCTGATCTGCAACTTGAAGACC' 
-		'ACATACAGATCCAAGAAACCCGCTAAGAACCTCAAGATGCCCGGC' 
-		'GTCTACTATGTGGACAGAAGACTGGAAAGAATCAAGGAGGCCGAC' 
-		'AAAGAGACCTACGTCGAGCAGCACGAGGTGGCTGTGGCCAGATAC' 
-		'TGCG')
+mKate_seq_elements = ('TCTAAGGGCGAAGAGCTGATTAAGGAGAACATGCACATGAAGCTG'
+                      'TACATGGAGGGCACCGTGAACAACCACCACTTCAAGTGCACATCC'
+                      'GAGGGCGAAGGCAAGCCCTACGAGGGCACCCAGACCATGAGAATC'
+                      'AAGGTGGTCGAGGGCGGCCCTCTCCCCTTCGCCTTCGACATCCTG'
+                      'GCTACCAGCTTCATGTACGGCAGCAAAACCTTCATCAACCACACC'
+                      'CAGGGCATCCCCGACTTCTTTAAGCAGTCCTTCCCTGAGGTAAGT'
+                      'GGTCCTACCTCATCAGGAACATGTGTTTTAGAGCTAGAAATAGCA'
+                      'AGTTAAAATAAGGCTAGTCCGTTATCAACTTGAAAAAGTGGCACC'
+                      'GAGTCGGTGCTACTAACTCTCGAGTCTTCTTTTTTTTTTTCACAG'
+                      'GGCTTCACATGGGAGAGAGTCACCACATACGAAGACGGGGGCGTG'
+                      'CTGACCGCTACCCAGGACACCAGCCTCCAGGACGGCTGCCTCATC'
+                      'TACAACGTCAAGATCAGAGGGGTGAACTTCCCATCCAACGGCCCT'
+                      'GTGATGCAGAAGAAAACACTCGGCTGGGAGGCCTCCACCGAGATG'
+                      'CTGTACCCCGCTGACGGCGGCCTGGAAGGCAGAAGCGACATGGCC'
+                      'CTGAAGCTCGTGGGCGGGGGCCACCTGATCTGCAACTTGAAGACC'
+                      'ACATACAGATCCAAGAAACCCGCTAAGAACCTCAAGATGCCCGGC'
+                      'GTCTACTATGTGGACAGAAGACTGGAAAGAATCAAGGAGGCCGAC'
+                      'AAAGAGACCTACGTCGAGCAGCACGAGGTGGCTGTGGCCAGATAC'
+                      'TGCG')
 mKate_seq = Sequence('mKate_seq', mKate_seq_elements, SBOL_ENCODING_IUPAC, version)
 doc.addSequence(mKate_seq)
 
-CRP_b_seq_elements = ('GCTCCGAATTTCTCGACAGATCTCATGTGATTACGCCAAGCTACG' 
-		'GGCGGAGTACTGTCCTCCGAGCGGAGTACTGTCCTCCGAGCGGAG' 
-		'TACTGTCCTCCGAGCGGAGTACTGTCCTCCGAGCGGAGTTCTGTC' 
-		'CTCCGAGCGGAGACTCTAGATACCTCATCAGGAACATGTTGGAAT' 
-		'TCTAGGCGTGTACGGTGGGAGGCCTATATAAGCAGAGCTCGTTTA' 
-		'GTGAACCGTCAGATCGCCTCGAGTACCTCATCAGGAACATGTTGG' 
-		'ATCCAATTCGACC')
+CRP_b_seq_elements = ('GCTCCGAATTTCTCGACAGATCTCATGTGATTACGCCAAGCTACG'
+                      'GGCGGAGTACTGTCCTCCGAGCGGAGTACTGTCCTCCGAGCGGAG'
+                      'TACTGTCCTCCGAGCGGAGTACTGTCCTCCGAGCGGAGTTCTGTC'
+                      'CTCCGAGCGGAGACTCTAGATACCTCATCAGGAACATGTTGGAAT'
+                      'TCTAGGCGTGTACGGTGGGAGGCCTATATAAGCAGAGCTCGTTTA'
+                      'GTGAACCGTCAGATCGCCTCGAGTACCTCATCAGGAACATGTTGG'
+                      'ATCCAATTCGACC')
 CRP_b_seq = Sequence('CRP_b_seq', CRP_b_seq_elements, SBOL_ENCODING_IUPAC, version)
 doc.addSequence(CRP_b_seq)
 
@@ -172,7 +176,8 @@ cas9m_BFP_cds_c.definition = cas9m_BFP_cds.persistentIdentity
 cas9m_BFP_cds_c.access = SBOL_ACCESS_PUBLIC
 cas9m_BFP_cds_c.version = version
 
-cas9m_BFP_gene_constraint = cas9m_BFP_gene.sequenceConstraints.create('cas9m_BFP_gene_constraint')
+cas9m_BFP_gene_constraint = \
+    cas9m_BFP_gene.sequenceConstraints.create('cas9m_BFP_gene_constraint')
 cas9m_BFP_gene_constraint.subject = pConst_c2.identity
 cas9m_BFP_gene_constraint.object = cas9m_BFP_cds_c.identity
 cas9m_BFP_gene_constraint.restriction = SBOL_RESTRICTION_PRECEDES
@@ -275,7 +280,8 @@ Gal4VP16_cds_c.definition = Gal4VP16_cds.persistentIdentity
 Gal4VP16_cds_c.access = SBOL_ACCESS_PUBLIC
 Gal4VP16_cds_c.version = version
 
-GAL4VP16_gene_constraint = Gal4VP16_gene.sequenceConstraints.create('GAL4VP16_gene_constraint')
+GAL4VP16_gene_constraint = \
+    Gal4VP16_gene.sequenceConstraints.create('GAL4VP16_gene_constraint')
 GAL4VP16_gene_constraint.subject = pConst_c3.identity
 GAL4VP16_gene_constraint.object = Gal4VP16_cds_c.identity
 GAL4VP16_gene_constraint.restriction = SBOL_RESTRICTION_PRECEDES
@@ -292,7 +298,7 @@ EYFP_cds = ComponentDefinition('EYFP_cds', BIOPAX_DNA, version)
 EYFP_cds.roles = [SO_CDS]
 doc.addComponentDefinition(EYFP_cds)
 
-EYFP_gene =  ComponentDefinition('EYFP_gene', BIOPAX_DNA, version)
+EYFP_gene = ComponentDefinition('EYFP_gene', BIOPAX_DNA, version)
 EYFP_gene.roles = [SO_PROMOTER]
 doc.addComponentDefinition(EYFP_gene)
 
@@ -311,10 +317,10 @@ EYFP_gene_constraint.subject = CRP_b_c.identity
 EYFP_gene_constraint.object = EYFP_cds_c.identity
 EYFP_gene_constraint.restriction = SBOL_RESTRICTION_PRECEDES
 
-EYFP =  ComponentDefinition('EYFP', BIOPAX_PROTEIN, version)
+EYFP = ComponentDefinition('EYFP', BIOPAX_PROTEIN, version)
 doc.addComponentDefinition(EYFP)
 
-CRPb_circuit =  ModuleDefinition('CRPb_characterization_Circuit', version)
+CRPb_circuit = ModuleDefinition('CRPb_characterization_Circuit', version)
 doc.addModuleDefinition(CRPb_circuit)
 
 cas9m_BFP_fc = CRPb_circuit.functionalComponents.create('cas9m_BFP')
@@ -334,7 +340,7 @@ gRNA_b_fc.definition = gRNA_b.identity
 gRNA_b_fc.access = SBOL_ACCESS_PRIVATE
 gRNA_b_fc.direction = SBOL_DIRECTION_NONE
 gRNA_b_fc.version = version
-	
+
 gRNA_b_gene_fc = CRPb_circuit.functionalComponents.create('gRNA_b_gene')
 gRNA_b_gene_fc.definition = gRNA_b_gene.identity
 gRNA_b_gene_fc.access = SBOL_ACCESS_PRIVATE
@@ -346,7 +352,7 @@ mKate_fc.definition = mKate.identity
 mKate_fc.access = SBOL_ACCESS_PRIVATE
 mKate_fc.direction = SBOL_DIRECTION_NONE
 mKate_fc.version = version
-	
+
 mKate_gene_fc = CRPb_circuit.functionalComponents.create('mKate_gene')
 mKate_gene_fc.definition = mKate_gene.identity
 mKate_gene_fc.access = SBOL_ACCESS_PRIVATE
@@ -383,83 +389,84 @@ cas9m_BFP_gRNA_b_fc.access = SBOL_ACCESS_PRIVATE
 cas9m_BFP_gRNA_b_fc.direction = SBOL_DIRECTION_NONE
 cas9m_BFP_gRNA_b_fc.version = version
 
-mKate_production = CRPb_circuit.interactions.create('mKate_production') 
+mKate_production = CRPb_circuit.interactions.create('mKate_production')
 mKate_production.types = [SBO_GENETIC_PRODUCTION]
 
 mKate_participation = mKate_production.participations.create('mKate')
 mKate_participation.roles = [SBO_PRODUCT]
 mKate_participation.participant = mKate_fc.identity
 
-mKate_gene_participation = mKate_production.participations.create('mKate_gene') 
+mKate_gene_participation = mKate_production.participations.create('mKate_gene')
 mKate_gene_participation.roles = [SBO_PROMOTER]
 mKate_gene_participation.participant = mKate_gene_fc.identity
 
-GAL4VP16_production = CRPb_circuit.interactions.create('Gal4VP16_production') 
+GAL4VP16_production = CRPb_circuit.interactions.create('Gal4VP16_production')
 GAL4VP16_production.types = [SBO_GENETIC_PRODUCTION]
 
-Gal4VP16_gene_participation = GAL4VP16_production.participations.create('Gal4VP16_gene') 
+Gal4VP16_gene_participation = GAL4VP16_production.participations.create('Gal4VP16_gene')
 Gal4VP16_gene_participation.roles = [SBO_PROMOTER]
 Gal4VP16_gene_participation.participant = Gal4VP16_gene_fc.identity
 
-Gal4VP16_participation1 = GAL4VP16_production.participations.create('Gal4VP16') 
+Gal4VP16_participation1 = GAL4VP16_production.participations.create('Gal4VP16')
 Gal4VP16_participation1.roles = [SBO_PRODUCT]
 Gal4VP16_participation1.participant = Gal4VP16_fc.identity
 
-cas9m_BFP_production = CRPb_circuit.interactions.create('cas9m_BFP_production') 
+cas9m_BFP_production = CRPb_circuit.interactions.create('cas9m_BFP_production')
 cas9m_BFP_production.types = [SBO_GENETIC_PRODUCTION]
 
-cas9m_BFP_gene_participation = cas9m_BFP_production.participations.create('cas9m_BFP_gene') 
+cas9m_BFP_gene_participation = \
+    cas9m_BFP_production.participations.create('cas9m_BFP_gene')
 cas9m_BFP_gene_participation.roles = [SBO_PROMOTER]
 cas9m_BFP_gene_participation.participant = cas9m_BFP_gene_fc.identity
 
-cas9m_BFP_participation = cas9m_BFP_production.participations.create('cas9m_BFP') 
+cas9m_BFP_participation = cas9m_BFP_production.participations.create('cas9m_BFP')
 cas9m_BFP_participation.roles = [SBO_PRODUCT]
 cas9m_BFP_participation.participant = cas9m_BFP_fc.identity
 
-gRNA_b_production = CRPb_circuit.interactions.create('gRNA_b_production') 
+gRNA_b_production = CRPb_circuit.interactions.create('gRNA_b_production')
 gRNA_b_production.types = [SBO_GENETIC_PRODUCTION]
 
-gRNA_b_gene_participation = gRNA_b_production.participations.create('gRNA_b_gene') 
+gRNA_b_gene_participation = gRNA_b_production.participations.create('gRNA_b_gene')
 gRNA_b_gene_participation.roles = [SBO_PROMOTER]
 gRNA_b_gene_participation.participant = gRNA_b_gene_fc.identity
 
-gRNA_b_participation = gRNA_b_production.participations.create('gRNA_b') 
+gRNA_b_participation = gRNA_b_production.participations.create('gRNA_b')
 gRNA_b_participation.roles = [SBO_PRODUCT]
 gRNA_b_participation.participant = gRNA_b_fc.identity
 
-EYFP_Activation = CRPb_circuit.interactions.create('EYFP_Activation') 
+EYFP_Activation = CRPb_circuit.interactions.create('EYFP_Activation')
 EYFP_Activation.types = [SBO_STIMULATION]
-#%%
-Gal4VP16_participation = EYFP_Activation.participations.create('Gal4VP16') 
+# %%
+Gal4VP16_participation = EYFP_Activation.participations.create('Gal4VP16')
 Gal4VP16_participation.roles = [SBO_STIMULATOR]
 Gal4VP16_participation.participant = Gal4VP16_fc.identity
 
-EYFP_gene_participation = EYFP_Activation.participations.create('EYFP_gene') 
+EYFP_gene_participation = EYFP_Activation.participations.create('EYFP_gene')
 EYFP_gene_participation.roles = [SBO_PROMOTER]
 EYFP_gene_participation.participant = EYFP_gene_fc.identity
 
-mKate_deg = CRPb_circuit.interactions.create('mKate_deg') 
+mKate_deg = CRPb_circuit.interactions.create('mKate_deg')
 mKate_deg.types = [SBO_DEGRADATION]
 
-mKate_participation1 = mKate_deg.participations.create('mKate') 
+mKate_participation1 = mKate_deg.participations.create('mKate')
 mKate_participation1.roles = [SBO_REACTANT]
 mKate_participation1.participant = mKate_fc.identity
 
-GAL4VP16_deg = CRPb_circuit.interactions.create('Gal4VP16_deg') 
+GAL4VP16_deg = CRPb_circuit.interactions.create('Gal4VP16_deg')
 GAL4VP16_deg.types = [SBO_DEGRADATION]
 
 Gal4VP16_participation2 = GAL4VP16_deg.participations.create('Gal4VP16')
 Gal4VP16_participation2.roles = [SBO_REACTANT]
 Gal4VP16_participation2.participant = Gal4VP16_fc.identity
 
-cas9m_BFP_deg = CRPb_circuit.interactions.create('cas9m_BFP_deg') 
+cas9m_BFP_deg = CRPb_circuit.interactions.create('cas9m_BFP_deg')
 cas9m_BFP_deg.types = [SBO_DEGRADATION]
 
 cas9m_BFP_participation1 = cas9m_BFP_deg.participations.create('cas9m_BFP')
 cas9m_BFP_participation1.roles = [SBO_REACTANT]
 cas9m_BFP_participation1.participant = cas9m_BFP_fc.identity
 
-gRNA_b_deg = CRPb_circuit.interactions.create('gRNA_b_deg') 
+gRNA_b_deg = CRPb_circuit.interactions.create('gRNA_b_deg')
 gRNA_b_deg.types = [SBO_DEGRADATION]
 
 gRNA_b_participation1 = gRNA_b_deg.participations.create('gRNA_b')
@@ -473,10 +480,11 @@ EYFP_participation = EYFP_deg.participations.create('EYFP')
 EYFP_participation.roles = [SBO_REACTANT]
 EYFP_participation.participant = EYFP_fc.identity
 
-cas9m_BFP_gRNA_b_deg = CRPb_circuit.interactions.create('cas9m_BFP_gRNA_b_deg') 
+cas9m_BFP_gRNA_b_deg = CRPb_circuit.interactions.create('cas9m_BFP_gRNA_b_deg')
 cas9m_BFP_gRNA_b_deg.types = [SBO_DEGRADATION]
 
-cas9m_BFP_gRNA_b_participation = cas9m_BFP_gRNA_b_deg.participations.create('cas9m_BFP_gRNA_b')
+cas9m_BFP_gRNA_b_participation = \
+    cas9m_BFP_gRNA_b_deg.participations.create('cas9m_BFP_gRNA_b')
 cas9m_BFP_gRNA_b_participation.roles = [SBO_REACTANT]
 cas9m_BFP_gRNA_b_participation.participant = cas9m_BFP_gRNA_b_fc.identity
 
