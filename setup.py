@@ -36,4 +36,7 @@ setup(name='sbol2',
             'requests',
             'urllib3',
             'packaging>=20.0'
+      ],
+      tests_require=[
+            'pycodestyle>=2.6.0'
       ])
