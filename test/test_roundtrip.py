@@ -85,7 +85,7 @@ class TestRoundTripSBOL2(unittest.TestCase):
     def test_sbol2_files(self):
         test_dir = os.path.join(SBOL_TEST_SUITE, 'SBOL2')
         # test_source_location.xml has a serialization error in SBOL2Serialize
-        self.run_round_trip_dir(test_dir, ['test_source_location.xml'])
+        self.run_round_trip_dir(test_dir)
 
     def test_sbol2_bp_files(self):
         test_dir = os.path.join(SBOL_TEST_SUITE, 'SBOL2_bp')
@@ -100,13 +100,6 @@ class TestRoundTripSBOL2(unittest.TestCase):
         # SBOL1and2Test.xml has a namespace error when serializing
         # Handle it for now as an expected failure below
         self.run_round_trip_dir(test_dir, ['SBOL1and2Test.xml'])
-
-    @unittest.expectedFailure
-    def test_source_location(self):
-        # Key error in SBOL2Serialize
-        test_path = os.path.join(SBOL_TEST_SUITE, 'SBOL2',
-                                 'test_source_location.xml')
-        self.run_round_trip_file(test_path)
 
     @unittest.expectedFailure
     def test_sbol_1_and_2(self):

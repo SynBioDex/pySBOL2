@@ -2,7 +2,7 @@ from rdflib import URIRef
 
 from .constants import *
 from .identified import Identified
-from .location import Location, OwnedLocation
+from .location import OwnedLocation
 from .mapsto import MapsTo
 from .measurement import Measurement
 from .property import URIProperty, OwnedObject, ReferencedObject
@@ -29,7 +29,7 @@ class Component(ComponentInstance):
                                  [Component._role_set_role_integration])
         self.roleIntegration = URIProperty(self, SBOL_ROLE_INTEGRATION,
                                            '0', '1', [])
-        self.sourceLocations = OwnedLocation(self, SBOL_LOCATIONS, '0', '*')
+        self.sourceLocations = OwnedLocation(self, SBOL_SOURCE_LOCATIONS, '0', '*')
 
     def addRole(self, new_role):
         val = self.roles
