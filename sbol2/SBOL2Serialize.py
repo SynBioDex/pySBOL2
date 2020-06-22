@@ -54,7 +54,7 @@ def is_ownership_relation(g, triple):
 
     if predicate in ownership_predicates:
         return True
-    
+
     # SBOL2 reuses the "component" predicate as both an ownership predicate (in
     # the case of ComponentDefinition) and a referencing one (in the case of
     # SequenceAnnotation).
@@ -86,13 +86,17 @@ def serialize_sboll2(g):
         subject = triple[0].toPython()
         the_type = triple[2].toPython()
         if subject in subject_to_element:
-            etree.SubElement(subject_to_element[subject], prefixify(RDF.type, prefixes, True), attrib={
-                QName(rdfNS, 'resource'): the_type
-            })
+            etree.SubElement(subject_to_element[subject],
+                             prefixify(RDF.type, prefixes, True),
+                             attrib={
+                                 QName(rdfNS, 'resource'): the_type
+                             })
         else:
-            subject_to_element[subject] = etree.Element(prefixify(the_type, prefixes, True),
+            subject_to_element[subject] = etree.Element(prefixify(the_type, prefixes,
+                                                                  True),
                                                         attrib={
-                                                            QName(rdfNS, 'about'): subject
+                                                            QName(rdfNS,
+                                                                  'about'): subject
                                                         }
                                                         )
 
@@ -105,7 +109,8 @@ def serialize_sboll2(g):
             continue
         if is_ownership_relation(g, triple):
             owned_element = subject_to_element[obj.toPython()]
-            ownership_element = etree.SubElement(element, prefixify(predicate, prefixes, True))
+            ownership_element = etree.SubElement(element,
+                                                 prefixify(predicate, prefixes, True))
             ownership_element.append(owned_element)
             owned_elements.add(obj.toPython())
             continue
