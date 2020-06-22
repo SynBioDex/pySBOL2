@@ -33,15 +33,12 @@ from rdflib import URIRef, Literal
 rdfNS = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 sbolNS = "http://sbols.org/v2#"
 
-SBOL_IDENTITY = sbolNS + 'identity'
-
 
 def is_ownership_relation(g, triple):
-    # subject = triple[0].toPython()
+    subject = triple[0].toPython()
     predicate = triple[1].toPython()
-    # obj = triple[2]
+    obj = triple[2]
 
-    # TODO: Extract this constant so we don't build it on every call
     ownership_predicates = {
         sbolNS + 'module',
         sbolNS + 'mapsTo',
@@ -57,7 +54,7 @@ def is_ownership_relation(g, triple):
 
     if predicate in ownership_predicates:
         return True
-
+    
     # SBOL2 reuses the "component" predicate as both an ownership predicate (in
     # the case of ComponentDefinition) and a referencing one (in the case of
     # SequenceAnnotation).
@@ -71,31 +68,33 @@ def is_ownership_relation(g, triple):
     return False
 
 
+def ns_prefix_dict(g):
+    """Return a dictionary of namespace, uri prefix pairs."""
+    return {ns: prefix.toPython() for (ns, prefix) in g.namespaces()}
+
+
 def serialize_sboll2(g):
-    used_prefixes = dict()
-    prefixes = init_prefix_map(g)
+    prefixes = ns_prefix_dict(g)
+    prefixes['rdf'] = rdfNS
+    prefixes['sbol'] = sbolNS
 
     subject_to_element = dict()
 
     owned_elements = set()
 
     for triple in g.triples((None, RDF.type, None)):
-        # print(triple)
         subject = triple[0].toPython()
         the_type = triple[2].toPython()
         if subject in subject_to_element:
-            etree.SubElement(subject_to_element[subject],
-                             prefixify(RDF.type, prefixes,
-                                       True, used_prefixes),
-                             attrib={
-                                 QName(rdfNS, 'resource'): the_type
-                             })
+            etree.SubElement(subject_to_element[subject], prefixify(RDF.type, prefixes, True), attrib={
+                QName(rdfNS, 'resource'): the_type
+            })
         else:
-            subject_to_element[subject] = etree.Element(
-                prefixify(the_type, prefixes, True, used_prefixes),
-                attrib={
-                    QName(rdfNS, 'about'): subject
-                })
+            subject_to_element[subject] = etree.Element(prefixify(the_type, prefixes, True),
+                                                        attrib={
+                                                            QName(rdfNS, 'about'): subject
+                                                        }
+                                                        )
 
     for triple in g.triples((None, None, None)):
         subject = triple[0].toPython()
@@ -104,34 +103,21 @@ def serialize_sboll2(g):
         element = subject_to_element[subject]
         if predicate == RDF.type.toPython():
             continue
-        if predicate == SBOL_IDENTITY:
-            # Do not output identity predicates. In SBOL they are redundant.
-            continue
         if is_ownership_relation(g, triple):
             owned_element = subject_to_element[obj.toPython()]
-            ownership_element = etree.SubElement(
-                element, prefixify(predicate, prefixes, True, used_prefixes))
+            ownership_element = etree.SubElement(element, prefixify(predicate, prefixes, True))
             ownership_element.append(owned_element)
             owned_elements.add(obj.toPython())
             continue
         if isinstance(obj, URIRef):
-            etree.SubElement(
-                element, prefixify(predicate, prefixes, True, used_prefixes),
-                attrib={QName(rdfNS, 'resource'): obj.toPython()})
+            etree.SubElement(element, prefixify(predicate, prefixes, True), attrib={
+                QName(rdfNS, 'resource'): obj.toPython()
+            })
         elif isinstance(obj, Literal):
-            elem = etree.SubElement(
-                element, prefixify(predicate, prefixes, True, used_prefixes))
+            elem = etree.SubElement(element, prefixify(predicate, prefixes, True))
             elem.text = obj
         else:
             raise Exception()
-
-    # Remove some namespaces that get added by rdflib but aren't needed
-    if 'rdfs' not in used_prefixes:
-        del prefixes['rdfs']
-    if 'xml' not in used_prefixes:
-        del prefixes['xml']
-    if 'xsd' not in used_prefixes:
-        del prefixes['xsd']
 
     doc = etree.Element(QName(rdfNS, 'RDF'), nsmap=prefixes)
 
@@ -140,26 +126,13 @@ def serialize_sboll2(g):
             element = subject_to_element[subject]
             doc.append(element)
 
-    # Now get ALL namespaces and their aliases, and
-    # iterate over the entire document, replacing them.
-
     return tostring(doc, pretty_print=True)
 
 
-def init_prefix_map(g):
-    prefixes = dict()
-    prefixes['rdf'] = rdfNS
-    prefixes['sbol'] = sbolNS
-    for alias, ns in g.namespaces():
-        prefixes[alias] = str(ns)
-    return prefixes
-
-
-def prefixify(iri, prefixes, create_new, used_prefixes):
+def prefixify(iri, prefixes, create_new):
     for prefix in prefixes:
-        prefix_iri = prefixes[prefix]  # key = alias, value = full namespace
+        prefix_iri = prefixes[prefix]
         if iri.startswith(prefix_iri):
-            used_prefixes[prefix] = prefix_iri  # add to used prefixes
             return QName(prefix_iri, iri[len(prefix_iri):])
     if not create_new:
         return iri

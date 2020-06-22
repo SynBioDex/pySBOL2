@@ -402,6 +402,9 @@ class SBOLObject:
             if typeURI in self._hidden_properties:
                 # Skip hidden properties
                 continue
+            if typeURI == SBOL_IDENTITY:
+                # Do not write the identity property to SBOL files
+                continue
             for prop in proplist:
                 graph.add((rdflib.URIRef(self.identity),
                            rdflib.URIRef(typeURI),
