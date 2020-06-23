@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='sbol2',
-      version='1.0b6',
+      version='1.0b7',
       description='Pure Python implementation of SBOL 2 standard',
       url='https://github.com/SynBioDex/pySBOL2',
       author='Bryan Bartley',
@@ -30,9 +30,13 @@ setup(name='sbol2',
       packages=['sbol2'],
       install_requires=[
             'rdflib>=5.0',
+            'python-dateutil',
             'deprecated',
             'lxml',
             'requests',
             'urllib3',
             'packaging>=20.0'
+      ],
+      tests_require=[
+            'pycodestyle>=2.6.0'
       ])

@@ -1,9 +1,12 @@
+import datetime
 from abc import ABC, abstractmethod
 import collections
 import logging
 import math
 import posixpath
+from typing import Any, Union
 
+import dateutil.parser
 import rdflib
 from rdflib import Literal, URIRef
 import packaging.version as pv
@@ -451,9 +454,46 @@ class IntProperty(LiteralProperty):
         # If lower bound > 0, attribute must have a value, so None is unacceptable
         if value is None and self.upper_bound == 1 and self.lower_bound == 0:
             return None
-        if not isinstance(value, int):
-            msg = '{} values must have type int'.format(self.getTypeURI())
-            raise TypeError(msg)
+        # Convert to int. If conversion fails a ValueError is raised
+        value = int(value)
+        return Literal(value)
+
+
+class FloatProperty(LiteralProperty):
+
+    def convert_to_user(self, value: rdflib.Literal) -> float:
+        return float(value)
+
+    def convert_from_user(self, value: Any) -> Union[rdflib.Literal, None]:
+        """
+        :raises: ValueError if value cannot be converted to float
+        """
+        # None is ok iff upper bound is 1 and lower bound is 0.
+        # If upper bound > 1, attribute is a list and None is not a valid list
+        # If lower bound > 0, attribute must have a value, so None is unacceptable
+        if value is None and self.upper_bound == 1 and self.lower_bound == 0:
+            return None
+        # Convert to float. If conversion fails a ValueError is raised
+        value = float(value)
+        return Literal(value)
+
+
+class DateTimeProperty(LiteralProperty):
+
+    def convert_to_user(self, value):
+        return dateutil.parser.parse(value)
+
+    def convert_from_user(self, value):
+        # None is ok iff upper bound is 1 and lower bound is 0.
+        # If upper bound > 1, attribute is a list and None is not a valid list
+        # If lower bound > 0, attribute must have a value, so None is unacceptable
+        if value is None and self.upper_bound == 1 and self.lower_bound == 0:
+            return None
+        if isinstance(value, str):
+            value = dateutil.parser.parse(value)
+        if not isinstance(value, datetime.datetime):
+            msg = '{} values must have type datetime'.format(self.getTypeURI())
+            raise ValueError(msg)
         return Literal(value)
 
 
@@ -577,7 +617,12 @@ class OwnedObject(Property):
 
     def find(self, query):
         if isinstance(query, str):
-            return self.get_uri(rdflib.URIRef(query))
+            try:
+                return self.get_uri(rdflib.URIRef(query))
+            except SBOLError as e:
+                if e.error_code() == SBOLErrorCode.NOT_FOUND_ERROR:
+                    return False
+                raise
         errmsg = 'Invalid find query {} of type {}'
         errmsg = errmsg.format(query, type(query).__name__)
         raise TypeError(errmsg)
@@ -790,9 +835,9 @@ class OwnedObject(Property):
     def remove(self, identifier):
         """id can be either an integer index or a string URI"""
         if type(identifier) is int:
-            self.removeOwnedObject_int(identifier)
+            return self.removeOwnedObject_int(identifier)
         elif isinstance(identifier, str):
-            self.removeOwnedObject_str(identifier)
+            return self.removeOwnedObject_str(identifier)
         else:
             msg = 'id parameter must be an integer index or a string uri.'
             msg += ' Got {} of type {}'.format(identifier,
@@ -810,7 +855,9 @@ class OwnedObject(Property):
                 if self._sbol_owner.getTypeURI() == SBOL_DOCUMENT:
                     del obj.doc.SBOLObjects[rdflib.URIRef(obj.identity)]
                 del object_store[index]
+                obj.doc = None
                 self.validate(None)
+                return obj
         else:
             raise Exception('This property is not defined in '
                             'the parent object')
@@ -824,6 +871,7 @@ class OwnedObject(Property):
         # Erase TopLevel objects from Document
         if self._sbol_owner.rdf_type == SBOL_DOCUMENT:
             del obj.doc.SBOLObjects[obj.identity]
+        obj.doc = None
         self.validate(None)
         return obj
 

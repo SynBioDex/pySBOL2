@@ -1,4 +1,5 @@
 import posixpath
+from typing import Union
 
 from rdflib import URIRef
 
@@ -8,13 +9,13 @@ from .config import ConfigOptions
 from .config import getHomespace
 from .config import hasHomespace
 from .constants import *
-from .property import LiteralProperty
 from .property import ReferencedObject, TextProperty
 from .property import URIProperty
 from .sbolerror import SBOLError
 from .sbolerror import SBOLErrorCode
 from .config import parseClassName
 from . import validation
+from .versionproperty import VersionProperty
 
 
 class Identified(SBOLObject):
@@ -47,6 +48,7 @@ class Identified(SBOLObject):
     # (for example, 1 < 1.3.1 < 2.0-beta).
     # For a full explanation, see the linked resources.
     # _version = None
+    version: Union[str, VersionProperty]
 
     # The wasDerivedFrom property is OPTIONAL and has a data type of URI.
     # An SBOL object with this property refers to another SBOL object
@@ -89,7 +91,7 @@ class Identified(SBOLObject):
                                               '0', '1', None, URIRef(uri))
         self.displayId = TextProperty(self, SBOL_DISPLAY_ID, '0', '1',
                                       [validation.sbol_rule_10204])
-        self.version = LiteralProperty(self, SBOL_VERSION, '0', '1', None, version)
+        self.version = VersionProperty(self, SBOL_VERSION, '0', '1', None, version)
         self.name = TextProperty(self, SBOL_NAME, '0', '1', None)
         self.description = TextProperty(self, SBOL_DESCRIPTION, '0', '1', None)
         if Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS.value) is True:
@@ -99,7 +101,7 @@ class Identified(SBOLObject):
                 if self.version:
                     self.identity = URIRef(posixpath.join(getHomespace(),
                                                           self.getClassName(type_uri),
-                                                          uri, self.version))
+                                                          uri, str(self.version)))
                 else:
                     self.identity = URIRef(posixpath.join(getHomespace(),
                                                           self.getClassName(type_uri),
@@ -107,7 +109,7 @@ class Identified(SBOLObject):
             else:
                 if self.version:
                     self.identity = URIRef(posixpath.join(getHomespace(),
-                                                          uri, self.version))
+                                                          uri, str(self.version)))
                 else:
                     self.identity = URIRef(posixpath.join(getHomespace(), uri))
         elif hasHomespace():
@@ -230,12 +232,6 @@ class Identified(SBOLObject):
                             new_values.append(new_uri)
                     new_obj.properties[reference_property._rdf_type] = new_values
 
-        # Assign the new object to the target Document
-        if target_doc:
-            target_doc.add(new_obj)
-        elif self.doc:
-            self.doc.add(new_obj)
-
         # Set the new object's version according to the user specified parameter. If
         # user didnt't provide a version, then set it automatically based on self's
         # version (if it has one).
@@ -248,10 +244,25 @@ class Identified(SBOLObject):
             # be automatically incremented to avoid a URI collision with the original
             # object.  However, if user is copying into a different Document, then copy
             # the original object's version without incrementing
-            if new_obj.doc and new_obj.doc is self.doc and not target_namespace:
-                new_obj.version.incrementMajor()
+            if self.doc and not target_doc and not target_namespace:
+                new_obj.version = VersionProperty.increment_major(self.version)
             else:
                 new_obj.version = self.version
+
+        # Now set up the identity based on the persistentIdentity and maybe version
+        # In the case of a Document there is no persistentIdentity so skip this block
+        if new_obj.persistentIdentity:
+            if Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS) and new_obj.version:
+                new_obj.identity = posixpath.join(new_obj.persistentIdentity,
+                                                  new_obj.version)
+            else:
+                new_obj.identity = new_obj.persistentIdentity
+
+        # Assign the new object to the target Document
+        if target_doc:
+            target_doc.add(new_obj)
+        elif self.doc:
+            self.doc.add(new_obj)
 
         # When an object is simply being cloned, the value of wasDerivedFrom should be
         # copied exactly as is from self. However, when copy is being used to generate

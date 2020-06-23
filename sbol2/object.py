@@ -220,8 +220,8 @@ class SBOLObject:
         try:
             value_store = self.properties[uri]
             for val in value_store:
-                if val == value:
-                    matches.append(val)
+                if string_equal(val, value):
+                    matches.append(self)
         except KeyError:
             # It is ok that uri is not in properties
             pass
@@ -401,6 +401,9 @@ class SBOLObject:
         for typeURI, proplist in self.properties.items():
             if typeURI in self._hidden_properties:
                 # Skip hidden properties
+                continue
+            if typeURI == SBOL_IDENTITY:
+                # Do not write the identity property to SBOL files
                 continue
             for prop in proplist:
                 graph.add((rdflib.URIRef(self.identity),

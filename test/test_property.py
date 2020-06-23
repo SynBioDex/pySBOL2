@@ -1,3 +1,4 @@
+import datetime
 import unittest
 import os
 
@@ -21,7 +22,7 @@ class TestProperty(unittest.TestCase):
 
     def test_noListProperty(self):
         plasmid = sbol.ComponentDefinition('pBB1', sbol.BIOPAX_DNA, '1.0.0')
-        with self.assertRaises(TypeError):
+        with self.assertRaises(ValueError):
             plasmid.version = ['1', '2']
 
     def test_addPropertyToList(self):
@@ -108,7 +109,7 @@ class TestProperty(unittest.TestCase):
     def test_literal_property_properties(self):
         md = sbol.ModuleDefinition()
         self.assertNotIn(rdflib.URIRef(sbol.UNDEFINED), md.properties)
-        sbol.property.LiteralProperty(md, sbol.UNDEFINED, '0', '*', [], 'foo')
+        sbol.property.TextProperty(md, sbol.UNDEFINED, '0', '*', [], 'foo')
         # Creating the property should also create the entry in the
         # parent properties dict
         self.assertIn(rdflib.URIRef(sbol.UNDEFINED), md.properties)
@@ -188,17 +189,9 @@ class TestProperty(unittest.TestCase):
         # find something that is in the collection
         md2 = doc.moduleDefinitions.find('foo')
         self.assertEqual(md, md2)
-        # find something that is not in the collection
-        with self.assertRaises(sbol.SBOLError):
-            doc.moduleDefinitions.find('bar')
-        # confirm we get the expected error code
-        try:
-            doc.moduleDefinitions.find('bar')
-        except sbol.SBOLError as err:
-            self.assertEqual(err.error_code(),
-                             sbol.SBOLErrorCode.NOT_FOUND_ERROR)
-        else:
-            self.fail('Expected SBOLError')
+        # Try to find something that is not in the collection,
+        # which should return False as pysbol did
+        self.assertFalse(doc.moduleDefinitions.find('bar'))
 
     def test_referenced_object(self):
         # Test referenced object property is initialized to correct types
@@ -254,7 +247,7 @@ class TestProperty(unittest.TestCase):
         r.start = 42
         self.assertEqual(type(r.start), int)
         self.assertEqual(r.start, 42)
-        with self.assertRaises(TypeError):
+        with self.assertRaises(ValueError):
             r.start = 'forty-two'
 
     def test_uri_property_list(self):
@@ -295,8 +288,11 @@ class TestProperty(unittest.TestCase):
         m1 = md.modules.create('m1')
         m2 = md.modules.create('m2')
         self.assertEqual(list(md.modules), [m1, m2])
-        md.modules.remove(m2.identity)
+        obj = md.modules.remove(m2.identity)
         self.assertEqual(list(md.modules), [m1])
+        self.assertEqual(obj.identity, m2.identity)
+        self.assertIsNone(obj.doc)
+        self.assertIsNone(m2.doc)
 
     def test_validation_rules(self):
         md = sbol2.ModuleDefinition()
@@ -360,6 +356,39 @@ class TestIntProperty(unittest.TestCase):
         self.assertEqual(initial_value, prop.value)
         self.assertEqual([], prop._validation_rules)
 
+    def test_values(self):
+        # Cut class uses IntProperty
+        # Make sure we can set a IntProperty via a variety of types
+        # that can be coerced to float
+        cut = sbol2.Cut('m1')
+        self.assertEqual(0, cut.at)
+        # set with float
+        v = 2.54
+        cut.at = v
+        self.assertEqual(int(v), cut.at)
+        # set with string
+        v = '32'
+        cut.at = v
+        self.assertEqual(int(v), cut.at)
+        # set with string float
+        v = '1.37'
+        with self.assertRaises(ValueError):
+            cut.at = v
+        # set with int
+        v = 15
+        cut.at = v
+        self.assertEqual(int(v), cut.at)
+
+    def test_init_store(self):
+        # Ensure that property constructors initialize the parent
+        # object's value store
+        obj = sbol2.SBOLObject()
+        type_uri = 'http://example.com#thing'
+        obj.thing = sbol2.IntProperty(obj, type_uri, '0', '*')
+        self.assertIn(type_uri, obj.properties)
+        self.assertEqual([], obj.properties[type_uri])
+        self.assertEqual([], obj.thing)
+
 
 class TestTextProperty(unittest.TestCase):
 
@@ -409,6 +438,109 @@ class TestTextProperty(unittest.TestCase):
         prop = sbol2.TextProperty(cd, type_uri, '0', '1', None, initial_value)
         self.assertEqual(initial_value, prop.value)
         self.assertEqual([], prop._validation_rules)
+
+    def test_init_store(self):
+        # Ensure that property constructors initialize the parent
+        # object's value store
+        obj = sbol2.SBOLObject()
+        type_uri = 'http://example.com#thing'
+        obj.thing = sbol2.TextProperty(obj, type_uri, '0', '*')
+        self.assertIn(type_uri, obj.properties)
+        self.assertEqual([], obj.properties[type_uri])
+        self.assertEqual([], obj.thing)
+
+
+class TestFloatProperty(unittest.TestCase):
+
+    def test_values(self):
+        # Measurement class uses FloatProperty
+        # Make sure we can set a FloatProperty via a variety of types
+        # that can be coerced to float
+        m = sbol2.Measurement('m1')
+        self.assertEqual(0.0, m.value)
+        # set with float
+        v = 2.54
+        m.value = v
+        self.assertEqual(v, m.value)
+        # set with string
+        v = '1.37'
+        m.value = v
+        self.assertEqual(float(v), m.value)
+        # set with int
+        v = 15
+        m.value = v
+        self.assertEqual(float(v), m.value)
+
+    def test_init_store(self):
+        # Ensure that property constructors initialize the parent
+        # object's value store
+        obj = sbol2.SBOLObject()
+        type_uri = 'http://example.com#thing'
+        obj.thing = sbol2.FloatProperty(obj, type_uri, '0', '*')
+        self.assertIn(type_uri, obj.properties)
+        self.assertEqual([], obj.properties[type_uri])
+        self.assertEqual([], obj.thing)
+
+
+class TestDateTimeProperty(unittest.TestCase):
+
+    def test_values(self):
+        # Activity class uses DateTimeProperty
+        # Make sure we can set a DateTimeProperty via a variety of formats
+        # that can be parsed by dateutil
+        activity = sbol2.Activity('a1')
+        self.assertIsNone(activity.startedAtTime)
+        # set with datetime
+        v = datetime.datetime.now()
+        activity.startedAtTime = v
+        self.assertEqual(v, activity.startedAtTime)
+        # set with string
+        dt = datetime.datetime.now()
+        v = str(dt)
+        activity.startedAtTime = v
+        self.assertEqual(dt, activity.startedAtTime)
+        # set with string in ISO format
+        dt = datetime.datetime.now()
+        v = dt.isoformat()
+        activity.startedAtTime = v
+        self.assertEqual(dt, activity.startedAtTime)
+
+    def test_init_store(self):
+        # Ensure that property constructors initialize the parent
+        # object's value store
+        obj = sbol2.SBOLObject()
+        type_uri = 'http://example.com#thing'
+        obj.thing = sbol2.DateTimeProperty(obj, type_uri, '0', '*')
+        self.assertIn(type_uri, obj.properties)
+        self.assertEqual([], obj.properties[type_uri])
+        self.assertEqual([], obj.thing)
+
+
+class TestReferencedObject(unittest.TestCase):
+
+    def test_init_store(self):
+        # Ensure that property constructors initialize the parent
+        # object's value store
+        obj = sbol2.SBOLObject()
+        type_uri = 'http://example.com#thing'
+        ref_uri = 'http://example.com#other_thing'
+        obj.thing = sbol2.ReferencedObject(obj, type_uri, ref_uri, '0', '*', [])
+        self.assertIn(type_uri, obj.properties)
+        self.assertEqual([], obj.properties[type_uri])
+        self.assertEqual([], obj.thing)
+
+
+class TestURIProperty(unittest.TestCase):
+
+    def test_init_store(self):
+        # Ensure that property constructors initialize the parent
+        # object's value store
+        obj = sbol2.SBOLObject()
+        type_uri = 'http://example.com#thing'
+        obj.thing = sbol2.URIProperty(obj, type_uri, '0', '*', [])
+        self.assertIn(type_uri, obj.properties)
+        self.assertEqual([], obj.properties[type_uri])
+        self.assertEqual([], obj.thing)
 
 
 if __name__ == '__main__':

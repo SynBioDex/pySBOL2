@@ -1,6 +1,9 @@
+import io
 import locale
 import os
+import tempfile
 import unittest
+import unittest.mock
 
 import rdflib
 
@@ -187,16 +190,20 @@ class TestDocument(unittest.TestCase):
         sbol.Config.setOption('sbol_compliant_uris', True)
         sbol.Config.setOption('sbol_typed_uris', True)
         doc = sbol.Document()
-        md = doc.moduleDefinitions.create('foo')
+        cd = doc.moduleDefinitions.create('foo')
+        cd.roles = sbol.SO_PROMOTER
         test_uri = 'http://examples.org/does/not/exist/1'
         matches = doc.find_property_value(sbol.SBOL_IDENTITY, test_uri)
         self.assertEqual(len(matches), 0)
+        matches = doc.find_property_value(sbol.SBOL_ROLES, sbol.SO_PROMOTER)
+        self.assertEqual(len(matches), 1)
+        self.assertEqual(matches[0], cd)
 
     def test_add_namespace(self):
         doc = sbol.Document()
         cd = doc.componentDefinitions.create('cd')
-        cd.foo = sbol.property.LiteralProperty(cd, 'http://examples.org#foo',
-                                               '0', '1', None, 'bar')
+        cd.foo = sbol.property.TextProperty(cd, 'http://examples.org#foo',
+                                            '0', '1', None, 'bar')
         doc.readString(doc.writeString())
         namespaces = [n[1] for n in doc.graph.namespace_manager.namespaces()]
         self.assertFalse('http://examples.org#' in namespaces)
@@ -394,6 +401,13 @@ class TestDocument(unittest.TestCase):
         self.assertEqual(1, len(doc.attachments))
         self.assertTrue(test_attach.compare(doc.attachments[0]))
 
+    def test_get_collection(self):
+        doc = sbol2.Document()
+        self.assertTrue(hasattr(doc, 'getCollection'))
+        c1 = doc.collections.create('c1')
+        self.assertEqual(c1, doc.getCollection('c1'))
+        self.assertEqual(c1, doc.getCollection(c1.identity))
+
 
 class TopLevelExtension(sbol2.TopLevel):
 
@@ -532,6 +546,35 @@ class TestDocumentExtensionObjects(unittest.TestCase):
         self.assertEqual(old_len, len(doc))
         cd = doc.componentDefinitions[cd_uri]
         self.assertEqual(1, len(cd.roles))
+
+    def test_write_validation(self):
+        # Test that write performs validation if requested
+        # and skips validation if requested.
+        doc = sbol2.Document()
+        doc.moduleDefinitions.create('md1')
+        validate = sbol2.Config.getOption(sbol2.ConfigOptions.VALIDATE)
+        sbol2.Config.setOption(sbol2.ConfigOptions.VALIDATE, True)
+        verbose = sbol2.Config.getOption(sbol2.ConfigOptions.VERBOSE)
+        sbol2.Config.setOption(sbol2.ConfigOptions.VERBOSE, True)
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            test_file = os.path.join(tmpdirname, 'test.xml')
+            with unittest.mock.patch('sys.stdout', new=io.StringIO()) as fake_out:
+                # Write to disk
+                result = doc.write(test_file)
+                self.assertEqual('Valid.', result)
+                # Expect timing output
+                output = fake_out.getvalue().strip()
+                self.assertTrue(output.startswith('Validation request took'))
+                self.assertTrue(output.endswith('seconds'))
+        sbol2.Config.setOption(sbol2.ConfigOptions.VALIDATE, False)
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            test_file = os.path.join(tmpdirname, 'test.xml')
+            # Write to disk
+            result = doc.write(test_file)
+            self.assertTrue(result.startswith('Validation disabled.'))
+        # Reset validate to its original value
+        sbol2.Config.setOption(sbol2.ConfigOptions.VALIDATE, validate)
+        sbol2.Config.setOption(sbol2.ConfigOptions.VERBOSE, verbose)
 
 
 if __name__ == '__main__':

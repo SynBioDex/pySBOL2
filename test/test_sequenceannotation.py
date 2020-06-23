@@ -23,5 +23,6 @@ class TestSequenceAnnotation(unittest.TestCase):
         sa.component = c
         self.assertEqual(sa.component, c.identity)
 
+
 if __name__ == '__main__':
     unittest.main()

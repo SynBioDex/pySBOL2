@@ -1,4 +1,4 @@
-__version__ = '1.0b6'
+__version__ = '1.0b7'
 
 # Anything imported here is part of the public API. Limit what gets
 # imported to only those things that are actually needed.
@@ -30,9 +30,9 @@ from .moduledefinition import ModuleDefinition
 from .object import SBOLObject
 from .participation import Participation
 from .partshop import PartShop
-from .property import IntProperty
-from .property import LiteralProperty
-from .property import TextProperty
+from .property import DateTimeProperty, FloatProperty, IntProperty
+from .property import LiteralProperty, OwnedObject
+from .property import ReferencedObject, TextProperty
 from .property import URIProperty
 from .provo import Activity
 from .provo import Agent
@@ -45,3 +45,4 @@ from .sequenceannotation import SequenceAnnotation
 from .toplevel import TopLevel
 from .validation import is_alphanumeric_or_underscore
 from .validation import is_not_alphanumeric_or_underscore
+from .versionproperty import VersionProperty
