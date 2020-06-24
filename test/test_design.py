@@ -8,7 +8,7 @@ class TestDesign(unittest.TestCase):
     # `design.function` both return a ReferencedObject instance instead
     # of None. We'll have to deal with that at some point if we want
     # to maintain backward compatibility.
-    @unittest.expectedFailure
+    @unittest.expectedFailure  # See issue #197
     def test_constructor_empty(self):
         # There was a bug where a Design could not be constructed with
         # no arguments. The original pySBOL allows this. This test

@@ -82,7 +82,7 @@ class TestComponentDefinitions(unittest.TestCase):
         else:
             self.assertCountEqual(list_cd, list_cd_true)
 
-    @unittest.expectedFailure
+    @unittest.expectedFailure  # See issue #309
     def testInsertDownstream(self):
         doc = sbol2.Document()
         gene = sbol2.ComponentDefinition("BB0001")
@@ -104,7 +104,7 @@ class TestComponentDefinitions(unittest.TestCase):
                                    cds.identity, terminator.identity]
         self.assertListEqual(primary_structure, valid_primary_structure)
 
-    @unittest.expectedFailure
+    @unittest.expectedFailure  # See issue #309
     def testInsertUpstream(self):
         doc = sbol2.Document()
         gene = sbol2.ComponentDefinition("BB0001")
@@ -482,7 +482,7 @@ class TestAssemblyRoutines(unittest.TestCase):
         target_seq = gene.compile()
         self.assertEqual(target_seq, 'atcg')
 
-    @unittest.expectedFailure
+    @unittest.expectedFailure  # See issue #309
     def test_delete_upstream(self):
         doc = sbol2.Document()
         gene = sbol2.ComponentDefinition("BB0001")
@@ -522,7 +522,7 @@ class TestAssemblyRoutines(unittest.TestCase):
         with self.assertRaises(ValueError):
             gene.deleteUpstreamComponent(Component())
 
-    @unittest.expectedFailure
+    @unittest.expectedFailure  # See issue #309
     def test_delete_downstream(self):
         doc = sbol2.Document()
         gene = sbol2.ComponentDefinition("BB0001")
@@ -562,7 +562,7 @@ class TestAssemblyRoutines(unittest.TestCase):
         with self.assertRaises(ValueError):
             gene.deleteDownstreamComponent(Component())
 
-    @unittest.expectedFailure
+    @unittest.expectedFailure  # See issue #309
     def test_insert_downstream(self):
         doc = sbol2.Document()
         gene = sbol2.ComponentDefinition("BB0001")
@@ -584,7 +584,7 @@ class TestAssemblyRoutines(unittest.TestCase):
                                    terminator.identity]
         self.assertEqual(primary_structure, valid_primary_structure)
 
-    @unittest.expectedFailure
+    @unittest.expectedFailure  # See issue #309
     def test_insert_upstream(self):
         doc = sbol2.Document()
         gene = sbol2.ComponentDefinition("BB0001")

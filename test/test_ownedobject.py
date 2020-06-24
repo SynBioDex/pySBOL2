@@ -31,7 +31,7 @@ class TestOwnedObject(unittest.TestCase):
     # These are classes that are considered outside the core, and thus
     # outside the beta. They use OwnedObject, so they will need to be
     # updated in the future.
-    @unittest.expectedFailure
+    @unittest.expectedFailure  # See issue #310
     def test_non_beta_classes(self):
         # These are all in dbtl.py
         x = sbol.Analysis()
