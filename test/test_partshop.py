@@ -44,16 +44,17 @@ class TestPartShop(unittest.TestCase):
         #     print(obj)
         self.assertEqual(7, len(doc))
 
-    # The part has gone missing in SynBioHub
-    @unittest.expectedFailure
     def test_pull_02(self):
+        # I don't know what this adds over test_pull_01
+        # This is a replacement for a previous test whose part was no
+        # longer available at SynBioHub
         doc = sbol.Document()
-        ps = sbol.PartShop('https://synbiohub.utah.edu/public/RepressionModel')
-        ps.pull('CRPb_characterization_Circuit', doc)
+        ps = sbol.PartShop('https://synbiohub.org/public/bsu')
+        ps.pull('SyBiOntKB2sbol', doc)
         # print(doc)
         # for obj in doc:
         #     print(obj)
-        self.assertEqual(31, len(doc))
+        self.assertEqual(1, len(doc))
 
     def test_login(self):
         # NOTE: Add /login because login pages may be different

@@ -101,7 +101,7 @@ class TestRoundTripSBOL2(unittest.TestCase):
         # Handle it for now as an expected failure below
         self.run_round_trip_dir(test_dir, ['SBOL1and2Test.xml'])
 
-    @unittest.expectedFailure
+    @unittest.expectedFailure  # See issue #210
     def test_sbol_1_and_2(self):
         # Invalid namespace prefix in lxml.etree when serializing the document
         test_path = os.path.join(SBOL_TEST_SUITE, 'SBOL2_nc',
