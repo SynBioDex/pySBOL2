@@ -482,9 +482,9 @@ class TestAssemblyRoutines(unittest.TestCase):
         target_seq = gene.compile()
         self.assertEqual(target_seq, 'atcg')
 
-    def test_assembly_multiple_locations(self):
-        # Currently hierarchical assembly of Components with multiple Locations is not
-        # supported, and an exception will be thrown if the user attempts it
+    def test_assembly_multiple_sequenceannotations(self):
+        # Currently hierarchical assembly of Components with multiple SequenceAnnotations
+        # is not supported, and an exception will be thrown if the user attempts it
         doc = sbol2.Document()
         root = doc.componentDefinitions.create('root')
         sub0 = doc.componentDefinitions.create('sub0')
@@ -498,32 +498,42 @@ class TestAssemblyRoutines(unittest.TestCase):
         # Add a second SequenceAnnotation
         sa = root.sequenceAnnotations.create('sub0_annotation_1')
         sa.component = root.components['sub0_0']
-        for c in root.components:
-            sequence_annotations = \
-                    root.find_property_value(sbol2.SBOL_COMPONENT_PROPERTY, c.identity)
-            print([a.identity for a in sequence_annotations])
-        print([sa.component for sa in root.sequenceAnnotations])
-        root.compile()
+        with self.assertRaises(sbol2.SBOLError) as err:
+            root.compile()
+        self.assertEqual(err.exception.error_code(),
+                         sbol2.SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
 
-        # sa0 = sub0.sequenceAnnotations.create('sa0')
-        # sa1_0 = sub1.sequenceAnnotations.create('sa1_0')
-        # sa1_1 = sub1.sequenceAnnotations.create('sa1_1')
-        # print(root.compile())
+    def test_assembly_multiple_ranges(self):
+        # Currently hierarchical assembly of Components with multiple Ranges
+        # is not supported, and an exception will be thrown if the user attempts it
+        doc = sbol2.Document()
+        root = doc.componentDefinitions.create('root')
+        sub0 = doc.componentDefinitions.create('sub0')
+        sub1 = doc.componentDefinitions.create('sub1')
 
-        # sub0_0 = root.components['sub0_0']
-        # sub1_0 = root.components['sub1_0']
-        # sa0 = sub0.sequenceAnnotations.create('sa')
-        # r1 = multi_range_sa.locations.createRange('r1')
-        # r3 = multi_range_sa.locations.createRange('r3')
-        # single_range_sa = sub2.sequenceAnnotations.create('sa')
-        # r2 = single_range_sa.locations.createRange('r2')
-        # r1.start = 1
-        # r1.end = 2
-        # r2.start = 3
-        # r2.end = 4
-        # r3.start = 5
-        # r3.end = 6
-        # print(root.compile())
+        sub0.sequence = sbol2.Sequence('sub0', 'tttt')
+        sub1.sequence = sbol2.Sequence('sub1', 'aa')
+        root.assemblePrimaryStructure([sub0, sub1])
+
+        sub0_0 = root.components['sub0_0']
+        sub1_0 = root.components['sub1_0']
+        sa0 = root.sequenceAnnotations.create('sa0')
+        sa0.component = sub0_0
+        r0 = sa0.locations.createRange('r0')
+        r1 = sa0.locations.createRange('r1')
+        sa1 = root.sequenceAnnotations.create('sa1')
+        sa1.component = sub1_0
+        r2 = sa1.locations.createRange('r2')
+        r0.start = 1
+        r0.end = 2
+        r1.start = 3
+        r1.end = 4
+        r2.start = 5
+        r2.end = 6
+        with self.assertRaises(sbol2.SBOLError) as err:
+            root.compile()
+        self.assertEqual(err.exception.error_code(),
+                         sbol2.SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
 
     @unittest.expectedFailure
     def test_delete_upstream(self):
