@@ -1,3 +1,5 @@
+import os
+import posixpath
 from typing import Union
 
 from rdflib import URIRef
@@ -550,6 +552,74 @@ class ComponentDefinition(TopLevel):
             if upstream_sequence_constraint:
                 upstream_sequence_constraint.object = \
                     downstream_sequence_constraint.object
+
+    def insertUpstreamComponent(self, downstream, insert):
+        if not Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS):
+            raise ValueError('SBOL-compliant URIs must be enabled to use this method')
+        if not self.doc:
+            msg = f'ComponentDefinition {self.identity} does not belong to a Document'
+            msg += ' Add this ComponentDefinition to a Document before calling'
+            msg += ' insertUpstreamComponent'
+            raise ValueError(msg)
+        if self.doc != insert.doc:
+            msg = f'Invalid Document for ComponentDefinition {insert.identity}.'
+            msg += ' Add the insert to the same Document as the calling object.'
+            raise ValueError(msg)
+        # If the user makes a mistake and tries to insert a ComponentDefinition
+        # that doesn't already belong to this Document
+        if not insert.doc:
+            insert.doc = self.doc
+        # Two cases. In first case, insert a Component that already has a
+        # downstream Component specified by a SequenceConstraint. Otherwise,
+        # append this Component to the end os sequential constraints.
+
+        # Search for an existing SequenceConstraint between upstream
+        # and downstream Component
+        target_constraint = None
+        for sc in self.sequenceConstraints:
+            if (sc.object == downstream.identity and
+                    sc.restriction == SBOL_RESTRICTION_PRECEDES):
+                if target_constraint is not None:
+                    # If more than one downstream component has been specified,
+                    # then it is ambiguous where the insert should be placed,
+                    # so throw an error
+                    msg = 'SequenceConstraints are ambiguous. The target component'
+                    msg += ' may have more than one downstream component specified'
+                    raise ValueError(msg)
+                target_constraint = sc
+        # Generate URI of a Component to be created.  Check if an object with
+        # that URI is already instantiated.
+        instance_count = 0
+        component_id = posixpath.join(self.persistentIdentity,
+                                      f'{insert.displayId}_{instance_count}',
+                                      self.version)
+        while self.find(component_id):
+            instance_count += 1
+            component_id = posixpath.join(self.persistentIdentity,
+                                          f'{insert.displayId}_{instance_count}',
+                                          self.version)
+        # Auto-construct the new Component
+        c_insert = self.components.create(f'{insert.displayId}_{instance_count}')
+        c_insert.definition = insert.identity
+        # Generate URI of new SequenceConstraint. Check if an object with
+        # that URI is already instantiated.
+        instance_count = 0
+        sc_id = posixpath.join(self.persistentIdentity,
+                               f'constraint_{instance_count}',
+                               self.version)
+        while self.find(sc_id):
+            instance_count += 1
+            sc_id = posixpath.join(self.persistentIdentity,
+                                   f'constraint_{instance_count}',
+                                   self.version)
+        # Auto-construct the new SequenceConstraint
+        sc_new = self.sequenceConstraints.create(f'constraint_{instance_count}')
+        sc_new.subject = component_id
+        sc_new.object = downstream.identity
+        sc_new.restriction = SBOL_RESTRICTION_PRECEDES
+        # In case an upstream component was found...
+        if target_constraint:
+            target_constraint.object = c_insert.identity
 
     def getFirstComponent(self):
         """Gets the first Component in a linear sequence.

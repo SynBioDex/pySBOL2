@@ -104,7 +104,6 @@ class TestComponentDefinitions(unittest.TestCase):
                                    cds.identity, terminator.identity]
         self.assertListEqual(primary_structure, valid_primary_structure)
 
-    @unittest.expectedFailure  # See issue #309
     def testInsertUpstream(self):
         doc = sbol2.Document()
         gene = sbol2.ComponentDefinition("BB0001")
@@ -582,7 +581,6 @@ class TestAssemblyRoutines(unittest.TestCase):
                                    terminator.identity]
         self.assertEqual(primary_structure, valid_primary_structure)
 
-    @unittest.expectedFailure  # See issue #309
     def test_insert_upstream(self):
         doc = sbol2.Document()
         gene = sbol2.ComponentDefinition("BB0001")
