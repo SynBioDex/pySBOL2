@@ -3,7 +3,7 @@ from typing import Union
 from rdflib import URIRef
 
 from .component import Component
-from .config import Config
+from .config import Config, ConfigOptions
 from .constants import *
 from .toplevel import TopLevel
 from .property import OwnedObject, ReferencedObject, URIProperty
@@ -479,6 +479,39 @@ class ComponentDefinition(TopLevel):
         raise SBOLError(SBOLErrorCode.SBOL_ERROR_END_OF_LIST,
                         'This component has no downstream '
                         'component. Use hasDownstreamComponent to catch this error')
+
+    def deleteDownstreamComponent(self, upstream_component):
+        if not Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS):
+            raise ValueError('SBOL-compliant URIs must be enabled to use this method')
+        if upstream_component.identity not in self.components:
+            raise ValueError(
+                'Deletion failed. ComponentDefinition %s has no child component %s' % (self.identity,
+                                                                                       upstream_component.identity))
+        primary_structure = self.getPrimaryStructureComponents()
+        if upstream_component.identity == primary_structure[-1].identity:
+            raise ValueError(
+                'Deletion failed. No Components were found downstream of %s' % upstream_component.identity)
+        downstream_component = None
+        upstream_sequence_constraint = None
+        downstream_sequence_constraint = None
+        for c_upstream, c_downstream in zip(primary_structure[:-1], primary_structure[1:]):
+            for sc in self.sequenceConstraints:
+                if (sc.subject == c_upstream.identity and
+                        sc.object == c_downstream.identity and
+                        sc.restriction == SBOL_RESTRICTION_PRECEDES):
+                    upstream_sequence_constraint = downstream_sequence_constraint
+                    downstream_sequence_constraint = sc
+            if downstream_component:
+                break
+            if c_upstream.identity == upstream_component.identity:
+                downstream_component = c_downstream
+        if downstream_component:
+            self.components.remove(downstream_component.identity)
+            self.sequenceConstraints.remove(downstream_sequence_constraint.identity)
+            # The following condition is False when the downstream component is the last
+            # component
+            if downstream_sequence_constraint.subject == downstream_component.identity:
+                upstream_sequence_constraint.object = downstream_sequence_constraint.object
 
     def getFirstComponent(self):
         """Gets the first Component in a linear sequence.

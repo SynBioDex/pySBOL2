@@ -522,7 +522,6 @@ class TestAssemblyRoutines(unittest.TestCase):
         with self.assertRaises(ValueError):
             gene.deleteUpstreamComponent(Component())
 
-    @unittest.expectedFailure  # See issue #309
     def test_delete_downstream(self):
         doc = sbol2.Document()
         gene = sbol2.ComponentDefinition("BB0001")
@@ -560,7 +559,7 @@ class TestAssemblyRoutines(unittest.TestCase):
         # Test failure when the user supplies a Component that isn't part of the
         # primary structure
         with self.assertRaises(ValueError):
-            gene.deleteDownstreamComponent(Component())
+            gene.deleteDownstreamComponent(sbol2.Component())
 
     @unittest.expectedFailure  # See issue #309
     def test_insert_downstream(self):
