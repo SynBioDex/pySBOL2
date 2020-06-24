@@ -482,7 +482,6 @@ class TestAssemblyRoutines(unittest.TestCase):
         target_seq = gene.compile()
         self.assertEqual(target_seq, 'atcg')
 
-    @unittest.expectedFailure  # See issue #309
     def test_delete_upstream(self):
         doc = sbol2.Document()
         gene = sbol2.ComponentDefinition("BB0001")
@@ -520,7 +519,7 @@ class TestAssemblyRoutines(unittest.TestCase):
         # Test failure when the user supplies a Component that isn't part of the
         # primary structure
         with self.assertRaises(ValueError):
-            gene.deleteUpstreamComponent(Component())
+            gene.deleteUpstreamComponent(sbol2.Component())
 
     def test_delete_downstream(self):
         doc = sbol2.Document()
