@@ -484,17 +484,20 @@ class ComponentDefinition(TopLevel):
         if not Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS):
             raise ValueError('SBOL-compliant URIs must be enabled to use this method')
         if upstream_component.identity not in self.components:
-            raise ValueError(
-                'Deletion failed. ComponentDefinition %s has no child component %s' % (self.identity,
-                                                                                       upstream_component.identity))
+            msg = 'Deletion failed. ComponentDefinition %s has no child component %s'
+            msg = msg % (self.identity, upstream_component.identity)
+            raise ValueError(msg)
         primary_structure = self.getPrimaryStructureComponents()
         if upstream_component.identity == primary_structure[-1].identity:
+            msg = 'Deletion failed. No Components were found downstream of %s'
+            msg = msg % upstream_component.identity
             raise ValueError(
-                'Deletion failed. No Components were found downstream of %s' % upstream_component.identity)
+                msg)
         downstream_component = None
         upstream_sequence_constraint = None
         downstream_sequence_constraint = None
-        for c_upstream, c_downstream in zip(primary_structure[:-1], primary_structure[1:]):
+        for c_upstream, c_downstream in zip(primary_structure[:-1],
+                                            primary_structure[1:]):
             for sc in self.sequenceConstraints:
                 if (sc.subject == c_upstream.identity and
                         sc.object == c_downstream.identity and
@@ -511,7 +514,8 @@ class ComponentDefinition(TopLevel):
             # The following condition is False when the downstream component is the last
             # component
             if downstream_sequence_constraint.subject == downstream_component.identity:
-                upstream_sequence_constraint.object = downstream_sequence_constraint.object
+                upstream_sequence_constraint.object = \
+                    downstream_sequence_constraint.object
 
     def getFirstComponent(self):
         """Gets the first Component in a linear sequence.
