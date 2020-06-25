@@ -143,6 +143,7 @@ class SBOLObject:
         else:
             return rdf_type
 
+    @deprecated(reason='This is an obsolete carryover from the C++ library')
     def cast(self, cls):
         if not isinstance(self, cls):
             msg = 'Cannot cast instance of {} to class {}'
