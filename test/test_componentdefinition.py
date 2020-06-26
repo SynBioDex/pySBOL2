@@ -82,7 +82,6 @@ class TestComponentDefinitions(unittest.TestCase):
         else:
             self.assertCountEqual(list_cd, list_cd_true)
 
-    @unittest.expectedFailure  # See issue #309
     def testInsertDownstream(self):
         doc = sbol2.Document()
         gene = sbol2.ComponentDefinition("BB0001")
@@ -104,7 +103,6 @@ class TestComponentDefinitions(unittest.TestCase):
                                    cds.identity, terminator.identity]
         self.assertListEqual(primary_structure, valid_primary_structure)
 
-    @unittest.expectedFailure  # See issue #309
     def testInsertUpstream(self):
         doc = sbol2.Document()
         gene = sbol2.ComponentDefinition("BB0001")
@@ -535,7 +533,6 @@ class TestAssemblyRoutines(unittest.TestCase):
         self.assertEqual(err.exception.error_code(),
                          sbol2.SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
 
-    @unittest.expectedFailure  # See issue #309
     def test_delete_upstream(self):
         doc = sbol2.Document()
         gene = sbol2.ComponentDefinition("BB0001")
@@ -573,9 +570,8 @@ class TestAssemblyRoutines(unittest.TestCase):
         # Test failure when the user supplies a Component that isn't part of the
         # primary structure
         with self.assertRaises(ValueError):
-            gene.deleteUpstreamComponent(Component())
+            gene.deleteUpstreamComponent(sbol2.Component())
 
-    @unittest.expectedFailure  # See issue #309
     def test_delete_downstream(self):
         doc = sbol2.Document()
         gene = sbol2.ComponentDefinition("BB0001")
@@ -613,9 +609,8 @@ class TestAssemblyRoutines(unittest.TestCase):
         # Test failure when the user supplies a Component that isn't part of the
         # primary structure
         with self.assertRaises(ValueError):
-            gene.deleteDownstreamComponent(Component())
+            gene.deleteDownstreamComponent(sbol2.Component())
 
-    @unittest.expectedFailure  # See issue #309
     def test_insert_downstream(self):
         doc = sbol2.Document()
         gene = sbol2.ComponentDefinition("BB0001")
@@ -637,7 +632,6 @@ class TestAssemblyRoutines(unittest.TestCase):
                                    terminator.identity]
         self.assertEqual(primary_structure, valid_primary_structure)
 
-    @unittest.expectedFailure  # See issue #309
     def test_insert_upstream(self):
         doc = sbol2.Document()
         gene = sbol2.ComponentDefinition("BB0001")

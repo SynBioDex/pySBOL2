@@ -1,9 +1,11 @@
+import os
+import posixpath
 from typing import Union
 
 from rdflib import URIRef
 
 from .component import Component
-from .config import Config
+from .config import Config, ConfigOptions
 from .constants import *
 from .toplevel import TopLevel
 from .property import OwnedObject, ReferencedObject, URIProperty
@@ -479,6 +481,213 @@ class ComponentDefinition(TopLevel):
         raise SBOLError(SBOLErrorCode.SBOL_ERROR_END_OF_LIST,
                         'This component has no downstream '
                         'component. Use hasDownstreamComponent to catch this error')
+
+    def deleteDownstreamComponent(self, upstream_component):
+        if not Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS):
+            raise ValueError('SBOL-compliant URIs must be enabled to use this method')
+        if upstream_component.identity not in self.components:
+            msg = 'Deletion failed. ComponentDefinition %s has no child component %s'
+            msg = msg % (self.identity, upstream_component.identity)
+            raise ValueError(msg)
+        primary_structure = self.getPrimaryStructureComponents()
+        if upstream_component.identity == primary_structure[-1].identity:
+            msg = 'Deletion failed. No Components were found downstream of %s'
+            msg = msg % upstream_component.identity
+            raise ValueError(
+                msg)
+        downstream_component = None
+        upstream_sequence_constraint = None
+        downstream_sequence_constraint = None
+        for c_upstream, c_downstream in zip(primary_structure[:-1],
+                                            primary_structure[1:]):
+            for sc in self.sequenceConstraints:
+                if (sc.subject == c_upstream.identity and
+                        sc.object == c_downstream.identity and
+                        sc.restriction == SBOL_RESTRICTION_PRECEDES):
+                    upstream_sequence_constraint = downstream_sequence_constraint
+                    downstream_sequence_constraint = sc
+            if downstream_component:
+                break
+            if c_upstream.identity == upstream_component.identity:
+                downstream_component = c_downstream
+        if downstream_component:
+            self.components.remove(downstream_component.identity)
+            self.sequenceConstraints.remove(downstream_sequence_constraint.identity)
+            # The following condition is False when the downstream component is the last
+            # component
+            if downstream_sequence_constraint.subject == downstream_component.identity:
+                upstream_sequence_constraint.object = \
+                    downstream_sequence_constraint.object
+
+    def deleteUpstreamComponent(self, downstream_component):
+        # if Config.getOption('sbol_compliant_uris') == False:
+        if not Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS):
+            raise ValueError('SBOL-compliant URIs must be enabled to use this method')
+        if downstream_component.identity not in self.components:
+            msg = 'Deletion failed. No Components were found upstream of %s'
+            msg = msg % downstream_component.identity
+            raise ValueError(msg)
+        primary_structure = self.getPrimaryStructureComponents()
+        if downstream_component.identity == primary_structure[0].identity:
+            msg = 'Deletion failed. Component %s does not have an upstream component'
+            msg = msg % downstream_component.identity
+            raise ValueError(msg)
+        upstream_component = None
+        upstream_sequence_constraint = None
+        downstream_sequence_constraint = None
+        for c_upstream, c_downstream in zip(primary_structure[:-1],
+                                            primary_structure[1:]):
+            for sc in self.sequenceConstraints:
+                if (sc.subject == c_upstream.identity and
+                        sc.object == c_downstream.identity and
+                        sc.restriction == SBOL_RESTRICTION_PRECEDES):
+                    upstream_sequence_constraint = downstream_sequence_constraint
+                    downstream_sequence_constraint = sc
+            if c_downstream.identity == downstream_component.identity:
+                upstream_component = c_upstream
+                break
+        if upstream_component:
+            self.components.remove(upstream_component.identity)
+            self.sequenceConstraints.remove(downstream_sequence_constraint.identity)
+            if upstream_sequence_constraint:
+                upstream_sequence_constraint.object = \
+                    downstream_sequence_constraint.object
+
+    def insertUpstreamComponent(self, downstream, insert):
+        if not Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS):
+            raise ValueError('SBOL-compliant URIs must be enabled to use this method')
+        if not self.doc:
+            msg = f'ComponentDefinition {self.identity} does not belong to a Document'
+            msg += ' Add this ComponentDefinition to a Document before calling'
+            msg += ' insertUpstreamComponent'
+            raise ValueError(msg)
+        if self.doc != insert.doc:
+            msg = f'Invalid Document for ComponentDefinition {insert.identity}.'
+            msg += ' Add the insert to the same Document as the calling object.'
+            raise ValueError(msg)
+        # If the user makes a mistake and tries to insert a ComponentDefinition
+        # that doesn't already belong to this Document
+        if not insert.doc:
+            insert.doc = self.doc
+        # Two cases. In first case, insert a Component that already has a
+        # downstream Component specified by a SequenceConstraint. Otherwise,
+        # append this Component to the end os sequential constraints.
+
+        # Search for an existing SequenceConstraint between upstream
+        # and downstream Component
+        target_constraint = None
+        for sc in self.sequenceConstraints:
+            if (sc.object == downstream.identity and
+                    sc.restriction == SBOL_RESTRICTION_PRECEDES):
+                if target_constraint is not None:
+                    # If more than one downstream component has been specified,
+                    # then it is ambiguous where the insert should be placed,
+                    # so throw an error
+                    msg = 'SequenceConstraints are ambiguous. The target component'
+                    msg += ' may have more than one downstream component specified'
+                    raise ValueError(msg)
+                target_constraint = sc
+        # Generate URI of a Component to be created.  Check if an object with
+        # that URI is already instantiated.
+        instance_count = 0
+        component_id = posixpath.join(self.persistentIdentity,
+                                      f'{insert.displayId}_{instance_count}',
+                                      self.version)
+        while self.find(component_id):
+            instance_count += 1
+            component_id = posixpath.join(self.persistentIdentity,
+                                          f'{insert.displayId}_{instance_count}',
+                                          self.version)
+        # Auto-construct the new Component
+        c_insert = self.components.create(f'{insert.displayId}_{instance_count}')
+        c_insert.definition = insert.identity
+        # Generate URI of new SequenceConstraint. Check if an object with
+        # that URI is already instantiated.
+        instance_count = 0
+        sc_id = posixpath.join(self.persistentIdentity,
+                               f'constraint_{instance_count}',
+                               self.version)
+        while self.find(sc_id):
+            instance_count += 1
+            sc_id = posixpath.join(self.persistentIdentity,
+                                   f'constraint_{instance_count}',
+                                   self.version)
+        # Auto-construct the new SequenceConstraint
+        sc_new = self.sequenceConstraints.create(f'constraint_{instance_count}')
+        sc_new.subject = component_id
+        sc_new.object = downstream.identity
+        sc_new.restriction = SBOL_RESTRICTION_PRECEDES
+        # In case an upstream component was found...
+        if target_constraint:
+            target_constraint.object = c_insert.identity
+
+    def insertDownstreamComponent(self, upstream, insert):
+        if not Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS):
+            raise ValueError('SBOL-compliant URIs must be enabled to use this method')
+        if not self.doc:
+            msg = f'ComponentDefinition {self.identity} does not belong to a Document'
+            msg += ' Add this ComponentDefinition to a Document before calling'
+            msg += ' insertUpstreamComponent'
+            raise ValueError(msg)
+        if self.doc != insert.doc:
+            msg = f'Invalid Document for ComponentDefinition {insert.identity}.'
+            msg += ' Add the insert to the same Document as the calling object.'
+            raise ValueError(msg)
+        # If the user makes a mistake and tries to insert a ComponentDefinition
+        # that doesn't already belong to this Document
+        if not insert.doc:
+            insert.doc = self.doc
+        # Two cases. In first case, insert a Component that already has a
+        # downstream Component specified by a SequenceConstraint. Otherwise,
+        # append this Component to the end os sequential constraints.
+
+        # Search for an existing SequenceConstraint between upstream
+        # and downstream Component
+        target_constraint = None
+        for sc in self.sequenceConstraints:
+            if (sc.subject == upstream.identity and
+                    sc.restriction == SBOL_RESTRICTION_PRECEDES):
+                if target_constraint is not None:
+                    # If more than one downstream component has been specified,
+                    # then it is ambiguous where the insert should be placed,
+                    # so throw an error
+                    msg = 'SequenceConstraints are ambiguous. The target component'
+                    msg += ' may have more than one downstream component specified'
+                    raise ValueError(msg)
+                target_constraint = sc
+        # Generate URI of a Component to be created.  Check if an object with
+        # that URI is already instantiated.
+        instance_count = 0
+        component_id = posixpath.join(self.persistentIdentity,
+                                      f'{insert.displayId}_{instance_count}',
+                                      self.version)
+        while self.find(component_id):
+            instance_count += 1
+            component_id = posixpath.join(self.persistentIdentity,
+                                          f'{insert.displayId}_{instance_count}',
+                                          self.version)
+        # Auto-construct the new Component
+        c_insert = self.components.create(f'{insert.displayId}_{instance_count}')
+        c_insert.definition = insert.identity
+        # Generate URI of new SequenceConstraint. Check if an object with
+        # that URI is already instantiated.
+        instance_count = 0
+        sc_id = posixpath.join(self.persistentIdentity,
+                               f'constraint_{instance_count}',
+                               self.version)
+        while self.find(sc_id):
+            instance_count += 1
+            sc_id = posixpath.join(self.persistentIdentity,
+                                   f'constraint_{instance_count}',
+                                   self.version)
+        # Auto-construct the new SequenceConstraint
+        sc_new = self.sequenceConstraints.create(f'constraint_{instance_count}')
+        sc_new.subject = upstream.identity
+        sc_new.object = component_id
+        sc_new.restriction = SBOL_RESTRICTION_PRECEDES
+        # In case an upstream component was found...
+        if target_constraint:
+            target_constraint.object = c_insert.identity
 
     def getFirstComponent(self):
         """Gets the first Component in a linear sequence.
