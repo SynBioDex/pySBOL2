@@ -5,6 +5,8 @@ from .constants import *
 from .property import URIProperty, TextProperty
 from .toplevel import TopLevel
 from .config import Config
+from .sbolerror import SBOLError, SBOLErrorCode
+from .location import Range
 
 
 class Sequence(TopLevel):
@@ -171,12 +173,11 @@ class Sequence(TopLevel):
                 sequence_annotations = \
                     parent_cdef.find_property_value(SBOL_COMPONENT_PROPERTY, c.identity)
 
-                sequence_annotations = [o.cast(SequenceAnnotation)
-                                        for o in sequence_annotations]
                 if len(sequence_annotations) > 1:
-                    raise ValueError('Cannot compile Sequence. Component <%s> is '
-                                     'irregular. More than one SequenceAnnotation is '
-                                     'associated with this Component' % c.identity)
+                    raise SBOLError('Cannot compile Sequence. Component <%s> is '
+                                    'irregular. More than one SequenceAnnotation is '
+                                    'associated with this Component' % c.identity,
+                                    SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
 
                 # Auto-construct a SequenceAnnotation for this Component if one doesn't
                 # already exist
@@ -200,11 +201,11 @@ class Sequence(TopLevel):
 
                 # Check for regularity--only one Range per SequenceAnnotation is allowed
                 ranges = []
-                if len(sa.locations):
-                    # Look for an existing Range that can be re-used
-                    for l in sa.locations:
-                        if l.type == SBOL_RANGE:
-                            ranges.append(l.cast(Range))
+
+                # Look for an existing Range that can be re-used
+                for l in sa.locations:
+                    if type(l) is Range:
+                        ranges.append(l)
                 else:
                     # Auto-construct a Range
                     range_id = sa.displayId if Config.getOption('sbol_compliant_uris') \
@@ -212,9 +213,10 @@ class Sequence(TopLevel):
                     r = sa.locations.createRange(range_id + '_range')
                     ranges.append(r)
                 if len(ranges) > 1:
-                    raise ValueError('Cannot compile Sequence <%s> because '
-                                     'SequenceAnnotation <%s> has more than one Range.'
-                                     % (self.identity, sa.identity))
+                    raise SBOLError('Cannot compile Sequence <%s> because '
+                                    'SequenceAnnotation <%s> has more than one Range.'
+                                    % (self.identity, sa.identity),
+                                    SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
 
                 r = ranges[0]
                 r.start = len(composite_sequence) + 1
