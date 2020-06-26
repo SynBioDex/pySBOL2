@@ -1,7 +1,7 @@
 from .constants import *
 from .identified import Identified
 from .mapsto import MapsTo
-from .measurement import Measurement
+from .measurement import Measure
 from .property import OwnedObject, ReferencedObject
 
 
@@ -16,5 +16,5 @@ class Module(Identified):
                                            '1', '1', [], definition)
         self.mapsTos = OwnedObject(self, SBOL_MAPS_TOS, MapsTo,
                                    '0', '*', [])
-        self.measurements = OwnedObject(self, SBOL_MEASUREMENTS,
-                                        Measurement, '0', '*', [])
+        self.measures = OwnedObject(self, SBOL_MEASUREMENTS,
+                                    Measure, '0', '*', [])

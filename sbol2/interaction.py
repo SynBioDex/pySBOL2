@@ -1,7 +1,7 @@
 from .constants import *
 from .component import FunctionalComponent
 from .identified import Identified
-from .measurement import Measurement
+from .measurement import Measure
 from .participation import Participation
 from .property import OwnedObject
 from .property import URIProperty
@@ -21,7 +21,5 @@ class Interaction(Identified):
         self.participations = OwnedObject(self, SBOL_PARTICIPATIONS,
                                           Participation,
                                           '0', '*', [])
-        self.measurements = OwnedObject(self, SBOL_MEASUREMENTS,
-                                        Measurement,
-                                        '0', '*', [])
-        # TODO hidden properties
+        self.measures = OwnedObject(self, SBOL_MEASUREMENTS,
+                                    Measure, '0', '*', [])

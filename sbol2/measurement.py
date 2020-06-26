@@ -5,15 +5,16 @@ from .property import URIProperty, FloatProperty
 from rdflib import URIRef
 
 
-class Measurement(Identified):
+class Measure(Identified):
     """The purpose of the Measure class is to link a numerical value
     to a unit of measure."""
 
     def __init__(self, uri=URIRef('example'), value=0.0,
                  unit='', version=VERSION_STRING):
-        super().__init__(SBOL_MEASURE, uri, version)
-        self.value = FloatProperty(self, SBOL_VALUE, '1', '1', [], value)
-        self.unit = URIProperty(self, SBOL_UNIT, '1', '1', [], unit)
+        super().__init__(OM_MEASURE, uri, version)
+        self.numericalValue = FloatProperty(self, OM_HAS_NUMERICAL_VALUE,
+                                            '1', '1', [], value)
+        self.unit = URIProperty(self, OM_HAS_UNIT, '1', '1', [], unit)
         self.types = URIProperty(self, SBOL_TYPES, '0', '*', [])
 
     def addType(self, new_type):

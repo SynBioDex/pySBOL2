@@ -13,7 +13,7 @@ MEASURE_LOCATION = os.path.join(MODULE_LOCATION, 'SBOLTestSuite', 'SBOL2',
 class TestMeasurement(unittest.TestCase):
 
     def test_add_remove_type(self):
-        measurement = sbol2.Measurement()
+        measurement = sbol2.Measure()
         self.assertEqual([], measurement.types)
         measurement.addType(sbol2.BIOPAX_DNA)
         self.assertEqual([sbol2.BIOPAX_DNA], measurement.types)
@@ -25,19 +25,20 @@ class TestMeasurement(unittest.TestCase):
         measurement.removeType(1)
         self.assertEqual([sbol2.BIOPAX_DNA, sbol2.BIOPAX_COMPLEX], measurement.types)
 
-    @unittest.expectedFailure  # See issue #304
     def test_read(self):
         doc = sbol2.Document(MEASURE_LOCATION)
         md_uri = 'http://www.async.ece.utah.edu/md'
         md = doc.getModuleDefinition(md_uri)
         interaction_uri = 'http://www.async.ece.utah.edu/md/i'
         interaction = md.interactions.get(interaction_uri)
-        measurement_uri = 'http://www.async.ece.utah.edu/md/i/i_measure'
-        measurement = interaction.measurements.get(measurement_uri)
-        self.assertIsNotNone(measurement)
-        # Expecting this to be a Measurement, for starters
+        measure_uri = 'http://www.async.ece.utah.edu/md/i/i_measure'
+        measure = interaction.measures.get(measure_uri)
+        self.assertIsNotNone(measure)
+        # Expecting this to be a Measure, for starters
         # This wasn't the case, see issue #304
-        self.assertTrue(isinstance(measurement, sbol2.Measurement))
+        self.assertTrue(isinstance(measure, sbol2.Measure))
+        self.assertEqual(0.04, measure.numericalValue)
+        self.assertEqual('http://purl.obolibrary.org/obo/UO_0000077', measure.unit)
 
 
 if __name__ == '__main__':

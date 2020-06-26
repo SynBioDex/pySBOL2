@@ -1,3 +1,5 @@
+import rdflib
+
 # All SBOL objects will be created in the default namespace,
 # unless otherwise specified
 DEFAULT_NS = "http://examples.org/"
@@ -11,6 +13,7 @@ PROV_URI = "http://www.w3.org/ns/prov"
 PROVO = "http://www.w3.org/ns/prov"
 SYSBIO_URI = "http://sys-bio.org"
 # PROVO = "https://www.w3.org/TR/prov-o/"
+OM_URI = 'http://www.ontology-of-units-of-measure.org/resource/om-2/'
 
 # rdf nodes used in SBOL
 NODENAME_ABOUT = "rdf:about"
@@ -291,3 +294,8 @@ SYSBIO_ANALYSIS = SYSBIO_URI + "#Analysis"
 SYSBIO_SAMPLE_ROSTER = SYSBIO_URI + "#SampleRoster"
 
 IGEM_URI = "http://wiki.synbiohub.org/wiki/Terms/igem"
+
+OM_NS = rdflib.Namespace(OM_URI)
+OM_MEASURE: str = OM_NS.Measure.toPython()
+OM_HAS_UNIT: str = OM_NS.hasUnit.toPython()
+OM_HAS_NUMERICAL_VALUE: str = OM_NS.hasNumericalValue.toPython()
