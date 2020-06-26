@@ -1,5 +1,4 @@
 import os
-import sys
 import unittest
 import rdflib
 import sbol2
@@ -75,12 +74,7 @@ class TestComponentDefinitions(unittest.TestCase):
         primary_sequence = gene.getPrimaryStructure()
         for component in primary_sequence:
             list_cd.append(component.displayId)
-
-        # Python 3 compatability
-        if sys.version_info[0] < 3:
-            self.assertItemsEqual(list_cd, list_cd_true)
-        else:
-            self.assertCountEqual(list_cd, list_cd_true)
+        self.assertCountEqual(list_cd, list_cd_true)
 
     def testInsertDownstream(self):
         doc = sbol2.Document()
