@@ -4,7 +4,7 @@ from .constants import *
 from .identified import Identified
 from .location import OwnedLocation
 from .mapsto import MapsTo
-from .measurement import Measure
+from .measurement import Measurement
 from .property import URIProperty, OwnedObject, ReferencedObject
 
 
@@ -17,7 +17,7 @@ class ComponentInstance(Identified):
         self.access = URIProperty(self, SBOL_ACCESS, '0', '1', [], access)
         self.mapsTos = OwnedObject(self, SBOL_MAPS_TOS, MapsTo,
                                    '0', '*', [])
-        self.measures = OwnedObject(self, SBOL_MEASUREMENTS, Measure,
+        self.measures = OwnedObject(self, SBOL_MEASUREMENTS, Measurement,
                                     '0', '*', [])
 
 

@@ -13,7 +13,7 @@ MEASURE_LOCATION = os.path.join(MODULE_LOCATION, 'SBOLTestSuite', 'SBOL2',
 class TestMeasurement(unittest.TestCase):
 
     def test_add_remove_type(self):
-        measurement = sbol2.Measure()
+        measurement = sbol2.Measurement()
         self.assertEqual([], measurement.types)
         measurement.addType(sbol2.BIOPAX_DNA)
         self.assertEqual([sbol2.BIOPAX_DNA], measurement.types)
@@ -36,7 +36,7 @@ class TestMeasurement(unittest.TestCase):
         self.assertIsNotNone(measure)
         # Expecting this to be a Measure, for starters
         # This wasn't the case, see issue #304
-        self.assertTrue(isinstance(measure, sbol2.Measure))
+        self.assertTrue(isinstance(measure, sbol2.Measurement))
         self.assertEqual(0.04, measure.numericalValue)
         self.assertEqual('http://purl.obolibrary.org/obo/UO_0000077', measure.unit)
 

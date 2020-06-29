@@ -5,7 +5,7 @@ from .property import URIProperty, FloatProperty
 from rdflib import URIRef
 
 
-class Measure(Identified):
+class Measurement(Identified):
     """The purpose of the Measure class is to link a numerical value
     to a unit of measure."""
 

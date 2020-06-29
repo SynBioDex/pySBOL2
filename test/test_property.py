@@ -456,7 +456,7 @@ class TestFloatProperty(unittest.TestCase):
         # Measurement class uses FloatProperty
         # Make sure we can set a FloatProperty via a variety of types
         # that can be coerced to float
-        m = sbol2.Measure('m1')
+        m = sbol2.Measurement('m1')
         self.assertEqual(0.0, m.numericalValue)
         # set with float
         v = 2.54

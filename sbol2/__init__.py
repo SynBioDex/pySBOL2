@@ -24,7 +24,7 @@ from .identified import Identified
 from .implementation import Implementation
 from .interaction import Interaction
 from .location import Location, Range, Cut, GenericLocation
-from .measurement import Measure
+from .measurement import Measurement
 from .module import Module
 from .moduledefinition import ModuleDefinition
 from .object import SBOLObject
