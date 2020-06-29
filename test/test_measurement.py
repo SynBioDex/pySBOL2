@@ -34,7 +34,7 @@ class TestMeasurement(unittest.TestCase):
         measurement_uri = 'http://www.async.ece.utah.edu/md/i/i_measure'
         measurement = interaction.measurements.get(measurement_uri)
         self.assertIsNotNone(measurement)
-        # Expecting this to be a Measure, for starters
+        # Expecting this to be a Measurement, for starters
         # This wasn't the case, see issue #304
         self.assertTrue(isinstance(measurement, sbol2.Measurement))
         self.assertEqual(0.04, measurement.value)
