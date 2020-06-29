@@ -12,8 +12,8 @@ class Measurement(Identified):
     def __init__(self, uri=URIRef('example'), value=0.0,
                  unit='', version=VERSION_STRING):
         super().__init__(OM_MEASURE, uri, version)
-        self.numericalValue = FloatProperty(self, OM_HAS_NUMERICAL_VALUE,
-                                            '1', '1', [], value)
+        self.value = FloatProperty(self, OM_HAS_NUMERICAL_VALUE,
+                                   '1', '1', [], value)
         self.unit = URIProperty(self, OM_HAS_UNIT, '1', '1', [], unit)
         self.types = URIProperty(self, SBOL_TYPES, '0', '*', [])
 

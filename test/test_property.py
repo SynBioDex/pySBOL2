@@ -457,19 +457,19 @@ class TestFloatProperty(unittest.TestCase):
         # Make sure we can set a FloatProperty via a variety of types
         # that can be coerced to float
         m = sbol2.Measurement('m1')
-        self.assertEqual(0.0, m.numericalValue)
+        self.assertEqual(0.0, m.value)
         # set with float
         v = 2.54
-        m.numericalValue = v
-        self.assertEqual(v, m.numericalValue)
+        m.value = v
+        self.assertEqual(v, m.value)
         # set with string
         v = '1.37'
-        m.numericalValue = v
-        self.assertEqual(float(v), m.numericalValue)
+        m.value = v
+        self.assertEqual(float(v), m.value)
         # set with int
         v = 15
-        m.numericalValue = v
-        self.assertEqual(float(v), m.numericalValue)
+        m.value = v
+        self.assertEqual(float(v), m.value)
 
     def test_init_store(self):
         # Ensure that property constructors initialize the parent

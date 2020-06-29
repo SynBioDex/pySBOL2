@@ -37,7 +37,7 @@ class TestMeasurement(unittest.TestCase):
         # Expecting this to be a Measure, for starters
         # This wasn't the case, see issue #304
         self.assertTrue(isinstance(measure, sbol2.Measurement))
-        self.assertEqual(0.04, measure.numericalValue)
+        self.assertEqual(0.04, measure.value)
         self.assertEqual('http://purl.obolibrary.org/obo/UO_0000077', measure.unit)
 
 
