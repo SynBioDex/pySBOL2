@@ -17,8 +17,8 @@ class ComponentInstance(Identified):
         self.access = URIProperty(self, SBOL_ACCESS, '0', '1', [], access)
         self.mapsTos = OwnedObject(self, SBOL_MAPS_TOS, MapsTo,
                                    '0', '*', [])
-        self.measures = OwnedObject(self, SBOL_MEASUREMENTS, Measurement,
-                                    '0', '*', [])
+        self.measurements = OwnedObject(self, SBOL_MEASUREMENTS, Measurement,
+                                        '0', '*', [])
 
 
 class Component(ComponentInstance):

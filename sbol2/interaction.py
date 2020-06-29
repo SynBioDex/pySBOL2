@@ -21,5 +21,5 @@ class Interaction(Identified):
         self.participations = OwnedObject(self, SBOL_PARTICIPATIONS,
                                           Participation,
                                           '0', '*', [])
-        self.measures = OwnedObject(self, SBOL_MEASUREMENTS,
-                                    Measurement, '0', '*', [])
+        self.measurements = OwnedObject(self, SBOL_MEASUREMENTS,
+                                        Measurement, '0', '*', [])

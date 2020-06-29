@@ -15,8 +15,8 @@ class Participation(Identified):
         self.participant = ReferencedObject(self, SBOL_PARTICIPANT,
                                             SBOL_FUNCTIONAL_COMPONENT,
                                             '1', '1', [], participant)
-        self.measures = OwnedObject(self, SBOL_MEASUREMENTS,
-                                    Measurement, '0', '*', [])
+        self.measurements = OwnedObject(self, SBOL_MEASUREMENTS,
+                                        Measurement, '0', '*', [])
 
     def addRole(self, new_role):
         val = self.roles

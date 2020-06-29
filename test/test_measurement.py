@@ -31,14 +31,14 @@ class TestMeasurement(unittest.TestCase):
         md = doc.getModuleDefinition(md_uri)
         interaction_uri = 'http://www.async.ece.utah.edu/md/i'
         interaction = md.interactions.get(interaction_uri)
-        measure_uri = 'http://www.async.ece.utah.edu/md/i/i_measure'
-        measure = interaction.measures.get(measure_uri)
-        self.assertIsNotNone(measure)
+        measurement_uri = 'http://www.async.ece.utah.edu/md/i/i_measure'
+        measurement = interaction.measurements.get(measurement_uri)
+        self.assertIsNotNone(measurement)
         # Expecting this to be a Measure, for starters
         # This wasn't the case, see issue #304
-        self.assertTrue(isinstance(measure, sbol2.Measurement))
-        self.assertEqual(0.04, measure.value)
-        self.assertEqual('http://purl.obolibrary.org/obo/UO_0000077', measure.unit)
+        self.assertTrue(isinstance(measurement, sbol2.Measurement))
+        self.assertEqual(0.04, measurement.value)
+        self.assertEqual('http://purl.obolibrary.org/obo/UO_0000077', measurement.unit)
 
 
 if __name__ == '__main__':
