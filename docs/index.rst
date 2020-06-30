@@ -13,12 +13,10 @@ and constructing genetic designs according to the standardized specifications of
 
    introduction
    installation
-   testing_instructions
    getting_started
    repositories
    sbol_examples
    dbtl
-   API
 
 
 Indices and tables

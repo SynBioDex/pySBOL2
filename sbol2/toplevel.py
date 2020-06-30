@@ -32,7 +32,7 @@ class TopLevel(Identified):
     def generateTopLevel(self, uri, agent=None, plan=None, usages=None):
         """
         :param uri: A URI for the new object, or a displayId if operating
-        in SBOLCompliant mode
+                    in SBOLCompliant mode
         :return:
         """
         # TODO this originally was called 'generate' but

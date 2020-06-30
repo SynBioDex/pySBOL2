@@ -1,13 +1,13 @@
 Computer-aided Design for Synthetic Biology
 ===========================================
 
-See `Full Example Code <https://pysbol2.readthedocs.io/en/latest/sbol_examples.html#id2>`_ for full example code.
+See `Full Example Code <#id1>`_ for full example code.
 
 ---------------------------------
 Design Abstraction
 ---------------------------------
 
-An advantage of the SBOL data format over GenBank is the ability to represent DNA as abstract components without specifying an exact sequence. An **abstract design** can be used as a template, with sequence information filled in later. In SBOL, a ComponentDefinition represents a biological component whose general function is known while its sequence is currently either unknown or unspecified. The intended function of the component is specified using a descriptive term from the Sequence Ontology (SO), a standard vocabulary for describing genetic parts. As the following example shows, some common SO terms are built in to PySBOL as pre-defined constants (see `constants.h <https://github.com/SynBioDex/libSBOL/blob/master/source/constants.h>`_). This code example defines the new component as a gene by setting its `roles` property to the SO term for `gene`.  Other terms may be found by browsing the `Sequence Ontology <http://www.sequenceontology.org/browser/obob.cgi>`_ online.
+An advantage of the SBOL data format over GenBank is the ability to represent DNA as abstract components without specifying an exact sequence. An **abstract design** can be used as a template, with sequence information filled in later. In SBOL, a ComponentDefinition represents a biological component whose general function is known while its sequence is currently either unknown or unspecified. The intended function of the component is specified using a descriptive term from the Sequence Ontology (SO), a standard vocabulary for describing genetic parts. As the following example shows, some common SO terms are built in to PySBOL2 as pre-defined constants (see `constants.py <https://github.com/SynBioDex/pySBOL2/blob/master/sbol2/constants.py>`_). This code example defines the new component as a gene by setting its `roles` property to the SO term for `gene`.  Other terms may be found by browsing the `Sequence Ontology <http://www.sequenceontology.org/browser/obob.cgi>`_ online.
 
 .. code:: python
 
@@ -17,13 +17,13 @@ An advantage of the SBOL data format over GenBank is the ability to represent DN
 
 .. end
 
-**Design abstraction** is an important engineering principle for synthetic biology. Abstraction enables the engineer to think at a high-level about functional characteristics of a system while hiding low-level physical details. For example, in electronics, abstract schematics are used to describe the function of a circuit, while hiding the physical details of how a printed circuit board is laid out. Computer-aided design (CAD) programs allow the engineer to easily switch back and forth between abstract and physical representations of a circuit. In the same spirit, PySBOL enables a CAD approach for designing genetic constructs and other forms of synthetic biology.
+**Design abstraction** is an important engineering principle for synthetic biology. Abstraction enables the engineer to think at a high-level about functional characteristics of a system while hiding low-level physical details. For example, in electronics, abstract schematics are used to describe the function of a circuit, while hiding the physical details of how a printed circuit board is laid out. Computer-aided design (CAD) programs allow the engineer to easily switch back and forth between abstract and physical representations of a circuit. In the same spirit, PySBOL2 enables a CAD approach for designing genetic constructs and other forms of synthetic biology.
 
 -------------------------------
 Hierarchical DNA Assembly
 -------------------------------
 
-PySBOL also includes methods for assembling biological components (also referred to as biological parts in the synthetic biology literature) into **abstraction hierarchies**. Abstraction hierarchies are important from an engineering perspective because they allow engineers to assemble complicated systems from more basic components. Abstraction hierarchies are also important from a biological perspective, because DNA sequences and biological structures in general exhibit hierarchical organization, from the genome, to operons, to genes, to lower level genetic operators. The following code assembles an abstraction hierarchy that describes a gene cassette. Note that subcomponents must belong to a `Document` in order to be assembled, so a `Document` is passed as a parameter.
+PySBOL2 also includes methods for assembling biological components (also referred to as biological parts in the synthetic biology literature) into **abstraction hierarchies**. Abstraction hierarchies are important from an engineering perspective because they allow engineers to assemble complicated systems from more basic components. Abstraction hierarchies are also important from a biological perspective, because DNA sequences and biological structures in general exhibit hierarchical organization, from the genome, to operons, to genes, to lower level genetic operators. The following code assembles an abstraction hierarchy that describes a gene cassette. Note that subcomponents must belong to a `Document` in order to be assembled, so a `Document` is passed as a parameter.
 
 The gene cassette below is composed of genetic subcomponents including a promoter, ribosome binding site (RBS), coding sequence (CDS), and transcriptional terminator, expressed in SBOL Visual schematic glyphs. The next example demonstrates how an abstract design for this gene is assembled from its subcomponents.
 
@@ -43,6 +43,7 @@ After creating an abstraction hierarchy, it is then possible to iterate through 
 This returns a list of `ComponentDefinitions` arranged in their primary sequence. Occasionally it is also helpful to get `Components` arranged in their primary sequence as well. Note that the example below produces the same output as the example above, and may be helpful for understanding the relationship between `Components` and `ComponentDefinitions`.
 
 .. code:: python
+
     for component in gene.getPrimaryStructureComponents():
         print (component.definition)
 .. end
@@ -76,7 +77,7 @@ Given an abstract representation of a primary structure as above, it is possible
 Sequence Assembly
 -------------------------------
 
-A **complete design** adds explicit sequence information to the components in a **template design** or **abstraction hierarchy**. In order to complete a design, `Sequence` objects must first be created and associated with the promoter, CDS, RBS, terminator subcomponents. In contrast to the `ComponentDefinition.assemble() <https://pysbol2.readthedocs.io/en/latest/API.html#sbol.pySBOL.ComponentDefinition.assemble>`_ method, which assembles a template design, the `ComponentDefinition.compile` method recursively generates the complete sequence of a hierarchical design from the sequence of its subcomponents. Compiling a DNA sequence is analogous to a programmer compiling their code. In order to `compile` a `ComponentDefinition`, you must first assemble a template design from `ComponentDefinitions`, as described in the previous section.
+A **complete design** adds explicit sequence information to the components in a **template design** or **abstraction hierarchy**. In order to complete a design, `Sequence` objects must first be created and associated with the promoter, CDS, RBS, terminator subcomponents. In contrast to the `ComponentDefinition.assemble() <autoapi/sbol2/componentdefinition/index.html#sbol2.componentdefinition.ComponentDefinition.assemble>`_ method, which assembles a template design, the `ComponentDefinition.compile` method recursively generates the complete sequence of a hierarchical design from the sequence of its subcomponents. Compiling a DNA sequence is analogous to a programmer compiling their code. In order to `compile` a `ComponentDefinition`, you must first assemble a template design from `ComponentDefinitions`, as described in the previous section.
 
 .. code:: python 
 
@@ -110,7 +111,7 @@ Full example code is provided below, which will create a file called "gene_casse
 
 .. code:: python
 
-    from sbol import *
+    from sbol2 import *
 
     setHomespace('http://sys-bio.org')
     doc = Document()
