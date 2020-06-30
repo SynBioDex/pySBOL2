@@ -22,6 +22,4 @@ class Interaction(Identified):
                                           Participation,
                                           '0', '*', [])
         self.measurements = OwnedObject(self, SBOL_MEASUREMENTS,
-                                        Measurement,
-                                        '0', '*', [])
-        # TODO hidden properties
+                                        Measurement, '0', '*', [])

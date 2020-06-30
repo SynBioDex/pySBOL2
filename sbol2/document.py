@@ -6,7 +6,6 @@ import time
 from typing import Any, Dict, Mapping, Union
 import warnings
 
-import rdflib
 from rdflib import URIRef
 
 from . import SBOL2Serialize
@@ -29,6 +28,7 @@ from .implementation import Implementation
 from .interaction import Interaction
 from .location import Location, Range, Cut, GenericLocation
 from .mapsto import MapsTo
+from .measurement import Measurement
 from .model import Model
 from .module import Module
 from .moduledefinition import ModuleDefinition
@@ -92,7 +92,8 @@ class Document(Identified):
         URIRef(SYSBIO_ANALYSIS): Analysis,
         URIRef(SYSBIO_SAMPLE_ROSTER): SampleRoster,
         URIRef(SBOL_EXPERIMENT): Experiment,
-        URIRef(SBOL_EXPERIMENTAL_DATA): ExperimentalData
+        URIRef(SBOL_EXPERIMENTAL_DATA): ExperimentalData,
+        URIRef(OM_MEASURE): Measurement
     }
 
     def __init__(self, filename=None):

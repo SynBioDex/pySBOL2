@@ -25,7 +25,6 @@ class TestMeasurement(unittest.TestCase):
         measurement.removeType(1)
         self.assertEqual([sbol2.BIOPAX_DNA, sbol2.BIOPAX_COMPLEX], measurement.types)
 
-    @unittest.expectedFailure  # See issue #304
     def test_read(self):
         doc = sbol2.Document(MEASURE_LOCATION)
         md_uri = 'http://www.async.ece.utah.edu/md'
@@ -38,6 +37,8 @@ class TestMeasurement(unittest.TestCase):
         # Expecting this to be a Measurement, for starters
         # This wasn't the case, see issue #304
         self.assertTrue(isinstance(measurement, sbol2.Measurement))
+        self.assertEqual(0.04, measurement.value)
+        self.assertEqual('http://purl.obolibrary.org/obo/UO_0000077', measurement.unit)
 
 
 if __name__ == '__main__':
