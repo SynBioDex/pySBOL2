@@ -34,7 +34,7 @@ extensions = [
     'autoapi.extension',
 ]
 
-autoapi_dirs = ['../sbol2', '../examples']
+autoapi_dirs = ['../sbol2']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
