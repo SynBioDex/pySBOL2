@@ -1,15 +1,15 @@
 Getting Started with SBOL
 =============================
 
-This beginner’s guide introduces the basic principles of pySBOL for new users. Most of the examples discussed in this guide are excerpted from the example script. The objective of this documentation is to familiarize users with the basic patterns of the API. For more comprehensive documentation about the API, refer to documentation about specific classes and methods. 
+This beginner’s guide introduces the basic principles of pySBOL2 for new users. Most of the examples discussed in this guide are excerpted from the example script. The objective of this documentation is to familiarize users with the basic patterns of the API. For more comprehensive documentation about the API, refer to documentation about specific classes and methods. 
 
-The class structure and data model for the API is based on the Synthetic Biology Open Language. For more detail about the SBOL standard, visit `sbolstandard.org <http://sbolstandard.org>`_ or refer to the `specification document <http://sbolstandard.org/wp-content/uploads/2018/01/BBF-RFC114-SBOL2.2.0.pdf/>`_. This document provides diagrams and description of all the standard classes and properties that comprise SBOL. 
+The class structure and data model for the API is based on the Synthetic Biology Open Language. For more detail about the SBOL standard, visit `sbolstandard.org <https://sbolstandard.org>`_ or refer to the `specification document <https://sbolstandard.org/wp-content/uploads/2016/06/SBOL2.3.0.pdf>`_. This document provides diagrams and description of all the standard classes and properties that comprise SBOL. 
 
 -------------------------
 Creating an SBOL Document
 -------------------------
 
-In a previous era, engineers might sit at a drafting board and draft a design by hand. The engineer's drafting sheet in pySBOL is called a Document. The Document serves as a container, initially empty, for SBOL data objects which represent elements of a biological design. Usually the first step is to construct a Document in which to put your objects. All file I/O operations are performed on the Document. The ``read`` and ``write`` methods are used for reading and writing files in SBOL format.
+In a previous era, engineers might sit at a drafting board and draft a design by hand. The engineer's drafting sheet in pySBOL2 is called a Document. The Document serves as a container, initially empty, for SBOL data objects which represent elements of a biological design. Usually the first step is to construct a Document in which to put your objects. All file I/O operations are performed on the Document. The Document `read <autoapi/sbol2/document/index.html#sbol2.document.Document.read>`_ and `write <autoapi/sbol2/document/index.html#sbol2.document.Document.write>`_ methods are used for reading and writing files in SBOL format.
 
 .. code:: python
 
@@ -19,7 +19,7 @@ In a previous era, engineers might sit at a drafting board and draft a design by
 
 .. end
 
-Reading a Document will wipe any existing contents clean before import. However, you can import objects from multiple files into a single Document object using `Document.append() <https://pysbol2.readthedocs.io/en/latest/API.html#sbol.libsbol.Document.append>`_. This can be advantageous when you want to integrate multiple objects from different files into a single design. This kind of data integration is an important and useful feature of SBOL.
+Reading a Document will wipe any existing contents clean before import. However, you can import objects from multiple files into a single Document object using `Document.append() <autoapi/sbol2/document/index.html#sbol2.document.Document.append>`_. This can be advantageous when you want to integrate multiple objects from different files into a single design. This kind of data integration is an important and useful feature of SBOL.
 
 A Document may contain different types of SBOL objects, including ComponentDefinitions, ModuleDefinitions, Sequences, and Models. These objects are collectively referred to as TopLevel objects because they can be referenced directly from a Document. The total count of objects contained in a Document is determined using the ``len`` function. To view an inventory of objects contained in the Document, simply ``print`` it.
 
@@ -28,25 +28,27 @@ A Document may contain different types of SBOL objects, including ComponentDefin
     >>> len(doc)
     31
     >>> print(doc)
-    Attachment....................0
-    Collection....................0
-    CombinatorialDerivation.......0
-    ComponentDefinition...........25
-    Implementation................0
-    Model.........................0
-    ModuleDefinition..............2
-    Sequence......................4
-    Analysis......................0
-    Build.........................0
     Design........................0
-    SampleRoster..................0
+    Build.........................0
     Test..........................0
+    Analysis......................0
+    ComponentDefinition...........25
+    ModuleDefinition..............2
+    Model.........................0
+    Sequence......................4
+    Collection....................0
     Activity......................0
-    Agent.........................0
     Plan..........................0
+    Agent.........................0
+    Attachment....................0
+    CombinatorialDerivation.......0
+    Implementation................0
+    SampleRoster..................0
+    Experiment....................0
+    ExperimentalData..............0
     Annotation Objects............0
     ---
-    Total.........................31
+    Total: .........................31
 
 .. end
 
@@ -68,14 +70,20 @@ Each SBOL object in a Document is uniquely identified by a special string of cha
 These objects are sorted into object stores based on the type of object. For example to view ``ComponentDefinition`` objects specifically, iterate through the `Document.componentDefinitions` store:
 
 .. code:: python
+
   >>> for cd in doc.componentDefinitions:
   ...     print(cd)
   ...
+
 .. end
 
-Similarly, you can iterate through `Document.moduleDefinitions <https://pysbol2.readthedocs.io/en/latest/API.html#sbol.libsbol.Document.getModuleDefinition>`_, `Document.sequences <https://pysbol2.readthedocs.io/en/latest/API.html#sbol.libsbol.Document.getSequence>`_, `Document.models <https://pysbol2.readthedocs.io/en/latest/API.html#sbol.libsbol.Document.getModel>`_, or any top level object. The last type of object, Annotation Objects is a special case which will be discussed later.
+Similarly, you can iterate through
+`Document.moduleDefinitions <autoapi/sbol2/document/index.html#sbol2.document.Document.getModuleDefinition>`_,
+`Document.sequences <autoapi/sbol2/document/index.html#sbol2.document.Document.getSequence>`_,
+`Document.models <autoapi/sbol2/document/index.html#sbol2.document.Document.getModel>`_,
+or any top level object. The last type of object, Annotation Objects is a special case which will be discussed later.
 
-These URIs are said to be **sbol-compliant**. An sbol-compliant URI consists of a scheme, a namespace, a local identifier (also called a ``displayId``), and a version number. In this tutorial, we use URIs of the type ``http://sbols.org/CRISPR_Example/my_obj/1.0.0.0``, where the scheme is indicated by ``http://``, the namespace is ``http://sbols.org/CRISPR_Example``, the local identifier is ``my_object``, and the version is ``1.0.0``. SBOL-compliant URIs enable shortcuts that make the pySBOL API easier to use and are enabled by default. However, users are not required to use sbol-compliant URIs if they don't want to, and this option can be turned off.
+These URIs are said to be **sbol-compliant**. An sbol-compliant URI consists of a scheme, a namespace, a local identifier (also called a ``displayId``), and a version number. In this tutorial, we use URIs of the type ``http://sbols.org/CRISPR_Example/my_obj/1.0.0``, where the scheme is indicated by ``http://``, the namespace is ``http://sbols.org/CRISPR_Example``, the local identifier is ``my_object``, and the version is ``1.0.0``. SBOL-compliant URIs enable shortcuts that make the pySBOL2 API easier to use and are enabled by default. However, users are not required to use sbol-compliant URIs if they don't want to, and this option can be turned off.
 
 Based on our inspection of objects contained in the Document above, we can see that these objects were all created in the namespace ``http://sbols.org/CRISPR_Example``. Thus, in order to take advantage of SBOL-compliant URIs, we set an environment variable that configures this namespace as the default. In addition we set some other configuration options.
 
@@ -95,11 +103,11 @@ Biological designs can be described with SBOL data objects, including both struc
 
 In the official SBOL specification document, classes and their properties are represented as box diagrams. Each box represents an SBOL class and its attributes. Following is an example of the diagram for the ComponentDefinition class which will be referred to in later sections. These class diagrams follow conventions of the Unified Modeling Language.
 
-.. figure:: ../component_definition_uml.png
+.. figure:: component_definition_uml.png
     :align: center
     :figclass: align-center
 
-As introduced in the previous section, SBOL objects are identified by a uniform resource identifier (URI). When a new object is constructed, the user must assign a unique identity. The identity is ALWAYS the first argument supplied to the constructor of an SBOL object. Depending on which configuration options for pySBOL are specified, different algorithms are applied to form the complete URI of the object. The following examples illustrate these different configuration options.
+As introduced in the previous section, SBOL objects are identified by a uniform resource identifier (URI). When a new object is constructed, the user must assign a unique identity. The identity is ALWAYS the first argument supplied to the constructor of an SBOL object. Depending on which configuration options for pySBOL2 are specified, different algorithms are applied to form the complete URI of the object. The following examples illustrate these different configuration options.
 
 The first set of configuration options demonstrates 'open-world' mode, which means that URIs are explicitly specified in full by the user, and the user is free to use whatever convention or conventions they want to form URIs. Open-world configuration can be useful sometimes when integrating data objects derived from multiple files or web resources, because it makes no assumptions about the format of URIs.
 
@@ -168,11 +176,11 @@ Constructors for SBOL objects follow a fairly predictable pattern. The first arg
 Using Ontology Terms for Attribute Values
 -----------------------------------------
 
-Notice the ``ComponentDefinition.types`` attribute is specified using a predefined constant. The ``ComponentDefinition.types`` property is one of many SBOL attributes that uses ontology terms as property values.  The ``ComponentDefinition.types`` property uses the `BioPax ontology <https://bioportal.bioontology.org/ontologies/BP/?p=classes&conceptid=root>` to be specific. Ontologies are standardized, machine-readable vocabularies that categorize concepts within a domain of scientific study. The SBOL 2.0 standard unifies many different ontologies into a high-level, object-oriented model.
+Notice the ``ComponentDefinition.types`` attribute is specified using a predefined constant. The ``ComponentDefinition.types`` property is one of many SBOL attributes that uses ontology terms as property values.  The ``ComponentDefinition.types`` property uses the `BioPax ontology <https://bioportal.bioontology.org/ontologies/BP/?p=classes&conceptid=root>`_ to be specific. Ontologies are standardized, machine-readable vocabularies that categorize concepts within a domain of scientific study. The SBOL 2.0 standard unifies many different ontologies into a high-level, object-oriented model.
 
-Ontology terms also take the form of Uniform Resource Identifiers. Many commonly used ontological terms are built-in to pySBOL as predefined constants. If an ontology term is not provided as a built-in constant, its URI can often be found by using an ontology browser tool online. `Browse Sequence Ontology terms here <http://www.sequenceontology.org/browser/obob.cgi> ` and `Systems Biology Ontology terms here <http://www.ebi.ac.uk/sbo/main/tree>`_. While the SBOL specification often recommends particular ontologies and terms to be used for certain attributes, in many cases these are not rigid requirements. The advantage of using a recommended term is that it ensures your data can be interpreted or visualized by other applications that support SBOL. However in many cases an application developer may want to develop their own ontologies to support custom applications within their domain.
+Ontology terms also take the form of Uniform Resource Identifiers. Many commonly used ontological terms are built-in to pySBOL2 as predefined constants. If an ontology term is not provided as a built-in constant, its URI can often be found by using an ontology browser tool online. `Browse Sequence Ontology terms here <http://www.sequenceontology.org/browser/obob.cgi>`_ and `Systems Biology Ontology terms here <http://www.ebi.ac.uk/sbo/main/tree>`_. While the SBOL specification often recommends particular ontologies and terms to be used for certain attributes, in many cases these are not rigid requirements. The advantage of using a recommended term is that it ensures your data can be interpreted or visualized by other applications that support SBOL. However in many cases an application developer may want to develop their own ontologies to support custom applications within their domain.
 
-The following example illustrates how the URIs for ontology terms can be easily constructed, assuming they are not already part of pySBOL's built-in ontology constants.
+The following example illustrates how the URIs for ontology terms can be easily constructed, assuming they are not already part of pySBOL2's built-in ontology constants.
 
 .. code:: python
 
@@ -259,7 +267,7 @@ To set multiple values:
 
 .. end
 
-Although properties such as ``types`` and ``roles`` behave like Python lists in some ways, beware that list operations like ``append`` and ``extend`` do not work directly on these kind of attributes, due to the nature of the C++ bindings. If you need to append values to an attribute, use the following idiom:
+Although properties such as ``types`` and ``roles`` behave like Python lists in some ways, beware that list operations like ``append`` and ``extend`` do not work directly on these kind of attributes, due to the data hiding nature of the bindings. If you need to append values to an attribute, use the following idiom:
 
 .. code:: python
 
@@ -480,4 +488,4 @@ It is possible to convert SBOL to and from other common sequence formats. Conver
 Creating Biological Designs
 ----------------------------------
 
-This concludes the basic methods for manipulating SBOL data structures. Now that you're familiar with these basic methods, you are ready to learn about libSBOL's high-level design interface for synthetic biology. See `SBOL Examples <https://pysbol2.readthedocs.io/en/latest/sbol_examples.html>`_.
+This concludes the basic methods for manipulating SBOL data structures. Now that you're familiar with these basic methods, you are ready to learn about libSBOL's high-level design interface for synthetic biology. See `SBOL Examples <sbol_examples.html>`_.
