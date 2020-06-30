@@ -31,7 +31,10 @@ release = '1.0 beta 7'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    'autoapi.extension',
 ]
+
+autoapi_dirs = ['../sbol2', '../examples']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
