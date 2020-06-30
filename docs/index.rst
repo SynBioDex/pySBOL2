@@ -3,13 +3,13 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to pySBOL's documentation!
+Welcome to pySBOL2's documentation!
 ===================================
-pySBOL is a SWIG-Python wrapper around libSBOL, a module for reading, writing, 
+pySBOL2 is a Python  module for reading, writing,
 and constructing genetic designs according to the standardized specifications of the Synthetic Biology Open Language (SBOL).
 
 .. toctree::
-   :maxdepth: 10
+   :maxdepth: 2
 
    introduction
    installation
