@@ -333,19 +333,19 @@ Some SBOL objects point to other objects by way of URI references. For example, 
 
     >>> eyfp_gene = ComponentDefinition('EYFPGene', BIOPAX_DNA)
     >>> seq = Sequence('EYFPSequence', 'atgnnntaa', SBOL_ENCODING_IUPAC)
-    >>> eyfp_gene.sequence = seq
-    >>> print (eyfp_gene.sequence)
-    'http://sbols.org/Sequence/EYFPSequence/1.0.0'
+    >>> eyfp_gene.sequences = seq
+    >>> print(eyfp_gene.sequences)
+    ['http://examples.org/Sequence/EYFPSequence/1']
 
 .. end
 
-Note that assigning the ``seq`` object to the ``eyfp_gene.sequence`` actually results in assignment of the object's URI. An equivalent assignment is as follows:
+Note that assigning the ``seq`` object to the ``eyfp_gene.sequences`` actually results in assignment of the object's URI. An equivalent assignment is as follows:
 
 .. code:: python
 
-    >>> eyfp_gene.sequence = seq.identity
-    >>> print (eyfp_gene.sequence)
-    'http://sbols.org/Sequence/EYFPSequence/1.0.0'
+    >>> eyfp_gene.sequences = seq.identity
+    >>> print (eyfp_gene.sequences)
+    ['http://examples.org/Sequence/EYFPSequence/1']
 
 .. end
 
