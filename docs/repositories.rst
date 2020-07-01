@@ -8,7 +8,7 @@ Re-using Genetic Parts From Online Repositories
 In today's modern technological society, a variety of interesting technologies can be assembled from 
 "off-the-shelf" components, including cars, computers, and airplanes. Synthetic biology is inspired by a similar idea. Synthetic biologists aim to program new biological functions into organisms by assembling genetic code from off-the-shelf DNA sequences. PySBOL2 puts an inventory of biological parts at your fingertips.
 
-For example, the `iGEM Registry of Standard Biological Parts <http://parts.igem.org/Main_Page>`_ is an online resource that many synthetic biologists are familiar with.  The Registry is an online database that catalogs a vast inventory of genetic parts, mostly contributed by students in the iGEM competition. These parts are now available in SBOL format in the `SynBioHub <http://synbiohub.org>`_ knowledgebase, hosted by Newcastle University. The code example below demonstrates how a programmer can access these data.
+For example, the `iGEM Registry of Standard Biological Parts <http://parts.igem.org/Main_Page>`_ is an online resource that many synthetic biologists are familiar with.  The Registry is an online database that catalogs a vast inventory of genetic parts, mostly contributed by students in the iGEM competition. These parts are now available in SBOL format in the `SynBioHub <https://synbiohub.org>`_ knowledgebase, hosted by Newcastle University. The code example below demonstrates how a programmer can access these data.
 
 The following code example shows how to pull data about biological components from the SynBioHub repository. In order to pull a part, simply locate the web address of that part by browsing the SynBioHub repository online. Alternatively, pySBOL2 also supports programmatic querying of SynBioHub (see below).
 
@@ -123,7 +123,7 @@ Finally, the **advanced search** allows the user to configure a search with mult
 Submitting Designs to a Repo
 ----------------------------
 
-Users can submit their SBOL data directly to a ``PartShop`` using the pySBOL2 API. This is important, so that  synthetic biologists may reuse the data and build off each other's work. Submitting to a repository is also important for reproducing published scientific work. The synthetic biology journal ACS Synthetic Biology now encourages authors to submit SBOL data about their genetically engineered DNA to a repository like `SynBioHub <https://synbiohub.org>`_. In order to submit to a ``PartShop`` remotely, the user must first vist the appropriate website and register. Once the user has established an account, they can then log in remotely using pySBOL2.
+Users can submit their SBOL data directly to a ``PartShop`` using the pySBOL2 API. This is important, so that  synthetic biologists may reuse the data and build off each other's work. Submitting to a repository is also important for reproducing published scientific work. The synthetic biology journal ACS Synthetic Biology now encourages authors to submit SBOL data about their genetically engineered DNA to a repository like `SynBioHub <https://synbiohub.org>`__. In order to submit to a ``PartShop`` remotely, the user must first vist the appropriate website and register. Once the user has established an account, they can then log in remotely using pySBOL2.
 
 .. code:: python
 

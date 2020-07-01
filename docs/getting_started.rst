@@ -233,10 +233,12 @@ Getting, Setting, and Editing Attributes
 The attributes of an SBOL object can be accessed like other Python class objects, with a few special considerations. For example, to get the values of the ``displayId`` and ``identity`` properties of any object :
 
 .. code:: python
+
     >>> print(cas9.displayId)
     >>> print(cas9.identity)
 
 .. end
+
 Note that ``displayId`` gives only the shorthand, local identifier for the object, while the ``identity`` property gives the full URI.
 
 The attributes above return singleton values. Some attributes, like ``ComponentDefinition.roles`` and ``ComponentDefinition.types`` support multiple values. Generally these attributes have plural names. If an attribute supports multiple values, then it will return a list. If the attribute has not been assigned any values, it will return an empty list.
