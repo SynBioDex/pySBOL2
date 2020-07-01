@@ -42,3 +42,4 @@
      SynBioDex repository_
    * Bump version number in `setup.py`
    * Bump version number in the `sbol2/__init__.py`
+   * Bump version number in `docs/conf.py`
