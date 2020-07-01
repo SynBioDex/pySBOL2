@@ -6,13 +6,13 @@ Re-using Genetic Parts From Online Repositories
 -----------------------------------------------
 
 In today's modern technological society, a variety of interesting technologies can be assembled from 
-"off-the-shelf" components, including cars, computers, and airplanes. Synthetic biology is inspired by a similar idea. Synthetic biologists aim to program new biological functions into organisms by assembling genetic code from off-the-shelf DNA sequences. PySBOL puts an inventory of biological parts at your fingertips.
+"off-the-shelf" components, including cars, computers, and airplanes. Synthetic biology is inspired by a similar idea. Synthetic biologists aim to program new biological functions into organisms by assembling genetic code from off-the-shelf DNA sequences. PySBOL2 puts an inventory of biological parts at your fingertips.
 
 For example, the `iGEM Registry of Standard Biological Parts <http://parts.igem.org/Main_Page>`_ is an online resource that many synthetic biologists are familiar with.  The Registry is an online database that catalogs a vast inventory of genetic parts, mostly contributed by students in the iGEM competition. These parts are now available in SBOL format in the `SynBioHub <http://synbiohub.org>`_ knowledgebase, hosted by Newcastle University. The code example below demonstrates how a programmer can access these data.
 
-The following code example shows how to pull data about biological components from the SynBioHub repository. In order to pull a part, simply locate the web address of that part by browsing the SynBioHub repository online. Alternatively, pySBOL also supports programmatic querying of SynBioHub (see below).
+The following code example shows how to pull data about biological components from the SynBioHub repository. In order to pull a part, simply locate the web address of that part by browsing the SynBioHub repository online. Alternatively, pySBOL2 also supports programmatic querying of SynBioHub (see below).
 
-The interface with the SynBioHub repository is represented by a ``PartShop`` object. The following code retrieves parts corresponding to promoter, coding sequence (CDS), ribosome binding site (RBS), and transcriptional terminator. These parts are imported into a ``Document`` object, which must be initialized first. See `Getting Started with SBOL <https://pysbol2.readthedocs.io/en/latest/getting_started.html>`_ for more about creating ``Documents``. A Uniform Resource Identifier (URI) is used to retrieve objects from the ``PartShop``, similar to how URIs are used to retrieve objects from a ``Document`` 
+The interface with the SynBioHub repository is represented by a ``PartShop`` object. The following code retrieves parts corresponding to promoter, coding sequence (CDS), ribosome binding site (RBS), and transcriptional terminator. These parts are imported into a ``Document`` object, which must be initialized first. See `Getting Started with SBOL <getting_started.html>`_ for more about creating ``Documents``. A Uniform Resource Identifier (URI) is used to retrieve objects from the ``PartShop``, similar to how URIs are used to retrieve objects from a ``Document`` 
 
 .. code:: python
 
@@ -34,22 +34,22 @@ Typing full URIs can be tedious. Therefore the ``PartShop`` interface provides a
 
 .. end
 
-The ``pull`` operation will retrieve ``ComponentDefinitions`` and their associated ``Sequence`` objects. Note that the objects are copied into the user's Homespace:
+The ``pull`` operation will retrieve ``ComponentDefinitions`` and their associated ``Sequence`` objects.
 
 .. code:: python
 
     >>> for obj in doc:
-    ...     print obj
+    ...     print(obj)
     ...
-    http://examples.org/Sequence/BBa_R0010_sequence/1
-    http://examples.org/Sequence/BBa_B0012_sequence/1
-    http://examples.org/ComponentDefinition/BBa_E0040/1
-    http://examples.org/ComponentDefinition/BBa_B0012/1
-    http://examples.org/Sequence/BBa_E0040_sequence/1
-    http://examples.org/Activity/igem2sbol/1
-    http://examples.org/ComponentDefinition/BBa_R0010/1
-    http://examples.org/ComponentDefinition/BBa_B0032/1
-    http://examples.org/Sequence/BBa_B0032_sequence/1
+    https://synbiohub.org/public/igem/igem2sbol/1
+    https://synbiohub.org/public/igem/BBa_R0010_sequence/1
+    https://synbiohub.org/public/igem/BBa_R0010/1
+    https://synbiohub.org/public/igem/BBa_B0032/1
+    https://synbiohub.org/public/igem/BBa_B0032_sequence/1
+    https://synbiohub.org/public/igem/BBa_E0040_sequence/1
+    https://synbiohub.org/public/igem/BBa_E0040/1
+    https://synbiohub.org/public/igem/BBa_B0012_sequence/1
+    https://synbiohub.org/public/igem/BBa_B0012/1
 
 .. end
 
@@ -57,7 +57,7 @@ The ``pull`` operation will retrieve ``ComponentDefinitions`` and their associat
 Searching Part Repos
 --------------------
 
-PySBOL supports three kinds of searches: a **general search**, an **exact search**, and an **advanced search**.
+PySBOL2 supports three kinds of searches: a **general search**, an **exact search**, and an **advanced search**.
 
 The following query conducts a **general search** which scans through `identity`, `name`, `description`, and `displayId` properties for a match to the search text, including partial, case-insensitive matches to substrings of the property value. Search results are returned as a `SearchResponse` object.
 
@@ -73,7 +73,7 @@ By default, the general search looks only for ``ComponentDefinitions``, and only
     records = igem.search('plasmid', SBOL_COMPONENT_DEFINITION, 0, 25)
 .. end
 
-Of course, these parameters can be changed to search for different type of SBOL objects or to return more records. For example, some searches may match a large number of objects, more than the specified limit allows. In this case, it is possible to specify an offset and to retrieve additional records in successive requests. The total number of objects in the repository matching the search criteria can be found using the searchCount method, which has the same call signature as the search method. It is a good idea to put a small delay between successive requests to prevent server overload. The following example demonstrates how to do this. The 100 millisecond delay is implemented using cross-platform C++11 headers chrono and thread. As of the writing of this documentation, this call retrieves 391 records.
+Of course, these parameters can be changed to search for different type of SBOL objects or to return more records. For example, some searches may match a large number of objects, more than the specified limit allows. In this case, it is possible to specify an offset and to retrieve additional records in successive requests. The total number of objects in the repository matching the search criteria can be found using the searchCount method, which has the same call signature as the search method. It is a good idea to put a small delay between successive requests to prevent server overload. The following example demonstrates how to do this. As of the writing of this documentation, this call retrieves 391 records.
 
 .. code:: python
 
@@ -102,7 +102,7 @@ The preceding examples concern **general searches**, which scan through an objec
 
 .. code:: python
 
-records = igem.search(SO_PROMOTER, SBOL_COMPONENT_DEFINITION, SBOL_ROLES, 0, 25);
+    records = igem.search(SO_PROMOTER, SBOL_COMPONENT_DEFINITION, SBOL_ROLES, 0, 25);
 .. end
 
 Finally, the **advanced search** allows the user to configure a search with multiple criteria by constructing a ``SearchQuery`` object. The following query looks for promoters that have an additional annotation indicating that the promoter is regulated (as opposed to constitutive):
@@ -123,7 +123,7 @@ Finally, the **advanced search** allows the user to configure a search with mult
 Submitting Designs to a Repo
 ----------------------------
 
-Users can submit their SBOL data directly to a ``PartShop`` using the pySBOL API. This is important, so that  synthetic biologists may reuse the data and build off each other's work. Submitting to a repository is also important for reproducing published scientific work. The synthetic biology journal ACS Synthetic Biology now encourages authors to submit SBOL data about their genetically engineered DNA to a repository like `SynBioHub <https://synbiohub.org>`_. In order to submit to a ``PartShop`` remotely, the user must first vist the appropriate website and register. Once the user has established an account, they can then log in remotely using pySBOL.
+Users can submit their SBOL data directly to a ``PartShop`` using the pySBOL2 API. This is important, so that  synthetic biologists may reuse the data and build off each other's work. Submitting to a repository is also important for reproducing published scientific work. The synthetic biology journal ACS Synthetic Biology now encourages authors to submit SBOL data about their genetically engineered DNA to a repository like `SynBioHub <https://synbiohub.org>`_. In order to submit to a ``PartShop`` remotely, the user must first vist the appropriate website and register. Once the user has established an account, they can then log in remotely using pySBOL2.
 
 .. code:: python
 

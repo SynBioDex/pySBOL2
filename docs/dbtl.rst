@@ -1,14 +1,14 @@
 Design-Build-Test-Learn Workflows
 =================================
 
-PySBOL can be used to manage computational and experimental workflows for synthetic biology. The API is based on the design-build-test-learn (DBTL) method for engineering problem solving. These workflows involve the following types of objects:
+PySBOL2 can be used to manage computational and experimental workflows for synthetic biology. The API is based on the design-build-test-learn (DBTL) method for engineering problem solving. These workflows involve the following types of objects:
 
 * A ``Design`` is a conceptual representation of a biological system that a synthetic biologist intends to implement in the lab. A ``Design`` may describe both structural composition or the intended function of a biological system. In more traditional engineering terms, a ``Design`` is analogous to a draft or blueprint, but is a purely digital representation
 * A ``Build`` describes an actual, physical sample in the laboratory. A DNA construct is the most common example of a ``Build`` in synthetic biology, but the definition can be extended to represent any kind of physical sample, including cells and reagents. A ``Build`` may be linked to a laboratory information management system using SBOL.
 * A ``Test`` is a wrapper for experimental data files that are produced as a result of an experimental measurement on a ``Build``. As a matter of scientific integrity, unaltered experimental data should and must be preserved. A ``Test`` object provides a link to those data.
 * An ``Analysis`` is a wrapper for experimental data that has been processed or transformed. Common data transformations include subtracting background signal ("blanking"), log transformations, and model-fitting.
 
-Note that these pySBOL classes are not part of the core SBOL standard, but are abstractions provided by the pySBOL interface for the convenience of the user. However, they map closely to the SBOL data model. 
+Note that these pySBOL2 classes are not part of the core SBOL standard, but are abstractions provided by the pySBOL2 interface for the convenience of the user. However, they map closely to the SBOL data model. 
 
 In order to organize and track data as a workflow proceeds, a user can create objects and link them together using ``Activity`` objects. An ``Activity`` uses certain types of objects as inputs and generates new objects. For example, under the DBTL formalization a ``Design`` is used to generate a ``Build``. This implies that a digital blueprint for a biological system has been realized as a real construct the laboratory. If an experimental measurement is performed subsequently, via an experiment ``Activity``, a ``Test`` object is generated. A ``Test`` performs measurement on ``Builds``. Finally an ``Analysis`` may use the raw experimental data represented by a ``Test`` object. Thus, objects are created in a logical order that conforms to the DBTL formalism.  This pattern is represented in the UML class diagram below.
 
@@ -32,7 +32,7 @@ Branching and intersecting workflows are other common patterns of usage. For exa
 
 .. code:: python
 
-	from sbol import *
+	from sbol2 import *
 
 	doc=Document()
 	setHomespace('https://sys-bio.org')
