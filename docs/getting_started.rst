@@ -477,14 +477,34 @@ In the examples above, the ``copy`` method returns a new ``Document``. However, 
 Converting To and From Other Sequence Formats
 ---------------------------------------------
 
-It is possible to convert SBOL to and from other common sequence formats. Conversion is performed by calling the `online converter tool  <https://validator.sbolstandard.org/>`_ , so an internet connection is required. Currently the supported formats are `SBOL2`, `SBOL1`, `FASTA`, `GenBank`, and `GFF3`. The following example illustrates how to import and export to these different formats. Note that conversion can be lossy.
+It is possible to convert SBOL to and from other common sequence
+formats. Conversion is performed by calling the `online converter tool
+<https://validator.sbolstandard.org/>`_ , so an internet connection is
+required. Currently the supported formats are `SBOL2`, `SBOL1`,
+`FASTA`, `GenBank`, and `GFF3`. The following example illustrates how
+to export these different formats. Note that conversion can be lossy.
+
+.. TODO: Add example of importFromFormat. See Issue #329
+..   * Add "and import" to the sentence above
+..   * Add to the example below
+..  >>> doc.importFromFormat('GenBank', 'parts.gb')
+
+This example uses
+`parts.xml <https://raw.githubusercontent.com/SynBioDex/pySBOL2/master/test/resources/tutorial/parts.xml>`_
+from the pySBOL2 repository.
 
 .. code:: python
 
-  >>> doc.exportToFormat('GenBank', 'crispr_example_out.gb')
-  >>> doc.importFromFormat('GenBank', 'crispr_example_out.gb')
+  >>> from sbol2 import *
+  RDFLib Version: 5.0.0
+  >>> doc = Document('parts.xml')
+  >>> doc.exportToFormat('GenBank', 'parts.gb')
 
 .. end
+
+N.B. Importing from other formats has
+`not been implemented in pySBOL2 <https://github.com/SynBioDex/pySBOL2/issues/329>`_
+yet.
 
 ----------------------------------
 Creating Biological Designs
