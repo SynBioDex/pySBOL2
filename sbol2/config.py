@@ -98,6 +98,11 @@ class Config:
     through the setOptions and getOptions methods.
     """
 
+    # Dictionary which holds builder functions for SBOL objects and which can
+    # be extended with extension classes. The dictionary is populated in
+    # document.py
+    SBOL_DATA_MODEL_REGISTER = {}
+
     @staticmethod
     def setHomespace(ns):
         """Setting the Homespace has several advantages.

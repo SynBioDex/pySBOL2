@@ -46,6 +46,41 @@ from .uridict import URIDict
 
 import requests
 
+Config.SBOL_DATA_MODEL_REGISTER = {
+    URIRef(UNDEFINED): SBOLObject,
+    URIRef(SBOL_IDENTIFIED): Identified,
+    URIRef(SBOL_COMPONENT_DEFINITION): ComponentDefinition,
+    URIRef(SBOL_SEQUENCE_ANNOTATION): SequenceAnnotation,
+    URIRef(SBOL_SEQUENCE): Sequence,
+    URIRef(SBOL_COMPONENT): Component,
+    URIRef(SBOL_FUNCTIONAL_COMPONENT): FunctionalComponent,
+    URIRef(SBOL_MODULE_DEFINITION): ModuleDefinition,
+    URIRef(SBOL_MODULE): Module,
+    URIRef(SBOL_INTERACTION): Interaction,
+    URIRef(SBOL_PARTICIPATION): Participation,
+    URIRef(SBOL_MODEL): Model,
+    URIRef(SBOL_SEQUENCE_CONSTRAINT): SequenceConstraint,
+    URIRef(SBOL_RANGE): Range,
+    URIRef(SBOL_MAPS_TO): MapsTo,
+    URIRef(SBOL_CUT): Cut,
+    URIRef(SBOL_COLLECTION): Collection,
+    URIRef(SBOL_LOCATION): Location,
+    URIRef(SBOL_GENERIC_LOCATION): GenericLocation,
+    URIRef(PROVO_PLAN): Plan,
+    URIRef(PROVO_ACTIVITY): Activity,
+    URIRef(PROVO_AGENT): Agent,
+    URIRef(PROVO_USAGE): Usage,
+    URIRef(PROVO_ASSOCIATION): Association,
+    URIRef(SBOL_ATTACHMENT): Attachment,
+    URIRef(SBOL_COMBINATORIAL_DERIVATION): CombinatorialDerivation,
+    URIRef(SBOL_IMPLEMENTATION): Implementation,
+    URIRef(SYSBIO_DESIGN): Design,
+    URIRef(SYSBIO_ANALYSIS): Analysis,
+    URIRef(SYSBIO_SAMPLE_ROSTER): SampleRoster,
+    URIRef(SBOL_EXPERIMENT): Experiment,
+    URIRef(SBOL_EXPERIMENTAL_DATA): ExperimentalData
+}
+
 
 class Document(Identified):
     """
@@ -59,41 +94,6 @@ class Document(Identified):
     All file I/O operations are performed on the Document
     to populate it with SBOL objects representing design elements.
     """
-
-    SBOL_DATA_MODEL_REGISTER = {
-        URIRef(UNDEFINED): SBOLObject,
-        URIRef(SBOL_IDENTIFIED): Identified,
-        URIRef(SBOL_COMPONENT_DEFINITION): ComponentDefinition,
-        URIRef(SBOL_SEQUENCE_ANNOTATION): SequenceAnnotation,
-        URIRef(SBOL_SEQUENCE): Sequence,
-        URIRef(SBOL_COMPONENT): Component,
-        URIRef(SBOL_FUNCTIONAL_COMPONENT): FunctionalComponent,
-        URIRef(SBOL_MODULE_DEFINITION): ModuleDefinition,
-        URIRef(SBOL_MODULE): Module,
-        URIRef(SBOL_INTERACTION): Interaction,
-        URIRef(SBOL_PARTICIPATION): Participation,
-        URIRef(SBOL_MODEL): Model,
-        URIRef(SBOL_SEQUENCE_CONSTRAINT): SequenceConstraint,
-        URIRef(SBOL_RANGE): Range,
-        URIRef(SBOL_MAPS_TO): MapsTo,
-        URIRef(SBOL_CUT): Cut,
-        URIRef(SBOL_COLLECTION): Collection,
-        URIRef(SBOL_LOCATION): Location,
-        URIRef(SBOL_GENERIC_LOCATION): GenericLocation,
-        URIRef(PROVO_PLAN): Plan,
-        URIRef(PROVO_ACTIVITY): Activity,
-        URIRef(PROVO_AGENT): Agent,
-        URIRef(PROVO_USAGE): Usage,
-        URIRef(PROVO_ASSOCIATION): Association,
-        URIRef(SBOL_ATTACHMENT): Attachment,
-        URIRef(SBOL_COMBINATORIAL_DERIVATION): CombinatorialDerivation,
-        URIRef(SBOL_IMPLEMENTATION): Implementation,
-        URIRef(SYSBIO_DESIGN): Design,
-        URIRef(SYSBIO_ANALYSIS): Analysis,
-        URIRef(SYSBIO_SAMPLE_ROSTER): SampleRoster,
-        URIRef(SBOL_EXPERIMENT): Experiment,
-        URIRef(SBOL_EXPERIMENTAL_DATA): ExperimentalData
-    }
 
     def __init__(self, filename=None):
         """
@@ -522,9 +522,9 @@ class Document(Identified):
     def parse_objects_inner(self, subject, obj):
         # Construct the top-level object if we haven't already done so
         # and its type is something we know about.
-        if subject not in self.SBOLObjects and obj in self.SBOL_DATA_MODEL_REGISTER:
+        if subject not in self.SBOLObjects and obj in Config.SBOL_DATA_MODEL_REGISTER:
             # Call constructor for the appropriate SBOLObject
-            new_obj = self.SBOL_DATA_MODEL_REGISTER[obj]()
+            new_obj = Config.SBOL_DATA_MODEL_REGISTER[obj]()
             if isinstance(new_obj, Identified):
                 # Clear out the version. it will get set later
                 new_obj.version = ''
@@ -548,7 +548,7 @@ class Document(Identified):
             if new_obj.is_top_level():
                 self.owned_objects[new_obj.rdf_type].append(new_obj)
         elif (subject not in self.SBOLObjects
-              and obj not in self.SBOL_DATA_MODEL_REGISTER):
+              and obj not in Config.SBOL_DATA_MODEL_REGISTER):
             # Generic TopLevels
             new_obj = SBOLObject()
             new_obj.identity = subject

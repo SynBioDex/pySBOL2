@@ -8,6 +8,7 @@ from rdflib import URIRef
 
 from .config import getHomespace, string_equal
 from .config import hasHomespace
+from .config import Config
 from .constants import *
 from .property import Property, OwnedObject, URIProperty
 from .sbolerror import SBOLError
@@ -46,7 +47,7 @@ def _compare_owned_objects(obj1, obj2):
     return True
 
 
-class SBOLObject:
+class SBOLObject():
     """An SBOLObject converts a Python data structure into an RDF triple store
      and contains methods for serializing and parsing RDF triples.
     """
@@ -63,7 +64,7 @@ class SBOLObject:
     def _makeQName(self, uri):
         raise NotImplementedError("Not yet implemented")
 
-    def _register_extension_class(self, ns, ns_prefix, class_name):
+    def _register_extension_class(self, namespace, namespace_prefix, cls):
         """Register an extension class and its namespace, so custom data
         can be embedded into and read from SBOL files.
 
@@ -88,7 +89,7 @@ class SBOLObject:
     # see Section 11.2 of the [SBOL specification document
     # (http://sbolstandard.org/wp-content/uploads/2015/08/SBOLv2.0.1.pdf).
 
-    def __init__(self, _rdf_type=rdflib.URIRef(UNDEFINED),
+    def __init__(self, type_uri=rdflib.URIRef(UNDEFINED),
                  uri=rdflib.URIRef("example")):
         """Open-world constructor."""
         self.owned_objects = URIDict()  # map<rdf_type, vector<SBOLObject>>
@@ -97,7 +98,7 @@ class SBOLObject:
         self.parent = None
         self._default_namespace = None
         self._hidden_properties = []
-        self.rdf_type = str(_rdf_type)
+        self.rdf_type = str(type_uri)
         self._namespaces = {}
         self.identity = URIProperty(self, SBOL_IDENTITY, '0', '1',
                                     [validation.sbol_rule_10202])
@@ -105,6 +106,17 @@ class SBOLObject:
         if hasHomespace():
             uri = posixpath.join(getHomespace(), uri)
         self.identity = uri
+
+        print(rdflib.URIRef(type_uri) in Config.SBOL_DATA_MODEL_REGISTER, type_uri)
+        # if _rdf_type in Document.SBOL_DATA_MODEL_REGISTER:
+        #     # Check if this is an extension class that is derived from an SBOL
+        #     # core class (i.e., the user has overrided the default rdftype)
+        #    if issubclass(self.__class__, Document.SBOL_DATA_MODEL_REGISTER[_rdf_type]):
+        #         Config.SBOL_DATA_MODEL_REGISTER[_rdf_type] = self.__class__
+        # else:
+        #     # Register a new extension class
+        #     Document.SBOL_DATA_MODEL_REGISTER[_rdf_type] = self.__class__
+        # self._register_extension_class(self, namespace, namespace_prefix, cls)
 
     @property
     def logger(self):
