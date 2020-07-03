@@ -4,6 +4,7 @@ import warnings
 
 from .sbolerror import SBOLError
 from .sbolerror import SBOLErrorCode
+from rdflib import URIRef
 
 
 class FileFormats(Enum):
@@ -102,6 +103,19 @@ class Config:
     # be extended with extension classes. The dictionary is populated in
     # document.py
     SBOL_DATA_MODEL_REGISTER = {}
+
+    def register_extension_class(cls, type_uri):
+        print(len(Config.SBOL_DATA_MODEL_REGISTER))
+        Config.SBOL_DATA_MODEL_REGISTER[URIRef(type_uri)] = cls
+        print(len(Config.SBOL_DATA_MODEL_REGISTER))
+        # if type_uri not in Config.SBOL_DATA_MODEL_REGISTER:
+        #     # Register a new extension class
+        #     Config.SBOL_DATA_MODEL_REGISTER[type_uri] = cls
+        # else:
+        #     # Check if this is an extension class that is derived from an SBOL
+        #     # core class (i.e., the user has overrided the default rdftype)
+        #    if issubclass(cls, Config.SBOL_DATA_MODEL_REGISTER[type_uri]):
+        #         Config.SBOL_DATA_MODEL_REGISTER[type_uri] = cls
 
     @staticmethod
     def setHomespace(ns):

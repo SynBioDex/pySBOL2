@@ -100,7 +100,7 @@ class ComponentDefinition(TopLevel):
     def __init__(self, uri=URIRef("example"),
                  component_type=URIRef(BIOPAX_DNA),
                  version=VERSION_STRING,
-                 rdf_type=SBOL_COMPONENT_DEFINITION):
+                 type_uri=SBOL_COMPONENT_DEFINITION):
         """Construct a ComponentDefinition.
 
         :param uri: A full URI including a scheme, namespace, and identifier.
@@ -116,7 +116,7 @@ class ComponentDefinition(TopLevel):
         :param rdf_type: The RDF type for an extension class
         derived from this one
         """
-        super().__init__(rdf_type, uri, version)
+        super().__init__(type_uri, uri, version)
         self.types = URIProperty(self, SBOL_TYPES,
                                  '1', '*', None, component_type)
         self.roles = URIProperty(self, SBOL_ROLES,

@@ -427,7 +427,45 @@ class NonTopLevelExtension(sbol2.Identified):
                          type_uri=NonTopLevelExtension.RDF_TYPE)
 
 
+class TopLevelOverrideAndExtension(sbol2.ComponentDefinition):
+
+    def __init__(self, uri='example'):
+        super().__init__(uri=uri,
+                         type_uri=sbol2.SBOL_COMPONENT_DEFINITION)
+
+
 class TestDocumentExtensionObjects(unittest.TestCase):
+
+    def test_register_extension_class(self):
+
+        # Define extension object
+        doc = sbol2.Document()
+        cd = TopLevelOverrideAndExtension('cd')
+        doc.add(cd)
+
+        # Round-trip the extension data
+        doc2 = sbol2.Document()
+        doc2.readString(doc.writeString())
+        cd = doc2.getExtensionObject(cd.identity)
+
+        # Note the extension object's type is not preserved!
+        self.assertIs(type(cd), sbol2.ComponentDefinition)
+        self.assertIsNot(type(cd), TopLevelOverrideAndExtension)
+
+        # Now register the class and attempt to round-trip again
+        doc2 = sbol2.Document()
+        sbol2.Config.register_extension_class(TopLevelOverrideAndExtension,
+                                              sbol2.SBOL_COMPONENT_DEFINITION)
+        doc2.readString(doc.writeString())
+        cd = doc2.getExtensionObject(cd.identity)
+
+        # This time the extension object's type is preserved!
+        self.assertIs(type(cd), TopLevelOverrideAndExtension)
+        self.assertIsNot(type(cd), sbol2.ComponentDefinition)
+
+        # Restore
+        sbol2.Config.register_extension_class(sbol2.ComponentDefinition,
+                                              sbol2.SBOL_COMPONENT_DEFINITION)
 
     def test_get_extension_object(self):
         doc = sbol2.Document(CRISPR_LOCATION)

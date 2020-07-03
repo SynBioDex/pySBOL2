@@ -64,7 +64,7 @@ class SBOLObject():
     def _makeQName(self, uri):
         raise NotImplementedError("Not yet implemented")
 
-    def _register_extension_class(self, namespace, namespace_prefix, cls):
+    def register_extension_class(cls, namespace, namespace_prefix, class_name):
         """Register an extension class and its namespace, so custom data
         can be embedded into and read from SBOL files.
 
@@ -76,6 +76,16 @@ class SBOLObject():
         :param class_name: The extension class name.
         :return: The new class.
         """
+        print(cls)
+        # if type_uri not in Document.SBOL_DATA_MODEL_REGISTER:
+        #     # Register a new extension class
+        #     Document.SBOL_DATA_MODEL_REGISTER[type_uri] = self.__class__
+        # else:
+        #     # Check if this is an extension class that is derived from an SBOL
+        #     # core class (i.e., the user has overrided the default rdftype)
+        #    if issubclass(self.__class__, Document.SBOL_DATA_MODEL_REGISTER[type_uri]):
+        #         Config.SBOL_DATA_MODEL_REGISTER[type_uri] = self.__class__
+        # self._register_extension_class(self, namespace, namespace_prefix, cls)
         raise NotImplementedError("Not yet implemented")
 
     # TODO Docstrings on variables isn't a thing in Python. Consider using Epydoc.
@@ -106,17 +116,6 @@ class SBOLObject():
         if hasHomespace():
             uri = posixpath.join(getHomespace(), uri)
         self.identity = uri
-
-        print(rdflib.URIRef(type_uri) in Config.SBOL_DATA_MODEL_REGISTER, type_uri)
-        # if _rdf_type in Document.SBOL_DATA_MODEL_REGISTER:
-        #     # Check if this is an extension class that is derived from an SBOL
-        #     # core class (i.e., the user has overrided the default rdftype)
-        #    if issubclass(self.__class__, Document.SBOL_DATA_MODEL_REGISTER[_rdf_type]):
-        #         Config.SBOL_DATA_MODEL_REGISTER[_rdf_type] = self.__class__
-        # else:
-        #     # Register a new extension class
-        #     Document.SBOL_DATA_MODEL_REGISTER[_rdf_type] = self.__class__
-        # self._register_extension_class(self, namespace, namespace_prefix, cls)
 
     @property
     def logger(self):
