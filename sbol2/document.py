@@ -207,7 +207,7 @@ class Document(Identified):
         Register an object in the Document.
 
         :param sbol_obj: The SBOL object(s) you want to serialize.
-        Either a single object or a list of objects.
+            Either a single object or a list of objects.
         :return: None
         """
         # Check for uniqueness of URI
@@ -347,7 +347,8 @@ class Document(Identified):
         raise NotImplementedError("Not yet implemented")
 
     def get(self, uri):
-        """
+        """ Finds the SBOL object with the given URI.
+
         :param uri: URI of the extension object
         :type uri: str
         :return: The matching SBOLObject
@@ -966,7 +967,8 @@ class Document(Identified):
 
     @deprecated(reason="Use Document.get() instead")
     def getExtensionObject(self, uri: str) -> SBOLObject:
-        """
+        """*Deprecated.* Use Document.get instead.
+
         :param uri: URI of the extension object
         :type uri: str
         :return: The matching SBOLObject
@@ -978,10 +980,11 @@ class Document(Identified):
     @deprecated(reason="Use Document.add() instead")
     def addExtensionObject(self, obj: SBOLObject) -> None:
         """
+        *Deprecated.* Use Document.add instead.
+
         :param obj: An SBOLObject to add to this document
         :type obj: SBOLObject
         :return: None
-        :rtype: None
         """
         # Just do an add
         self.add(obj)
