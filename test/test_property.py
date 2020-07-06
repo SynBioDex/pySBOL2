@@ -176,8 +176,8 @@ class TestProperty(unittest.TestCase):
         cd.annotations = sbol.property.OwnedObject(cd, annotation_uri, sbol.Identified,
                                                    '0', '*', None)
         self.assertEqual(type(cd.annotations), sbol.property.OwnedObject)
-        cd.annotations.add(sbol.Identified('foo_0'))
-        cd.annotations.add(sbol.Identified('foo_1'))
+        cd.annotations.add(sbol.Identified(uri='foo_0'))
+        cd.annotations.add(sbol.Identified(uri='foo_1'))
         self.assertEqual(type(cd.annotations), sbol.property.OwnedObject)
 
     def test_owned_object_find(self):
