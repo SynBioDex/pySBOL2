@@ -593,6 +593,14 @@ class OwnedObject(Property):
         # Update URI for the argument object and all its children,
         # if SBOL-compliance is enabled.
         sbol_obj.update_uri()
+        # Check that this URI is unique within the object store
+        # See issue #127
+        for obj in object_store:
+            if obj.identity == sbol_obj.identity:
+                raise SBOLError("The object " + sbol_obj.identity +
+                                " is already contained by the " +
+                                self._rdf_type + " property",
+                                SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE)
         # Add to parent object
         object_store.append(sbol_obj)
         # Run validation rules
