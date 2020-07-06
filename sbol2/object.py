@@ -64,30 +64,6 @@ class SBOLObject():
     def _makeQName(self, uri):
         raise NotImplementedError("Not yet implemented")
 
-    def register_extension_class(cls, namespace, namespace_prefix, class_name):
-        """Register an extension class and its namespace, so custom data
-        can be embedded into and read from SBOL files.
-
-        :param ns: The extension namespace, eg, http://myhome.org/my_extension#
-        It's important that the namespace ends in a forward-slash or hash.
-        :param ns_prefix: A shorthand symbol for the full namespace
-        as it will appear in the output file,
-        eg. my_extension.
-        :param class_name: The extension class name.
-        :return: The new class.
-        """
-        print(cls)
-        # if type_uri not in Document.SBOL_DATA_MODEL_REGISTER:
-        #     # Register a new extension class
-        #     Document.SBOL_DATA_MODEL_REGISTER[type_uri] = self.__class__
-        # else:
-        #     # Check if this is an extension class that is derived from an SBOL
-        #     # core class (i.e., the user has overrided the default rdftype)
-        #    if issubclass(self.__class__, Document.SBOL_DATA_MODEL_REGISTER[type_uri]):
-        #         Config.SBOL_DATA_MODEL_REGISTER[type_uri] = self.__class__
-        # self._register_extension_class(self, namespace, namespace_prefix, cls)
-        raise NotImplementedError("Not yet implemented")
-
     # TODO Docstrings on variables isn't a thing in Python. Consider using Epydoc.
     # The identity property is REQUIRED by all Identified objects
     # and has a data type of URI. A given Identified object's identity
