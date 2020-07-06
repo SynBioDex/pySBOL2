@@ -112,7 +112,6 @@ class Config:
         :param type_uri: An RDF type URI for the class
         :return: The new class.
         """
-
         Config.SBOL_DATA_MODEL_REGISTER[URIRef(type_uri)] = cls
 
     @staticmethod

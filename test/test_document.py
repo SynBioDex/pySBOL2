@@ -427,11 +427,10 @@ class NonTopLevelExtension(sbol2.Identified):
                          type_uri=NonTopLevelExtension.RDF_TYPE)
 
 
-class TopLevelOverrideAndExtension(sbol2.ComponentDefinition):
+class ComponentDefinitionOverride(sbol2.ComponentDefinition):
 
     def __init__(self, uri='example'):
-        super().__init__(uri=uri,
-                         type_uri=sbol2.SBOL_COMPONENT_DEFINITION)
+        super().__init__(uri=uri)
 
 
 class TestDocumentExtensionObjects(unittest.TestCase):
@@ -440,7 +439,7 @@ class TestDocumentExtensionObjects(unittest.TestCase):
 
         # Define extension object
         doc = sbol2.Document()
-        cd = TopLevelOverrideAndExtension('cd')
+        cd = ComponentDefinitionOverride('cd')
         doc.add(cd)
 
         # Round-trip the extension data
@@ -450,18 +449,21 @@ class TestDocumentExtensionObjects(unittest.TestCase):
 
         # Note the extension object's type is not preserved!
         self.assertIs(type(cd), sbol2.ComponentDefinition)
-        self.assertIsNot(type(cd), TopLevelOverrideAndExtension)
+        self.assertIsNot(type(cd), ComponentDefinitionOverride)
 
         # Now register the class and attempt to round-trip again
         doc2 = sbol2.Document()
-        sbol2.Config.register_extension_class(TopLevelOverrideAndExtension,
+        sbol2.Config.register_extension_class(ComponentDefinitionOverride,
                                               sbol2.SBOL_COMPONENT_DEFINITION)
         doc2.readString(doc.writeString())
         cd = doc2.getExtensionObject(cd.identity)
 
         # This time the extension object's type is preserved!
-        self.assertIs(type(cd), TopLevelOverrideAndExtension)
+        self.assertIs(type(cd), ComponentDefinitionOverride)
         self.assertIsNot(type(cd), sbol2.ComponentDefinition)
+
+        # The object is stored in Document.componentDefinitions
+        self.assertEqual(len(doc2.componentDefinitions), 1)
 
         # Restore
         sbol2.Config.register_extension_class(sbol2.ComponentDefinition,
