@@ -47,3 +47,15 @@ If you would like to try out our latest snapshot, use `git <https://git-scm.com/
 ``import sbol2``
 
 **If you have trouble importing the module with the setup script, check to see if there are multiple Python installations on your machine and also check the output of the setup script to see which version of Python is the install target.**
+
+----------------------
+Installing on macOS
+----------------------
+
+.. See Issue #258
+
+Macs do not ship with Python 3 so it is necessary to download and
+install Python 3 before installing pySBOL2. You can download the
+latest Python 3 release from `python.org
+<https://www.python.org>`_. After Python 3 is installed please follow
+the instructions above to install pySBOL2.
