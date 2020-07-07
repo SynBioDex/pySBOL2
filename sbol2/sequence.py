@@ -172,9 +172,9 @@ class Sequence(TopLevel):
                 ranges = []
 
                 # Look for an existing Range that can be re-used
-                for l in sa.locations:
-                    if type(l) is Range:
-                        ranges.append(l)
+                for loc in sa.locations:
+                    if type(loc) is Range:
+                        ranges.append(loc)
                 else:
                     # Auto-construct a Range
                     range_id = sa.displayId if Config.getOption('sbol_compliant_uris') \
@@ -200,7 +200,7 @@ class Sequence(TopLevel):
                 # subcomponent
                 if len(c.sourceLocations) == 1:
                     source_loc = c.sourceLocations.getRange()
-                    subsequence = subsequence[(source_loc.start - 1):(source_loc.end)]
+                    subsequence = subsequence[(source_loc.start - 1):source_loc.end]
                 composite_sequence = composite_sequence + subsequence
                 r.end = len(composite_sequence)
 
