@@ -78,7 +78,7 @@ class ModuleDefinition(TopLevel):
     models = None
 
     def __init__(self, uri=rdflib.URIRef("example"), version=VERSION_STRING,
-                 sbol_type_uri=SBOL_MODULE_DEFINITION):
+                 type_uri=SBOL_MODULE_DEFINITION):
         """Construct a ModuleDefinition
 
         :param uri: A full URI including a scheme, namespace, and identifier.
@@ -87,10 +87,10 @@ class ModuleDefinition(TopLevel):
         for the new object and a full URI will automatically be constructed.
         :param version: An arbitrary version string. If SBOLCompliance is enabled,
         this should be a valid [Maven version string](http://maven.apache.org/).
-        :param sbol_type_uri: The RDF type for an extension class
+        :param type_uri: The RDF type for an extension class
         derived from this one (optional)
         """
-        super().__init__(sbol_type_uri, uri, version)
+        super().__init__(type_uri, uri, version)
         self.roles = URIProperty(self, SBOL_ROLES, '0', '*', None)
         self.models = ReferencedObject(self, SBOL_MODELS,
                                        SBOL_MODEL, '0', '*', [])
