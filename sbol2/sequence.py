@@ -67,37 +67,6 @@ class Sequence(TopLevel):
     # | Protein                   | IUPAC Protein  | SBOL_ENCODING_IUPAC_PROTEIN | http://www.chem.qmul.ac.uk/iupac/AminoAcid/      |
     # | Small Molecule            | SMILES         | SBOL_ENCODING_SMILES        | http://www.opensmiles.org/opensmiles.html        |
 
-    def assemble(self, composite_sequence=""):
-        """Calculates the complete sequence of a high-level Component
-        from the sequence of its subcomponents.
-
-        Prior to assembling the the complete sequence, you must assemble
-        a template design by calling ComponentDefinition::assemble for the
-        ComponentDefinition that references this Sequence.
-
-        :param composite_sequence: Typically no value for the composite
-        sequence should be specified by the user.
-        This parameter is used to hold the composite sequence
-        as it is passed to function calls at a higher-level of the
-        recursion stack.
-        :return: The complete sequence of a high-level Component.
-        """
-        raise NotImplementedError('Not yet implemented')
-
-    def compile(self):
-        """Synonymous with Sequence::assemble.
-
-        Calculates the complete sequence of a high-level Component
-        from the sequence of its subcomponents.
-        Prior to assembling the the complete sequence, you must assemble
-        a template design by calling ComponentDefinition::assemble for the
-        ComponentDefinition that references this Sequence.
-
-        :return:
-        """
-        self.assemble()
-        return self.elements
-
     def __len__(self):
         """
 
