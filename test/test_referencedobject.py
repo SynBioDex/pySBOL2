@@ -1,11 +1,7 @@
-import locale
-import logging
 import os
 import unittest
 
-import rdflib
-import sbol2 as sbol
-from sbol2.property import ReferencedObject
+import sbol2
 
 MODULE_LOCATION = os.path.dirname(os.path.abspath(__file__))
 TEST_LOCATION = os.path.join(MODULE_LOCATION, 'resources', 'crispr_example.xml')
@@ -15,7 +11,7 @@ PARTS_LOCATION = os.path.join(MODULE_LOCATION, 'resources', 'tutorial', 'parts.x
 class TestReferencedObjects(unittest.TestCase):
 
     def test_participant_type(self):
-        doc = sbol.Document()
+        doc = sbol2.Document()
         doc.read(TEST_LOCATION)
         md_uri = 'http://sbols.org/CRISPR_Example/CRISPR_Template/1.0.0'
         md = doc.moduleDefinitions[md_uri]
@@ -25,7 +21,7 @@ class TestReferencedObjects(unittest.TestCase):
         self.assertEqual(type(i.participations[0].participant), str)
 
     def test_fc_definition(self):
-        doc = sbol.Document()
+        doc = sbol2.Document()
         doc.read(TEST_LOCATION)
         md_uri = 'http://sbols.org/CRISPR_Example/CRISPR_Template/1.0.0'
         md = doc.moduleDefinitions[md_uri]
@@ -37,7 +33,7 @@ class TestReferencedObjects(unittest.TestCase):
 
     def test_cd_sequences(self):
         # Test a referenced object storing a list instead of a singleton
-        doc = sbol.Document()
+        doc = sbol2.Document()
         doc.read(PARTS_LOCATION)
 
         cd_uri = 'http://examples.org/ComponentDefinition/AmeR/1'
