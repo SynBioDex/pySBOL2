@@ -1,6 +1,8 @@
 import os
 import unittest
 
+import rdflib
+
 import sbol2
 
 MODULE_LOCATION = os.path.dirname(os.path.abspath(__file__))
@@ -61,4 +63,18 @@ class TestReferencedObjects(unittest.TestCase):
         # Verify that the attribute is still a ReferencedObject and
         # was not overwritten with the list.
         if 'sequences' in cd.__dict__:
-            self.assertIsInstance(cd.__dict__['sequences'], ReferencedObject)
+            self.assertIsInstance(cd.__dict__['sequences'], sbol2.ReferencedObject)
+
+    def test_dunder_uri(self):
+        # See issue #319
+        # The __uri__ method to convert an object to a URI
+        # was returning a str, not a URIRef
+        sa = sbol2.SequenceAnnotation('test_sa')
+        comp = sbol2.Component('test_comp')
+        sa.component = comp
+        expected = rdflib.URIRef(comp.identity)
+        self.assertEqual(expected, sa.properties[sbol2.SBOL_COMPONENT_PROPERTY][0])
+
+
+if __name__ == '__main__':
+    unittest.main()

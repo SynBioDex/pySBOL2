@@ -117,7 +117,7 @@ class SBOLObject:
         return logger
 
     def __uri__(self):
-        return self.identity
+        return rdflib.URIRef(self.identity)
 
     @property
     def type(self):
