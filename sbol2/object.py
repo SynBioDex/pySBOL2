@@ -116,7 +116,12 @@ class SBOLObject:
             logging.basicConfig()
         return logger
 
-    def __uri__(self):
+    def __uri__(self) -> rdflib.URIRef:
+        """Returns a URIRef representing this object.
+
+        :return: The identity of this object as an rdflib.URIRef
+        :rtype: rdflib.URIRef
+        """
         return rdflib.URIRef(self.identity)
 
     @property
