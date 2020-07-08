@@ -128,9 +128,9 @@ Full example code is provided below, which will create a file called "gene_casse
     b0012.roles = SO_TERMINATOR
 
     doc.addComponentDefinition(gene)
-    doc.addComponentDefinition([ r0010, b0032, e0040, b0012 ])
+    doc.addComponentDefinition([r0010, b0032, e0040, b0012])
 
-    gene.assemblePrimaryStructure([ r0010, b0032, e0040, b0012 ])
+    gene.assemblePrimaryStructure([r0010, b0032, e0040, b0012])
 
     first = gene.getFirstComponent()
     print(first.identity)
