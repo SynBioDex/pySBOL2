@@ -107,7 +107,10 @@ In some cases, it may be useful to represent integration of vectors / transposon
 Full Example Code
 -------------------------------
 
-Full example code is provided below, which will create a file called "gene_cassette.xml"
+Full example code is provided below, which will create a file called "gene_cassette.xml".
+This example is available as
+`examples/gene_cassette.py <https://github.com/SynBioDex/pySBOL2/blob/master/examples/gene_cassette.py>`_
+in the pySBOL2 source code.
 
 .. code:: python
 
