@@ -3,7 +3,7 @@ import http
 import logging
 import os
 import posixpath
-from typing import List, Optional
+from typing import List, Optional, Union
 import urllib.parse
 
 import requests
@@ -17,6 +17,11 @@ from .constants import *
 from .sbolerror import SBOLError
 from .sbolerror import SBOLErrorCode
 from .identified import Identified
+
+
+class SearchQuery:
+    """This is a stub until SearchQuery is implemented."""
+    pass
 
 
 class PartShop:
@@ -387,10 +392,17 @@ class PartShop:
 
     def search(self, search_text: str,
                object_type: Optional[str] = SBOL_COMPONENT_DEFINITION,
-               property_uri: Optional[str] = None,
+               property_uri: Optional[Union[str, int]] = None,
                offset: int = 0, limit: int = 25) -> List[Identified]:
         # if search_text is a SearchQuery, dispatch to search_advanced
-
+        if type(search_text) is SearchQuery:
+            raise NotImplementedError('search using SearchQuery is not implemented')
+        if type(property_uri) is int:
+            # User called without property_uri and with offset. Shift args
+            if offset > 0:
+                limit = offset
+            offset = property_uri
+            property_uri = None
         # if property_uri is not specified, do a general search
         if property_uri is None:
             return self.search_general(search_text, object_type, offset,
@@ -398,3 +410,37 @@ class PartShop:
         # property_uri is specified, do an exact search
         return self.search_exact(search_text, object_type, property_uri,
                                  offset, limit)
+
+    def _search_count(self, search_text, object_type, property_uri):
+        search_url = parseURLDomain(self.resource)
+        query = dict(objectType=parseClassName(object_type))
+        query = urllib.parse.urlencode(query)
+        search_text = urllib.parse.quote(search_text)
+        # params = dict(offset=offset, limit=limit)
+        # params = urllib.parse.urlencode(params)
+        # query_url = f'{search_url}/search/{query}&{search_text}/?{params}'
+        url = f'{search_url}/searchCount/{query}&{search_text}/'
+        headers = {'Accept': 'text/plain'}
+        if self.key:
+            headers['X-authorization'] = self.key
+        self.logger.info('searchCount query: %s', url)
+        response = requests.get(url, headers=headers)
+        if not response:
+            # Something went wrong
+            raise SBOLError(response, SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST)
+        # Everything looks good, parse and return the results
+        return int(response.text)
+
+    def searchCount(self, search_text, object_type=None, property_uri=None):
+        """Returns the number of records matching the given criteria.
+        """
+        # if search_text is a SearchQuery, dispatch to ???
+        if type(search_text) is SearchQuery:
+            raise NotImplementedError('search using SearchQuery is not implemented')
+
+        # if object_type is not specified, default to SBOL_COMPONENT_DEFINITION
+        if object_type is None:
+            object_type = SBOL_COMPONENT_DEFINITION
+
+        # Dispatch to the internal search count method
+        return self._search_count(search_text, object_type, property_uri)

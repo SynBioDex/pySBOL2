@@ -239,6 +239,23 @@ WHERE {
         self.assertTrue(all([isinstance(x, sbol2.Identified)
                              for x in results]))
 
+    def test_search_general_offset_limit(self):
+        # Test a general search using offset and limit
+        # This comes from a documentation example that was failing
+        sbh = sbol2.PartShop(TEST_RESOURCE)
+        offset = 10
+        limit = 20
+        results = sbh.search('plasmid', sbol2.SBOL_COMPONENT_DEFINITION,
+                             offset, limit)
+        # The response is a list
+        self.assertEqual(list, type(results))
+        # There are `limit` items in the list (search returns more,
+        # but by default we get the first `limit`)
+        self.assertEqual(limit, len(results))
+        # The response items are all of type Identified
+        self.assertTrue(all([isinstance(x, sbol2.Identified)
+                             for x in results]))
+
     def test_search_exact(self):
         igem = sbol.PartShop('https://synbiohub.org')
         limit = 10
@@ -269,6 +286,16 @@ WHERE {
         self.assertEqual(3, len(doc))
         self.assertIsNotNone(doc.version)
         self.assertEqual(old_version, doc.version)
+
+    def test_search_count(self):
+        part_shop = sbol2.PartShop('https://synbiohub.org/public/igem')
+        # searchCount did not exist, see #322
+        self.assertTrue(hasattr(part_shop, 'searchCount'))
+        count = part_shop.searchCount('plasmid')
+        # Make sure we get an int back, not a string representation of a number
+        self.assertIs(type(count), int)
+        # Expecting at least 1 plasmid
+        self.assertGreater(count, 0)
 
 
 if __name__ == '__main__':
