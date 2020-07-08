@@ -1,11 +1,9 @@
-import locale
-import logging
 import os
 import unittest
 
 import rdflib
-import sbol2 as sbol
-from sbol2.property import ReferencedObject
+
+import sbol2
 
 MODULE_LOCATION = os.path.dirname(os.path.abspath(__file__))
 TEST_LOCATION = os.path.join(MODULE_LOCATION, 'resources', 'crispr_example.xml')
@@ -15,7 +13,7 @@ PARTS_LOCATION = os.path.join(MODULE_LOCATION, 'resources', 'tutorial', 'parts.x
 class TestReferencedObjects(unittest.TestCase):
 
     def test_participant_type(self):
-        doc = sbol.Document()
+        doc = sbol2.Document()
         doc.read(TEST_LOCATION)
         md_uri = 'http://sbols.org/CRISPR_Example/CRISPR_Template/1.0.0'
         md = doc.moduleDefinitions[md_uri]
@@ -25,7 +23,7 @@ class TestReferencedObjects(unittest.TestCase):
         self.assertEqual(type(i.participations[0].participant), str)
 
     def test_fc_definition(self):
-        doc = sbol.Document()
+        doc = sbol2.Document()
         doc.read(TEST_LOCATION)
         md_uri = 'http://sbols.org/CRISPR_Example/CRISPR_Template/1.0.0'
         md = doc.moduleDefinitions[md_uri]
@@ -37,7 +35,7 @@ class TestReferencedObjects(unittest.TestCase):
 
     def test_cd_sequences(self):
         # Test a referenced object storing a list instead of a singleton
-        doc = sbol.Document()
+        doc = sbol2.Document()
         doc.read(PARTS_LOCATION)
 
         cd_uri = 'http://examples.org/ComponentDefinition/AmeR/1'
@@ -65,4 +63,18 @@ class TestReferencedObjects(unittest.TestCase):
         # Verify that the attribute is still a ReferencedObject and
         # was not overwritten with the list.
         if 'sequences' in cd.__dict__:
-            self.assertIsInstance(cd.__dict__['sequences'], ReferencedObject)
+            self.assertIsInstance(cd.__dict__['sequences'], sbol2.ReferencedObject)
+
+    def test_dunder_uri(self):
+        # See issue #319
+        # The __uri__ method to convert an object to a URI
+        # was returning a str, not a URIRef
+        sa = sbol2.SequenceAnnotation('test_sa')
+        comp = sbol2.Component('test_comp')
+        sa.component = comp
+        expected = rdflib.URIRef(comp.identity)
+        self.assertEqual(expected, sa.properties[sbol2.SBOL_COMPONENT_PROPERTY][0])
+
+
+if __name__ == '__main__':
+    unittest.main()

@@ -9,8 +9,8 @@ class Module(Identified):
     def __init__(self, uri='example',
                  # Everything after the asterisk (`*`) is a keyword
                  *, definition='', version=VERSION_STRING,
-                 rdf_type=SBOL_MODULE):
-        super().__init__(rdf_type, uri, version)
+                 type_uri=SBOL_MODULE):
+        super().__init__(type_uri, uri, version)
         self.definition = ReferencedObject(self, SBOL_DEFINITION,
                                            SBOL_MODULE_DEFINITION,
                                            '1', '1', [], definition)

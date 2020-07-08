@@ -6,6 +6,7 @@ import time
 from typing import Any, Dict, Mapping, Union
 import warnings
 
+from deprecated import deprecated
 from rdflib import URIRef
 
 from . import SBOL2Serialize
@@ -205,7 +206,7 @@ class Document(Identified):
         Register an object in the Document.
 
         :param sbol_obj: The SBOL object(s) you want to serialize.
-        Either a single object or a list of objects.
+            Either a single object or a list of objects.
         :return: None
         """
         # Check for uniqueness of URI
@@ -345,17 +346,19 @@ class Document(Identified):
         raise NotImplementedError("Not yet implemented")
 
     def get(self, uri):
+        """ Finds the SBOL object with the given URI.
+
+        :param uri: URI of the extension object
+        :type uri: str
+        :return: The matching SBOLObject
+        :rtype: SBOLObject
+        :raises: SBOLError if the given uri is not found
         """
-        Retrieve an object from the Document.
-        :param uri: The identity of the SBOL object you want to retrieve.
-        :return: The SBOL object.
-        """
-        # TODO may want to move into SBOLObject or Property
-        # First, search the object's property store for the uri
-        if uri in self.objectCache:
-            return self.objectCache[uri]
-        if Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS.value) is True:
-            return
+        try:
+            return self.SBOLObjects[uri]
+        except KeyError:
+            raise SBOLError(f'Object {uri} was not found',
+                            SBOLErrorCode.SBOL_ERROR_NOT_FOUND)
 
     def getAll(self):
         """
@@ -961,26 +964,26 @@ class Document(Identified):
                       DeprecationWarning)
         self.exportToFormat(language, output_path)
 
+    @deprecated(reason="Use Document.get() instead")
     def getExtensionObject(self, uri: str) -> SBOLObject:
-        """
+        """*Deprecated.* Use Document.get instead.
+
         :param uri: URI of the extension object
         :type uri: str
         :return: The matching SBOLObject
         :rtype: SBOLObject
         :raises: SBOLError if the given uri is not found
         """
-        try:
-            return self.SBOLObjects[uri]
-        except KeyError:
-            raise SBOLError(f'Object {uri} was not found',
-                            SBOLErrorCode.SBOL_ERROR_NOT_FOUND)
+        return self.get(uri)
 
+    @deprecated(reason="Use Document.add() instead")
     def addExtensionObject(self, obj: SBOLObject) -> None:
         """
+        *Deprecated.* Use Document.add instead.
+
         :param obj: An SBOLObject to add to this document
         :type obj: SBOLObject
         :return: None
-        :rtype: None
         """
         # Just do an add
         self.add(obj)

@@ -113,7 +113,7 @@ class ComponentDefinition(TopLevel):
         :param version: An arbitrary version string.
         If SBOLCompliance is enabled, this should be a Maven version string
         of the form "major.minor.patch".
-        :param rdf_type: The RDF type for an extension class
+        :param type_uri: The RDF type for an extension class
         derived from this one
         """
         super().__init__(type_uri, uri, version)

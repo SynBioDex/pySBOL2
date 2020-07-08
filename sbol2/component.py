@@ -9,8 +9,8 @@ from .property import URIProperty, OwnedObject, ReferencedObject
 
 
 class ComponentInstance(Identified):
-    def __init__(self, rdf_type, uri, definition, access, version):
-        super().__init__(rdf_type, uri, version)
+    def __init__(self, type_uri, uri, definition, access, version):
+        super().__init__(type_uri, uri, version)
         self.definition = ReferencedObject(self, SBOL_DEFINITION,
                                            SBOL_COMPONENT_DEFINITION,
                                            '1', '1', [], definition)
