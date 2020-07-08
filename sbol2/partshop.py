@@ -3,7 +3,7 @@ import http
 import logging
 import os
 import posixpath
-from typing import List, Optional
+from typing import List, Optional, Union
 import urllib.parse
 
 import requests
@@ -17,6 +17,11 @@ from .constants import *
 from .sbolerror import SBOLError
 from .sbolerror import SBOLErrorCode
 from .identified import Identified
+
+
+class SearchQuery:
+    """This is a stub until SearchQuery is implemented."""
+    pass
 
 
 class PartShop:
@@ -387,10 +392,17 @@ class PartShop:
 
     def search(self, search_text: str,
                object_type: Optional[str] = SBOL_COMPONENT_DEFINITION,
-               property_uri: Optional[str] = None,
+               property_uri: Optional[Union[str, int]] = None,
                offset: int = 0, limit: int = 25) -> List[Identified]:
         # if search_text is a SearchQuery, dispatch to search_advanced
-
+        if type(search_text) is SearchQuery:
+            raise NotImplementedError('search using SearchQuery is not implemented')
+        if type(property_uri) is int:
+            # User called without property_uri and with offset. Shift args
+            if offset > 0:
+                limit = offset
+            offset = property_uri
+            property_uri = None
         # if property_uri is not specified, do a general search
         if property_uri is None:
             return self.search_general(search_text, object_type, offset,
@@ -423,6 +435,8 @@ class PartShop:
         """Returns the number of records matching the given criteria.
         """
         # if search_text is a SearchQuery, dispatch to ???
+        if type(search_text) is SearchQuery:
+            raise NotImplementedError('search using SearchQuery is not implemented')
 
         # if object_type is not specified, default to SBOL_COMPONENT_DEFINITION
         if object_type is None:
