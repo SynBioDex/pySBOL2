@@ -25,7 +25,6 @@ class TestMeasurement(unittest.TestCase):
         measurement.removeType(1)
         self.assertEqual([sbol2.BIOPAX_DNA, sbol2.BIOPAX_COMPLEX], measurement.types)
 
-    @unittest.expectedFailure
     def test_read(self):
         doc = sbol2.Document(MEASURE_LOCATION)
         md_uri = 'http://www.async.ece.utah.edu/md'

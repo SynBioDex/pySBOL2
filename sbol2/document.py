@@ -79,7 +79,8 @@ Config.SBOL_DATA_MODEL_REGISTER = {
     URIRef(SYSBIO_ANALYSIS): Analysis,
     URIRef(SYSBIO_SAMPLE_ROSTER): SampleRoster,
     URIRef(SBOL_EXPERIMENT): Experiment,
-    URIRef(SBOL_EXPERIMENTAL_DATA): ExperimentalData
+    URIRef(SBOL_EXPERIMENTAL_DATA): ExperimentalData,
+    URIRef(OM_MEASURE): Measurement,
 }
 
 
