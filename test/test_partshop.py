@@ -270,6 +270,16 @@ WHERE {
         self.assertIsNotNone(doc.version)
         self.assertEqual(old_version, doc.version)
 
+    def test_search_count(self):
+        part_shop = sbol2.PartShop('https://synbiohub.org/public/igem')
+        # searchCount did not exist, see #322
+        self.assertTrue(hasattr(part_shop, 'searchCount'))
+        count = part_shop.searchCount('plasmid')
+        # Make sure we get an int back, not a string representation of a number
+        self.assertIs(type(count), int)
+        # Expecting at least 1 plasmid
+        self.assertGreater(count, 0)
+
 
 if __name__ == '__main__':
     unittest.main()

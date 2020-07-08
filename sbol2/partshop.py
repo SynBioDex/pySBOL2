@@ -398,3 +398,35 @@ class PartShop:
         # property_uri is specified, do an exact search
         return self.search_exact(search_text, object_type, property_uri,
                                  offset, limit)
+
+    def _search_count(self, search_text, object_type, property_uri):
+        search_url = parseURLDomain(self.resource)
+        query = dict(objectType=parseClassName(object_type))
+        query = urllib.parse.urlencode(query)
+        search_text = urllib.parse.quote(search_text)
+        # params = dict(offset=offset, limit=limit)
+        # params = urllib.parse.urlencode(params)
+        # query_url = f'{search_url}/search/{query}&{search_text}/?{params}'
+        url = f'{search_url}/searchCount/{query}&{search_text}/'
+        headers = {'Accept': 'text/plain'}
+        if self.key:
+            headers['X-authorization'] = self.key
+        self.logger.info('searchCount query: %s', url)
+        response = requests.get(url, headers=headers)
+        if not response:
+            # Something went wrong
+            raise SBOLError(response, SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST)
+        # Everything looks good, parse and return the results
+        return int(response.text)
+
+    def searchCount(self, search_text, object_type=None, property_uri=None):
+        """Returns the number of records matching the given criteria.
+        """
+        # if search_text is a SearchQuery, dispatch to ???
+
+        # if object_type is not specified, default to SBOL_COMPONENT_DEFINITION
+        if object_type is None:
+            object_type = SBOL_COMPONENT_DEFINITION
+
+        # Dispatch to the internal search count method
+        return self._search_count(search_text, object_type, property_uri)
