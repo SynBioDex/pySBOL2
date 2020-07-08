@@ -59,7 +59,7 @@ Searching Part Repos
 
 PySBOL2 supports three kinds of searches: a **general search**, an **exact search**, and an **advanced search**.
 
-The following query conducts a **general search** which scans through `identity`, `name`, `description`, and `displayId` properties for a match to the search text, including partial, case-insensitive matches to substrings of the property value. Search results are returned as a `SearchResponse` object.
+The following query conducts a **general search** which scans through `identity`, `name`, `description`, and `displayId` properties for a match to the search text, including partial, case-insensitive matches to substrings of the property value. Search results are returned as a list.
 
 .. code:: python
 
@@ -79,7 +79,7 @@ Of course, these parameters can be changed to search for different type of SBOL 
 
     import time
 
-    records = SearchResponse()
+    records = []
     search_term = 'plasmid'
     limit = 25
     total_hits = igem.searchCount(search_term)
@@ -88,14 +88,14 @@ Of course, these parameters can be changed to search for different type of SBOL 
         time.sleep(0.1)
 .. end
 
-A ``SearchResponse`` object is returned by a query and contains multiple records. Each record contains basic data, including identity, displayId, name, and description fields. *It is very important to realize however that the search does not retrieve the complete ComponentDefinition!* In order to retrieve the full object, the user must call ``pull`` while specifying the target object's identity.
+The list returned by ``search`` contains multiple records. Each record contains basic data, including identity, displayId, name, and description fields. *It is very important to realize however that the search does not retrieve the complete ComponentDefinition!* In order to retrieve the full object, the user must call ``pull`` while specifying the target object's identity.
 
-Records in a ``SearchResponse`` can be accessed using iterators or numeric indices. The interface for each record behaves exactly like any other SBOL object:
+Records returned by ``search`` have an ``identity`` attribute that can be used when calling ``pull``:
 
 .. code:: python
 
     for record in records:
-        print( record.identity.get() )
+        print(record.identity)
 .. end
 
 The preceding examples concern **general searches**, which scan through an object's metadata for partial matches to the search term. In contrast, the **exact search** explicitly specifies which property of an object to search, and the value of that property must exactly match the search term. The following **exact search** will search for ``ComponentDefinitions`` with a role of promoter:
@@ -104,6 +104,9 @@ The preceding examples concern **general searches**, which scan through an objec
 
     records = igem.search(SO_PROMOTER, SBOL_COMPONENT_DEFINITION, SBOL_ROLES, 0, 25);
 .. end
+
+*Note: advanced search is not yet implemented in pySBOL2.*
+*This documentation describes how it works in pySBOL.*
 
 Finally, the **advanced search** allows the user to configure a search with multiple criteria by constructing a ``SearchQuery`` object. The following query looks for promoters that have an additional annotation indicating that the promoter is regulated (as opposed to constitutive):
 
