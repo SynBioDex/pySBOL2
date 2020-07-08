@@ -1,5 +1,6 @@
 # pySBOL2
 [![Build Status](https://travis-ci.org/SynBioDex/pySBOL2.svg?branch=master)](https://travis-ci.org/SynBioDex/pySBOL2)
+[![Documentation Status](https://readthedocs.org/projects/pysbol/badge/?version=latest)](https://pysbol.readthedocs.io/en/latest/?badge=latest)
 
 **pySBOL2** is a pure Python implementation of the
 SBOL 2.3.0 standard [Synthetic Biology Open Language (SBOL)](https://sbolstandard.org/) - 
@@ -55,10 +56,7 @@ python3 -m unittest discover test
 
 ## DOCUMENTATION
 
-This module should be largely compatible with
-[pySBOL](https://github.com/SynBioDex/pySBOL).
-The [pySBOL documentation](https://pysbol2.readthedocs.io/en/latest/index.html)
-should be used until this module has its own documentation.
+[Full documentation for pySBOL2 is available here](https://pysbol.readthedocs.io).
 
 ## ACKNOWLEDGEMENTS
 

@@ -29,7 +29,7 @@
    * [Create a release](https://github.com/SynBioDex/pySBOL2/releases/new) (Releases; Draft a new release)
    * Use the current tag
    * Name it "Major.Minor[.Patch]"
-   * Upload the source tar file and the wheel
+   * Upload the source tar file and the wheel found in `dist`
 1. Upload packages to [pypi.org](https://pypi.org/project/sbol2/)
 
    ```shell
@@ -42,3 +42,4 @@
      SynBioDex repository_
    * Bump version number in `setup.py`
    * Bump version number in the `sbol2/__init__.py`
+   * Bump version number in `docs/conf.py`

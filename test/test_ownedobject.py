@@ -160,3 +160,26 @@ class TestOwnedObject(unittest.TestCase):
         self.assertIn(type_uri, obj.owned_objects)
         self.assertEqual([], obj.owned_objects[type_uri])
         self.assertEqual([], obj.thing.value)
+
+    def test_duplicate_uri_no_doc(self):
+        cd = sbol2.ComponentDefinition('cd')
+        cd.sequenceAnnotations.create('sa')
+        with self.assertRaises(sbol2.SBOLError) as cm:
+            cd.sequenceAnnotations.create('sa')
+        raised = cm.exception
+        self.assertEqual(raised.error_code(),
+                         sbol2.SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE)
+
+    def test_duplicate_uri_in_doc(self):
+        doc = sbol2.Document()
+        cd = doc.componentDefinitions.create('cd')
+        cd.sequenceAnnotations.create('sa')
+        with self.assertRaises(sbol2.SBOLError) as cm:
+            cd.sequenceAnnotations.create('sa')
+        raised = cm.exception
+        self.assertEqual(raised.error_code(),
+                         sbol2.SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE)
+
+
+if __name__ == '__main__':
+    unittest.main()
