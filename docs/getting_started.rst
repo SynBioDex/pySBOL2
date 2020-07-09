@@ -114,8 +114,8 @@ The first set of configuration options demonstrates 'open-world' mode, which mea
 .. code:: python
 
    >>> setHomespace('')
-   >>> Config.setOption('sbol_compliant_uris', False)
-   >>> Config.setOption('sbol_typed_uris', False)
+   >>> Config.setOption(ConfigOptions.SBOL_COMPLIANT_URIS, False)
+   >>> Config.setOption(ConfigOptions.SBOL_TYPED_URIS, False)
    >>> crispr_template = ModuleDefinition('http://sbols.org/CRISPR_Example/CRISPR_Template')
    >>> print(crispr_template)
    http://sbols.org/CRISPR_Example/CRISPR_Template
@@ -127,8 +127,8 @@ The second set of configuration options demonstrates use of a default namespace 
 .. code:: python
 
    >>> setHomespace('http://sbols.org/CRISPR_Example/')
-   >>> Config.setOption('sbol_compliant_uris', False)
-   >>> Config.setOption('sbol_typed_uris', False)
+   >>> Config.setOption(ConfigOptions.SBOL_COMPLIANT_URIS, False)
+   >>> Config.setOption(ConfigOptions.SBOL_TYPED_URIS, False)
    >>> crispr_template = ModuleDefinition('CRISPR_Template')
    >>> print(crispr_template)
    http://sbols.org/CRISPR_Example/CRISPR_Template
@@ -140,8 +140,8 @@ The third set of configuration options demonstrates SBOL-compliant mode. In this
 .. code:: python
 
    >>> setHomespace('http://sbols.org/CRISPR_Example/')
-   >>> Config.setOption('sbol_compliant_uris', True)
-   >>> Config.setOption('sbol_typed_uris', False)
+   >>> Config.setOption(ConfigOptions.SBOL_COMPLIANT_URIS, True)
+   >>> Config.setOption(ConfigOptions.SBOL_TYPED_URIS, False)
    >>> crispr_template = ModuleDefinition('CRISPR_Template')
    >>> print(crispr_template)
    http://sbols.org/CRISPR_Example/CRISPR_Template/1.0.0
@@ -153,8 +153,8 @@ The final example demonstrates typed URIs. When this option is enabled, the type
 .. code:: python
 
    >>> setHomespace('http://sbols.org/CRISPR_Example/')
-   >>> Config.setOption('sbol_compliant_uris', True)
-   >>> Config.setOption('sbol_typed_uris', True)
+   >>> Config.setOption(ConfigOptions.SBOL_COMPLIANT_URIS, True)
+   >>> Config.setOption(ConfigOptions.SBOL_TYPED_URIS, True)
    >>> crispr_template_md = ModuleDefinition('CRISPR_Template')
    >>> print(crispr_template)
    http://sbols.org/CRISPR_Example/ModuleDefinition/CRISPR_Template/1.0.0
@@ -219,8 +219,8 @@ When working interactively in a Python environment, typing long form URIs can be
 
 .. code:: python
 
-    >>> Config.setOption('sbol_compliant_uris', True)
-    >>> Config.setOption('sbol_typed_uris', False)
+    >>> Config.setOption(ConfigOptions.SBOL_COMPLIANT_URIS, True)
+    >>> Config.setOption(ConfigOptions.SBOL_TYPED_URIS, False)
     >>> crispr_template = doc.moduleDefinitions['CRISPR_Template']
     >>> cas9 = doc.componentDefinitions['cas9_generic']
 

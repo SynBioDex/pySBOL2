@@ -143,8 +143,6 @@ class PartShop:
             elif not response:
                 raise SBOLError(response, SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST)
             # Add content to document
-            serialization_format = Config.getOption('serialization_format')
-            Config.setOption('serialization_format', serialization_format)
             doc.readString(response.content)
             doc.resource_namespaces.add(self.resource)
 

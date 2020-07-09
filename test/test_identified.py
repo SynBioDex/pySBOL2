@@ -4,6 +4,7 @@ import unittest
 import rdflib
 
 import sbol2 as sbol
+import sbol2
 
 MODULE_LOCATION = os.path.dirname(os.path.abspath(__file__))
 PARTS_LOCATION = os.path.join(MODULE_LOCATION, 'resources', 'tutorial',
@@ -16,16 +17,16 @@ class TestIdentified(unittest.TestCase):
 
     def test_getDisplayId_SBOLCompliant(self):
         sbol.setHomespace('http://sbols.org/CRISPR_Example')
-        sbol.Config.setOption('sbol_compliant_uris', True)
-        sbol.Config.setOption('sbol_typed_uris', False)
+        sbol.Config.setOption(sbol2.ConfigOptions.SBOL_COMPLIANT_URIS, True)
+        sbol.Config.setOption(sbol2.ConfigOptions.SBOL_TYPED_URIS, False)
         expected = 'CRISPR_Template'
         crispr_template = sbol.ModuleDefinition(expected)
         self.assertEqual(crispr_template.displayId, expected)
 
     def test_getPersistentIdentity_SBOLCompliant(self):
         sbol.setHomespace('http://sbols.org/CRISPR_Example')
-        sbol.Config.setOption('sbol_compliant_uris', True)
-        sbol.Config.setOption('sbol_typed_uris', False)
+        sbol.Config.setOption(sbol2.ConfigOptions.SBOL_COMPLIANT_URIS, True)
+        sbol.Config.setOption(sbol2.ConfigOptions.SBOL_TYPED_URIS, False)
         crispr_template = sbol.ModuleDefinition('CRISPR_Template')
         expected = 'http://sbols.org/CRISPR_Example/CRISPR_Template'
         self.assertEqual(crispr_template.persistentIdentity,
@@ -33,15 +34,15 @@ class TestIdentified(unittest.TestCase):
 
     def test_getVersion_SBOLCompliant(self):
         sbol.setHomespace('http://sbols.org/CRISPR_Example')
-        sbol.Config.setOption('sbol_compliant_uris', True)
-        sbol.Config.setOption('sbol_typed_uris', False)
+        sbol.Config.setOption(sbol2.ConfigOptions.SBOL_COMPLIANT_URIS, True)
+        sbol.Config.setOption(sbol2.ConfigOptions.SBOL_TYPED_URIS, False)
         crispr_template = sbol.ModuleDefinition('CRISPR_Template')
         self.assertEqual(crispr_template.version, '1')
 
     def test_setDisplayId_SBOLCompliant(self):
         sbol.setHomespace('http://sbols.org/CRISPR_Example')
-        sbol.Config.setOption('sbol_compliant_uris', True)
-        sbol.Config.setOption('sbol_typed_uris', False)
+        sbol.Config.setOption(sbol2.ConfigOptions.SBOL_COMPLIANT_URIS, True)
+        sbol.Config.setOption(sbol2.ConfigOptions.SBOL_TYPED_URIS, False)
         crispr_template = sbol.ModuleDefinition('CRISPR_Template')
         crispr_template.displayId = 'test'
         self.assertEqual(str(crispr_template.displayId), 'test')
@@ -49,8 +50,8 @@ class TestIdentified(unittest.TestCase):
 
     def test_setPersistentIdentity_SBOLCompliant(self):
         sbol.setHomespace('http://sbols.org/CRISPR_Example')
-        sbol.Config.setOption('sbol_compliant_uris', True)
-        sbol.Config.setOption('sbol_typed_uris', False)
+        sbol.Config.setOption(sbol2.ConfigOptions.SBOL_COMPLIANT_URIS, True)
+        sbol.Config.setOption(sbol2.ConfigOptions.SBOL_TYPED_URIS, False)
         crispr_template = sbol.ModuleDefinition('CRISPR_Template')
         expected = 'test'
         crispr_template.persistentIdentity = expected
@@ -58,38 +59,38 @@ class TestIdentified(unittest.TestCase):
 
     def test_setVersion_SBOLCompliant(self):
         sbol.setHomespace('http://sbols.org/CRISPR_Example')
-        sbol.Config.setOption('sbol_compliant_uris', True)
-        sbol.Config.setOption('sbol_typed_uris', False)
+        sbol.Config.setOption(sbol2.ConfigOptions.SBOL_COMPLIANT_URIS, True)
+        sbol.Config.setOption(sbol2.ConfigOptions.SBOL_TYPED_URIS, False)
         crispr_template = sbol.ModuleDefinition('CRISPR_Template')
         crispr_template.version = '2'
         self.assertEqual(crispr_template.version, '2')
 
     def test_getDisplayId_hasHomespace(self):
         sbol.setHomespace('http://sbols.org/CRISPR_Example')
-        sbol.Config.setOption('sbol_compliant_uris', False)
-        sbol.Config.setOption('sbol_typed_uris', False)
+        sbol.Config.setOption(sbol2.ConfigOptions.SBOL_COMPLIANT_URIS, False)
+        sbol.Config.setOption(sbol2.ConfigOptions.SBOL_TYPED_URIS, False)
         crispr_template = sbol.ModuleDefinition('CRISPR_Template')
         self.assertEqual(None, crispr_template.displayId)
 
     def test_getPersistentIdentity_hasHomespace(self):
         sbol.setHomespace('http://sbols.org/CRISPR_Example')
-        sbol.Config.setOption('sbol_compliant_uris', False)
-        sbol.Config.setOption('sbol_typed_uris', False)
+        sbol.Config.setOption(sbol2.ConfigOptions.SBOL_COMPLIANT_URIS, False)
+        sbol.Config.setOption(sbol2.ConfigOptions.SBOL_TYPED_URIS, False)
         crispr_template = sbol.ModuleDefinition('CRISPR_Template')
         expected = 'http://sbols.org/CRISPR_Example/CRISPR_Template'
         self.assertEqual(crispr_template.persistentIdentity, expected)
 
     def test_getVersion_hasHomespace(self):
         sbol.setHomespace('http://sbols.org/CRISPR_Example')
-        sbol.Config.setOption('sbol_compliant_uris', False)
-        sbol.Config.setOption('sbol_typed_uris', False)
+        sbol.Config.setOption(sbol2.ConfigOptions.SBOL_COMPLIANT_URIS, False)
+        sbol.Config.setOption(sbol2.ConfigOptions.SBOL_TYPED_URIS, False)
         crispr_template = sbol.ModuleDefinition('CRISPR_Template')
         self.assertEqual(crispr_template.version, '1')
 
     def test_setPersistentIdentity_hasHomespace(self):
         sbol.setHomespace('http://sbols.org/CRISPR_Example')
-        sbol.Config.setOption('sbol_compliant_uris', False)
-        sbol.Config.setOption('sbol_typed_uris', False)
+        sbol.Config.setOption(sbol2.ConfigOptions.SBOL_COMPLIANT_URIS, False)
+        sbol.Config.setOption(sbol2.ConfigOptions.SBOL_TYPED_URIS, False)
         crispr_template = sbol.ModuleDefinition('CRISPR_Template')
         expected = 'test'
         crispr_template.persistentIdentity = expected
@@ -97,8 +98,8 @@ class TestIdentified(unittest.TestCase):
 
     def test_setVersion_hasHomespace(self):
         sbol.setHomespace('http://sbols.org/CRISPR_Example')
-        sbol.Config.setOption('sbol_compliant_uris', False)
-        sbol.Config.setOption('sbol_typed_uris', False)
+        sbol.Config.setOption(sbol2.ConfigOptions.SBOL_COMPLIANT_URIS, False)
+        sbol.Config.setOption(sbol2.ConfigOptions.SBOL_TYPED_URIS, False)
         crispr_template = sbol.ModuleDefinition('CRISPR_Template')
         crispr_template.version = '2'
         self.assertEqual(crispr_template.version, '2')
@@ -174,8 +175,8 @@ class TestCopy(unittest.TestCase):
         # whose values point to an object in the old namespace are also copied into the
         # new namespace
         sbol.setHomespace('http://examples.org')
-        sbol.Config.setOption('sbol_compliant_uris', True)
-        sbol.Config.setOption('sbol_typed_uris', False)
+        sbol.Config.setOption(sbol2.ConfigOptions.SBOL_COMPLIANT_URIS, True)
+        sbol.Config.setOption(sbol2.ConfigOptions.SBOL_TYPED_URIS, False)
         doc = sbol.Document()
         comp = sbol.ComponentDefinition('cd')
         seq = sbol.Sequence('seq')
@@ -214,8 +215,8 @@ class TestCopy(unittest.TestCase):
     def test_import_into_nontyped_namespace_from_typed_namespace(self):
         # Copy an sbol-typed URI to a non-typed, sbol-compliant URI
         sbol.setHomespace('http://examples.org')
-        sbol.Config.setOption('sbol_compliant_uris', True)
-        sbol.Config.setOption('sbol_typed_uris', True)
+        sbol.Config.setOption(sbol2.ConfigOptions.SBOL_COMPLIANT_URIS, True)
+        sbol.Config.setOption(sbol2.ConfigOptions.SBOL_TYPED_URIS, True)
 
         doc = sbol.Document()
         comp = sbol.ComponentDefinition('cd')
@@ -225,7 +226,7 @@ class TestCopy(unittest.TestCase):
         doc.addSequence(seq)
 
         # Import the object into the new namespace
-        sbol.Config.setOption('sbol_typed_uris', False)
+        sbol.Config.setOption(sbol2.ConfigOptions.SBOL_TYPED_URIS, False)
         old_homespace = sbol.getHomespace()
         sbol.setHomespace('http://acme.com')
         comp_copy = comp.copy(None, old_homespace)
@@ -243,8 +244,8 @@ class TestCopy(unittest.TestCase):
 
         # Copy an sbol-typed URI to a non-typed, sbol-compliant URI
         sbol.setHomespace('http://examples.org')
-        sbol.Config.setOption('sbol_typed_uris', False)
-        sbol.Config.setOption('sbol_compliant_uris', True)
+        sbol.Config.setOption(sbol2.ConfigOptions.SBOL_TYPED_URIS, False)
+        sbol.Config.setOption(sbol2.ConfigOptions.SBOL_COMPLIANT_URIS, True)
 
         doc = sbol.Document()
         comp = sbol.ComponentDefinition('cd')
@@ -254,7 +255,7 @@ class TestCopy(unittest.TestCase):
         doc.addSequence(seq)
 
         # Import the object into the new namespace
-        sbol.Config.setOption('sbol_typed_uris', True)
+        sbol.Config.setOption(sbol2.ConfigOptions.SBOL_TYPED_URIS, True)
         old_homespace = sbol.getHomespace()
         sbol.setHomespace('http://acme.com')
         comp_copy = comp.copy(None, old_homespace)
@@ -290,7 +291,7 @@ class TestCopy(unittest.TestCase):
     def test_copy_and_increment_version(self):
         # When copying an object within the same Document, the version should be
         # automatically incrememented
-        sbol.Config.setOption('sbol_typed_uris', False)
+        sbol.Config.setOption(sbol2.ConfigOptions.SBOL_TYPED_URIS, False)
         doc = sbol.Document()
         comp = sbol.ComponentDefinition('foo', sbol.constants.BIOPAX_DNA, '1.0.0')
         doc.addComponentDefinition(comp)
@@ -303,7 +304,7 @@ class TestCopy(unittest.TestCase):
         self.assertEqual(comp_copy.types[0], sbol.constants.BIOPAX_DNA)
 
     def test_copy_to_new_document(self):
-        sbol.Config.setOption('sbol_typed_uris', False)
+        sbol.Config.setOption(sbol2.ConfigOptions.SBOL_TYPED_URIS, False)
         doc = sbol.Document()
         comp1 = sbol.ComponentDefinition('cd1', sbol.constants.BIOPAX_DNA, '2')
         comp2 = sbol.ComponentDefinition('cd2', sbol.constants.BIOPAX_DNA, '2')

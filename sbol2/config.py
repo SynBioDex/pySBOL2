@@ -95,7 +95,7 @@ class Config:
     for the libSBOL environment.
 
     Configuration variables are accessed
-    through the setOptions and getOptions methods.
+    through the setOption and getOption methods.
     """
 
     @staticmethod

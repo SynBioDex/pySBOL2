@@ -1,6 +1,6 @@
 from . import validation
 from .component import FunctionalComponent
-from .config import Config
+from .config import Config, ConfigOptions
 from .constants import *
 from .interaction import Interaction
 from .module import Module
@@ -222,7 +222,7 @@ class ModuleDefinition(TopLevel):
         :param list_of_modules: A list of submodule ModuleDefinitions.
         :return: None
         """
-        if not Config.getOption('sbol_compliant_uris'):
+        if not Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS):
             msg = 'This method only works when SBOL-compliance is enabled'
             raise SBOLError(msg, SBOLError.SBOL_ERROR_COMPLIANCE)
         for mdef in list_of_modules:

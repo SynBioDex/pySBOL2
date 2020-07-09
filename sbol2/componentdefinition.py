@@ -233,7 +233,7 @@ class ComponentDefinition(TopLevel):
         # prior to execution. That means if a call fails, it may result in a modified
         # and incomplete data structure that will be difficult to fix when the user is
         # working interactively in the interpreter
-        if not Config.getOption('sbol_compliant_uris'):
+        if not Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS):
             raise EnvironmentError('Assemble method requires SBOL-compliance enabled')
 
         # Validate doc
@@ -377,8 +377,8 @@ class ComponentDefinition(TopLevel):
 
         if self.sequence is None:
             sequence_id = self.displayId + '_seq'
-            compliant_uris = Config.getOption('sbol_compliant_uris')
-            typed_uris = Config.getOption('sbol_typed_uris')
+            compliant_uris = Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS)
+            typed_uris = Config.getOption(ConfigOptions.SBOL_TYPED_URIS)
             if compliant_uris and typed_uris:
                 sequence_id = self.displayId
             self.sequence = Sequence(sequence_id)
@@ -520,7 +520,6 @@ class ComponentDefinition(TopLevel):
                     downstream_sequence_constraint.object
 
     def deleteUpstreamComponent(self, downstream_component):
-        # if Config.getOption('sbol_compliant_uris') == False:
         if not Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS):
             raise ValueError('SBOL-compliant URIs must be enabled to use this method')
         if downstream_component.identity not in self.components:

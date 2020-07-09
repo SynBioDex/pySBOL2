@@ -41,8 +41,8 @@ class TestDocument(unittest.TestCase):
         doc = sbol.Document()
         # Tutorial doesn't drop final forward slash, but this isn't right.
         sbol.setHomespace('http://sbols.org/CRISPR_Example')
-        sbol.Config.setOption('sbol_compliant_uris', True)
-        sbol.Config.setOption('sbol_typed_uris', False)
+        sbol.Config.setOption(sbol2.ConfigOptions.SBOL_COMPLIANT_URIS, True)
+        sbol.Config.setOption(sbol2.ConfigOptions.SBOL_TYPED_URIS, False)
         crispr_template = sbol.ModuleDefinition('CRISPR_Template')
         cas9 = sbol.ComponentDefinition('Cas9', sbol.BIOPAX_PROTEIN)
         doc.addModuleDefinition(crispr_template)
@@ -58,8 +58,8 @@ class TestDocument(unittest.TestCase):
     def test_addGetTopLevel_displayId(self):
         doc = sbol.Document()
         sbol.setHomespace('http://sbols.org/CRISPR_Example')
-        sbol.Config.setOption('sbol_compliant_uris', True)
-        sbol.Config.setOption('sbol_typed_uris', False)
+        sbol.Config.setOption(sbol2.ConfigOptions.SBOL_COMPLIANT_URIS, True)
+        sbol.Config.setOption(sbol2.ConfigOptions.SBOL_TYPED_URIS, False)
         crispr_template = sbol.ModuleDefinition('CRISPR_Template')
         cas9 = sbol.ComponentDefinition('Cas9', sbol.BIOPAX_PROTEIN)
         doc.addModuleDefinition(crispr_template)
@@ -74,8 +74,8 @@ class TestDocument(unittest.TestCase):
         doc = sbol.Document()
         # Tutorial doesn't drop final forward slash, but this isn't right.
         sbol.setHomespace('http://sbols.org/CRISPR_Example')
-        sbol.Config.setOption('sbol_compliant_uris', True)
-        sbol.Config.setOption('sbol_typed_uris', False)
+        sbol.Config.setOption(sbol2.ConfigOptions.SBOL_COMPLIANT_URIS, True)
+        sbol.Config.setOption(sbol2.ConfigOptions.SBOL_TYPED_URIS, False)
         crispr_template = sbol.ModuleDefinition('CRISPR_Template')
         cas9 = sbol.ComponentDefinition('Cas9', sbol.BIOPAX_PROTEIN)
         doc.addModuleDefinition(crispr_template)
@@ -187,8 +187,8 @@ class TestDocument(unittest.TestCase):
         # `value` parameter, so it was returning all identities in the
         # document.
         sbol.setHomespace('http://examples.org')
-        sbol.Config.setOption('sbol_compliant_uris', True)
-        sbol.Config.setOption('sbol_typed_uris', True)
+        sbol.Config.setOption(sbol2.ConfigOptions.SBOL_COMPLIANT_URIS, True)
+        sbol.Config.setOption(sbol2.ConfigOptions.SBOL_TYPED_URIS, True)
         doc = sbol.Document()
         cd = doc.moduleDefinitions.create('foo')
         cd.roles = sbol.SO_PROMOTER

@@ -56,7 +56,7 @@ Branching and intersecting workflows are other common patterns of usage. For exa
 	workflow_step_7.plan = Plan('parameter_optimization')
 
 	setHomespace('')
-	Config.setOption('sbol_compliant_uris', False)  # Temporarily disable auto-construction of URIs
+	Config.setOption(ConfigOptions.SBOL_COMPLIANT_URIS, False)  # Temporarily disable auto-construction of URIs
 
 	workflow_step_1.agent = Agent('mailto:jdoe@sbols.org')
 	workflow_step_2.agent = workflow_step_1.agent
@@ -66,7 +66,7 @@ Branching and intersecting workflows are other common patterns of usage. For exa
 	workflow_step_6.agent = Agent('http://sys-bio.org/plate_reader_1')
 	workflow_step_7.agent = Agent('http://tellurium.analogmachine.org')
 
-	Config.setOption('sbol_compliant_uris', True)
+	Config.setOption(ConfigOptions.SBOL_COMPLIANT_URIS, True)
 	setHomespace('https://sys-bio.org')
 
 	doc.addActivity([workflow_step_1, workflow_step_2, workflow_step_3, workflow_step_4, workflow_step_5, workflow_step_6, workflow_step_7])

@@ -18,8 +18,8 @@ class TestCollection(unittest.TestCase):
     def setUp(self):
         # Always reset homespace
         sbol2.setHomespace(self.homespace)
-        sbol2.Config.setOption('sbol_typed_uris', True)
-        sbol2.Config.setOption('sbol_compliant_uris', True)
+        sbol2.Config.setOption(sbol2.ConfigOptions.SBOL_TYPED_URIS, True)
+        sbol2.Config.setOption(sbol2.ConfigOptions.SBOL_COMPLIANT_URIS, True)
 
     def testEmptyConstructor(self):
         # This is the default name in the collection constructor

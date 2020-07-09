@@ -45,7 +45,7 @@ class TestSequence(unittest.TestCase):
 
     def testSequenceElement(self):
         sbol2.setHomespace('http://sbols.org/CRISPR_Example')
-        sbol2.Config.setOption('sbol_typed_uris', False)
+        sbol2.Config.setOption(sbol2.ConfigOptions.SBOL_TYPED_URIS, False)
         doc = sbol2.Document()
         doc.read(CRISPR_EXAMPLE)
         # Sequence to test against
@@ -60,7 +60,7 @@ class TestSequence(unittest.TestCase):
 
     def testUpdateSequenceElement(self):
         sbol2.setHomespace('http://sbols.org/CRISPR_Example')
-        sbol2.Config.setOption('sbol_typed_uris', False)
+        sbol2.Config.setOption(sbol2.ConfigOptions.SBOL_TYPED_URIS, False)
         doc = sbol2.Document()
         doc.read(CRISPR_EXAMPLE)
         # Sequence to test against
@@ -72,7 +72,7 @@ class TestSequence(unittest.TestCase):
     # File I/O Tests
     def testUpdateWrite(self):
         sbol2.setHomespace('http://sbols.org/CRISPR_Example')
-        sbol2.Config.setOption('sbol_typed_uris', False)
+        sbol2.Config.setOption(sbol2.ConfigOptions.SBOL_TYPED_URIS, False)
         doc = sbol2.Document()
         doc.read(CRISPR_EXAMPLE)
         # Sequence to test against

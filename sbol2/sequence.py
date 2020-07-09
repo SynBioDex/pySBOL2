@@ -4,7 +4,7 @@ from rdflib import URIRef
 from .constants import *
 from .property import URIProperty, TextProperty
 from .toplevel import TopLevel
-from .config import Config
+from .config import Config, ConfigOptions
 from .sbolerror import SBOLError, SBOLErrorCode
 from .location import Range
 
@@ -127,7 +127,7 @@ class Sequence(TopLevel):
             for c in subcomponents:
                 cdef = self.doc.getComponentDefinition(c.definition)
                 if not cdef.sequence:
-                    if Config.getOption('sbol_compliant_uris'):
+                    if Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS):
                         seq = self.doc.sequences.create(cdef.displayId)
                         # cdef.sequence = seq
                         cdef.sequences = seq.identity
@@ -152,8 +152,10 @@ class Sequence(TopLevel):
                 # already exist
                 if len(sequence_annotations) == 0:
                     sa_instance = 0
-                    sa_id = cdef.displayId if Config.getOption('sbol_compliant_uris') \
-                        else cdef.identity
+                    if Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS):
+                        sa_id = cdef.displayId
+                    else:
+                        sa_id = cdef.identity
                     sa_id += '_annotation'
                     sa_uri = '%s/%s_%d/%s' % (parent_cdef.persistentIdentity, sa_id,
                                               sa_instance, cdef.version)
@@ -177,8 +179,10 @@ class Sequence(TopLevel):
                         ranges.append(loc)
                 else:
                     # Auto-construct a Range
-                    range_id = sa.displayId if Config.getOption('sbol_compliant_uris') \
-                        else sa.identity
+                    if Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS):
+                        range_id = sa.displayId
+                    else:
+                        range_id = sa.identity
                     r = sa.locations.createRange(range_id + '_range')
                     ranges.append(r)
                 if len(ranges) > 1:

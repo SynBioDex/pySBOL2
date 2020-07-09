@@ -710,7 +710,7 @@ class OwnedObject(Property):
                 compliant_uri = posixpath.join(ns, uri, '')
             compliant_uri = URIRef(compliant_uri)
             persistent_id_matches = []
-            if Config.getOption('verbose') is True:
+            if Config.getOption(ConfigOptions.VERBOSE) is True:
                 print('Searching for TopLevel: ' + compliant_uri)
             for obj in object_store:
                 if compliant_uri in obj.identity:
