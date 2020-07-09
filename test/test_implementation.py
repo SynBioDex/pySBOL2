@@ -1,8 +1,7 @@
 import unittest
 
-import rdflib
-
 import sbol2 as sbol
+import sbol2
 
 
 class TestImplementation(unittest.TestCase):
@@ -18,8 +17,8 @@ class TestImplementation(unittest.TestCase):
     def setUp(self):
         # Always reset homespace
         sbol.setHomespace(self.homespace)
-        sbol.Config.setOption('sbol_typed_uris', True)
-        sbol.Config.setOption('sbol_compliant_uris', True)
+        sbol.Config.setOption(sbol2.ConfigOptions.SBOL_TYPED_URIS, True)
+        sbol.Config.setOption(sbol2.ConfigOptions.SBOL_COMPLIANT_URIS, True)
 
     def test_implementation_exported(self):
         self.assertIn('Implementation', dir(sbol))

@@ -23,8 +23,8 @@ class TestComponentDefinitions(unittest.TestCase):
 
     def testAddComponentDefinition(self):
         sbol2.setHomespace('http://sbols.org/CRISPR_Example')
-        sbol2.Config.setOption('sbol_compliant_uris', True)
-        sbol2.Config.setOption('sbol_typed_uris', False)
+        sbol2.Config.setOption(sbol2.ConfigOptions.SBOL_COMPLIANT_URIS, True)
+        sbol2.Config.setOption(sbol2.ConfigOptions.SBOL_TYPED_URIS, False)
         expected = 'BB0001'
         test_CD = sbol2.ComponentDefinition(expected)
         doc = sbol2.Document()
@@ -319,7 +319,7 @@ class TestAssemblyRoutines(unittest.TestCase):
 
     def test_compile_sequence(self):
         doc = sbol2.Document()
-        sbol2.Config.setOption('sbol_typed_uris', True)
+        sbol2.Config.setOption(sbol2.ConfigOptions.SBOL_TYPED_URIS, True)
         gene = sbol2.ComponentDefinition("BB0001")
         promoter = sbol2.ComponentDefinition("R0010")
         CDS = sbol2.ComponentDefinition("B0032")
@@ -352,8 +352,8 @@ class TestAssemblyRoutines(unittest.TestCase):
         # different configuration options
         root_id = 'root'
         sub_id = 'sub'
-        sbol2.Config.setOption('sbol_compliant_uris', True)
-        sbol2.Config.setOption('sbol_typed_uris', True)
+        sbol2.Config.setOption(sbol2.ConfigOptions.SBOL_COMPLIANT_URIS, True)
+        sbol2.Config.setOption(sbol2.ConfigOptions.SBOL_TYPED_URIS, True)
         doc = sbol2.Document()
         root = doc.componentDefinitions.create(root_id)
         sub = doc.componentDefinitions.create(sub_id)
@@ -361,8 +361,8 @@ class TestAssemblyRoutines(unittest.TestCase):
         expected_identity = sbol2.getHomespace() + '/Sequence/' + root_id + '/1'
         self.assertEqual(root.sequence.identity, expected_identity)
 
-        sbol2.Config.setOption('sbol_compliant_uris', True)
-        sbol2.Config.setOption('sbol_typed_uris', False)
+        sbol2.Config.setOption(sbol2.ConfigOptions.SBOL_COMPLIANT_URIS, True)
+        sbol2.Config.setOption(sbol2.ConfigOptions.SBOL_TYPED_URIS, False)
         doc = sbol2.Document()
         root = doc.componentDefinitions.create(root_id)
         sub = doc.componentDefinitions.create(sub_id)
@@ -370,8 +370,8 @@ class TestAssemblyRoutines(unittest.TestCase):
         expected_identity = sbol2.getHomespace() + '/' + root_id + '_seq/1'
         self.assertEqual(root.sequence.identity, expected_identity)
 
-        sbol2.Config.setOption('sbol_compliant_uris', True)
-        sbol2.Config.setOption('sbol_typed_uris', True)
+        sbol2.Config.setOption(sbol2.ConfigOptions.SBOL_COMPLIANT_URIS, True)
+        sbol2.Config.setOption(sbol2.ConfigOptions.SBOL_TYPED_URIS, True)
 
     def test_recursive_compile(self):
         doc = sbol2.Document()
@@ -440,7 +440,7 @@ class TestAssemblyRoutines(unittest.TestCase):
         self.assertEqual(target_seq, 'atactagagttactagctactagagg')
 
     def test_assemble_with_displayIds(self):
-        sbol2.Config.setOption('sbol_typed_uris', True)
+        sbol2.Config.setOption(sbol2.ConfigOptions.SBOL_TYPED_URIS, True)
 
         doc = sbol2.Document()
         gene = sbol2.ComponentDefinition("BB0001")
