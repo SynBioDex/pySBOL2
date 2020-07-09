@@ -1,7 +1,7 @@
 from sbol2 import *
 
 setHomespace('http://sbols.org/CRISPR_Example')
-Config.setOption('sbol_typed_uris', False)
+Config.setOption(ConfigOptions.SBOL_TYPED_URIS, False)
 version = '1.0'
 doc = Document()
 
