@@ -321,7 +321,7 @@ def replace_namespace(old_uri, target_namespace, rdf_type):
     if replacement_target not in old_uri:
         replacement_target = target_namespace
 
-    if Config.getOption('sbol_typed_uris'):
+    if Config.getOption(ConfigOptions.SBOL_TYPED_URIS):
         # Map into a typed namespace
         replacement = getHomespace() + '/' + class_name
     else:
