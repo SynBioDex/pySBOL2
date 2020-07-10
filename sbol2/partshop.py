@@ -17,11 +17,7 @@ from .constants import *
 from .sbolerror import SBOLError
 from .sbolerror import SBOLErrorCode
 from .identified import Identified
-
-
-class SearchQuery:
-    """This is a stub until SearchQuery is implemented."""
-    pass
+from . import SearchQuery
 
 
 class PartShop:

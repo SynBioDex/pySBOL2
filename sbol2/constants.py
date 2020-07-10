@@ -15,6 +15,10 @@ SYSBIO_URI = "http://sys-bio.org"
 # PROVO = "https://www.w3.org/TR/prov-o/"
 OM_URI = 'http://www.ontology-of-units-of-measure.org/resource/om-2/'
 
+# A private namespace for pySBOL2 URIs
+PYSBOL2_NS = rdflib.Namespace('https://github.com/SynBioDex/pySBOL2')
+
+
 # rdf nodes used in SBOL
 NODENAME_ABOUT = "rdf:about"
 NODENAME_RESOURCE = "rdf:resource"
