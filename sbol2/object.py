@@ -47,7 +47,7 @@ def _compare_owned_objects(obj1, obj2):
     return True
 
 
-class SBOLObject():
+class SBOLObject:
     """An SBOLObject converts a Python data structure into an RDF triple store
      and contains methods for serializing and parsing RDF triples.
     """

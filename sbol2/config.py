@@ -99,20 +99,20 @@ class Config:
     through the setOptions and getOptions methods.
     """
 
-    # Dictionary which holds builder functions for SBOL objects and which can
-    # be extended with extension classes. The dictionary is populated in
-    # document.py
+    # Dictionary which holds builder functions for SBOL objects. The key is the
+    # RDFtype of the object which is parsed from the SBOL file. The dictionary is
+    # populated with SBOL core classes in document.py.  The dictionary also supports
+    # extension classes with RDFtypes not part of the core specification
     SBOL_DATA_MODEL_REGISTER = {}
 
-    def register_extension_class(cls, type_uri):
+    def register_extension_class(builder, type_uri):
         """Register an extension class and its namespace, so custom data
         can be embedded into and read from SBOL files.
 
-        :param cls: The class constructor
-        :param type_uri: An RDF type URI for the class
-        :return: The new class.
+        :param builder: A no-argument constructor
+        :param type_uri: An RDF type URI for the extension class
         """
-        Config.SBOL_DATA_MODEL_REGISTER[URIRef(type_uri)] = cls
+        Config.SBOL_DATA_MODEL_REGISTER[URIRef(type_uri)] = builder
 
     @staticmethod
     def setHomespace(ns):
