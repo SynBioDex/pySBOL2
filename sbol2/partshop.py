@@ -46,6 +46,8 @@ class PartShop:
         #   [1, 2, 3] will pass this test, and surely break something else later.
         # Should we use urllib.parse.urlparse?
         #   It doesn't do a whole lot, but catches some things this code doesn't
+        if isinstance(url, str):
+            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
         if len(url) > 0 and url[-1] == '/':
             msg = ('PartShop initialization failed. The {} URL '
                    + 'should not contain a terminal backlash')
