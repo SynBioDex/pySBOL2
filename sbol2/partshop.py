@@ -28,7 +28,7 @@ class PartShop:
     """A class which provides an API front-end for
     online bioparts repositories"""
 
-    def __init__(self, url, spoofed_url=''):
+    def __init__(self, url, spoofed_url='https://unset-spoofed-url-variable'):
         """
 
         :param url: The URL of the online repository (as a str)
