@@ -42,10 +42,12 @@ class PartShop:
 
     def _validate_url(self, url, url_name):
         """ Function to validate url with type checking, urlparse and
-        terminal forward slash's
+        terminal forward slash's as well as allowing spoofed url to
+        pass as ''
         """
-        # If url_name = spoofed and url = '' pass as spoofed_resource
-        # passes validation whilst initiating PartShop Class
+        # If url_name = spoofed and url = '' pass, as spoofed_resource
+        # initialises with default spoofed_url = '' when objects are
+        # created, ideal behavior should not throw errors in such case.
         if url_name == "spoofed" and url == '':
             return url
         # Type check to ensure passed url is a string
