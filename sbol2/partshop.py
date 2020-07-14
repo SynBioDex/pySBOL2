@@ -49,8 +49,8 @@ class PartShop:
                    + 'is not of type string').format(url_name)
             raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
         # Authenticity check with urlparse as to ensure correct scheme and netloc present
-        url_peices = urllib.parse.urlparse(url)
-        if not all([url_peices.scheme in ["http", "https"], url_peices.netloc]):
+        url_pieces = urllib.parse.urlparse(url)
+        if not all([url_pieces.scheme in ["http", "https"], url_pieces.netloc]):
             msg = ('PartShop initialization failed. The {} URL '
                    + 'was not valid').format(url_name)
             raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
