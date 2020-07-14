@@ -28,7 +28,7 @@ class PartShop:
     """A class which provides an API front-end for
     online bioparts repositories"""
 
-    def __init__(self, url, spoofed_url='https://unset-spoofed-url-variable'):
+    def __init__(self, url, spoofed_url=''):
         """
 
         :param url: The URL of the online repository (as a str)
@@ -44,6 +44,10 @@ class PartShop:
         """ Function to validate url with type checking, urlparse and
         terminal forward slash's
         """
+        # If url_name = spoofed and url = '' pass as spoofed_resource
+        # passes validation whilst initiating PartShop Class
+        if url_name == "spoofed" and url == '':
+            return url
         # Type check to ensure passed url is a string
         if not isinstance(url, str):
             msg = ('PartShop initialization failed. The {} URL '
