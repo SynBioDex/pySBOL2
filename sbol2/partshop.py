@@ -41,13 +41,21 @@ class PartShop:
         self.spoofed_resource = self._validate_url(spoofed_url, 'spoofed')
 
     def _validate_url(self, url, url_name):
-        # This feels like a weak validation
-        # Should we verify that it is a string?
-        #   [1, 2, 3] will pass this test, and surely break something else later.
-        # Should we use urllib.parse.urlparse?
-        #   It doesn't do a whole lot, but catches some things this code doesn't
-        if isinstance(url, str):
+        """ Function to validate url before further processing
+        """
+
+        # type check to ensure passed url is a string
+        if not isinstance(url,str):
+            msg = ('PartShop initialization failed. The {} URL '
+                   + 'is not of type string').format(url_name)
             raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
+        # authenticity check with urlparse so ensure correct scheme and netloc present
+        url_peices = urllib.parse.urlparse(url)
+        if not all([url_peices.scheme in ["http", "https"], url_peices.netloc]):
+            msg = ('PartShop initialization failed. The {} URL '
+                   + 'was not valid').format(url_name)
+            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
+        # string check to ensure length > 0 and does not contain terminal "\"
         if len(url) > 0 and url[-1] == '/':
             msg = ('PartShop initialization failed. The {} URL '
                    + 'should not contain a terminal backlash')
