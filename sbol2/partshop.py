@@ -40,27 +40,30 @@ class PartShop:
         self.key = ''
         self.spoofed_resource = self._validate_url(spoofed_url, 'spoofed')
 
-    def _validate_url(self, url, url_name):
-        """ Function to validate url with type checking, urlparse and terminal forward slash's
-        """
-        # Type check to ensure passed url is a string
-        if not isinstance(url,str):
-            msg = ('PartShop initialization failed. The {} URL '
-                   + 'is not of type string').format(url_name)
-            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
-        # Authenticity check with urlparse as to ensure correct scheme and netloc present
-        url_pieces = urllib.parse.urlparse(url)
-        if not all([url_pieces.scheme in ["http", "https"], url_pieces.netloc]):
-            msg = ('PartShop initialization failed. The {} URL '
-                   + 'was not valid').format(url_name)
-            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
-        # String check to ensure length > 0 and does not contain terminal "/"
-        if len(url) > 0 and url[-1] == '/':
-            msg = ('PartShop initialization failed. The {} URL '
-                   + 'should not contain a terminal forward slash')
-            msg = msg.format(url_name)
-            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
-        return url
+def _validate_url(self, url, url_name):
+    """ Function to validate url with type checking, urlparse and                    
+    terminal forward slash's
+    """
+    # Type check to ensure passed url is a string
+    if not isinstance(url, str):
+        msg = ('PartShop initialization failed. The {} URL '
+               + 'is not of type string').format(url_name)
+        raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
+    # Authenticity check with urlparse as to ensure correct scheme and
+    # netloc present
+    url_pieces = urllib.parse.urlparse(url)
+    if not all([url_pieces.scheme in ['http', 'https'],
+               url_pieces.netloc]):
+        msg = ('PartShop initialization failed. The {} URL '
+               + 'was not valid').format(url_name)
+        raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
+    # String check to ensure length > 0 and does not contain terminal "/"
+    if len(url) > 0 and url[-1] == '/':
+        msg = 'PartShop initialization failed. The {} URL ' \
+            + 'should not contain a terminal forward slash'
+        msg = msg.format(url_name)
+        raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
+    return url
 
     @property
     def logger(self):
