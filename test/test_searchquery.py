@@ -22,16 +22,17 @@ class TestSearchQuery(unittest.TestCase):
         query[sbol2.SBOL_COLLECTION] = collection
         query[sbol2.SBOL_NAME] = title
         # GSOC is always looking for DNA Region
-        query[sbol2.SBOL_ROLES] = sbol2.BIOPAX_DNA
+        query[sbol2.SBOL_TYPES] = sbol2.BIOPAX_DNA
         part_shop = sbol2.PartShop(GSOC_SBH_URL)
         response = part_shop.search(query)
         # At least one item in return should be the
         # expected return: https://synbiohub.org/public/igem/BBa_E0040/1
+        identities = [r.identity for r in response]
+        self.assertIn('https://synbiohub.org/public/igem/BBa_E0040/1', identities)
         #
         # All items in response should have name == GFP exactly.
-
-        self.assertEqual(None, part_shop)
-        pass
+        names = [r.name == title for r in response]
+        self.assertTrue(all(names))
 
 
 if __name__ == '__main__':

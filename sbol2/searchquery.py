@@ -1,4 +1,4 @@
-from .config import parseNamespace
+from .config import parseNamespace, parseClassName
 from .constants import *
 from .property import URIProperty, IntProperty, TextProperty
 from .toplevel import TopLevel
@@ -32,3 +32,31 @@ class SearchQuery(TopLevel):
 
     def __getitem__(self, item):
         return self.properties[item][0].toPython()
+
+    def query_dict(self) -> dict:
+        """Convert this search query to a query dictionary suitable for
+        urllib.parse.urlencode()."""
+        result = {}
+        object_type = self.objectType
+        if object_type:
+            result['objectType'] = parseClassName(object_type)
+        collection = self.getPropertyValue(SBOL_COLLECTION)
+        if collection:
+            result['collection'] = f'<{collection}>'
+        # Now gather all the properties the user has set
+        skip_list = [OBJECT_TYPE_URI, OFFSET_URI, LIMIT_URI,
+                     SBOL_IDENTITY, SBOL_PERSISTENT_IDENTITY, SBOL_DISPLAY_ID,
+                     SBOL_COLLECTION
+                     ]
+        for k, v in self.properties.items():
+            if k in skip_list:
+                continue
+            if not v:
+                # If there is no value, skip it
+                # this can happen if no value is supplied for an attribute
+                continue
+            if v[0].startswith('http'):
+                result[f'<{k}>'] = f'<{v[0]}>'
+            else:
+                result[f'<{k}>'] = f"'{v[0]}'"
+        return result

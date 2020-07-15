@@ -384,13 +384,29 @@ class PartShop:
         query_url = f'{search_url}/search/{query}&/?{params}'
         return self._search(query_url)
 
-    def search(self, search_text: str,
+    def search_advanced(self, search_query: SearchQuery):
+        # See https://synbiohub.github.io/api-docs/#search-metadata
+        search_url = parseURLDomain(self.resource)
+        query = search_query.query_dict()
+        # if search_text.startswith('http'):
+        #     search_text = f"<{search_text}>"
+        # else:
+        #     search_text = f"'{search_text}'"
+        # query[parseClassName(property_uri)] = search_text
+        query = urllib.parse.urlencode(query)
+        params = dict(offset=(search_query.offset),
+                      limit=(search_query.limit))
+        params = urllib.parse.urlencode(params)
+        query_url = f'{search_url}/search/{query}&/?{params}'
+        return self._search(query_url)
+
+    def search(self, search_text: Union[str, SearchQuery],
                object_type: Optional[str] = SBOL_COMPONENT_DEFINITION,
                property_uri: Optional[Union[str, int]] = None,
                offset: int = 0, limit: int = 25) -> List[Identified]:
         # if search_text is a SearchQuery, dispatch to search_advanced
         if type(search_text) is SearchQuery:
-            raise NotImplementedError('search using SearchQuery is not implemented')
+            return self.search_advanced(search_text)
         if type(property_uri) is int:
             # User called without property_uri and with offset. Shift args
             if offset > 0:
