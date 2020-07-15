@@ -44,14 +44,13 @@ class SearchQuery(TopLevel):
         if collection:
             result['collection'] = f'<{collection}>'
         # Now gather all the properties the user has set
-        skip_list = [OBJECT_TYPE_URI, OFFSET_URI, LIMIT_URI,
-                     SBOL_IDENTITY, SBOL_PERSISTENT_IDENTITY, SBOL_DISPLAY_ID,
-                     SBOL_COLLECTION
-                     ]
+        skip_list = [SBOL_IDENTITY,
+                     OBJECT_TYPE_URI, OFFSET_URI, LIMIT_URI,
+                     SBOL_COLLECTION]
         for k, v in self.properties.items():
             if k in skip_list:
                 continue
-            if not v:
+            if not v or not v[0]:
                 # If there is no value, skip it
                 # this can happen if no value is supplied for an attribute
                 continue
