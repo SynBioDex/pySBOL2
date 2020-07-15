@@ -297,6 +297,46 @@ WHERE {
         # Expecting at least 1 plasmid
         self.assertGreater(count, 0)
 
+    def test_validate_url_forwardslash(self):
+        # Tests whether the _validate_url() sucessfully filters
+        # out urls containing a terminal forward slash
+        part_shop = sbol2.PartShop('https://initialise-partshop')
+        self.assertRaises(TypeError,
+                          part_shop._validate_url,
+                          'https://stackoverflow.com/')
+
+    def test_validate_url_missing_netloc(self):
+        # Tests whether the _validate_url() sucessfully filters
+        # out urls with non existent netlocs
+        part_shop = sbol2.PartShop('https://initialise-partshop')
+        self.assertRaises(TypeError,
+                          part_shop._validate_url,
+                          'https://')
+
+    def test_validate_url_invalid_scheme(self):
+        # Tests whether the _validate_url() sucessfully filters
+        # out urls with schemes not equal to "http" or "https"
+        part_shop = sbol2.PartShop('https://initialise-partshop')
+        self.assertRaises(TypeError,
+                          part_shop._validate_url,
+                          'file://google.com')
+
+    def test_validate_url_hidden_list(self):
+        # Tests whether the _validate_url() sucessfully filters
+        # out urls as a string of a list
+        part_shop = sbol2.PartShop('https://initialise-partshop')
+        self.assertRaises(TypeError,
+                          part_shop._validate_url,
+                          '[1,2,3]')
+
+    def test_validate_url_type_check(self):
+        # Tests whether the _validate_url() sucessfully filters
+        # out urls of type which is not equal to string
+        part_shop = sbol2.PartShop('https://initialise-partshop')
+        self.assertRaises(TypeError,
+                          part_shop._validate_url,
+                          [1, 2, 3])
+
 
 if __name__ == '__main__':
     unittest.main()
