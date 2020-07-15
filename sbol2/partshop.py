@@ -41,14 +41,32 @@ class PartShop:
         self.spoofed_resource = self._validate_url(spoofed_url, 'spoofed')
 
     def _validate_url(self, url, url_name):
-        # This feels like a weak validation
-        # Should we verify that it is a string?
-        #   [1, 2, 3] will pass this test, and surely break something else later.
-        # Should we use urllib.parse.urlparse?
-        #   It doesn't do a whole lot, but catches some things this code doesn't
+        """ Function to validate url with type checking, urlparse and
+        terminal forward slash's as well as allowing spoofed url to
+        pass as ''
+        """
+        # If url_name = spoofed and url = '' pass, as spoofed_resource
+        # initialises with default spoofed_url = '' when objects are
+        # created, ideal behavior should not throw errors in such case.
+        if url_name == "spoofed" and url == '':
+            return url
+        # Type check to ensure passed url is a string
+        if not isinstance(url, str):
+            msg = ('PartShop initialization failed. The {} URL '
+                   + 'is not of type string').format(url_name)
+            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
+        # Authenticity check with urlparse as to ensure correct scheme and
+        # netloc present
+        url_pieces = urllib.parse.urlparse(url)
+        if not all([url_pieces.scheme in ['http', 'https'],
+                   url_pieces.netloc]):
+            msg = ('PartShop initialization failed. The {} URL '
+                   + 'was not valid').format(url_name)
+            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
+        # String check to ensure length > 0 and does not contain terminal "/"
         if len(url) > 0 and url[-1] == '/':
             msg = ('PartShop initialization failed. The {} URL '
-                   + 'should not contain a terminal backlash')
+                   + 'should not contain a terminal forward slash')
             msg = msg.format(url_name)
             raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
         return url
