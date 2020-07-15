@@ -132,6 +132,17 @@ class TestSearchQuery(unittest.TestCase):
         self.assertIn('https://synbiohub.org/public/bsu/BO_28874/1', identities)
         self.assertNotIn('https://synbiohub.org/public/bsu/BO_26604/1', identities)
 
+    def test_gsoc_count_5(self):
+        part_shop = sbol2.PartShop(GSOC_SBH_URL)
+        query = sbol2.SearchQuery()
+        collection = 'https://synbiohub.org/public/bsu/bsu_collection/1'
+        query[sbol2.SBOL_COLLECTION] = collection
+        query[sbol2.SBOL_NAME] = 'accA'
+        # GSOC is always looking for DNA Region
+        query[sbol2.SBOL_TYPES] = sbol2.BIOPAX_DNA
+        count = part_shop.searchCount(query)
+        self.assertEqual(1, count)
+
 
 if __name__ == '__main__':
     unittest.main()

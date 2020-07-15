@@ -421,15 +421,7 @@ class PartShop:
         return self.search_exact(search_text, object_type, property_uri,
                                  offset, limit)
 
-    def _search_count(self, search_text, object_type, property_uri):
-        search_url = parseURLDomain(self.resource)
-        query = dict(objectType=parseClassName(object_type))
-        query = urllib.parse.urlencode(query)
-        search_text = urllib.parse.quote(search_text)
-        # params = dict(offset=offset, limit=limit)
-        # params = urllib.parse.urlencode(params)
-        # query_url = f'{search_url}/search/{query}&{search_text}/?{params}'
-        url = f'{search_url}/searchCount/{query}&{search_text}/'
+    def _search_count(self, url):
         headers = {'Accept': 'text/plain'}
         if self.key:
             headers['X-authorization'] = self.key
@@ -441,16 +433,34 @@ class PartShop:
         # Everything looks good, parse and return the results
         return int(response.text)
 
+    def search_count(self, search_text, object_type, property_uri):
+        search_url = parseURLDomain(self.resource)
+        query = dict(objectType=parseClassName(object_type))
+        query = urllib.parse.urlencode(query)
+        search_text = urllib.parse.quote(search_text)
+        # params = dict(offset=offset, limit=limit)
+        # params = urllib.parse.urlencode(params)
+        # query_url = f'{search_url}/search/{query}&{search_text}/?{params}'
+        url = f'{search_url}/searchCount/{query}&{search_text}/'
+        return self._search_count(url)
+
+    def search_count_advanced(self, search_query):
+        search_url = parseURLDomain(self.resource)
+        query = search_query.query_dict()
+        query = urllib.parse.urlencode(query)
+        url = f'{search_url}/searchCount/{query}&/'
+        return self._search_count(url)
+
     def searchCount(self, search_text, object_type=None, property_uri=None):
         """Returns the number of records matching the given criteria.
         """
-        # if search_text is a SearchQuery, dispatch to ???
+        # if search_text is a SearchQuery, dispatch to search_count_advanced
         if type(search_text) is SearchQuery:
-            raise NotImplementedError('search using SearchQuery is not implemented')
+            return self.search_count_advanced(search_text)
 
         # if object_type is not specified, default to SBOL_COMPONENT_DEFINITION
         if object_type is None:
             object_type = SBOL_COMPONENT_DEFINITION
 
         # Dispatch to the internal search count method
-        return self._search_count(search_text, object_type, property_uri)
+        return self.search_count(search_text, object_type, property_uri)
