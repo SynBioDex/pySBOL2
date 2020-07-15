@@ -50,7 +50,6 @@ SBOL_ATTACHMENT = SBOL_URI + "#Attachment"
 SBOL_IMPLEMENTATION = SBOL_URI + "#Implementation"
 SBOL_EXPERIMENT = SBOL_URI + "#Experiment"
 SBOL_EXPERIMENTAL_DATA = SBOL_URI + "#ExperimentalData"
-SBOL_MEASURE = SBOL_URI + "#Measure"
 UNDEFINED = SBOL_URI + "#Undefined"
 
 # URIs for SBOL Properties
