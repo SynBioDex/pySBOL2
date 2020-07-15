@@ -17,11 +17,7 @@ from .constants import *
 from .sbolerror import SBOLError
 from .sbolerror import SBOLErrorCode
 from .identified import Identified
-
-
-class SearchQuery:
-    """This is a stub until SearchQuery is implemented."""
-    pass
+from . import SearchQuery
 
 
 class PartShop:
@@ -406,13 +402,29 @@ class PartShop:
         query_url = f'{search_url}/search/{query}&/?{params}'
         return self._search(query_url)
 
-    def search(self, search_text: str,
+    def search_advanced(self, search_query: SearchQuery):
+        # See https://synbiohub.github.io/api-docs/#search-metadata
+        search_url = parseURLDomain(self.resource)
+        query = search_query.query_dict()
+        # if search_text.startswith('http'):
+        #     search_text = f"<{search_text}>"
+        # else:
+        #     search_text = f"'{search_text}'"
+        # query[parseClassName(property_uri)] = search_text
+        query = urllib.parse.urlencode(query)
+        params = dict(offset=(search_query.offset),
+                      limit=(search_query.limit))
+        params = urllib.parse.urlencode(params)
+        query_url = f'{search_url}/search/{query}&/?{params}'
+        return self._search(query_url)
+
+    def search(self, search_text: Union[str, SearchQuery],
                object_type: Optional[str] = SBOL_COMPONENT_DEFINITION,
                property_uri: Optional[Union[str, int]] = None,
                offset: int = 0, limit: int = 25) -> List[Identified]:
         # if search_text is a SearchQuery, dispatch to search_advanced
         if type(search_text) is SearchQuery:
-            raise NotImplementedError('search using SearchQuery is not implemented')
+            return self.search_advanced(search_text)
         if type(property_uri) is int:
             # User called without property_uri and with offset. Shift args
             if offset > 0:
@@ -427,15 +439,7 @@ class PartShop:
         return self.search_exact(search_text, object_type, property_uri,
                                  offset, limit)
 
-    def _search_count(self, search_text, object_type, property_uri):
-        search_url = parseURLDomain(self.resource)
-        query = dict(objectType=parseClassName(object_type))
-        query = urllib.parse.urlencode(query)
-        search_text = urllib.parse.quote(search_text)
-        # params = dict(offset=offset, limit=limit)
-        # params = urllib.parse.urlencode(params)
-        # query_url = f'{search_url}/search/{query}&{search_text}/?{params}'
-        url = f'{search_url}/searchCount/{query}&{search_text}/'
+    def _search_count(self, url):
         headers = {'Accept': 'text/plain'}
         if self.key:
             headers['X-authorization'] = self.key
@@ -447,16 +451,34 @@ class PartShop:
         # Everything looks good, parse and return the results
         return int(response.text)
 
+    def search_count(self, search_text, object_type, property_uri):
+        search_url = parseURLDomain(self.resource)
+        query = dict(objectType=parseClassName(object_type))
+        query = urllib.parse.urlencode(query)
+        search_text = urllib.parse.quote(search_text)
+        # params = dict(offset=offset, limit=limit)
+        # params = urllib.parse.urlencode(params)
+        # query_url = f'{search_url}/search/{query}&{search_text}/?{params}'
+        url = f'{search_url}/searchCount/{query}&{search_text}/'
+        return self._search_count(url)
+
+    def search_count_advanced(self, search_query):
+        search_url = parseURLDomain(self.resource)
+        query = search_query.query_dict()
+        query = urllib.parse.urlencode(query)
+        url = f'{search_url}/searchCount/{query}&/'
+        return self._search_count(url)
+
     def searchCount(self, search_text, object_type=None, property_uri=None):
         """Returns the number of records matching the given criteria.
         """
-        # if search_text is a SearchQuery, dispatch to ???
+        # if search_text is a SearchQuery, dispatch to search_count_advanced
         if type(search_text) is SearchQuery:
-            raise NotImplementedError('search using SearchQuery is not implemented')
+            return self.search_count_advanced(search_text)
 
         # if object_type is not specified, default to SBOL_COMPONENT_DEFINITION
         if object_type is None:
             object_type = SBOL_COMPONENT_DEFINITION
 
         # Dispatch to the internal search count method
-        return self._search_count(search_text, object_type, property_uri)
+        return self.search_count(search_text, object_type, property_uri)

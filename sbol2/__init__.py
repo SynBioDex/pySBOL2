@@ -29,6 +29,7 @@ from .module import Module
 from .moduledefinition import ModuleDefinition
 from .object import SBOLObject
 from .participation import Participation
+from .searchquery import SearchQuery
 from .partshop import PartShop
 from .property import DateTimeProperty, FloatProperty, IntProperty
 from .property import LiteralProperty, OwnedObject
