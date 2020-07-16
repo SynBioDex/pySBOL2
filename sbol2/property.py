@@ -7,7 +7,6 @@ import posixpath
 from typing import Any, Union
 
 import dateutil.parser
-import rdflib
 from rdflib import Literal, URIRef
 import packaging.version as pv
 
@@ -34,6 +33,33 @@ class Property(ABC):
     At a low level, the Property class converts SBOL data structures
     into RDF triples.
     """
+
+    @staticmethod
+    def valid_lower_bound(x: Union[int, float, str]) -> str:
+        """Validate the lower bound. Allow numeric strings, ints,
+        and floats.
+        """
+        if isinstance(x, str) and x.isnumeric():
+            return x
+        elif isinstance(x, int):
+            return str(x)
+        elif isinstance(x, float) and x.is_integer():
+            return str(int(x))
+        else:
+            raise ValueError('Lower bound must be numeric')
+
+    @staticmethod
+    def valid_upper_bound(x: Union[int, float, str]) -> str:
+        """Validate the upper bound. Allow numeric strings, ints,
+        floats, and '*' (to represent infinity).
+        """
+        if x == '*':
+            return x
+        try:
+            x = Property.valid_lower_bound(x)
+        except ValueError:
+            raise ValueError('Upper bound must be numeric or \'*\'')
+        return x
 
     def __init__(self, property_owner, type_uri, lower_bound, upper_bound,
                  validation_rules, initial_value=None):
@@ -66,8 +92,8 @@ class Property(ABC):
             raise TypeError('property_owner.properties must be a dict')
         self._sbol_owner = property_owner
         self._rdf_type = str(type_uri)
-        self._lowerBound = lower_bound
-        self._upperBound = upper_bound
+        self._lowerBound = Property.valid_lower_bound(lower_bound)
+        self._upperBound = Property.valid_upper_bound(upper_bound)
         # Validate validation rules
         if validation_rules is None:
             # Some constructors pass None for validation rules
