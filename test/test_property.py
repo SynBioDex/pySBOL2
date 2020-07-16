@@ -170,6 +170,23 @@ class TestProperty(unittest.TestCase):
         cd.annotation = None
         self.assertEqual(cd.annotation, None)
 
+    def test_owned_object_singleton_ints(self):
+        # same as test_owned_object_singleton but specify OwnedObject
+        # bounds as ints instead of strings
+        cd = sbol.ComponentDefinition('cd')
+        annotation_uri = rdflib.URIRef('http://examples.org#annotation_property')
+        cd.annotation = sbol.property.OwnedObject(cd, annotation_uri, sbol.Identified,
+                                                  0, 1, None)
+        self.assertIsNone(cd.annotation)
+        cd.annotation = sbol.Identified('foo')
+        self.assertEqual(type(cd.annotation), sbol.Identified)
+
+        # Test unsetting
+        cd.annotation = None
+        self.assertEqual(cd.annotation, None)
+        cd.annotation = None
+        self.assertEqual(cd.annotation, None)
+
     def test_owned_object_multiple(self):
         cd = sbol.ComponentDefinition('cd')
         annotation_uri = rdflib.URIRef('http://examples.org#annotation_property')
