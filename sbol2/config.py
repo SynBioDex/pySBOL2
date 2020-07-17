@@ -236,7 +236,7 @@ class Config:
             return options[option]
         else:
             msg = '{!r} is not a valid configuration option'.format(option)
-            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT, msg)
 
 
 # Global methods

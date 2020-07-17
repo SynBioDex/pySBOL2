@@ -287,8 +287,8 @@ class SBOLObject:
             return [str(x) for x in self.properties[property_uri]]
         except KeyError as e:
             # no property by this name
-            raise SBOLError('Property {} not found'.format(property_uri),
-                            SBOLErrorCode.SBOL_ERROR_NOT_FOUND)
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_NOT_FOUND,
+                            'Property {} not found'.format(property_uri))
 
     def getProperties(self):
         """Gets URIs for all properties contained by this object.

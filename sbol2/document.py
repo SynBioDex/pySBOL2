@@ -640,7 +640,7 @@ class Document(Identified):
                 self.logger.debug('Found %d good references', len(matches))
                 if len(matches) > 1:
                     msg = 'Invalid custom annotation object in SBOL document'
-                    raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_SERIALIZATION)
+                    raise SBOLError(SBOLErrorCode.SBOL_ERROR_SERIALIZATION, msg)
                 if len(matches) == 1:
                     match = matches[0]
                     if property_uri not in match.owned_objects:
@@ -952,10 +952,10 @@ class Document(Identified):
         # Or if response['result'] is not empty?
         if response['errors'][0]:
             msg = ' '.join(response['errors'])
-            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT, msg)
         if not response['result']:
             msg = 'Validator returned no content'
-            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT, msg)
         # write the result to the desired output path
         with open(output_path, 'w') as fp:
             fp.write(response['result'])
