@@ -6,10 +6,9 @@ import sbol2
 class TestError(unittest.TestCase):
 
     def test_sbol_error_warning(self):
-        # There are lots of places where the SBOLError constructor is
-        # called with arguments in the wrong order. A warning has been
-        # added to note these occurrences until they can be fixed.
-        with self.assertWarns(RuntimeWarning):
+        # SBOLError should raise a TypeError if the first argument
+        # is not an SBOLErrorCode.
+        with self.assertRaises(TypeError):
             sbol2.SBOLError('Item not found',
                             sbol2.SBOLErrorCode.NOT_FOUND_ERROR)
 
