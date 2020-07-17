@@ -213,10 +213,10 @@ class Document(Identified):
         # Check for uniqueness of URI
         identity_uri = sbol_obj.identity
         if identity_uri in self.SBOLObjects:
-            raise SBOLError('Cannot add ' + sbol_obj.identity +
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE,
+                            'Cannot add ' + sbol_obj.identity +
                             ' to Document. An object with this identity '
-                            'is already contained in the Document',
-                            SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE)
+                            'is already contained in the Document')
         else:
             # If TopLevel add to Document.
             if sbol_obj.is_top_level():
@@ -358,8 +358,8 @@ class Document(Identified):
         try:
             return self.SBOLObjects[uri]
         except KeyError:
-            raise SBOLError(f'Object {uri} was not found',
-                            SBOLErrorCode.SBOL_ERROR_NOT_FOUND)
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_NOT_FOUND,
+                            f'Object {uri} was not found')
 
     def getAll(self):
         """
@@ -917,7 +917,7 @@ class Document(Identified):
         if uri not in self.SBOLObjects:
             msg = 'Top level object {} is not in document'
             msg = msg.format(uri)
-            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_NOT_FOUND)
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_NOT_FOUND, msg)
         sbol_obj = self.SBOLObjects[uri]
         # Verify object is top level
         if sbol_obj.is_top_level():
@@ -925,7 +925,7 @@ class Document(Identified):
         # Not top level, raise error
         msg = '{} is not a top level object'
         msg = msg.format(uri)
-        raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
+        raise SBOLError(SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT, msg)
 
     def copy(self, target_namespace=None, target_doc=None, version=None):
         # This enables the user to use the pattern doc2 = doc.copy() to clone a Document.
@@ -1040,7 +1040,7 @@ def validate(doc: Document, options: Mapping[str, Any]):
     else:
         msg = 'Validation failure. HTTP post request failed with code {}: {}'
         msg = msg.format(response.status_code, response.content)
-        raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST)
+        raise SBOLError(SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST, msg)
 
 
 igem_assembly_scars = '''<?xml version="1.0" encoding="utf-8"?>

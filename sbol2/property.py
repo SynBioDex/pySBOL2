@@ -623,10 +623,10 @@ class OwnedObject(Property):
         # See issue #127
         for obj in object_store:
             if obj.identity == sbol_obj.identity:
-                raise SBOLError("The object " + sbol_obj.identity +
+                raise SBOLError(SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE,
+                                "The object " + sbol_obj.identity +
                                 " is already contained by the " +
-                                self._rdf_type + " property",
-                                SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE)
+                                self._rdf_type + " property")
         # Add to parent object
         object_store.append(sbol_obj)
         # Run validation rules
@@ -699,7 +699,7 @@ class OwnedObject(Property):
                 return obj
             else:
                 msg = 'Object {} not found'.format(id)
-                raise SBOLError(msg, SBOLErrorCode.NOT_FOUND_ERROR)
+                raise SBOLError(SBOLErrorCode.NOT_FOUND_ERROR, msg)
 
     def find_persistent_identity(self, search_uri):
         if not Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS):

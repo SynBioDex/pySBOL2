@@ -143,10 +143,10 @@ class Sequence(TopLevel):
                     parent_cdef.find_property_value(SBOL_COMPONENT_PROPERTY, c.identity)
 
                 if len(sequence_annotations) > 1:
-                    raise SBOLError('Cannot compile Sequence. Component <%s> is '
+                    raise SBOLError(SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT,
+                                    'Cannot compile Sequence. Component <%s> is '
                                     'irregular. More than one SequenceAnnotation is '
-                                    'associated with this Component' % c.identity,
-                                    SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
+                                    'associated with this Component' % c.identity)
 
                 # Auto-construct a SequenceAnnotation for this Component if one doesn't
                 # already exist
@@ -186,10 +186,10 @@ class Sequence(TopLevel):
                     r = sa.locations.createRange(range_id + '_range')
                     ranges.append(r)
                 if len(ranges) > 1:
-                    raise SBOLError('Cannot compile Sequence <%s> because '
+                    raise SBOLError(SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT,
+                                    'Cannot compile Sequence <%s> because '
                                     'SequenceAnnotation <%s> has more than one Range.'
-                                    % (self.identity, sa.identity),
-                                    SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
+                                    % (self.identity, sa.identity))
 
                 r = ranges[0]
                 r.start = len(composite_sequence) + 1

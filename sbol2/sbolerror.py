@@ -25,7 +25,7 @@ class SBOLErrorCode(Enum):
 
 class SBOLError(Exception):
 
-    def __init__(self, message, err):
+    def __init__(self, err, message):
         if isinstance(message, SBOLErrorCode):
             warnings.warn("SBOLError arguments out of order",
                           RuntimeWarning)

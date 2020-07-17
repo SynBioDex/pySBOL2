@@ -244,7 +244,7 @@ class PartShop:
             return uri.replace(self.spoofed_resource, self.resource)
         msg = ('{} does not exist in the resource namespace')
         msg = msg.format(uri)
-        raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
+        raise SBOLError(SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT, msg)
 
     def remove(self, uri):
         query = self._uri2url(uri)
@@ -256,13 +256,13 @@ class PartShop:
         response = requests.get(url, headers=headers)
         if response.ok:
             return True
-        if response.status_code == 401:
-            # TODO: Is there a symbol we can use instead of 401?
+        if response.status_code == requests.codes.unauthorized:
+            # Handle a 401 Unauthorized error
             msg = 'You must login with valid credentials before removing'
-            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_HTTP_UNAUTHORIZED)
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_HTTP_UNAUTHORIZED, msg)
         # Not sure what went wrong
         msg = 'Unknown error: ' + response
-        raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST)
+        raise SBOLError(SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST, msg)
 
     def login(self, user_id, password=''):
         """In order to submit to a PartShop, you must login first.
@@ -283,7 +283,7 @@ class PartShop:
         if not response:
             msg = 'Login failed due to an HTTP error: {}'
             msg = msg.format(response)
-            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST)
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST, msg)
         self.key = response.content.decode('utf-8')
         return response
 

@@ -161,10 +161,10 @@ class Identified(SBOLObject):
         if parent.doc:
             matches = parent.doc.find_property_value(SBOL_IDENTITY, self.identity)
             if len(matches) > 0:
-                raise SBOLError("Cannot update SBOL-compliant URI. "
+                raise SBOLError(SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE,
+                                "Cannot update SBOL-compliant URI. "
                                 "An object with URI " + str(self.identity) +
-                                " is already in the Document",
-                                SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE)
+                                " is already in the Document")
 
     def copy(self, target_doc=None, target_namespace=None, version=None):
 

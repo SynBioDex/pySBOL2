@@ -206,14 +206,14 @@ class Config:
             return
         if option not in options:
             msg = '{!r} is not a valid configuration option'.format(option)
-            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT, msg)
         if option in valid_options:
             if val in valid_options[option]:
                 options[option] = val
             else:
                 msg = '{!r} is not a valid value for option {!r}.'.format(val, option)
                 msg += ' Valid options are: {!r}.'.format(valid_options[option])
-                raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
+                raise SBOLError(SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT, msg)
         else:
             # Any argument is valid, eg. uriPrefix
             options[option] = val
