@@ -33,27 +33,13 @@ from rdflib import URIRef, Literal
 rdfNS = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 sbolNS = "http://sbols.org/v2#"
 
+OWNERSHIP_PREDICATES = set()
+
 
 def is_ownership_relation(g, triple):
     subject = triple[0].toPython()
     predicate = triple[1].toPython()
     obj = triple[2]
-
-    ownership_predicates = {
-        sbolNS + 'module',
-        sbolNS + 'mapsTo',
-        sbolNS + 'interaction',
-        sbolNS + 'participation',
-        sbolNS + 'functionalComponent',
-        sbolNS + 'sequenceConstraint',
-        sbolNS + 'location',
-        sbolNS + 'sourceLocation',
-        sbolNS + 'sequenceAnnotation',
-        sbolNS + 'measure'
-    }
-
-    if predicate in ownership_predicates:
-        return True
 
     # SBOL2 reuses the "component" predicate as both an ownership predicate (in
     # the case of ComponentDefinition) and a referencing one (in the case of
@@ -65,6 +51,8 @@ def is_ownership_relation(g, triple):
         else:
             return True
 
+    if predicate in OWNERSHIP_PREDICATES:
+        return True
     return False
 
 

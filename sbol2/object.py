@@ -387,7 +387,7 @@ class SBOLObject:
         """
         raise NotImplementedError("Implemented by child classes")
 
-    def build_graph(self, graph):
+    def build_graph(self, graph, ownership_predicates):
         graph.add((rdflib.URIRef(self.identity),
                    rdflib.RDF.type,
                    rdflib.URIRef(self.rdf_type)))
@@ -406,11 +406,12 @@ class SBOLObject:
             if typeURI in self._hidden_properties:
                 # Skip hidden properties
                 continue
+            ownership_predicates.add(typeURI)  # used in SBOL2Serialize to structure XML
             for owned_obj in objlist:
                 graph.add((rdflib.URIRef(self.identity),
                            rdflib.URIRef(typeURI),
                            URIRef(owned_obj.identity)))
-                owned_obj.build_graph(graph)
+                owned_obj.build_graph(graph, ownership_predicates)
 
     def __str__(self):
         return self.identity

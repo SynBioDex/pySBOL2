@@ -19,7 +19,8 @@ class SearchQuery(TopLevel):
         self.persistentIdentity = ''
         self.version = ''
         # Add some attributes
-        self.objectType = URIProperty(self, OBJECT_TYPE_URI, '0', '1', None, search_target)
+        self.objectType = URIProperty(self, OBJECT_TYPE_URI, '0', '1', None,
+                                      search_target)
         self.offset = IntProperty(self, OFFSET_URI, '0', '1', None, offset)
         self.limit = IntProperty(self, LIMIT_URI, '0', '1', None, limit)
 
