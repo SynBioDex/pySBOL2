@@ -6,18 +6,20 @@ The Synthetic Biology Open Language is an extensible data representation. This m
 Defining Extension Properties
 -----------------------------
 
-Extension data may be added or retrieved from an SBOL object using special SBOL property interfaces. Each interface is specialized for a specific data type and may include special validation rules. For example, the `VersionProperty` will validate whether its string value conforms to `Maven version syntax <https://docs.oracle.com/middleware/1212/core/MAVEN/maven_version.htm#MAVEN8855>`_. Additionally, `DateTimeProperty` will validate whether its string value conforms to `XML Schema Date/Time format <https://www.w3schools.com/xml/schema_dtypes_date.asp>`_. Currently the following property types are supported:
+Extension data may be added or retrieved from an SBOL object using special SBOL property interfaces. Currently the following property interfaces are supported:
 
 .. code:: python
-    TextProperty
-    URIProperty
-    IntProperty
-    FloatProperty
-    VersionProperty
-    DateTimeProperty
-    ReferencedObject
-    OwnedObject
+  TextProperty
+  URIProperty
+  IntProperty
+  FloatProperty
+  VersionProperty
+  DateTimeProperty
+  ReferencedObject
+  OwnedObject
 .. end
+
+Each interface is specialized for a specific data type. For example `TextProperty`, `IntProperty`, and `FloatProperty` contain string, integer, and float values, respectively. The `URIProperty` is used whenever an ontology term is specified. Some properties include special validation rules. For example, the `VersionProperty` will validate whether its string value conforms to `Maven version syntax <https://docs.oracle.com/middleware/1212/core/MAVEN/maven_version.htm#MAVEN8855>`_. Additionally, `DateTimeProperty` will validate whether its string value conforms to `XML Schema Date/Time format <https://www.w3schools.com/xml/schema_dtypes_date.asp>`_. The `OwnedObject` interface is used to define parent-child compositional relationships between objects, while the `ReferencedObject` is used to define associative links between objects.
 
 A property interface can be instantiated by calling its constructor. Property constructors follow a general pattern. The first argument always indicates the object to which the property will be bound. The second argument is always a URI that indicates how the data property will appear when serialized into the contents of an SBOL file. In XML, such a URI is called a "qualified name" or QName. Property constructors also include a cardinality lower and upper bound. Typical values for a lower bound are either 0 (if the field is optional) or 1 (if the field requires a value). Typical upper bound values are either 1 (if the field can contain only a single value) or `math.inf` (if the field can contain an arbitrary length list of values). If desired, a property can also be initialized with a list of validation rules. Validation rules are functions that check whether a property value conforms to a specified rule. They are run every time the value of the property is modified.
 
