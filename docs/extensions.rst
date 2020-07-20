@@ -9,6 +9,7 @@ Defining Extension Properties
 Extension data may be added or retrieved from an SBOL object using special SBOL property interfaces. Currently the following property interfaces are supported:
 
 .. code:: python
+
   TextProperty
   URIProperty
   IntProperty
