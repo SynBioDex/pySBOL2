@@ -185,8 +185,8 @@ Extension classes that do not override a core SBOL class can be accessed from a 
 
 .. end
 
-Composition
------------
+Example 3: Composing Extension Objects
+--------------------------------------
 
 It is also possible to create extension classes that have a parent-child compositional relationship. In this case the child class should be defined to inherit from `Identified`, while the parent class inherits from `TopLevel`. The child class is referenced through an `OwnedObject` interface. The following example introduces the `DataSheet` class which can now be referenced through the parent `Analysis` class.
 
