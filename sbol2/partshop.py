@@ -50,7 +50,7 @@ class PartShop:
         if not isinstance(url, str):
             msg = ('PartShop initialization failed. The {} URL '
                    + 'is not of type string').format(url_name)
-            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT, msg)
         # Authenticity check with urlparse as to ensure correct scheme and
         # netloc present
         url_pieces = urllib.parse.urlparse(url)
@@ -58,13 +58,13 @@ class PartShop:
                    url_pieces.netloc]):
             msg = ('PartShop initialization failed. The {} URL '
                    + 'was not valid').format(url_name)
-            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT, msg)
         # String check to ensure length > 0 and does not contain terminal "/"
         if len(url) > 0 and url[-1] == '/':
             msg = ('PartShop initialization failed. The {} URL '
                    + 'should not contain a terminal forward slash')
             msg = msg.format(url_name)
-            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT, msg)
         return url
 
     @property
@@ -149,13 +149,13 @@ class PartShop:
                                     headers={'X-authorization': self.key,
                                              'Accept': 'text/plain'})
             if response.status_code == 404:
-                raise SBOLError('Part not found. Unable to pull: ' + query,
-                                SBOLErrorCode.SBOL_ERROR_NOT_FOUND,)
+                raise SBOLError(SBOLErrorCode.SBOL_ERROR_NOT_FOUND,
+                                'Part not found. Unable to pull: ' + query)
             elif response.status_code == 401:
-                raise SBOLError('Please log in with valid credentials',
-                                SBOLErrorCode.SBOL_ERROR_HTTP_UNAUTHORIZED,)
+                raise SBOLError(SBOLErrorCode.SBOL_ERROR_HTTP_UNAUTHORIZED,
+                                'Please log in with valid credentials')
             elif not response:
-                raise SBOLError(response, SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST)
+                raise SBOLError(SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST, response)
             # Add content to document
             doc.readString(response.content)
             doc.resource_namespaces.add(self.resource)
@@ -244,7 +244,7 @@ class PartShop:
             return uri.replace(self.spoofed_resource, self.resource)
         msg = ('{} does not exist in the resource namespace')
         msg = msg.format(uri)
-        raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
+        raise SBOLError(SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT, msg)
 
     def remove(self, uri):
         query = self._uri2url(uri)
@@ -256,13 +256,13 @@ class PartShop:
         response = requests.get(url, headers=headers)
         if response.ok:
             return True
-        if response.status_code == 401:
-            # TODO: Is there a symbol we can use instead of 401?
+        if response.status_code == requests.codes.unauthorized:
+            # Handle a 401 Unauthorized error
             msg = 'You must login with valid credentials before removing'
-            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_HTTP_UNAUTHORIZED)
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_HTTP_UNAUTHORIZED, msg)
         # Not sure what went wrong
         msg = 'Unknown error: ' + response
-        raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST)
+        raise SBOLError(SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST, msg)
 
     def login(self, user_id, password=''):
         """In order to submit to a PartShop, you must login first.
@@ -283,7 +283,7 @@ class PartShop:
         if not response:
             msg = 'Login failed due to an HTTP error: {}'
             msg = msg.format(response)
-            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST)
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST, msg)
         self.key = response.content.decode('utf-8')
         return response
 
@@ -338,11 +338,11 @@ class PartShop:
         if response.status_code == http.HTTPStatus.UNAUTHORIZED:
             # HTTP 401
             msg = 'You must login with valid credentials before attaching a file'
-            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_HTTP_UNAUTHORIZED)
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_HTTP_UNAUTHORIZED, msg)
         # Not sure what went wrong
         msg = 'HTTP Error code {} trying to attach file.'
         msg = msg.format(response.status_code)
-        raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST)
+        raise SBOLError(SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST, msg)
 
     def _make_search_item(self, item: dict) -> Identified:
         obj = Identified()
@@ -367,7 +367,7 @@ class PartShop:
         response = requests.get(url, headers=headers)
         if not response:
             # Something went wrong
-            raise SBOLError(response, SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST)
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST, response)
         # Everything looks good, parse and return the results
         return [self._make_search_item(item) for item in (response.json())]
 
@@ -447,7 +447,7 @@ class PartShop:
         response = requests.get(url, headers=headers)
         if not response:
             # Something went wrong
-            raise SBOLError(response, SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST)
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST, response)
         # Everything looks good, parse and return the results
         return int(response.text)
 

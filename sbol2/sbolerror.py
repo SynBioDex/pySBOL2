@@ -1,5 +1,5 @@
 from enum import Enum
-import warnings
+from typing import Any
 
 
 class SBOLErrorCode(Enum):
@@ -25,11 +25,10 @@ class SBOLErrorCode(Enum):
 
 class SBOLError(Exception):
 
-    def __init__(self, message, err):
-        if isinstance(message, SBOLErrorCode):
-            warnings.warn("SBOLError arguments out of order",
-                          RuntimeWarning)
-        self._message = message
+    def __init__(self, err: SBOLErrorCode, message: Any):
+        if not isinstance(err, SBOLErrorCode):
+            raise TypeError('SBOLError err argument must be a SBOLErrorCode')
+        self._message = str(message)
         self._err = err
 
     def what(self):
