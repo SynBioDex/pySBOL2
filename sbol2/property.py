@@ -55,6 +55,8 @@ class Property(ABC):
         """
         if x == '*':
             return x
+        if x is math.inf:
+            return '*'
         try:
             x = Property.valid_lower_bound(x)
         except ValueError:
