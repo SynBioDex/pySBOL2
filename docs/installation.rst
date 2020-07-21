@@ -105,3 +105,28 @@ install Python 3 before installing pySBOL2. You can download the
 latest Python 3 release from `python.org
 <https://www.python.org>`_. After Python 3 is installed please follow
 the instructions above to install pySBOL2.
+
+Using PyPy
+----------------------
+
+`PyPy <https://www.pypy.org>`_ is "a fast, compliant alternative
+implementation of Python." PyPy uses a
+`just-in-time compiler <https://en.wikipedia.org/wiki/Just-in-time_compilation>`_
+(JIT), which can make certain programs faster.
+
+pySBOL2 uses `RDFlib <https://github.com/RDFLib/rdflib>`_ which can be
+slow for reading and writing SBOL files when compared to a C
+implementation like `Raptor <http://librdf.org/raptor/>`_ .
+
+Programs that might benefit from PyPy's JIT are programs that have
+longer runtimes and repeat tasks. A program that iterates over a
+directory reading each SBOL file, modifying the contents, and then
+writing the file is a good example of a program that might benefit
+from PyPy's JIT. On the other hand a program that reads or writes a
+single file is an example of a program that would probably *not*
+benefit from PyPy because the JIT complier doesn't have a chance to
+optimize the code.
+
+pySBOL2 is compatible with PyPy. The installation and use of PyPy is
+out of scope for this document. Please see the PyPy documentation if
+you want to try using PyPy with pySBOL2.
