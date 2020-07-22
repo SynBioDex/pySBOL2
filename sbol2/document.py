@@ -766,7 +766,7 @@ class Document(Identified):
             self.graph.bind(prefix, ns)
         # ASSUMPTION: Document does not have properties. Is this a valid assumption?
         for obj in self.SBOLObjects.values():
-            obj.build_graph(self.graph, SBOL2Serialize.OWNERSHIP_PREDICATES)
+            obj.build_graph(self.graph)
         if self.logger.isEnabledFor(logging.DEBUG):
             for s, p, o in self.graph:
                 self.logger.debug('Graph contains: %r', (s, p, o))

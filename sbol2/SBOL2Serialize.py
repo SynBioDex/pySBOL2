@@ -33,27 +33,35 @@ from rdflib import URIRef, Literal
 rdfNS = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 sbolNS = "http://sbols.org/v2#"
 
-OWNERSHIP_PREDICATES = set()
+# This is a module global that is used to register ownership relationships
+# between classes. The serializer uses this to generate structured XML from
+# flat RDF/XML
+OWNERSHIP_PREDICATES = {}
 
 
 def is_ownership_relation(g, triple):
-    subject = triple[0].toPython()
-    predicate = triple[1].toPython()
+    subject = triple[0]
+    predicate = triple[1]
     obj = triple[2]
+
+    if predicate not in OWNERSHIP_PREDICATES:
+        return False
 
     # SBOL2 reuses the "component" predicate as both an ownership predicate (in
     # the case of ComponentDefinition) and a referencing one (in the case of
-    # SequenceAnnotation).
-    #
-    if predicate == sbolNS + 'component':
-        if (triple[0], RDF.type, URIRef(sbolNS + 'SequenceAnnotation')) in g:
-            return False
-        else:
-            return True
-
-    if predicate in OWNERSHIP_PREDICATES:
+    # SequenceAnnotation). This case requires we check the OWNERSHIP_PREDICATES
+    # register
+    if (subject, RDF.type, OWNERSHIP_PREDICATES[predicate]) in g:
         return True
     return False
+
+
+def register_ownership_relation(parent_type, predicate):
+    # Encapsulates and populates the OWNERSHIP_PREDICATES dictionary.
+    #
+    # :param parent_type: The RDF type of the parent class
+    # :param predicate: The URI for the property.
+    OWNERSHIP_PREDICATES[URIRef(predicate)] = URIRef(parent_type)
 
 
 def ns_prefix_dict(g):
