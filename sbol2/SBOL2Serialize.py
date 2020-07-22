@@ -22,6 +22,8 @@
 #   LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 #   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 #   SUCH DAMAGE.
+from collections import defaultdict
+from typing import Dict
 
 from lxml import etree
 from lxml.etree import tostring
@@ -36,13 +38,13 @@ sbolNS = "http://sbols.org/v2#"
 # This is a module global that is used to register ownership relationships
 # between classes. The serializer uses this to generate structured XML from
 # flat RDF/XML
-OWNERSHIP_PREDICATES = {}
+OWNERSHIP_PREDICATES: Dict[URIRef, list] = defaultdict(list)
 
 
 def is_ownership_relation(g, triple):
     subject = triple[0]
     predicate = triple[1]
-    obj = triple[2]
+    # object = triple[2]
 
     if predicate not in OWNERSHIP_PREDICATES:
         return False
@@ -51,8 +53,9 @@ def is_ownership_relation(g, triple):
     # the case of ComponentDefinition) and a referencing one (in the case of
     # SequenceAnnotation). This case requires we check the OWNERSHIP_PREDICATES
     # register
-    if (subject, RDF.type, OWNERSHIP_PREDICATES[predicate]) in g:
-        return True
+    for parent_type in OWNERSHIP_PREDICATES[predicate]:
+        if (subject, RDF.type, parent_type) in g:
+            return True
     return False
 
 
@@ -61,7 +64,7 @@ def register_ownership_relation(parent_type, predicate):
     #
     # :param parent_type: The RDF type of the parent class
     # :param predicate: The URI for the property.
-    OWNERSHIP_PREDICATES[URIRef(predicate)] = URIRef(parent_type)
+    OWNERSHIP_PREDICATES[URIRef(predicate)].append(URIRef(parent_type))
 
 
 def ns_prefix_dict(g):
