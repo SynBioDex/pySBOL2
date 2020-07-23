@@ -16,12 +16,12 @@ matrix:
   - os: windows
     language: shell
     before_install:
-    - choco install python3 --version=3.7.6 --no-progress -y
+    - choco install python3 --version=3.8.5 --no-progress -y
     install:
-    - C:\\Python37\\python -m pip install .
-    - C:\\Python37\\python -m pip install 'pycodestyle>=2.6.0'
+    - C:\\Python38\\python -m pip install .
+    - C:\\Python38\\python -m pip install 'pycodestyle>=2.6.0'
     script:
-    - C:\\Python37\\python -m unittest discover -s test
+    - C:\\Python38\\python -m unittest discover -s test
 install:
   - python3 -m pip install .
   - python3 -m pip install 'pycodestyle>=2.6.0'
