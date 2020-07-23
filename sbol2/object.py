@@ -14,6 +14,7 @@ from .property import Property, OwnedObject, URIProperty
 from .sbolerror import SBOLError
 from .sbolerror import SBOLErrorCode
 from .uridict import URIDict
+from . import SBOL2Serialize
 from . import validation
 
 
@@ -406,11 +407,16 @@ class SBOLObject:
             if typeURI in self._hidden_properties:
                 # Skip hidden properties
                 continue
+
             for owned_obj in objlist:
                 graph.add((rdflib.URIRef(self.identity),
                            rdflib.URIRef(typeURI),
                            URIRef(owned_obj.identity)))
                 owned_obj.build_graph(graph)
+
+            # register ownership relationship in SBOL2Serialize to structure XML
+            SBOL2Serialize.register_ownership_relation(self.getTypeURI(),
+                                                       typeURI)
 
     def __str__(self):
         return self.identity

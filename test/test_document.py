@@ -409,15 +409,6 @@ class TestDocument(unittest.TestCase):
         self.assertEqual(c1, doc.getCollection(c1.identity))
 
 
-class TopLevelExtension(sbol2.TopLevel):
-
-    RDF_TYPE = 'http://example.org/test#TopLevelExtension'
-
-    def __init__(self, uri='example'):
-        super().__init__(uri=uri,
-                         type_uri=TopLevelExtension.RDF_TYPE)
-
-
 class NonTopLevelExtension(sbol2.Identified):
 
     RDF_TYPE = 'http://example.org/test#NonTopLevelExtension'
@@ -425,6 +416,17 @@ class NonTopLevelExtension(sbol2.Identified):
     def __init__(self, uri='example'):
         super().__init__(uri=uri,
                          type_uri=NonTopLevelExtension.RDF_TYPE)
+
+
+class TopLevelExtension(sbol2.TopLevel):
+
+    RDF_TYPE = 'http://example.org/test#TopLevelExtension'
+
+    def __init__(self, uri='example'):
+        super().__init__(uri=uri,
+                         type_uri=TopLevelExtension.RDF_TYPE)
+        self.child = sbol2.OwnedObject(self, 'http://example.org/test#child',
+                                       NonTopLevelExtension, '0', '1', [])
 
 
 class ComponentDefinitionOverride(sbol2.ComponentDefinition):
@@ -521,6 +523,19 @@ class TestDocumentExtensionObjects(unittest.TestCase):
                          raised.error_code())
         obj = doc.find(ntle.identity)
         self.assertIsNone(obj)
+
+    def test_parent_child_extensions(self):
+        doc = sbol2.Document()
+        tle = TopLevelExtension('tle')
+        ntle = NonTopLevelExtension('ntle')
+        tle.child = ntle
+        doc.add(tle)
+        self.assertEqual(len(doc.SBOLObjects), 1)
+
+        # Verify that the parent-child relationship is preserved upon round-trip
+        doc.readString(doc.writeString())
+        self.assertEqual(len(doc.SBOLObjects), 1)
+        self.assertIsNotNone(tle.child)
 
     def test_add_remove_citation(self):
         doc = sbol2.Document()
