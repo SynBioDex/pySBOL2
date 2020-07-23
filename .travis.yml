@@ -2,12 +2,15 @@ language: generic
 matrix:
   include:
   - os: linux
+    dist: bionic
     language: python
     python: 3.6
   - os: linux
+    dist: bionic
     language: python
     python: 3.8
   - os: linux
+    dist: bionic
     language: python
     python: pypy3
   - os: windows
