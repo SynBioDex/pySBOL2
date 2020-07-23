@@ -105,6 +105,7 @@ class Config:
     # extension classes with RDFtypes not part of the core specification
     SBOL_DATA_MODEL_REGISTER = {}
 
+    @staticmethod
     def register_extension_class(builder, type_uri):
         """Register an extension class and its namespace, so custom data
         can be embedded into and read from SBOL files.
