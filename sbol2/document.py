@@ -459,12 +459,12 @@ class Document(Identified):
         :return: None
         """
         self.logger.debug("Appending data from file: " + filename)
-        if not self.graph:
-            self.graph = rdflib.Graph()
-        # Save any changes we've made to the graph.
+        # Write our SBOL objects to an RDFlib graph
         self.update_graph()
         # Use rdflib to automatically merge the graphs together
         self.graph.parse(filename, format="application/rdf+xml")
+        # Clear out the SBOL objects, but not the newly merged graph
+        self.clear(clear_graph=False)
         # Base our internal representation on the new graph.
         self.parse_all()
 
