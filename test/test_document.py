@@ -602,6 +602,22 @@ class TestDocumentExtensionObjects(unittest.TestCase):
         cd = doc.componentDefinitions[cd_uri]
         self.assertEqual(1, len(cd.roles))
 
+    def test_idempotent_read2(self):
+        doc = sbol2.Document()
+        doc.read(CRISPR_LOCATION)
+        old_doc_len = len(doc)
+        cd_uri = 'http://sbols.org/CRISPR_Example/gRNA_b/1.0.0'
+        cd = doc.componentDefinitions['http://sbols.org/CRISPR_Example/gRNA_b/1.0.0']
+        cd.components.create('c')
+        old_component_len = len(cd.components)
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            temp_file = os.path.join(tmpdirname, 'test.xml')
+            doc.write(temp_file)
+            doc.append(temp_file)
+        cd = doc.componentDefinitions[cd_uri]
+        self.assertEqual(old_component_len, len(cd.components))
+        self.assertEqual(old_doc_len, len(doc))
+
     def test_write_validation(self):
         # Test that write performs validation if requested
         # and skips validation if requested.
