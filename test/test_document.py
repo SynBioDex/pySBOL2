@@ -408,6 +408,18 @@ class TestDocument(unittest.TestCase):
         self.assertEqual(c1, doc.getCollection('c1'))
         self.assertEqual(c1, doc.getCollection(c1.identity))
 
+    @unittest.expectedFailure
+    def test_read_string_clear(self):
+        # Test that Document.readString() clears the document
+        doc = sbol2.Document()
+        cd = doc.componentDefinitions.create('test_cd')
+        _ = cd.components.create('test_c')
+        self.assertEqual(1, len(cd.components))
+        doc.readString(doc.writeString())
+        self.assertEqual(1, len(cd.components))
+        cd = doc.componentDefinitions[cd.identity]
+        self.assertEqual(1, len(cd.components))
+
 
 class NonTopLevelExtension(sbol2.Identified):
 
@@ -534,6 +546,57 @@ class TestDocumentExtensionObjects(unittest.TestCase):
 
         # Verify that the parent-child relationship is preserved upon round-trip
         doc.readString(doc.writeString())
+        self.assertEqual(len(doc.SBOLObjects), 1)
+        self.assertIsNotNone(tle.child)
+
+    def test_register_parent_child_extensions(self):
+        # Show that we can load the parent/child relationship when the
+        # extension classes are registered. The methods around this one
+        # try to do the same thing without registration of the extension
+        # classes
+        #
+        # This is all wrapped in a `try` so that we can clean up the
+        # registration in the finally clause
+        try:
+            sbol2.Config.register_extension_class(TopLevelExtension,
+                                                  TopLevelExtension.RDF_TYPE)
+            sbol2.Config.register_extension_class(NonTopLevelExtension,
+                                                  NonTopLevelExtension.RDF_TYPE)
+            doc = sbol2.Document()
+            tle = TopLevelExtension('tle')
+            ntle = NonTopLevelExtension('ntle')
+            tle.child = ntle
+            doc.add(tle)
+            self.assertEqual(len(doc.SBOLObjects), 1)
+
+            # Verify that the parent-child relationship is preserved upon round-trip
+            doc.readString(doc.writeString())
+            self.assertEqual(len(doc.SBOLObjects), 1)
+            self.assertIsNotNone(tle.child)
+        finally:
+            # Clean up
+            tle_uri = rdflib.URIRef(TopLevelExtension.RDF_TYPE)
+            ntle_uri = rdflib.URIRef(NonTopLevelExtension.RDF_TYPE)
+            self.assertIn(tle_uri, sbol2.Config.SBOL_DATA_MODEL_REGISTER)
+            self.assertIn(ntle_uri, sbol2.Config.SBOL_DATA_MODEL_REGISTER)
+            del sbol2.Config.SBOL_DATA_MODEL_REGISTER[tle_uri]
+            del sbol2.Config.SBOL_DATA_MODEL_REGISTER[ntle_uri]
+            self.assertNotIn(tle_uri, sbol2.Config.SBOL_DATA_MODEL_REGISTER)
+            self.assertNotIn(ntle_uri, sbol2.Config.SBOL_DATA_MODEL_REGISTER)
+
+    @unittest.expectedFailure  # See Issue #368
+    def test_parent_child_extensions_top_level(self):
+        doc = sbol2.Document()
+        tle = TopLevelExtension('tle')
+        ntle = NonTopLevelExtension('ntle')
+        tle.child = ntle
+        doc.add(tle)
+        self.assertEqual(len(doc.SBOLObjects), 1)
+
+        # Verify that the parent-child relationship is preserved upon round-trip
+        doc2 = sbol2.Document()
+        doc2.readString(doc.writeString())
+        self.assertNotIsInstance(doc2.get(ntle.identity), sbol2.TopLevel)
         self.assertEqual(len(doc.SBOLObjects), 1)
         self.assertIsNotNone(tle.child)
 
