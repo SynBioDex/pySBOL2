@@ -468,6 +468,23 @@ class Document(Identified):
         # Base our internal representation on the new graph.
         self.parse_all()
 
+    def appendString(self, sbol_str: str):
+        """
+        Read an RDF/XML document from a string and attach the SBOL
+        objects to this Document.
+
+        New objects will be added to the existing contents of the Document.
+        :param sbol_str: A string of RDF/XML
+        :return: None
+        """
+        self.update_graph()
+        # Use rdflib to automatically merge the graphs together
+        self.graph.parse(data=sbol_str, format="application/rdf+xml")
+        # Clear out the SBOL objects, but not the newly merged graph
+        self.clear(clear_graph=False)
+        # Base our internal representation on the new graph.
+        self.parse_all()
+
     def parse_all(self):
         # Parse namespaces
         self.logger.debug("*** Reading in namespaces (graph): ")
