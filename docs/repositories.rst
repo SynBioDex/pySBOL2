@@ -54,6 +54,26 @@ The ``pull`` operation will retrieve ``ComponentDefinitions`` and their associat
 .. end
 
 --------------------
+Logging in to Part Repos
+--------------------
+
+Some parts repositories can be accessed as above, without
+authenticating to the parts repository. You may also have access to
+additional parts at some parts repositories if you authenticate to the
+repository. This can be done with a few more lines of code when
+creating your ``PartShop``. Here is an example of how to
+add authentication when using a ``PartShop``:
+
+.. code:: python
+
+    import sbol2
+    PART_SHOP_USER = 'your_username'
+    PART_SHOP_PASSWORD = 'your_password'
+    part_shop = sbol2.PartShop('https://synbiohub.org')
+    part_shop.login(PART_SHOP_USER, PART_SHOP_PASSWORD)
+
+
+--------------------
 Searching Part Repos
 --------------------
 
