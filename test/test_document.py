@@ -408,7 +408,6 @@ class TestDocument(unittest.TestCase):
         self.assertEqual(c1, doc.getCollection('c1'))
         self.assertEqual(c1, doc.getCollection(c1.identity))
 
-    @unittest.expectedFailure
     def test_read_string_clear(self):
         # Test that Document.readString() clears the document
         doc = sbol2.Document()
@@ -536,6 +535,7 @@ class TestDocumentExtensionObjects(unittest.TestCase):
         obj = doc.find(ntle.identity)
         self.assertIsNone(obj)
 
+    @unittest.expectedFailure  # See issue #368
     def test_parent_child_extensions(self):
         doc = sbol2.Document()
         tle = TopLevelExtension('tle')
