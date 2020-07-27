@@ -214,6 +214,10 @@ It is also possible to create extension classes that have a parent-child composi
           self.dataSheet = sbol2.OwnedObject(self, 'http://examples.org#dataSheet',
                                              DataSheet, 0, 1, [])
 
+  # Register the constructors with the parser
+  Config.register_extension_class(Analysis, Analysis.RDF_TYPE)
+  Config.register_extension_class(DataSheet, DataSheet.RDF_TYPE)
+
   doc = sbol2.Document()
   analysis = Analysis('foo')
   doc.add(analysis)
