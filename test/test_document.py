@@ -710,6 +710,11 @@ class TestDocumentExtensionObjects(unittest.TestCase):
         sbol2.Config.setOption(sbol2.ConfigOptions.VALIDATE, validate)
         sbol2.Config.setOption(sbol2.ConfigOptions.VERBOSE, verbose)
 
+    def test_append_string_no_overwrite(self):
+        doc = sbol2.Document(CRISPR_LOCATION)
+        result = doc.appendString(doc.writeString(), overwrite=False)
+        self.assertFalse(result)
+
 
 if __name__ == '__main__':
     unittest.main()
