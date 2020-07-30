@@ -715,6 +715,14 @@ class TestDocumentExtensionObjects(unittest.TestCase):
         result = doc.appendString(doc.writeString(), overwrite=False)
         self.assertFalse(result)
 
+    def test_append_string(self):
+        doc = sbol2.Document()
+        cd = doc.componentDefinitions.create('cd1')
+        cd.components.create('c1')
+        self.assertEqual(1, len(cd.components))
+        doc.appendString(doc.writeString())
+        self.assertEqual(1, len(cd.components))
+
 
 if __name__ == '__main__':
     unittest.main()

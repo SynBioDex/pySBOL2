@@ -447,24 +447,29 @@ class Document(Identified):
         rdf = SBOL2Serialize.serialize_sboll2(self.graph).decode('utf-8')
         return rdf
 
-    def append(self, filename):
+    def append(self, filename, overwrite: bool = True):
         """
         Read an RDF/XML file and attach the SBOL objects to this Document.
 
         New objects will be added to the existing contents of the Document.
         :param filename: The full name of the file you want to read
         (including file extension).
+        :param overwrite: Boolean indicating whether to overwrite existing objects
         :return: None
         """
-        self.logger.debug("Appending data from file: " + filename)
-        # Write our SBOL objects to an RDFlib graph
-        self.update_graph()
-        # Use rdflib to automatically merge the graphs together
-        self.graph.parse(filename, format="application/rdf+xml")
-        # Clear out the SBOL objects, but not the newly merged graph
-        self.clear(clear_graph=False)
-        # Base our internal representation on the new graph.
-        self.parse_all()
+        new_graph = rdflib.Graph()
+        new_graph.parse(filename, format='application/rdf+xml')
+        self._append_graph(new_graph, overwrite)
+
+        # self.logger.debug("Appending data from file: " + filename)
+        # # Write our SBOL objects to an RDFlib graph
+        # self.update_graph()
+        # # Use rdflib to automatically merge the graphs together
+        # self.graph.parse(filename, format="application/rdf+xml")
+        # # Clear out the SBOL objects, but not the newly merged graph
+        # self.clear(clear_graph=False)
+        # # Base our internal representation on the new graph.
+        # self.parse_all()
 
     def appendString(self, sbol_str: str, overwrite=True):
         """
@@ -480,27 +485,35 @@ class Document(Identified):
         # Load the new data into a graph
         new_graph = rdflib.Graph()
         new_graph.parse(data=sbol_str, format='application/rdf+xml')
-        # For all objects in the graph:
-        #     If the object exists in the document:
-        #         If overwrite is OFF:
-        #             stop and return
-        #         Make sure the object is in SBOLObjects to support parsing
-        #         Clear the object except for its identity
+        self._append_graph(new_graph, overwrite)
+
+    def _append_graph(self, new_graph: rdflib.Graph, overwrite: bool = True):
+        # Gather all the objects that will be overwritten, stopping
+        # if the user says not to overwrite. If we clear as we go we lose
+        # the ability to find objects within objects. So gather the list
+        # here, and clear them as a second pass.
+        objects_to_clear = []
         for s, _, _ in new_graph.triples((None, rdflib.RDF.type, None)):
             existing_object = self.find(s)
             if existing_object is not None:
                 if overwrite is False:
                     return False
-                if s not in self.SBOLObjects:
-                    self.SBOLObjects[s] = existing_object
-                # Now clear the object. It will get reconstituted below, after the read.
-                for k in existing_object.properties:
-                    # Clear out everything but the identity
-                    if k == SBOL_IDENTITY:
-                        continue
-                    existing_object.properties[k] = []
-                existing_object.owned_objects.clear()
-        # ------------------------------------------------------------
+                objects_to_clear.append(existing_object)
+        # Clear out the internal stores of the objects_to_clear so that
+        # they will be overwritten. Keep the identity property because it
+        # does not get restored by the graph parsing. Keep all the keys in
+        # the internal stores so owned objects end up in the right place.
+        for existing_object in objects_to_clear:
+            if existing_object.identity not in self.SBOLObjects:
+                self.SBOLObjects[existing_object.identity] = existing_object
+            # Now clear the object. It will get reconstituted below by parse_all
+            for k in existing_object.properties:
+                # Clear out everything but the identity
+                if k == SBOL_IDENTITY:
+                    continue
+                existing_object.properties[k] = []
+            for k in existing_object.owned_objects:
+                existing_object.owned_objects[k] = []
         # Make the new graph be the graph we parse
         self.graph = new_graph
         # Load the new graph into the existing document
