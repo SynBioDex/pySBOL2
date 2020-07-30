@@ -157,7 +157,7 @@ class PartShop:
             elif not response:
                 raise SBOLError(SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST, response)
             # Add content to document
-            doc.readString(response.content)
+            doc.appendString(response.content)
             doc.resource_namespaces.add(self.resource)
 
     def submit(self, doc, collection='', overwrite=0):

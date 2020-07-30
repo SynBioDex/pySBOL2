@@ -424,18 +424,16 @@ class Document(Identified):
         self.append(filename)
 
     def readString(self, sbol_str):
-        """
-        Convert text in SBOL into data objects.
+        """Read an RDF/XML string and attach the SBOL objects to
+        this Document.
+
+        Existing contents of the Document will be wiped.
 
         :param sbol_str: A string formatted in SBOL.
         :return: None
         """
-        # Save any changes we've made to the graph.
-        self.update_graph()
-        # Use rdflib to automatically merge the graphs together
-        self.graph.parse(data=sbol_str, format="application/rdf+xml")
-        # Base our internal representation on the new graph.
-        self.parse_all()
+        self.clear()
+        self.appendString(sbol_str)
 
     def writeString(self):
         """
@@ -465,6 +463,22 @@ class Document(Identified):
         self.graph.parse(filename, format="application/rdf+xml")
         # Clear out the SBOL objects, but not the newly merged graph
         self.clear(clear_graph=False)
+        # Base our internal representation on the new graph.
+        self.parse_all()
+
+    def appendString(self, sbol_str: str):
+        """
+        Read an RDF/XML document from a string and attach the SBOL
+        objects to this Document.
+
+        New objects will be added to the existing contents of the Document.
+        :param sbol_str: A string of RDF/XML
+        :return: None
+        """
+        # Save any changes we've made to the graph.
+        self.update_graph()
+        # Use rdflib to automatically merge the graphs together
+        self.graph.parse(data=sbol_str, format="application/rdf+xml")
         # Base our internal representation on the new graph.
         self.parse_all()
 
@@ -550,6 +564,8 @@ class Document(Identified):
             # If the new object is TopLevel,
             # add to the Document's property store
             if new_obj.is_top_level():
+                if new_obj.rdf_type not in self.owned_objects:
+                    self.owned_objects[new_obj.rdf_type] = []
                 self.owned_objects[new_obj.rdf_type].append(new_obj)
         elif (subject not in self.SBOLObjects
               and obj not in Config.SBOL_DATA_MODEL_REGISTER):
@@ -1192,7 +1208,7 @@ def IGEM_STANDARD_ASSEMBLY(parts_list):
     if not (G0000_uri in doc.componentDefinitions and
             G0002_uri in doc.componentDefinitions and
             G0000_seq_uri in doc.sequences and G0002_seq_uri in doc.sequences):
-        doc.readString(igem_assembly_scars)
+        doc.appendString(igem_assembly_scars)
 
     G0000 = doc.componentDefinitions[G0000_uri]
     G0002 = doc.componentDefinitions[G0002_uri]
