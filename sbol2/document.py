@@ -493,12 +493,17 @@ class Document(Identified):
         # the ability to find objects within objects. So gather the list
         # here, and clear them as a second pass.
         objects_to_clear = []
-        for s, _, _ in new_graph.triples((None, rdflib.RDF.type, None)):
-            existing_object = self.find(s)
-            if existing_object is not None:
-                if overwrite is False:
-                    return False
-                objects_to_clear.append(existing_object)
+        identities = (s for s, _, _ in
+                      new_graph.triples((None, rdflib.RDF.type, None)))
+        objects = (self.find(identity) for identity in identities)
+        objects_to_clear = [obj for obj in objects if obj is not None]
+        if overwrite is False and objects_to_clear:
+            msg = objects_to_clear[0].identity
+            count = len(objects_to_clear)
+            if count > 1:
+                msg += f' and {count - 1} others'
+            msg += ' would require overwriting'
+            raise SBOLError(SBOLErrorCode.DUPLICATE_URI_ERROR, msg)
         # Clear out the internal stores of the objects_to_clear so that
         # they will be overwritten. Keep the identity property because it
         # does not get restored by the graph parsing. Keep all the keys in

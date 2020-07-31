@@ -712,8 +712,11 @@ class TestDocumentExtensionObjects(unittest.TestCase):
 
     def test_append_string_no_overwrite(self):
         doc = sbol2.Document(CRISPR_LOCATION)
-        result = doc.appendString(doc.writeString(), overwrite=False)
-        self.assertFalse(result)
+        with self.assertRaises(sbol2.SBOLError) as cm:
+            doc.appendString(doc.writeString(), overwrite=False)
+        exc = cm.exception
+        self.assertEqual(sbol2.SBOLErrorCode.DUPLICATE_URI_ERROR,
+                         exc.error_code())
 
     def test_append_string(self):
         doc = sbol2.Document()
