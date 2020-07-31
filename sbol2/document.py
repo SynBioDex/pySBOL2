@@ -421,7 +421,7 @@ class Document(Identified):
         :return: None
         """
         self.clear()
-        self.append(filename)
+        self.append(filename, overwrite=False)
 
     def readString(self, sbol_str):
         """Read an RDF/XML string and attach the SBOL objects to
@@ -433,7 +433,7 @@ class Document(Identified):
         :return: None
         """
         self.clear()
-        self.appendString(sbol_str)
+        self.appendString(sbol_str, overwrite=False)
 
     def writeString(self):
         """
@@ -447,39 +447,71 @@ class Document(Identified):
         rdf = SBOL2Serialize.serialize_sboll2(self.graph).decode('utf-8')
         return rdf
 
-    def append(self, filename):
+    def append(self, filename, overwrite: bool = False):
         """
         Read an RDF/XML file and attach the SBOL objects to this Document.
 
         New objects will be added to the existing contents of the Document.
         :param filename: The full name of the file you want to read
         (including file extension).
+        :param overwrite: Boolean indicating whether to overwrite existing objects
         :return: None
         """
-        self.logger.debug("Appending data from file: " + filename)
-        # Write our SBOL objects to an RDFlib graph
-        self.update_graph()
-        # Use rdflib to automatically merge the graphs together
-        self.graph.parse(filename, format="application/rdf+xml")
-        # Clear out the SBOL objects, but not the newly merged graph
-        self.clear(clear_graph=False)
-        # Base our internal representation on the new graph.
-        self.parse_all()
+        new_graph = rdflib.Graph()
+        new_graph.parse(filename, format='application/rdf+xml')
+        self._append_graph(new_graph, overwrite)
 
-    def appendString(self, sbol_str: str):
+    def appendString(self, sbol_str: str, overwrite: bool = False):
         """
         Read an RDF/XML document from a string and attach the SBOL
         objects to this Document.
 
         New objects will be added to the existing contents of the Document.
         :param sbol_str: A string of RDF/XML
+        :param overwrite: Boolean indicating whether to overwrite existing objects
         :return: None
         """
-        # Save any changes we've made to the graph.
-        self.update_graph()
-        # Use rdflib to automatically merge the graphs together
-        self.graph.parse(data=sbol_str, format="application/rdf+xml")
-        # Base our internal representation on the new graph.
+        # ------------------------------------------------------------
+        # Load the new data into a graph
+        new_graph = rdflib.Graph()
+        new_graph.parse(data=sbol_str, format='application/rdf+xml')
+        self._append_graph(new_graph, overwrite)
+
+    def _append_graph(self, new_graph: rdflib.Graph, overwrite: bool):
+        # Gather all the objects that will be overwritten, stopping
+        # if the user says not to overwrite. If we clear as we go we lose
+        # the ability to find objects within objects. So gather the list
+        # here, and clear them as a second pass.
+        objects_to_clear = []
+        identities = (s for s, _, _ in
+                      new_graph.triples((None, rdflib.RDF.type, None)))
+        objects = (self.find(identity) for identity in identities)
+        objects_to_clear = [obj for obj in objects if obj is not None]
+        if overwrite is False and objects_to_clear:
+            msg = objects_to_clear[0].identity
+            count = len(objects_to_clear)
+            if count > 1:
+                msg += f' and {count - 1} others'
+            msg += ' would require overwriting'
+            raise SBOLError(SBOLErrorCode.DUPLICATE_URI_ERROR, msg)
+        # Clear out the internal stores of the objects_to_clear so that
+        # they will be overwritten. Keep the identity property because it
+        # does not get restored by the graph parsing. Keep all the keys in
+        # the internal stores so owned objects end up in the right place.
+        for existing_object in objects_to_clear:
+            if existing_object.identity not in self.SBOLObjects:
+                self.SBOLObjects[existing_object.identity] = existing_object
+            # Now clear the object. It will get reconstituted below by parse_all
+            for k in existing_object.properties:
+                # Clear out everything but the identity
+                if k == SBOL_IDENTITY:
+                    continue
+                existing_object.properties[k] = []
+            for k in existing_object.owned_objects:
+                existing_object.owned_objects[k] = []
+        # Make the new graph be the graph we parse
+        self.graph = new_graph
+        # Load the new graph into the existing document
         self.parse_all()
 
     def parse_all(self):
@@ -1208,7 +1240,7 @@ def IGEM_STANDARD_ASSEMBLY(parts_list):
     if not (G0000_uri in doc.componentDefinitions and
             G0002_uri in doc.componentDefinitions and
             G0000_seq_uri in doc.sequences and G0002_seq_uri in doc.sequences):
-        doc.appendString(igem_assembly_scars)
+        doc.appendString(igem_assembly_scars, overwrite=True)
 
     G0000 = doc.componentDefinitions[G0000_uri]
     G0002 = doc.componentDefinitions[G0002_uri]

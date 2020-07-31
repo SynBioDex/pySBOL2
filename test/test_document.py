@@ -637,7 +637,7 @@ class TestDocumentExtensionObjects(unittest.TestCase):
         doc = sbol2.Document()
         self.assertIsNotNone(doc.version)
         old_version = doc.version
-        doc.append(CRISPR_LOCATION)
+        doc.append(CRISPR_LOCATION, overwrite=True)
         self.assertIsNotNone(doc.version)
         self.assertEqual(old_version, doc.version)
 
@@ -652,7 +652,7 @@ class TestDocumentExtensionObjects(unittest.TestCase):
         # Now load the same file again and make sure the size of the
         # document didn't increase, and the number of roles on the
         # ComponentDefinition didn't increase.
-        doc.append(CRISPR_LOCATION)
+        doc.append(CRISPR_LOCATION, overwrite=True)
         self.assertEqual(old_len, len(doc))
         cd = doc.componentDefinitions[cd_uri]
         self.assertEqual(1, len(cd.roles))
@@ -660,7 +660,7 @@ class TestDocumentExtensionObjects(unittest.TestCase):
         # Now load the file one more time and make sure the size of the
         # document didn't increase, and the number of roles on the
         # ComponentDefinition didn't increase.
-        doc.append(CRISPR_LOCATION)
+        doc.append(CRISPR_LOCATION, overwrite=True)
         self.assertEqual(old_len, len(doc))
         cd = doc.componentDefinitions[cd_uri]
         self.assertEqual(1, len(cd.roles))
@@ -676,7 +676,7 @@ class TestDocumentExtensionObjects(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmpdirname:
             temp_file = os.path.join(tmpdirname, 'test.xml')
             doc.write(temp_file)
-            doc.append(temp_file)
+            doc.append(temp_file, overwrite=True)
         cd = doc.componentDefinitions[cd_uri]
         self.assertEqual(old_component_len, len(cd.components))
         self.assertEqual(old_doc_len, len(doc))
@@ -709,6 +709,38 @@ class TestDocumentExtensionObjects(unittest.TestCase):
         # Reset validate to its original value
         sbol2.Config.setOption(sbol2.ConfigOptions.VALIDATE, validate)
         sbol2.Config.setOption(sbol2.ConfigOptions.VERBOSE, verbose)
+
+    def test_append_string_no_overwrite(self):
+        doc = sbol2.Document(CRISPR_LOCATION)
+        with self.assertRaises(sbol2.SBOLError) as cm:
+            doc.appendString(doc.writeString(), overwrite=False)
+        exc = cm.exception
+        self.assertEqual(sbol2.SBOLErrorCode.DUPLICATE_URI_ERROR,
+                         exc.error_code())
+
+    def test_append_string(self):
+        doc = sbol2.Document()
+        cd = doc.componentDefinitions.create('cd1')
+        cd.components.create('c1')
+        self.assertEqual(1, len(cd.components))
+        doc.appendString(doc.writeString(), overwrite=True)
+        self.assertEqual(1, len(cd.components))
+
+    def test_append_string_2(self):
+        doc = sbol2.Document()
+        cd = doc.componentDefinitions.create('cd1')
+        cd.components.create('c1')
+        cd.roles = ['foo']
+        self.assertEqual(1, len(cd.components))
+        self.assertEqual('c1', cd.components[0].displayId)
+        doc2 = sbol2.Document()
+        cd_updated = doc2.componentDefinitions.create('cd1')
+        cd_updated.components.create('c2')
+        cd_updated.roles = ['bar']
+        doc.appendString(doc2.writeString(), overwrite=True)
+        self.assertEqual(1, len(cd.components))
+        self.assertEqual('c2', cd.components[0].displayId)
+        self.assertEqual(cd.roles, ['bar'])
 
 
 if __name__ == '__main__':
