@@ -421,7 +421,7 @@ class Document(Identified):
         :return: None
         """
         self.clear()
-        self.append(filename)
+        self.append(filename, overwrite=False)
 
     def readString(self, sbol_str):
         """Read an RDF/XML string and attach the SBOL objects to
@@ -433,7 +433,7 @@ class Document(Identified):
         :return: None
         """
         self.clear()
-        self.appendString(sbol_str)
+        self.appendString(sbol_str, overwrite=False)
 
     def writeString(self):
         """
@@ -447,7 +447,7 @@ class Document(Identified):
         rdf = SBOL2Serialize.serialize_sboll2(self.graph).decode('utf-8')
         return rdf
 
-    def append(self, filename, overwrite: bool = True):
+    def append(self, filename, overwrite: bool = False):
         """
         Read an RDF/XML file and attach the SBOL objects to this Document.
 
@@ -461,17 +461,7 @@ class Document(Identified):
         new_graph.parse(filename, format='application/rdf+xml')
         self._append_graph(new_graph, overwrite)
 
-        # self.logger.debug("Appending data from file: " + filename)
-        # # Write our SBOL objects to an RDFlib graph
-        # self.update_graph()
-        # # Use rdflib to automatically merge the graphs together
-        # self.graph.parse(filename, format="application/rdf+xml")
-        # # Clear out the SBOL objects, but not the newly merged graph
-        # self.clear(clear_graph=False)
-        # # Base our internal representation on the new graph.
-        # self.parse_all()
-
-    def appendString(self, sbol_str: str, overwrite=True):
+    def appendString(self, sbol_str: str, overwrite: bool = False):
         """
         Read an RDF/XML document from a string and attach the SBOL
         objects to this Document.
@@ -487,7 +477,7 @@ class Document(Identified):
         new_graph.parse(data=sbol_str, format='application/rdf+xml')
         self._append_graph(new_graph, overwrite)
 
-    def _append_graph(self, new_graph: rdflib.Graph, overwrite: bool = True):
+    def _append_graph(self, new_graph: rdflib.Graph, overwrite: bool):
         # Gather all the objects that will be overwritten, stopping
         # if the user says not to overwrite. If we clear as we go we lose
         # the ability to find objects within objects. So gather the list
@@ -1250,7 +1240,7 @@ def IGEM_STANDARD_ASSEMBLY(parts_list):
     if not (G0000_uri in doc.componentDefinitions and
             G0002_uri in doc.componentDefinitions and
             G0000_seq_uri in doc.sequences and G0002_seq_uri in doc.sequences):
-        doc.appendString(igem_assembly_scars)
+        doc.appendString(igem_assembly_scars, overwrite=True)
 
     G0000 = doc.componentDefinitions[G0000_uri]
     G0002 = doc.componentDefinitions[G0002_uri]
