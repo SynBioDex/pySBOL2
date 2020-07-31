@@ -723,6 +723,22 @@ class TestDocumentExtensionObjects(unittest.TestCase):
         doc.appendString(doc.writeString())
         self.assertEqual(1, len(cd.components))
 
+    def test_append_string_2(self):
+        doc = sbol2.Document()
+        cd = doc.componentDefinitions.create('cd1')
+        cd.components.create('c1')
+        cd.roles = ['foo']
+        self.assertEqual(1, len(cd.components))
+        self.assertEqual('c1', cd.components[0].displayId)
+        doc2 = sbol2.Document()
+        cd_updated = doc2.componentDefinitions.create('cd1')
+        cd_updated.components.create('c2')
+        cd_updated.roles = ['bar']
+        doc.appendString(doc2.writeString())
+        self.assertEqual(1, len(cd.components))
+        self.assertEqual('c2', cd.components[0].displayId)
+        self.assertEqual(cd.roles, ['bar'])
+
 
 if __name__ == '__main__':
     unittest.main()
