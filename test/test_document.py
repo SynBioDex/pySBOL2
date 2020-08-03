@@ -742,6 +742,20 @@ class TestDocumentExtensionObjects(unittest.TestCase):
         self.assertEqual('c2', cd.components[0].displayId)
         self.assertEqual(cd.roles, ['bar'])
 
+    def test_import_from_format(self):
+        genbank_path = os.path.join(MODULE_LOCATION, 'resources', 'brevig-flu.gb')
+        doc = sbol2.Document()
+        self.assertEqual(0, len(doc))
+        doc.importFromFormat(genbank_path)
+        self.assertEqual(4, len(doc))
+        # Maybe get something out, like a sequence, and make sure
+        # it's there and starts with the right stuff.
+        self.assertEqual(1, len(doc.sequences))
+        display_id = 'AY130766_seq'
+        sequence: sbol2.Sequence = doc.getSequence(display_id)
+        self.assertTrue(sequence.elements.startswith('atgagtctt'))
+        self.assertEqual(982, len(sequence.elements))
+
 
 if __name__ == '__main__':
     unittest.main()
