@@ -1013,6 +1013,56 @@ class Document(Identified):
                       DeprecationWarning)
         self.exportToFormat(language, output_path)
 
+    def importFromFormat(self, input_path: str, overwrite=False):
+        """Import the specified file into this document.
+        """
+        # The C++ version of this function takes a language argument
+        # and does not use it. There is no need for a language
+        # argument based on the validator API.
+        # Copy the global config options. Shallow copy is ok because values
+        # are either bool or str.
+        options = config.options.copy()
+        # We want an SBOL2 file back
+        options[ConfigOptions.LANGUAGE.value] = 'SBOL2'
+        options[ConfigOptions.URI_PREFIX.value] = Config.getHomespace()
+
+        json_request = _make_validation_request(options)
+        # We always want the return file.
+        json_request[ConfigOptions.RETURN_FILE.value] = True
+
+        # get the input file data to send
+        with open(input_path, 'r') as infile:
+            contents = infile.read()
+        json_request['main_file'] = contents
+
+        import json
+        with open('genbank2sbol.json', 'w') as outjson:
+            json.dump(json_request, outjson, indent=4)
+
+        headers = {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'charsets': 'utf-8'
+        }
+
+        validator_url = options[ConfigOptions.VALIDATOR_URL.value]
+
+        # Send the request to the online validation tool
+        response = requests.post(validator_url,
+                                 json=json_request,
+                                 headers=headers)
+        if response:
+            response = response.json()
+        else:
+            msg = 'Validation failure. HTTP post request failed with code {}: {}'
+            msg = msg.format(response.status_code, response.content)
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST, msg)
+        if response['valid']:
+            self.appendString(response['result'], overwrite)
+        else:
+            msg = ' '.join(response['errors'])
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT, msg)
+
     @deprecated(reason="Use Document.get() instead")
     def getExtensionObject(self, uri: str) -> SBOLObject:
         """*Deprecated.* Use Document.get instead.
