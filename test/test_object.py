@@ -217,6 +217,28 @@ class TestObject(unittest.TestCase):
         # comparison of modules
         self.assertFalse(md1a.compare(md1b))
 
+    def build_md_tree_3(self, suffix='1'):
+        # Build a md->m->measurement tree for comparison
+        meter_uri = 'http://www.ontology-of-units-of-measure.org/resource/om-2/metre'
+        mdef = sbol2.ModuleDefinition('md' + suffix)
+        module = sbol2.Module('m' + suffix)
+        measurement = sbol2.Measurement('meas' + suffix, 5.0, meter_uri)
+        module.measurements = [measurement]
+        mdef.modules = [module]
+        return mdef
+
+    def test_compare_recursive_3(self):
+        # Compare recursively at 3 levels instead of just 2
+        tree1a = self.build_md_tree_3()
+        tree1b = self.build_md_tree_3()
+        tree2 = self.build_md_tree_3('2')
+        self.assertTrue(tree1a.compare(tree1b))
+        self.assertTrue(tree1b.compare(tree1a))
+        self.assertFalse(tree1a.compare(tree2))
+        self.assertFalse(tree2.compare(tree1a))
+        self.assertFalse(tree1b.compare(tree2))
+        self.assertFalse(tree2.compare(tree1b))
+
     def test_is_hashable(self):
         obj = sbol2.SBOLObject()
         self.assertTrue(isinstance(obj, collections.abc.Hashable))
