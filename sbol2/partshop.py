@@ -382,16 +382,16 @@ class PartShop:
         if response.status_code == http.HTTPStatus.UNAUTHORIZED:
             # HTTP 401
             msg = 'You must login with valid credentials before attaching a file'
-            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_HTTP_UNAUTHORIZED)
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_HTTP_UNAUTHORIZED, msg)
         if response.status_code == http.HTTPStatus.NOT_FOUND:
             # HTTP 404
             msg = 'Unable to download. Attachment {} not found.'.format(attachment_uri)
-            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_NOT_FOUND)
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_NOT_FOUND, msg)
 
         # Not sure what went wrong
         msg = 'HTTP Error code {} trying to download file.'
         msg = msg.format(response.status_code)
-        raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST)
+        raise SBOLError(SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST, msg)
 
     def _make_search_item(self, item: dict) -> Identified:
         obj = Identified()
