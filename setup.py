@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='sbol2',
-      version='1.0b8',
+      version='1.1',
       description='Pure Python implementation of SBOL 2 standard',
       python_requires='>=3.4',
       url='https://github.com/SynBioDex/pySBOL2',
@@ -14,7 +14,7 @@ setup(name='sbol2',
             #   3 - Alpha
             #   4 - Beta
             #   5 - Production/Stable
-            'Development Status :: 4 - Beta',
+            'Development Status :: 5 - Production/Stable',
 
             # Indicate who your project is intended for
             'Intended Audience :: Developers',

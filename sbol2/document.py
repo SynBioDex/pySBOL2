@@ -47,6 +47,42 @@ from .uridict import URIDict
 
 import requests
 
+Config.SBOL_DATA_MODEL_REGISTER = {
+    URIRef(UNDEFINED): SBOLObject,
+    URIRef(SBOL_IDENTIFIED): Identified,
+    URIRef(SBOL_COMPONENT_DEFINITION): ComponentDefinition,
+    URIRef(SBOL_SEQUENCE_ANNOTATION): SequenceAnnotation,
+    URIRef(SBOL_SEQUENCE): Sequence,
+    URIRef(SBOL_COMPONENT): Component,
+    URIRef(SBOL_FUNCTIONAL_COMPONENT): FunctionalComponent,
+    URIRef(SBOL_MODULE_DEFINITION): ModuleDefinition,
+    URIRef(SBOL_MODULE): Module,
+    URIRef(SBOL_INTERACTION): Interaction,
+    URIRef(SBOL_PARTICIPATION): Participation,
+    URIRef(SBOL_MODEL): Model,
+    URIRef(SBOL_SEQUENCE_CONSTRAINT): SequenceConstraint,
+    URIRef(SBOL_RANGE): Range,
+    URIRef(SBOL_MAPS_TO): MapsTo,
+    URIRef(SBOL_CUT): Cut,
+    URIRef(SBOL_COLLECTION): Collection,
+    URIRef(SBOL_LOCATION): Location,
+    URIRef(SBOL_GENERIC_LOCATION): GenericLocation,
+    URIRef(PROVO_PLAN): Plan,
+    URIRef(PROVO_ACTIVITY): Activity,
+    URIRef(PROVO_AGENT): Agent,
+    URIRef(PROVO_USAGE): Usage,
+    URIRef(PROVO_ASSOCIATION): Association,
+    URIRef(SBOL_ATTACHMENT): Attachment,
+    URIRef(SBOL_COMBINATORIAL_DERIVATION): CombinatorialDerivation,
+    URIRef(SBOL_IMPLEMENTATION): Implementation,
+    URIRef(SYSBIO_DESIGN): Design,
+    URIRef(SYSBIO_ANALYSIS): Analysis,
+    URIRef(SYSBIO_SAMPLE_ROSTER): SampleRoster,
+    URIRef(SBOL_EXPERIMENT): Experiment,
+    URIRef(SBOL_EXPERIMENTAL_DATA): ExperimentalData,
+    URIRef(OM_MEASURE): Measurement,
+}
+
 
 class Document(Identified):
     """
@@ -60,42 +96,6 @@ class Document(Identified):
     All file I/O operations are performed on the Document
     to populate it with SBOL objects representing design elements.
     """
-
-    SBOL_DATA_MODEL_REGISTER = {
-        URIRef(UNDEFINED): SBOLObject,
-        URIRef(SBOL_IDENTIFIED): Identified,
-        URIRef(SBOL_COMPONENT_DEFINITION): ComponentDefinition,
-        URIRef(SBOL_SEQUENCE_ANNOTATION): SequenceAnnotation,
-        URIRef(SBOL_SEQUENCE): Sequence,
-        URIRef(SBOL_COMPONENT): Component,
-        URIRef(SBOL_FUNCTIONAL_COMPONENT): FunctionalComponent,
-        URIRef(SBOL_MODULE_DEFINITION): ModuleDefinition,
-        URIRef(SBOL_MODULE): Module,
-        URIRef(SBOL_INTERACTION): Interaction,
-        URIRef(SBOL_PARTICIPATION): Participation,
-        URIRef(SBOL_MODEL): Model,
-        URIRef(SBOL_SEQUENCE_CONSTRAINT): SequenceConstraint,
-        URIRef(SBOL_RANGE): Range,
-        URIRef(SBOL_MAPS_TO): MapsTo,
-        URIRef(SBOL_CUT): Cut,
-        URIRef(SBOL_COLLECTION): Collection,
-        URIRef(SBOL_LOCATION): Location,
-        URIRef(SBOL_GENERIC_LOCATION): GenericLocation,
-        URIRef(PROVO_PLAN): Plan,
-        URIRef(PROVO_ACTIVITY): Activity,
-        URIRef(PROVO_AGENT): Agent,
-        URIRef(PROVO_USAGE): Usage,
-        URIRef(PROVO_ASSOCIATION): Association,
-        URIRef(SBOL_ATTACHMENT): Attachment,
-        URIRef(SBOL_COMBINATORIAL_DERIVATION): CombinatorialDerivation,
-        URIRef(SBOL_IMPLEMENTATION): Implementation,
-        URIRef(SYSBIO_DESIGN): Design,
-        URIRef(SYSBIO_ANALYSIS): Analysis,
-        URIRef(SYSBIO_SAMPLE_ROSTER): SampleRoster,
-        URIRef(SBOL_EXPERIMENT): Experiment,
-        URIRef(SBOL_EXPERIMENTAL_DATA): ExperimentalData,
-        URIRef(OM_MEASURE): Measurement
-    }
 
     def __init__(self, filename=None):
         """
@@ -213,10 +213,10 @@ class Document(Identified):
         # Check for uniqueness of URI
         identity_uri = sbol_obj.identity
         if identity_uri in self.SBOLObjects:
-            raise SBOLError('Cannot add ' + sbol_obj.identity +
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE,
+                            'Cannot add ' + sbol_obj.identity +
                             ' to Document. An object with this identity '
-                            'is already contained in the Document',
-                            SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE)
+                            'is already contained in the Document')
         else:
             # If TopLevel add to Document.
             if sbol_obj.is_top_level():
@@ -358,8 +358,8 @@ class Document(Identified):
         try:
             return self.SBOLObjects[uri]
         except KeyError:
-            raise SBOLError(f'Object {uri} was not found',
-                            SBOLErrorCode.SBOL_ERROR_NOT_FOUND)
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_NOT_FOUND,
+                            f'Object {uri} was not found')
 
     def getAll(self):
         """
@@ -421,21 +421,19 @@ class Document(Identified):
         :return: None
         """
         self.clear()
-        self.append(filename)
+        self.append(filename, overwrite=False)
 
     def readString(self, sbol_str):
-        """
-        Convert text in SBOL into data objects.
+        """Read an RDF/XML string and attach the SBOL objects to
+        this Document.
+
+        Existing contents of the Document will be wiped.
 
         :param sbol_str: A string formatted in SBOL.
         :return: None
         """
-        # Save any changes we've made to the graph.
-        self.update_graph()
-        # Use rdflib to automatically merge the graphs together
-        self.graph.parse(data=sbol_str, format="application/rdf+xml")
-        # Base our internal representation on the new graph.
-        self.parse_all()
+        self.clear()
+        self.appendString(sbol_str, overwrite=False)
 
     def writeString(self):
         """
@@ -449,23 +447,71 @@ class Document(Identified):
         rdf = SBOL2Serialize.serialize_sboll2(self.graph).decode('utf-8')
         return rdf
 
-    def append(self, filename):
+    def append(self, filename, overwrite: bool = False):
         """
         Read an RDF/XML file and attach the SBOL objects to this Document.
 
         New objects will be added to the existing contents of the Document.
         :param filename: The full name of the file you want to read
         (including file extension).
+        :param overwrite: Boolean indicating whether to overwrite existing objects
         :return: None
         """
-        self.logger.debug("Appending data from file: " + filename)
-        if not self.graph:
-            self.graph = rdflib.Graph()
-        # Save any changes we've made to the graph.
-        self.update_graph()
-        # Use rdflib to automatically merge the graphs together
-        self.graph.parse(filename, format="application/rdf+xml")
-        # Base our internal representation on the new graph.
+        new_graph = rdflib.Graph()
+        new_graph.parse(filename, format='application/rdf+xml')
+        self._append_graph(new_graph, overwrite)
+
+    def appendString(self, sbol_str: str, overwrite: bool = False):
+        """
+        Read an RDF/XML document from a string and attach the SBOL
+        objects to this Document.
+
+        New objects will be added to the existing contents of the Document.
+        :param sbol_str: A string of RDF/XML
+        :param overwrite: Boolean indicating whether to overwrite existing objects
+        :return: None
+        """
+        # ------------------------------------------------------------
+        # Load the new data into a graph
+        new_graph = rdflib.Graph()
+        new_graph.parse(data=sbol_str, format='application/rdf+xml')
+        self._append_graph(new_graph, overwrite)
+
+    def _append_graph(self, new_graph: rdflib.Graph, overwrite: bool):
+        # Gather all the objects that will be overwritten, stopping
+        # if the user says not to overwrite. If we clear as we go we lose
+        # the ability to find objects within objects. So gather the list
+        # here, and clear them as a second pass.
+        objects_to_clear = []
+        identities = (s for s, _, _ in
+                      new_graph.triples((None, rdflib.RDF.type, None)))
+        objects = (self.find(identity) for identity in identities)
+        objects_to_clear = [obj for obj in objects if obj is not None]
+        if overwrite is False and objects_to_clear:
+            msg = objects_to_clear[0].identity
+            count = len(objects_to_clear)
+            if count > 1:
+                msg += f' and {count - 1} others'
+            msg += ' would require overwriting'
+            raise SBOLError(SBOLErrorCode.DUPLICATE_URI_ERROR, msg)
+        # Clear out the internal stores of the objects_to_clear so that
+        # they will be overwritten. Keep the identity property because it
+        # does not get restored by the graph parsing. Keep all the keys in
+        # the internal stores so owned objects end up in the right place.
+        for existing_object in objects_to_clear:
+            if existing_object.identity not in self.SBOLObjects:
+                self.SBOLObjects[existing_object.identity] = existing_object
+            # Now clear the object. It will get reconstituted below by parse_all
+            for k in existing_object.properties:
+                # Clear out everything but the identity
+                if k == SBOL_IDENTITY:
+                    continue
+                existing_object.properties[k] = []
+            for k in existing_object.owned_objects:
+                existing_object.owned_objects[k] = []
+        # Make the new graph be the graph we parse
+        self.graph = new_graph
+        # Load the new graph into the existing document
         self.parse_all()
 
     def parse_all(self):
@@ -526,9 +572,9 @@ class Document(Identified):
     def parse_objects_inner(self, subject, obj):
         # Construct the top-level object if we haven't already done so
         # and its type is something we know about.
-        if subject not in self.SBOLObjects and obj in self.SBOL_DATA_MODEL_REGISTER:
+        if subject not in self.SBOLObjects and obj in Config.SBOL_DATA_MODEL_REGISTER:
             # Call constructor for the appropriate SBOLObject
-            new_obj = self.SBOL_DATA_MODEL_REGISTER[obj]()
+            new_obj = Config.SBOL_DATA_MODEL_REGISTER[obj]()
             if isinstance(new_obj, Identified):
                 # Clear out the version. it will get set later
                 new_obj.version = ''
@@ -550,9 +596,11 @@ class Document(Identified):
             # If the new object is TopLevel,
             # add to the Document's property store
             if new_obj.is_top_level():
+                if new_obj.rdf_type not in self.owned_objects:
+                    self.owned_objects[new_obj.rdf_type] = []
                 self.owned_objects[new_obj.rdf_type].append(new_obj)
         elif (subject not in self.SBOLObjects
-              and obj not in self.SBOL_DATA_MODEL_REGISTER):
+              and obj not in Config.SBOL_DATA_MODEL_REGISTER):
             # Generic TopLevels
             new_obj = SBOLObject()
             new_obj.identity = subject
@@ -640,7 +688,7 @@ class Document(Identified):
                 self.logger.debug('Found %d good references', len(matches))
                 if len(matches) > 1:
                     msg = 'Invalid custom annotation object in SBOL document'
-                    raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_SERIALIZATION)
+                    raise SBOLError(SBOLErrorCode.SBOL_ERROR_SERIALIZATION, msg)
                 if len(matches) == 1:
                     match = matches[0]
                     if property_uri not in match.owned_objects:
@@ -917,7 +965,7 @@ class Document(Identified):
         if uri not in self.SBOLObjects:
             msg = 'Top level object {} is not in document'
             msg = msg.format(uri)
-            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_NOT_FOUND)
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_NOT_FOUND, msg)
         sbol_obj = self.SBOLObjects[uri]
         # Verify object is top level
         if sbol_obj.is_top_level():
@@ -925,7 +973,7 @@ class Document(Identified):
         # Not top level, raise error
         msg = '{} is not a top level object'
         msg = msg.format(uri)
-        raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
+        raise SBOLError(SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT, msg)
 
     def copy(self, target_namespace=None, target_doc=None, version=None):
         # This enables the user to use the pattern doc2 = doc.copy() to clone a Document.
@@ -952,10 +1000,10 @@ class Document(Identified):
         # Or if response['result'] is not empty?
         if response['errors'][0]:
             msg = ' '.join(response['errors'])
-            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT, msg)
         if not response['result']:
             msg = 'Validator returned no content'
-            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT, msg)
         # write the result to the desired output path
         with open(output_path, 'w') as fp:
             fp.write(response['result'])
@@ -964,6 +1012,56 @@ class Document(Identified):
         warnings.warn('Document.convert is now Document.exportToFormat',
                       DeprecationWarning)
         self.exportToFormat(language, output_path)
+
+    def importFromFormat(self, input_path: str, overwrite=False):
+        """Import the specified file into this document.
+        """
+        # The C++ version of this function takes a language argument
+        # and does not use it. There is no need for a language
+        # argument based on the validator API.
+        # Copy the global config options. Shallow copy is ok because values
+        # are either bool or str.
+        options = config.options.copy()
+        # We want an SBOL2 file back
+        options[ConfigOptions.LANGUAGE.value] = 'SBOL2'
+        options[ConfigOptions.URI_PREFIX.value] = Config.getHomespace()
+
+        json_request = _make_validation_request(options)
+        # We always want the return file.
+        json_request[ConfigOptions.RETURN_FILE.value] = True
+
+        # get the input file data to send
+        with open(input_path, 'r') as infile:
+            contents = infile.read()
+        json_request['main_file'] = contents
+
+        import json
+        with open('genbank2sbol.json', 'w') as outjson:
+            json.dump(json_request, outjson, indent=4)
+
+        headers = {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'charsets': 'utf-8'
+        }
+
+        validator_url = options[ConfigOptions.VALIDATOR_URL.value]
+
+        # Send the request to the online validation tool
+        response = requests.post(validator_url,
+                                 json=json_request,
+                                 headers=headers)
+        if response:
+            response = response.json()
+        else:
+            msg = 'Validation failure. HTTP post request failed with code {}: {}'
+            msg = msg.format(response.status_code, response.content)
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST, msg)
+        if response['valid']:
+            self.appendString(response['result'], overwrite)
+        else:
+            msg = ' '.join(response['errors'])
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT, msg)
 
     @deprecated(reason="Use Document.get() instead")
     def getExtensionObject(self, uri: str) -> SBOLObject:
@@ -1040,7 +1138,7 @@ def validate(doc: Document, options: Mapping[str, Any]):
     else:
         msg = 'Validation failure. HTTP post request failed with code {}: {}'
         msg = msg.format(response.status_code, response.content)
-        raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST)
+        raise SBOLError(SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST, msg)
 
 
 igem_assembly_scars = '''<?xml version="1.0" encoding="utf-8"?>
@@ -1192,7 +1290,7 @@ def IGEM_STANDARD_ASSEMBLY(parts_list):
     if not (G0000_uri in doc.componentDefinitions and
             G0002_uri in doc.componentDefinitions and
             G0000_seq_uri in doc.sequences and G0002_seq_uri in doc.sequences):
-        doc.readString(igem_assembly_scars)
+        doc.appendString(igem_assembly_scars, overwrite=True)
 
     G0000 = doc.componentDefinitions[G0000_uri]
     G0002 = doc.componentDefinitions[G0002_uri]

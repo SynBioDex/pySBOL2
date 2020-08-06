@@ -4,6 +4,7 @@ import warnings
 
 from .sbolerror import SBOLError
 from .sbolerror import SBOLErrorCode
+from rdflib import URIRef
 
 
 class FileFormats(Enum):
@@ -98,6 +99,22 @@ class Config:
     through the setOption and getOption methods.
     """
 
+    # Dictionary which holds builder functions for SBOL objects. The key is the
+    # RDFtype of the object which is parsed from the SBOL file. The dictionary is
+    # populated with SBOL core classes in document.py.  The dictionary also supports
+    # extension classes with RDFtypes not part of the core specification
+    SBOL_DATA_MODEL_REGISTER = {}
+
+    @staticmethod
+    def register_extension_class(builder, type_uri):
+        """Register an extension class and its namespace, so custom data
+        can be embedded into and read from SBOL files.
+
+        :param builder: A no-argument constructor
+        :param type_uri: An RDF type URI for the extension class
+        """
+        Config.SBOL_DATA_MODEL_REGISTER[URIRef(type_uri)] = builder
+
     @staticmethod
     def setHomespace(ns):
         """Setting the Homespace has several advantages.
@@ -190,14 +207,14 @@ class Config:
             return
         if option not in options:
             msg = '{!r} is not a valid configuration option'.format(option)
-            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT, msg)
         if option in valid_options:
             if val in valid_options[option]:
                 options[option] = val
             else:
                 msg = '{!r} is not a valid value for option {!r}.'.format(val, option)
                 msg += ' Valid options are: {!r}.'.format(valid_options[option])
-                raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
+                raise SBOLError(SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT, msg)
         else:
             # Any argument is valid, eg. uriPrefix
             options[option] = val
@@ -220,7 +237,7 @@ class Config:
             return options[option]
         else:
             msg = '{!r} is not a valid configuration option'.format(option)
-            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT, msg)
 
 
 # Global methods

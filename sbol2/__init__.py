@@ -1,4 +1,4 @@
-__version__ = '1.0b8'
+__version__ = '1.1'
 
 # Anything imported here is part of the public API. Limit what gets
 # imported to only those things that are actually needed.
@@ -29,6 +29,7 @@ from .module import Module
 from .moduledefinition import ModuleDefinition
 from .object import SBOLObject
 from .participation import Participation
+from .searchquery import SearchQuery
 from .partshop import PartShop
 from .property import DateTimeProperty, FloatProperty, IntProperty
 from .property import LiteralProperty, OwnedObject

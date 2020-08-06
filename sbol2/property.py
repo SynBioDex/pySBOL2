@@ -7,7 +7,6 @@ import posixpath
 from typing import Any, Union
 
 import dateutil.parser
-import rdflib
 from rdflib import Literal, URIRef
 import packaging.version as pv
 
@@ -34,6 +33,35 @@ class Property(ABC):
     At a low level, the Property class converts SBOL data structures
     into RDF triples.
     """
+
+    @staticmethod
+    def valid_lower_bound(x: Union[int, float, str]) -> str:
+        """Validate the lower bound. Allow numeric strings, ints,
+        and floats.
+        """
+        if isinstance(x, str) and x.isnumeric():
+            return x
+        elif isinstance(x, int):
+            return str(x)
+        elif isinstance(x, float) and x.is_integer():
+            return str(int(x))
+        else:
+            raise ValueError('Lower bound must be numeric')
+
+    @staticmethod
+    def valid_upper_bound(x: Union[int, float, str]) -> str:
+        """Validate the upper bound. Allow numeric strings, ints,
+        floats, and '*' (to represent infinity).
+        """
+        if x == '*':
+            return x
+        if x is math.inf:
+            return '*'
+        try:
+            x = Property.valid_lower_bound(x)
+        except ValueError:
+            raise ValueError('Upper bound must be numeric or \'*\'')
+        return x
 
     def __init__(self, property_owner, type_uri, lower_bound, upper_bound,
                  validation_rules, initial_value=None):
@@ -66,8 +94,8 @@ class Property(ABC):
             raise TypeError('property_owner.properties must be a dict')
         self._sbol_owner = property_owner
         self._rdf_type = str(type_uri)
-        self._lowerBound = lower_bound
-        self._upperBound = upper_bound
+        self._lowerBound = Property.valid_lower_bound(lower_bound)
+        self._upperBound = Property.valid_upper_bound(upper_bound)
         # Validate validation rules
         if validation_rules is None:
             # Some constructors pass None for validation rules
@@ -143,8 +171,8 @@ class Property(ABC):
             if self._rdf_type in self._sbol_owner.properties:
                 properties = self._sbol_owner.properties[self._rdf_type]
                 if index >= len(properties):
-                    raise SBOLError('Index out of range',
-                                    SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
+                    raise SBOLError(SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT,
+                                    'Index out of range')
                 if len(properties) == 1:
                     self.clear()
                 else:
@@ -582,10 +610,10 @@ class OwnedObject(Property):
         # Not top level, add to the attribute
         object_store = self._sbol_owner.owned_objects[self._rdf_type]
         if sbol_obj in object_store:
-            raise SBOLError("The object " + sbol_obj.identity +
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE,
+                            "The object " + sbol_obj.identity +
                             " is already contained by the " +
-                            self._rdf_type + " property",
-                            SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE)
+                            self._rdf_type + " property")
         # Add to Document and check for uniqueness of URI
         if self._sbol_owner.doc is not None:
             sbol_obj.doc = self._sbol_owner.doc
@@ -597,10 +625,10 @@ class OwnedObject(Property):
         # See issue #127
         for obj in object_store:
             if obj.identity == sbol_obj.identity:
-                raise SBOLError("The object " + sbol_obj.identity +
+                raise SBOLError(SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE,
+                                "The object " + sbol_obj.identity +
                                 " is already contained by the " +
-                                self._rdf_type + " property",
-                                SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE)
+                                self._rdf_type + " property")
         # Add to parent object
         object_store.append(sbol_obj)
         # Run validation rules
@@ -673,7 +701,7 @@ class OwnedObject(Property):
                 return obj
             else:
                 msg = 'Object {} not found'.format(id)
-                raise SBOLError(msg, SBOLErrorCode.NOT_FOUND_ERROR)
+                raise SBOLError(SBOLErrorCode.NOT_FOUND_ERROR, msg)
 
     def find_persistent_identity(self, search_uri):
         if not Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS):
@@ -764,11 +792,11 @@ class OwnedObject(Property):
         if len(self._sbol_owner.owned_objects[rdf_type]) == 0:
             self._sbol_owner.owned_objects[rdf_type].append(sbol_obj)
         else:
-            raise SBOLError("Cannot set " + parsePropertyName(rdf_type) +
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT,
+                            "Cannot set " + parsePropertyName(rdf_type) +
                             " property. The property is already set. "
                             "Call remove before attempting to "
-                            "overwrite the value.",
-                            SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
+                            "overwrite the value.")
         sbol_obj.parent = self._sbol_owner
         # Update URI for the argument object and all its children,
         # if SBOL-compliance is enabled.
@@ -857,8 +885,8 @@ class OwnedObject(Property):
             if self._rdf_type in self._sbol_owner.owned_objects:
                 object_store = self._sbol_owner.owned_objects[self._rdf_type]
                 if index >= len(object_store):
-                    raise SBOLError("Index out of range",
-                                    SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
+                    raise SBOLError(SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT,
+                                    "Index out of range")
                 obj = object_store[index]
                 if self._sbol_owner.getTypeURI() == SBOL_DOCUMENT:
                     del obj.doc.SBOLObjects[rdflib.URIRef(obj.identity)]

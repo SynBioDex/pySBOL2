@@ -22,6 +22,8 @@
 #   LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 #   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 #   SUCH DAMAGE.
+from collections import defaultdict
+from typing import Dict
 
 from lxml import etree
 from lxml.etree import tostring
@@ -33,39 +35,27 @@ from rdflib import URIRef, Literal
 rdfNS = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 sbolNS = "http://sbols.org/v2#"
 
+# This is a module global that is used to register ownership relationships
+# between classes. The serializer uses this to generate structured XML from
+# flat RDF/XML
+OWNERSHIP_PREDICATES: Dict[URIRef, set] = defaultdict(set)
 
-def is_ownership_relation(g, triple):
-    subject = triple[0].toPython()
-    predicate = triple[1].toPython()
-    obj = triple[2]
 
-    ownership_predicates = {
-        sbolNS + 'module',
-        sbolNS + 'mapsTo',
-        sbolNS + 'interaction',
-        sbolNS + 'participation',
-        sbolNS + 'functionalComponent',
-        sbolNS + 'sequenceConstraint',
-        sbolNS + 'location',
-        sbolNS + 'sourceLocation',
-        sbolNS + 'sequenceAnnotation',
-        sbolNS + 'measure'
-    }
+def is_ownership_relation(triple, subject_type):
+    # subject = triple[0]
+    predicate = triple[1]
+    # object = triple[2]
 
-    if predicate in ownership_predicates:
-        return True
+    return (predicate in OWNERSHIP_PREDICATES and
+            subject_type in OWNERSHIP_PREDICATES[predicate])
 
-    # SBOL2 reuses the "component" predicate as both an ownership predicate (in
-    # the case of ComponentDefinition) and a referencing one (in the case of
-    # SequenceAnnotation).
+
+def register_ownership_relation(parent_type, predicate):
+    # Encapsulates and populates the OWNERSHIP_PREDICATES dictionary.
     #
-    if predicate == sbolNS + 'component':
-        if (triple[0], RDF.type, URIRef(sbolNS + 'SequenceAnnotation')) in g:
-            return False
-        else:
-            return True
-
-    return False
+    # :param parent_type: The RDF type of the parent class
+    # :param predicate: The URI for the property.
+    OWNERSHIP_PREDICATES[URIRef(predicate)].add(URIRef(parent_type))
 
 
 def ns_prefix_dict(g):
@@ -79,10 +69,12 @@ def serialize_sboll2(g):
     prefixes['sbol'] = sbolNS
 
     subject_to_element = dict()
+    subject_to_type = dict()
 
     owned_elements = set()
 
     for triple in g.triples((None, RDF.type, None)):
+        subject_to_type[triple[0]] = triple[2]
         subject = triple[0].toPython()
         the_type = triple[2].toPython()
         if subject in subject_to_element:
@@ -101,13 +93,13 @@ def serialize_sboll2(g):
                                                         )
 
     for triple in g.triples((None, None, None)):
+        if triple[1] == RDF.type:
+            continue
         subject = triple[0].toPython()
         predicate = triple[1].toPython()
         obj = triple[2]
         element = subject_to_element[subject]
-        if predicate == RDF.type.toPython():
-            continue
-        if is_ownership_relation(g, triple):
+        if is_ownership_relation(triple, subject_to_type[triple[0]]):
             owned_element = subject_to_element[obj.toPython()]
             ownership_element = etree.SubElement(element,
                                                  prefixify(predicate, prefixes, True))

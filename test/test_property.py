@@ -1,4 +1,5 @@
 import datetime
+import math
 import unittest
 import os
 
@@ -170,6 +171,23 @@ class TestProperty(unittest.TestCase):
         cd.annotation = None
         self.assertEqual(cd.annotation, None)
 
+    def test_owned_object_singleton_ints(self):
+        # same as test_owned_object_singleton but specify OwnedObject
+        # bounds as ints instead of strings
+        cd = sbol.ComponentDefinition('cd')
+        annotation_uri = rdflib.URIRef('http://examples.org#annotation_property')
+        cd.annotation = sbol.property.OwnedObject(cd, annotation_uri, sbol.Identified,
+                                                  0, 1, None)
+        self.assertIsNone(cd.annotation)
+        cd.annotation = sbol.Identified('foo')
+        self.assertEqual(type(cd.annotation), sbol.Identified)
+
+        # Test unsetting
+        cd.annotation = None
+        self.assertEqual(cd.annotation, None)
+        cd.annotation = None
+        self.assertEqual(cd.annotation, None)
+
     def test_owned_object_multiple(self):
         cd = sbol.ComponentDefinition('cd')
         annotation_uri = rdflib.URIRef('http://examples.org#annotation_property')
@@ -305,6 +323,24 @@ class TestProperty(unittest.TestCase):
         tp = sbol2.TextProperty(md, 'http://example.com#logic', '0', '1',
                                 [], 'AND')
         # Should add a test for callable validation rules
+
+    def test_upper_bound_math_inf(self):
+        # test that math.inf can be used as an upper bound
+        cd = sbol.ComponentDefinition('cd')
+        annotation_uri = rdflib.URIRef('http://examples.org#annotation_property')
+        cd.annotation = sbol.property.OwnedObject(cd, annotation_uri, sbol.Identified,
+                                                  0, math.inf, None)
+        # By getting here, the test has passed
+        self.assertEqual(0, len(cd.annotation))
+
+    def test_lower_bound_math_inf(self):
+        # test that math.inf can not be used as a lower bound
+        cd = sbol.ComponentDefinition('cd')
+        annotation_uri = rdflib.URIRef('http://examples.org#annotation_property')
+        with self.assertRaises(ValueError):
+            cd.annotation = sbol.property.OwnedObject(cd, annotation_uri,
+                                                      sbol.Identified,
+                                                      math.inf, 1, None)
 
 
 class TestIntProperty(unittest.TestCase):

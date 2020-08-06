@@ -150,9 +150,9 @@ class Identified(SBOLObject):
             # Check for uniqueness of URI in local object properties
             matches = parent.find_property_value(SBOL_IDENTIFIED, obj_id)
             if len(matches) > 0:
-                raise SBOLError("Cannot update SBOL-compliant URI. The URI " +
-                                str(self.identity) + " is not unique",
-                                SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE)
+                raise SBOLError(SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE,
+                                "Cannot update SBOL-compliant URI. The URI " +
+                                str(self.identity) + " is not unique")
             for rdf_type, store in self.owned_objects.items():
                 if rdf_type not in self._hidden_properties:
                     for nested_obj in store:
@@ -161,10 +161,10 @@ class Identified(SBOLObject):
         if parent.doc:
             matches = parent.doc.find_property_value(SBOL_IDENTITY, self.identity)
             if len(matches) > 0:
-                raise SBOLError("Cannot update SBOL-compliant URI. "
+                raise SBOLError(SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE,
+                                "Cannot update SBOL-compliant URI. "
                                 "An object with URI " + str(self.identity) +
-                                " is already in the Document",
-                                SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE)
+                                " is already in the Document")
 
     def copy(self, target_doc=None, target_namespace=None, version=None):
 

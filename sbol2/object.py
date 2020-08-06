@@ -8,11 +8,13 @@ from rdflib import URIRef
 
 from .config import getHomespace, string_equal
 from .config import hasHomespace
+from .config import Config
 from .constants import *
 from .property import Property, OwnedObject, URIProperty
 from .sbolerror import SBOLError
 from .sbolerror import SBOLErrorCode
 from .uridict import URIDict
+from . import SBOL2Serialize
 from . import validation
 
 
@@ -63,20 +65,6 @@ class SBOLObject:
     def _makeQName(self, uri):
         raise NotImplementedError("Not yet implemented")
 
-    def _register_extension_class(self, ns, ns_prefix, class_name):
-        """Register an extension class and its namespace, so custom data
-        can be embedded into and read from SBOL files.
-
-        :param ns: The extension namespace, eg, http://myhome.org/my_extension#
-        It's important that the namespace ends in a forward-slash or hash.
-        :param ns_prefix: A shorthand symbol for the full namespace
-        as it will appear in the output file,
-        eg. my_extension.
-        :param class_name: The extension class name.
-        :return: The new class.
-        """
-        raise NotImplementedError("Not yet implemented")
-
     # TODO Docstrings on variables isn't a thing in Python. Consider using Epydoc.
     # The identity property is REQUIRED by all Identified objects
     # and has a data type of URI. A given Identified object's identity
@@ -88,7 +76,7 @@ class SBOLObject:
     # see Section 11.2 of the [SBOL specification document
     # (http://sbolstandard.org/wp-content/uploads/2015/08/SBOLv2.0.1.pdf).
 
-    def __init__(self, _rdf_type=rdflib.URIRef(UNDEFINED),
+    def __init__(self, type_uri=rdflib.URIRef(UNDEFINED),
                  uri=rdflib.URIRef("example")):
         """Open-world constructor."""
         self.owned_objects = URIDict()  # map<rdf_type, vector<SBOLObject>>
@@ -97,7 +85,7 @@ class SBOLObject:
         self.parent = None
         self._default_namespace = None
         self._hidden_properties = []
-        self.rdf_type = str(_rdf_type)
+        self.rdf_type = str(type_uri)
         self._namespaces = {}
         self.identity = URIProperty(self, SBOL_IDENTITY, '0', '1',
                                     [validation.sbol_rule_10202])
@@ -300,8 +288,8 @@ class SBOLObject:
             return [str(x) for x in self.properties[property_uri]]
         except KeyError as e:
             # no property by this name
-            raise SBOLError('Property {} not found'.format(property_uri),
-                            SBOLErrorCode.SBOL_ERROR_NOT_FOUND)
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_NOT_FOUND,
+                            'Property {} not found'.format(property_uri))
 
     def getProperties(self):
         """Gets URIs for all properties contained by this object.
@@ -419,11 +407,16 @@ class SBOLObject:
             if typeURI in self._hidden_properties:
                 # Skip hidden properties
                 continue
+
             for owned_obj in objlist:
                 graph.add((rdflib.URIRef(self.identity),
                            rdflib.URIRef(typeURI),
                            URIRef(owned_obj.identity)))
                 owned_obj.build_graph(graph)
+
+            # register ownership relationship in SBOL2Serialize to structure XML
+            SBOL2Serialize.register_ownership_relation(self.getTypeURI(),
+                                                       typeURI)
 
     def __str__(self):
         return self.identity

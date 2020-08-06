@@ -10,6 +10,7 @@ MODULE_LOCATION = os.path.dirname(os.path.abspath(__file__))
 CRISPR_LOCATION = os.path.join(MODULE_LOCATION, 'resources', 'crispr_example.xml')
 
 TEST_RESOURCE = 'https://synbiohub.utah.edu'
+TEST_RESOURCE_MAIN = 'https://synbiohub.org'
 
 if 'SBH_USER' in os.environ:
     username = os.environ['SBH_USER']
@@ -25,7 +26,7 @@ class TestPartShop(unittest.TestCase):
     def test_pull_00(self):
         # Based on tutorial: https://pysbol2.readthedocs.io/en/latest/repositories.html
         doc = sbol.Document()
-        igem = sbol.PartShop('https://synbiohub.org')
+        igem = sbol.PartShop(TEST_RESOURCE_MAIN)
         igem.pull('https://synbiohub.org/public/igem/BBa_R0010/1', doc)
         # print(doc)
         # for obj in doc:
@@ -59,12 +60,12 @@ class TestPartShop(unittest.TestCase):
     def test_login(self):
         # NOTE: Add /login because login pages may be different
         # depending on what site you're accessing
-        igem = sbol.PartShop('https://synbiohub.org')
+        igem = sbol.PartShop(TEST_RESOURCE_MAIN)
         response = igem.login('johndoe@example.org', 'test')
         self.assertEqual(response.status_code, 200)
 
     def test_login_bad(self):
-        igem = sbol.PartShop('https://synbiohub.org')
+        igem = sbol.PartShop(TEST_RESOURCE_MAIN)
         try:
             igem.login('johndoe@example.org', 'test1')
             self.fail('SBOLError not raised')
@@ -86,7 +87,7 @@ class TestPartShop(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_sparqlQuery_00(self):
-        ps = sbol.PartShop('https://synbiohub.org')
+        ps = sbol.PartShop(TEST_RESOURCE_MAIN)
         response = ps.login('johndoe', 'test')
         self.assertEqual(response.status_code, 200)
         query = '''
@@ -172,7 +173,7 @@ WHERE {
     def test_uri2url(self):
         # This tests an internal method that underlies `remove` and
         # `pull`. No spoofing in these tests.
-        part_shop = sbol.PartShop('https://synbiohub.org')
+        part_shop = sbol.PartShop(TEST_RESOURCE_MAIN)
         uri = 'https://synbiohub.org/design/CAT_C0378/1'
         url = part_shop._uri2url(uri)
         self.assertEqual(url, uri)
@@ -190,7 +191,7 @@ WHERE {
         #
         # Spoofed URLs had been an issue in `pull` before extracting
         # the `_uri2url` method
-        part_shop = sbol.PartShop('https://synbiohub.org',
+        part_shop = sbol.PartShop(TEST_RESOURCE_MAIN,
                                   spoofed_url='https://example.org')
         uri = 'https://synbiohub.org/design/CAT_C0378/1'
         url = part_shop._uri2url(uri)
@@ -270,7 +271,7 @@ WHERE {{
         self.assertEqual(e.error_code(), sbol2.SBOLErrorCode.SBOL_ERROR_NOT_FOUND)
 
     def test_search_general(self):
-        sbh = sbol2.PartShop(TEST_RESOURCE)
+        sbh = sbol2.PartShop(TEST_RESOURCE_MAIN)
         # sbh.login(username, password)
         results = sbh.search("NAND")
         # The response is a list
@@ -285,7 +286,7 @@ WHERE {{
     def test_search_general_offset_limit(self):
         # Test a general search using offset and limit
         # This comes from a documentation example that was failing
-        sbh = sbol2.PartShop(TEST_RESOURCE)
+        sbh = sbol2.PartShop(TEST_RESOURCE_MAIN)
         offset = 10
         limit = 20
         results = sbh.search('plasmid', sbol2.SBOL_COMPONENT_DEFINITION,
@@ -300,7 +301,7 @@ WHERE {{
                              for x in results]))
 
     def test_search_exact(self):
-        igem = sbol.PartShop('https://synbiohub.org')
+        igem = sbol.PartShop(TEST_RESOURCE_MAIN)
         limit = 10
         results = igem.search(sbol2.SO_PROMOTER,
                               sbol2.SBOL_COMPONENT_DEFINITION,
@@ -324,7 +325,7 @@ WHERE {{
         doc = sbol.Document()
         self.assertIsNotNone(doc.version)
         old_version = doc.version
-        igem = sbol.PartShop('https://synbiohub.org')
+        igem = sbol.PartShop(TEST_RESOURCE_MAIN)
         igem.pull('https://synbiohub.org/public/igem/BBa_R0010/1', doc)
         self.assertEqual(3, len(doc))
         self.assertIsNotNone(doc.version)
@@ -339,6 +340,46 @@ WHERE {{
         self.assertIs(type(count), int)
         # Expecting at least 1 plasmid
         self.assertGreater(count, 0)
+
+    def test_validate_url_forwardslash(self):
+        # Tests whether the _validate_url() sucessfully filters
+        # out urls containing a terminal forward slash
+        part_shop = sbol2.PartShop('https://initialise-partshop')
+        self.assertRaises(TypeError,
+                          part_shop._validate_url,
+                          'https://stackoverflow.com/')
+
+    def test_validate_url_missing_netloc(self):
+        # Tests whether the _validate_url() sucessfully filters
+        # out urls with non existent netlocs
+        part_shop = sbol2.PartShop('https://initialise-partshop')
+        self.assertRaises(TypeError,
+                          part_shop._validate_url,
+                          'https://')
+
+    def test_validate_url_invalid_scheme(self):
+        # Tests whether the _validate_url() sucessfully filters
+        # out urls with schemes not equal to "http" or "https"
+        part_shop = sbol2.PartShop('https://initialise-partshop')
+        self.assertRaises(TypeError,
+                          part_shop._validate_url,
+                          'file://google.com')
+
+    def test_validate_url_hidden_list(self):
+        # Tests whether the _validate_url() sucessfully filters
+        # out urls as a string of a list
+        part_shop = sbol2.PartShop('https://initialise-partshop')
+        self.assertRaises(TypeError,
+                          part_shop._validate_url,
+                          '[1,2,3]')
+
+    def test_validate_url_type_check(self):
+        # Tests whether the _validate_url() sucessfully filters
+        # out urls of type which is not equal to string
+        part_shop = sbol2.PartShop('https://initialise-partshop')
+        self.assertRaises(TypeError,
+                          part_shop._validate_url,
+                          [1, 2, 3])
 
 
 if __name__ == '__main__':

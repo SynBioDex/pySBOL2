@@ -17,11 +17,7 @@ from .constants import *
 from .sbolerror import SBOLError
 from .sbolerror import SBOLErrorCode
 from .identified import Identified
-
-
-class SearchQuery:
-    """This is a stub until SearchQuery is implemented."""
-    pass
+from . import SearchQuery
 
 
 class PartShop:
@@ -41,16 +37,34 @@ class PartShop:
         self.spoofed_resource = self._validate_url(spoofed_url, 'spoofed')
 
     def _validate_url(self, url, url_name):
-        # This feels like a weak validation
-        # Should we verify that it is a string?
-        #   [1, 2, 3] will pass this test, and surely break something else later.
-        # Should we use urllib.parse.urlparse?
-        #   It doesn't do a whole lot, but catches some things this code doesn't
+        """ Function to validate url with type checking, urlparse and
+        terminal forward slash's as well as allowing spoofed url to
+        pass as ''
+        """
+        # If url_name = spoofed and url = '' pass, as spoofed_resource
+        # initialises with default spoofed_url = '' when objects are
+        # created, ideal behavior should not throw errors in such case.
+        if url_name == "spoofed" and url == '':
+            return url
+        # Type check to ensure passed url is a string
+        if not isinstance(url, str):
+            msg = ('PartShop initialization failed. The {} URL '
+                   + 'is not of type string').format(url_name)
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT, msg)
+        # Authenticity check with urlparse as to ensure correct scheme and
+        # netloc present
+        url_pieces = urllib.parse.urlparse(url)
+        if not all([url_pieces.scheme in ['http', 'https'],
+                   url_pieces.netloc]):
+            msg = ('PartShop initialization failed. The {} URL '
+                   + 'was not valid').format(url_name)
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT, msg)
+        # String check to ensure length > 0 and does not contain terminal "/"
         if len(url) > 0 and url[-1] == '/':
             msg = ('PartShop initialization failed. The {} URL '
-                   + 'should not contain a terminal backlash')
+                   + 'should not contain a terminal forward slash')
             msg = msg.format(url_name)
-            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT, msg)
         return url
 
     @property
@@ -135,15 +149,15 @@ class PartShop:
                                     headers={'X-authorization': self.key,
                                              'Accept': 'text/plain'})
             if response.status_code == 404:
-                raise SBOLError('Part not found. Unable to pull: ' + query,
-                                SBOLErrorCode.SBOL_ERROR_NOT_FOUND,)
+                raise SBOLError(SBOLErrorCode.SBOL_ERROR_NOT_FOUND,
+                                'Part not found. Unable to pull: ' + query)
             elif response.status_code == 401:
-                raise SBOLError('Please log in with valid credentials',
-                                SBOLErrorCode.SBOL_ERROR_HTTP_UNAUTHORIZED,)
+                raise SBOLError(SBOLErrorCode.SBOL_ERROR_HTTP_UNAUTHORIZED,
+                                'Please log in with valid credentials')
             elif not response:
-                raise SBOLError(response, SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST)
+                raise SBOLError(SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST, response)
             # Add content to document
-            doc.readString(response.content)
+            doc.appendString(response.content, overwrite=True)
             doc.resource_namespaces.add(self.resource)
 
     def submit(self, doc, collection='', overwrite=0):
@@ -230,7 +244,7 @@ class PartShop:
             return uri.replace(self.spoofed_resource, self.resource)
         msg = ('{} does not exist in the resource namespace')
         msg = msg.format(uri)
-        raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT)
+        raise SBOLError(SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT, msg)
 
     def remove(self, uri):
         query = self._uri2url(uri)
@@ -242,13 +256,13 @@ class PartShop:
         response = requests.get(url, headers=headers)
         if response.ok:
             return True
-        if response.status_code == 401:
-            # TODO: Is there a symbol we can use instead of 401?
+        if response.status_code == requests.codes.unauthorized:
+            # Handle a 401 Unauthorized error
             msg = 'You must login with valid credentials before removing'
-            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_HTTP_UNAUTHORIZED)
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_HTTP_UNAUTHORIZED, msg)
         # Not sure what went wrong
         msg = 'Unknown error: ' + response
-        raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST)
+        raise SBOLError(SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST, msg)
 
     def login(self, user_id, password=''):
         """In order to submit to a PartShop, you must login first.
@@ -269,7 +283,7 @@ class PartShop:
         if not response:
             msg = 'Login failed due to an HTTP error: {}'
             msg = msg.format(response)
-            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST)
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST, msg)
         self.key = response.content.decode('utf-8')
         return response
 
@@ -324,11 +338,11 @@ class PartShop:
         if response.status_code == http.HTTPStatus.UNAUTHORIZED:
             # HTTP 401
             msg = 'You must login with valid credentials before attaching a file'
-            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_HTTP_UNAUTHORIZED)
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_HTTP_UNAUTHORIZED, msg)
         # Not sure what went wrong
         msg = 'HTTP Error code {} trying to attach file.'
         msg = msg.format(response.status_code)
-        raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST)
+        raise SBOLError(SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST, msg)
 
     def downloadAttachment(self, attachment_uri, filepath='.'):
         '''Download a file attachment from SynBioHub.
@@ -402,7 +416,7 @@ class PartShop:
         response = requests.get(url, headers=headers)
         if not response:
             # Something went wrong
-            raise SBOLError(response, SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST)
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST, response)
         # Everything looks good, parse and return the results
         return [self._make_search_item(item) for item in (response.json())]
 
@@ -437,13 +451,29 @@ class PartShop:
         query_url = f'{search_url}/search/{query}&/?{params}'
         return self._search(query_url)
 
-    def search(self, search_text: str,
+    def search_advanced(self, search_query: SearchQuery):
+        # See https://synbiohub.github.io/api-docs/#search-metadata
+        search_url = parseURLDomain(self.resource)
+        query = search_query.query_dict()
+        # if search_text.startswith('http'):
+        #     search_text = f"<{search_text}>"
+        # else:
+        #     search_text = f"'{search_text}'"
+        # query[parseClassName(property_uri)] = search_text
+        query = urllib.parse.urlencode(query)
+        params = dict(offset=(search_query.offset),
+                      limit=(search_query.limit))
+        params = urllib.parse.urlencode(params)
+        query_url = f'{search_url}/search/{query}&/?{params}'
+        return self._search(query_url)
+
+    def search(self, search_text: Union[str, SearchQuery],
                object_type: Optional[str] = SBOL_COMPONENT_DEFINITION,
                property_uri: Optional[Union[str, int]] = None,
                offset: int = 0, limit: int = 25) -> List[Identified]:
         # if search_text is a SearchQuery, dispatch to search_advanced
         if type(search_text) is SearchQuery:
-            raise NotImplementedError('search using SearchQuery is not implemented')
+            return self.search_advanced(search_text)
         if type(property_uri) is int:
             # User called without property_uri and with offset. Shift args
             if offset > 0:
@@ -458,7 +488,19 @@ class PartShop:
         return self.search_exact(search_text, object_type, property_uri,
                                  offset, limit)
 
-    def _search_count(self, search_text, object_type, property_uri):
+    def _search_count(self, url):
+        headers = {'Accept': 'text/plain'}
+        if self.key:
+            headers['X-authorization'] = self.key
+        self.logger.info('searchCount query: %s', url)
+        response = requests.get(url, headers=headers)
+        if not response:
+            # Something went wrong
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST, response)
+        # Everything looks good, parse and return the results
+        return int(response.text)
+
+    def search_count(self, search_text, object_type, property_uri):
         search_url = parseURLDomain(self.resource)
         query = dict(objectType=parseClassName(object_type))
         query = urllib.parse.urlencode(query)
@@ -467,27 +509,25 @@ class PartShop:
         # params = urllib.parse.urlencode(params)
         # query_url = f'{search_url}/search/{query}&{search_text}/?{params}'
         url = f'{search_url}/searchCount/{query}&{search_text}/'
-        headers = {'Accept': 'text/plain'}
-        if self.key:
-            headers['X-authorization'] = self.key
-        self.logger.info('searchCount query: %s', url)
-        response = requests.get(url, headers=headers)
-        if not response:
-            # Something went wrong
-            raise SBOLError(response, SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST)
-        # Everything looks good, parse and return the results
-        return int(response.text)
+        return self._search_count(url)
+
+    def search_count_advanced(self, search_query):
+        search_url = parseURLDomain(self.resource)
+        query = search_query.query_dict()
+        query = urllib.parse.urlencode(query)
+        url = f'{search_url}/searchCount/{query}&/'
+        return self._search_count(url)
 
     def searchCount(self, search_text, object_type=None, property_uri=None):
         """Returns the number of records matching the given criteria.
         """
-        # if search_text is a SearchQuery, dispatch to ???
+        # if search_text is a SearchQuery, dispatch to search_count_advanced
         if type(search_text) is SearchQuery:
-            raise NotImplementedError('search using SearchQuery is not implemented')
+            return self.search_count_advanced(search_text)
 
         # if object_type is not specified, default to SBOL_COMPONENT_DEFINITION
         if object_type is None:
             object_type = SBOL_COMPONENT_DEFINITION
 
         # Dispatch to the internal search count method
-        return self._search_count(search_text, object_type, property_uri)
+        return self.search_count(search_text, object_type, property_uri)

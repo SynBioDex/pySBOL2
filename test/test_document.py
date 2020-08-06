@@ -408,14 +408,16 @@ class TestDocument(unittest.TestCase):
         self.assertEqual(c1, doc.getCollection('c1'))
         self.assertEqual(c1, doc.getCollection(c1.identity))
 
-
-class TopLevelExtension(sbol2.TopLevel):
-
-    RDF_TYPE = 'http://example.org/test#TopLevelExtension'
-
-    def __init__(self, uri='example'):
-        super().__init__(uri=uri,
-                         type_uri=TopLevelExtension.RDF_TYPE)
+    def test_read_string_clear(self):
+        # Test that Document.readString() clears the document
+        doc = sbol2.Document()
+        cd = doc.componentDefinitions.create('test_cd')
+        _ = cd.components.create('test_c')
+        self.assertEqual(1, len(cd.components))
+        doc.readString(doc.writeString())
+        self.assertEqual(1, len(cd.components))
+        cd = doc.componentDefinitions[cd.identity]
+        self.assertEqual(1, len(cd.components))
 
 
 class NonTopLevelExtension(sbol2.Identified):
@@ -427,7 +429,58 @@ class NonTopLevelExtension(sbol2.Identified):
                          type_uri=NonTopLevelExtension.RDF_TYPE)
 
 
+class TopLevelExtension(sbol2.TopLevel):
+
+    RDF_TYPE = 'http://example.org/test#TopLevelExtension'
+
+    def __init__(self, uri='example'):
+        super().__init__(uri=uri,
+                         type_uri=TopLevelExtension.RDF_TYPE)
+        self.child = sbol2.OwnedObject(self, 'http://example.org/test#child',
+                                       NonTopLevelExtension, '0', '1', [])
+
+
+class ComponentDefinitionOverride(sbol2.ComponentDefinition):
+
+    def __init__(self, uri='example'):
+        super().__init__(uri=uri)
+
+
 class TestDocumentExtensionObjects(unittest.TestCase):
+
+    def test_register_extension_class(self):
+
+        # Define extension object
+        doc = sbol2.Document()
+        cd = ComponentDefinitionOverride('cd')
+        doc.add(cd)
+
+        # Round-trip the extension data
+        doc2 = sbol2.Document()
+        doc2.readString(doc.writeString())
+        cd = doc2.getExtensionObject(cd.identity)
+
+        # Note the extension object's type is not preserved!
+        self.assertIs(type(cd), sbol2.ComponentDefinition)
+        self.assertIsNot(type(cd), ComponentDefinitionOverride)
+
+        # Now register the class and attempt to round-trip again
+        doc2 = sbol2.Document()
+        sbol2.Config.register_extension_class(ComponentDefinitionOverride,
+                                              sbol2.SBOL_COMPONENT_DEFINITION)
+        doc2.readString(doc.writeString())
+        cd = doc2.getExtensionObject(cd.identity)
+
+        # This time the extension object's type is preserved!
+        self.assertIs(type(cd), ComponentDefinitionOverride)
+        self.assertIsNot(type(cd), sbol2.ComponentDefinition)
+
+        # The object is stored in Document.componentDefinitions
+        self.assertEqual(len(doc2.componentDefinitions), 1)
+
+        # Restore
+        sbol2.Config.register_extension_class(sbol2.ComponentDefinition,
+                                              sbol2.SBOL_COMPONENT_DEFINITION)
 
     def test_get_extension_object(self):
         doc = sbol2.Document(CRISPR_LOCATION)
@@ -482,6 +535,71 @@ class TestDocumentExtensionObjects(unittest.TestCase):
         obj = doc.find(ntle.identity)
         self.assertIsNone(obj)
 
+    @unittest.expectedFailure  # See issue #368
+    def test_parent_child_extensions(self):
+        doc = sbol2.Document()
+        tle = TopLevelExtension('tle')
+        ntle = NonTopLevelExtension('ntle')
+        tle.child = ntle
+        doc.add(tle)
+        self.assertEqual(len(doc.SBOLObjects), 1)
+
+        # Verify that the parent-child relationship is preserved upon round-trip
+        doc.readString(doc.writeString())
+        self.assertEqual(len(doc.SBOLObjects), 1)
+        self.assertIsNotNone(tle.child)
+
+    def test_register_parent_child_extensions(self):
+        # Show that we can load the parent/child relationship when the
+        # extension classes are registered. The methods around this one
+        # try to do the same thing without registration of the extension
+        # classes
+        #
+        # This is all wrapped in a `try` so that we can clean up the
+        # registration in the finally clause
+        try:
+            sbol2.Config.register_extension_class(TopLevelExtension,
+                                                  TopLevelExtension.RDF_TYPE)
+            sbol2.Config.register_extension_class(NonTopLevelExtension,
+                                                  NonTopLevelExtension.RDF_TYPE)
+            doc = sbol2.Document()
+            tle = TopLevelExtension('tle')
+            ntle = NonTopLevelExtension('ntle')
+            tle.child = ntle
+            doc.add(tle)
+            self.assertEqual(len(doc.SBOLObjects), 1)
+
+            # Verify that the parent-child relationship is preserved upon round-trip
+            doc.readString(doc.writeString())
+            self.assertEqual(len(doc.SBOLObjects), 1)
+            self.assertIsNotNone(tle.child)
+        finally:
+            # Clean up
+            tle_uri = rdflib.URIRef(TopLevelExtension.RDF_TYPE)
+            ntle_uri = rdflib.URIRef(NonTopLevelExtension.RDF_TYPE)
+            self.assertIn(tle_uri, sbol2.Config.SBOL_DATA_MODEL_REGISTER)
+            self.assertIn(ntle_uri, sbol2.Config.SBOL_DATA_MODEL_REGISTER)
+            del sbol2.Config.SBOL_DATA_MODEL_REGISTER[tle_uri]
+            del sbol2.Config.SBOL_DATA_MODEL_REGISTER[ntle_uri]
+            self.assertNotIn(tle_uri, sbol2.Config.SBOL_DATA_MODEL_REGISTER)
+            self.assertNotIn(ntle_uri, sbol2.Config.SBOL_DATA_MODEL_REGISTER)
+
+    @unittest.expectedFailure  # See Issue #368
+    def test_parent_child_extensions_top_level(self):
+        doc = sbol2.Document()
+        tle = TopLevelExtension('tle')
+        ntle = NonTopLevelExtension('ntle')
+        tle.child = ntle
+        doc.add(tle)
+        self.assertEqual(len(doc.SBOLObjects), 1)
+
+        # Verify that the parent-child relationship is preserved upon round-trip
+        doc2 = sbol2.Document()
+        doc2.readString(doc.writeString())
+        self.assertNotIsInstance(doc2.get(ntle.identity), sbol2.TopLevel)
+        self.assertEqual(len(doc.SBOLObjects), 1)
+        self.assertIsNotNone(tle.child)
+
     def test_add_remove_citation(self):
         doc = sbol2.Document()
         sbol1_spec = 'http://www.nature.com/nbt/journal/v32/n6/full/nbt.2891.html'
@@ -519,7 +637,7 @@ class TestDocumentExtensionObjects(unittest.TestCase):
         doc = sbol2.Document()
         self.assertIsNotNone(doc.version)
         old_version = doc.version
-        doc.append(CRISPR_LOCATION)
+        doc.append(CRISPR_LOCATION, overwrite=True)
         self.assertIsNotNone(doc.version)
         self.assertEqual(old_version, doc.version)
 
@@ -534,7 +652,7 @@ class TestDocumentExtensionObjects(unittest.TestCase):
         # Now load the same file again and make sure the size of the
         # document didn't increase, and the number of roles on the
         # ComponentDefinition didn't increase.
-        doc.append(CRISPR_LOCATION)
+        doc.append(CRISPR_LOCATION, overwrite=True)
         self.assertEqual(old_len, len(doc))
         cd = doc.componentDefinitions[cd_uri]
         self.assertEqual(1, len(cd.roles))
@@ -542,10 +660,26 @@ class TestDocumentExtensionObjects(unittest.TestCase):
         # Now load the file one more time and make sure the size of the
         # document didn't increase, and the number of roles on the
         # ComponentDefinition didn't increase.
-        doc.append(CRISPR_LOCATION)
+        doc.append(CRISPR_LOCATION, overwrite=True)
         self.assertEqual(old_len, len(doc))
         cd = doc.componentDefinitions[cd_uri]
         self.assertEqual(1, len(cd.roles))
+
+    def test_idempotent_read2(self):
+        doc = sbol2.Document()
+        doc.read(CRISPR_LOCATION)
+        old_doc_len = len(doc)
+        cd_uri = 'http://sbols.org/CRISPR_Example/gRNA_b/1.0.0'
+        cd = doc.componentDefinitions['http://sbols.org/CRISPR_Example/gRNA_b/1.0.0']
+        cd.components.create('c')
+        old_component_len = len(cd.components)
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            temp_file = os.path.join(tmpdirname, 'test.xml')
+            doc.write(temp_file)
+            doc.append(temp_file, overwrite=True)
+        cd = doc.componentDefinitions[cd_uri]
+        self.assertEqual(old_component_len, len(cd.components))
+        self.assertEqual(old_doc_len, len(doc))
 
     def test_write_validation(self):
         # Test that write performs validation if requested
@@ -575,6 +709,52 @@ class TestDocumentExtensionObjects(unittest.TestCase):
         # Reset validate to its original value
         sbol2.Config.setOption(sbol2.ConfigOptions.VALIDATE, validate)
         sbol2.Config.setOption(sbol2.ConfigOptions.VERBOSE, verbose)
+
+    def test_append_string_no_overwrite(self):
+        doc = sbol2.Document(CRISPR_LOCATION)
+        with self.assertRaises(sbol2.SBOLError) as cm:
+            doc.appendString(doc.writeString(), overwrite=False)
+        exc = cm.exception
+        self.assertEqual(sbol2.SBOLErrorCode.DUPLICATE_URI_ERROR,
+                         exc.error_code())
+
+    def test_append_string(self):
+        doc = sbol2.Document()
+        cd = doc.componentDefinitions.create('cd1')
+        cd.components.create('c1')
+        self.assertEqual(1, len(cd.components))
+        doc.appendString(doc.writeString(), overwrite=True)
+        self.assertEqual(1, len(cd.components))
+
+    def test_append_string_2(self):
+        doc = sbol2.Document()
+        cd = doc.componentDefinitions.create('cd1')
+        cd.components.create('c1')
+        cd.roles = ['foo']
+        self.assertEqual(1, len(cd.components))
+        self.assertEqual('c1', cd.components[0].displayId)
+        doc2 = sbol2.Document()
+        cd_updated = doc2.componentDefinitions.create('cd1')
+        cd_updated.components.create('c2')
+        cd_updated.roles = ['bar']
+        doc.appendString(doc2.writeString(), overwrite=True)
+        self.assertEqual(1, len(cd.components))
+        self.assertEqual('c2', cd.components[0].displayId)
+        self.assertEqual(cd.roles, ['bar'])
+
+    def test_import_from_format(self):
+        genbank_path = os.path.join(MODULE_LOCATION, 'resources', 'brevig-flu.gb')
+        doc = sbol2.Document()
+        self.assertEqual(0, len(doc))
+        doc.importFromFormat(genbank_path)
+        self.assertEqual(4, len(doc))
+        # Maybe get something out, like a sequence, and make sure
+        # it's there and starts with the right stuff.
+        self.assertEqual(1, len(doc.sequences))
+        display_id = 'AY130766_seq'
+        sequence: sbol2.Sequence = doc.getSequence(display_id)
+        self.assertTrue(sequence.elements.startswith('atgagtctt'))
+        self.assertEqual(982, len(sequence.elements))
 
 
 if __name__ == '__main__':
