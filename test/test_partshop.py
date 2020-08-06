@@ -220,17 +220,6 @@ WHERE {
         desc = 'a test collection created by the sbol2 unit tests'
         doc.description = desc
         md = doc.moduleDefinitions.create('attachmd')
-        # attachment = doc.attachments.create('attachment')
-        # attachment.source = CRISPR_LOCATION
-        # attachment.format = 'http://purl.org/NET/mediatypes/application/xml'
-        # md.attachments = [attachment.identity]
-        # sbh = sbol2.PartShop(TEST_RESOURCE)
-        # sbh.login(username, password)
-        # sbh.submit(doc, overwrite=1)
-        # attachment_uri = '{}/user/{}/{}/{}/{}'.format(sbh.getURL(), sbh.getUser(),
-        #                                               doc.displayId,
-        #                                               attachment.displayId,
-        #                                               attachment.version)
         sbh = sbol2.PartShop(TEST_RESOURCE)
         sbh.login(username, password)
         sbh.submit(doc, overwrite=1)
@@ -238,6 +227,8 @@ WHERE {
                                               md.displayId, md.version)
         sbh.attachFile(md_uri, CRISPR_LOCATION)
 
+        # SBH will autogenerate an Attachment object, so now we query to find out
+        # what the URI of that Attachment object is so we can download it
         query = '''
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX dcterms: <http://purl.org/dc/terms/>

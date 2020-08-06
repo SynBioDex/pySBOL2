@@ -381,7 +381,7 @@ class PartShop:
             return
         if response.status_code == http.HTTPStatus.UNAUTHORIZED:
             # HTTP 401
-            msg = 'You must login with valid credentials before attaching a file'
+            msg = 'You must login with valid credentials before downloading a file'
             raise SBOLError(SBOLErrorCode.SBOL_ERROR_HTTP_UNAUTHORIZED, msg)
         if response.status_code == http.HTTPStatus.NOT_FOUND:
             # HTTP 404
