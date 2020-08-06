@@ -1,6 +1,6 @@
 import os
 import unittest
-
+import json
 import requests
 
 import sbol2 as sbol
@@ -212,19 +212,62 @@ WHERE {
 
     @unittest.skipIf(password is None, "No password supplied")
     def test_attach_file(self):
+        sbol2.Config.setOption('sbol_typed_uris', False)
         doc = sbol2.Document()
         doc.displayId = 'test_attachment'
         doc.name = 'test attachment'
         desc = 'a test collection created by the sbol2 unit tests'
         doc.description = desc
         md = doc.moduleDefinitions.create('attachmd')
+        # attachment = doc.attachments.create('attachment')
+        # attachment.source = CRISPR_LOCATION
+        # attachment.format = 'http://purl.org/NET/mediatypes/application/xml'
+        # md.attachments = [attachment.identity]
+        # sbh = sbol2.PartShop(TEST_RESOURCE)
+        # sbh.login(username, password)
+        # sbh.submit(doc, overwrite=1)
+        # attachment_uri = '{}/user/{}/{}/{}/{}'.format(sbh.getURL(), sbh.getUser(),
+        #                                               doc.displayId,
+        #                                               attachment.displayId,
+        #                                               attachment.version)
         sbh = sbol2.PartShop(TEST_RESOURCE)
         sbh.login(username, password)
         sbh.submit(doc, overwrite=1)
-        md_uri = '{}/user/{}/{}/{}/{}'.format(sbh.getURL(), sbh.getUser(),
-                                              doc.displayId, md.displayId,
-                                              md.version)
+        md_uri = '{}/user/{}/{}/{}/{}'.format(sbh.getURL(), sbh.getUser(), doc.displayId,
+                                              md.displayId, md.version)
         sbh.attachFile(md_uri, CRISPR_LOCATION)
+
+        query = '''
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+PREFIX sbh: <http://wiki.synbiohub.org/wiki/Terms/synbiohub#>
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX sbol: <http://sbols.org/v2#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX purl: <http://purl.obolibrary.org/obo/>
+SELECT DISTINCT ?attachment_uri
+WHERE {{
+  <{}> sbol:attachment ?attachment_uri
+}}'''.format(md_uri)
+        response = sbh.sparqlQuery(query)
+        content = json.loads(response.content)
+        attachment_uri = content['results']['bindings'][0]['attachment_uri']['value']
+        # Save to default filename
+        sbh.downloadAttachment(attachment_uri)
+        self.assertTrue(os.path.exists('./crispr_example.xml'))
+        os.remove('crispr_example.xml')
+        # Save to new file name
+        sbh.downloadAttachment(attachment_uri, 'foo.xml')
+        self.assertTrue(os.path.exists('./foo.xml'))
+        os.remove('foo.xml')
+        # Confirm error handling
+        sbh.remove(attachment_uri)
+        with self.assertRaises(sbol2.SBOLError) as cm:
+            sbh.downloadAttachment(attachment_uri)
+        e = cm.exception
+        self.assertEqual(e.error_code(), sbol2.SBOLErrorCode.SBOL_ERROR_NOT_FOUND)
 
     def test_search_general(self):
         sbh = sbol2.PartShop(TEST_RESOURCE)

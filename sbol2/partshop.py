@@ -330,6 +330,55 @@ class PartShop:
         msg = msg.format(response.status_code)
         raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST)
 
+    def downloadAttachment(self, attachment_uri, filepath='.'):
+        '''Download a file attachment from SynBioHub.
+        :param attachment_uri: The URI of the file to download
+        :param filepath: The local path or filename to which the file will be written
+        Returns None if successful.
+
+        Raises EnvironmentError if the filepath is invalid
+
+        Raises SBOLError with code SBOL_ERROR_HTTP_UNAUTHORIZED if it
+        there is an HTTP Unauthorized response.
+
+        Raises SBOLError with code SBOL_ERROR_BAD_HTTP_REQUEST on any
+        other HTTP error. The actual status code is embedded in the
+        string message.
+        '''
+        url = self._uri2url(attachment_uri)
+        url = posixpath.join(url, 'download')
+        filepath = os.path.expanduser(filepath)
+
+        # HTTP request headers
+        headers = {
+            'Accept': 'text/plain',
+            'X-authorization': self.key
+        }
+
+        # Issue GET request
+        response = requests.get(url, headers=headers)
+        if response.ok:
+            filename = response.headers['Content-Disposition']
+            filename = filename[22:-1]  # remove extraneous text: attachment; filename="
+            if os.path.isdir(filepath):
+                filepath = posixpath.join(filepath, filename)
+            with open(filepath, 'wb') as filehandle:
+                filehandle.write(response.content)
+            return
+        if response.status_code == http.HTTPStatus.UNAUTHORIZED:
+            # HTTP 401
+            msg = 'You must login with valid credentials before attaching a file'
+            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_HTTP_UNAUTHORIZED)
+        if response.status_code == http.HTTPStatus.NOT_FOUND:
+            # HTTP 404
+            msg = 'Unable to download. Attachment {} not found.'.format(attachment_uri)
+            raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_NOT_FOUND)
+
+        # Not sure what went wrong
+        msg = 'HTTP Error code {} trying to download file.'
+        msg = msg.format(response.status_code)
+        raise SBOLError(msg, SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST)
+
     def _make_search_item(self, item: dict) -> Identified:
         obj = Identified()
         obj.identity = item['uri']
