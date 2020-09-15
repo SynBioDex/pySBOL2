@@ -7,8 +7,8 @@ from .property import ReferencedObject, URIProperty, OwnedObject
 
 class VariableComponent(Identified):
 
-    def __init__(self, type_uri=SBOL_IDENTIFIED, uri=URIRef('example'),
-                 repeat='http://sbols.org/v2#on', version=VERSION_STRING):
+    def __init__(self, type_uri=SBOL_VARIABLE_COMPONENT, uri=URIRef('example'),
+                 repeat='http://sbols.org/v2#one', version=VERSION_STRING):
         super().__init__(type_uri, uri, version)
         self.variable = ReferencedObject(self, SBOL_VARIABLE,
                                          SBOL_COMPONENT, '0', '1', [])
