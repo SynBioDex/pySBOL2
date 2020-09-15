@@ -13,7 +13,7 @@ from . import SBOL2Serialize
 from . import validation
 from .attachment import Attachment
 from .collection import Collection
-from .combinatorialderivation import CombinatorialDerivation
+from .combinatorialderivation import CombinatorialDerivation, VariableComponent
 from .component import Component, FunctionalComponent
 from .componentdefinition import ComponentDefinition
 from .config import ConfigOptions
@@ -81,6 +81,7 @@ Config.SBOL_DATA_MODEL_REGISTER = {
     URIRef(SBOL_EXPERIMENT): Experiment,
     URIRef(SBOL_EXPERIMENTAL_DATA): ExperimentalData,
     URIRef(OM_MEASURE): Measurement,
+    URIRef(SBOL_VARIABLE_COMPONENT): VariableComponent
 }
 
 
