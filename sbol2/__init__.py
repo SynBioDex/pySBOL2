@@ -10,7 +10,7 @@ __version__ = '1.2'
 # symbols are also exported.
 from .attachment import Attachment
 from .collection import Collection
-from .combinatorialderivation import CombinatorialDerivation
+from .combinatorialderivation import CombinatorialDerivation, VariableComponent
 from .component import Component
 from .component import FunctionalComponent
 from .componentdefinition import ComponentDefinition

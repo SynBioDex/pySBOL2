@@ -160,7 +160,13 @@ WHERE {
         doc.name = "SBOL Test Collection"
         doc.description = "A scratch collection for automated testing of the sbol."
         sbh = sbol.PartShop(RESOURCE, SPOOFED_RESOURCE)
-        sbh.login(username, password)
+        try:
+            sbh.login(username, password)
+        except sbol2.SBOLError as sbol_error:
+            if sbol_error.error_code() == sbol2.SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST:
+                if '503' in sbol_error.what():
+                    return
+            raise
         try:
             sbh.submit(doc)
         except Exception:
