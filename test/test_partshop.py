@@ -313,7 +313,7 @@ WHERE {{
                              for x in results]))
         doc = sbol2.Document()
         igem.pull([x.identity for x in results], doc, False)
-        self.assertEqual(10, len(doc))
+        self.assertEqual(5, len(doc))
         for cd in doc.componentDefinitions:
             self.assertIn(sbol2.SO_PROMOTER, cd.roles)
 
