@@ -183,7 +183,7 @@ class Config:
         | sbol_typed_uris              | Include the SBOL type in SBOL-compliant URIs                             | True or False   |
         | output_format                | File format for serialization                                            | True or False   |
         | validate                     | Enable validation and conversion requests through the online validator   | True or False   |
-        | validator_url                | The http request endpoint for validation                                 | A valid URL, set to<br>http://www.async.ece.utah.edu/sbol-validator/endpoint.php by default |
+        | validator_url                | The http request endpoint for validation                                 | A valid URL, set to<br>https://validator.sbolstandard.org/validate/ by default |
         | language                     | File format for conversion                                               | SBOL2, SBOL1, FASTA, GenBank |
         | test_equality                | Report differences between two files                                     | True or False |
         | check_uri_compliance         | If set to false, URIs in the file will not be checked for compliance<br>with the SBOL specification | True or False |
