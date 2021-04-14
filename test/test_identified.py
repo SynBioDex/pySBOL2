@@ -326,6 +326,20 @@ class TestCopy(unittest.TestCase):
         # Confirm version is the same as the copied object
         self.assertEqual(comp3.version, '2')
 
+    def test_copy_issue_397(self):
+        sbol2.Config.setOption('sbol_typed_uris', False)
+        sbol2.Config.setOption('validate', False)
+        sbol2.setHomespace('http://synbict.org')
+        test_doc = sbol2.Document()
+        parent_comp = test_doc.componentDefinitions.create('parent')
+        child_sub_comp = parent_comp.components.create('child')
+        child_sub_comp.definition = 'http://synbict.org/child/1'
+        sbol2.setHomespace('http://sd2e.org')
+        parent_copy = parent_comp.copy(test_doc, 'http://synbict.org', '1')
+        child_copy = parent_copy.components.get('http://sd2e.org/parent/child/1')
+        self.assertIsNotNone(child_copy.definition)
+        self.assertEqual('http://synbict.org/child/1', child_copy.definition)
+
 
 if __name__ == '__main__':
     unittest.main()

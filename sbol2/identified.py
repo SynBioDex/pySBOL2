@@ -226,6 +226,9 @@ class Identified(SBOLObject):
 
                             referenced_object = self.doc.find(uri)
                             if referenced_object is None:
+                                # This is a reference outside the document
+                                # so retain the reference.
+                                new_values.append(uri)
                                 continue
                             new_uri = replace_namespace(uri, target_namespace,
                                                         referenced_object.getTypeURI())

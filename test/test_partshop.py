@@ -273,9 +273,8 @@ WHERE {{
         results = sbh.search("NAND")
         # The response is a list
         self.assertEqual(list, type(results))
-        # There are 25 items in the list (search returns more,
-        # but by default we get the first 25)
-        self.assertEqual(25, len(results))
+        # There are 18 items in the list as of 2021-Apr-14
+        self.assertEqual(18, len(results))
         # The response items are all of type Identified
         self.assertTrue(all([isinstance(x, sbol2.Identified)
                              for x in results]))
@@ -313,7 +312,7 @@ WHERE {{
                              for x in results]))
         doc = sbol2.Document()
         igem.pull([x.identity for x in results], doc, False)
-        self.assertEqual(5, len(doc))
+        self.assertEqual(10, len(doc))
         for cd in doc.componentDefinitions:
             self.assertIn(sbol2.SO_PROMOTER, cd.roles)
 
