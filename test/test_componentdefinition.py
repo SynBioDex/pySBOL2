@@ -197,7 +197,7 @@ class TestComponentDefinitions(unittest.TestCase):
         doc.addComponentDefinition(cd)
         xml = doc.writeString()
         graph = rdflib.Graph()
-        graph.parse(data=xml)
+        graph.parse(data=xml, format='xml')
         # We shouldn't find SBOL_SEQUENCE within the component definition
         identity_uri = rdflib.URIRef(cd.identity)
         bad_triple = (identity_uri, rdflib.URIRef(sbol2.SBOL_SEQUENCE), None)
