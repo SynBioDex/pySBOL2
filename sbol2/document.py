@@ -995,15 +995,14 @@ class Document(Identified):
         options[ConfigOptions.RETURN_FILE.value] = True
         response = validate(self, options)
 
-        # What should we be expecting from the validator?
-        # Can we tell if there was an error?
-        # Is it if there are any errors? Or if 'Conversion failed.' is one of the errors?
-        # Or if response['result'] is not empty?
-        if response['errors'][0]:
-            msg = ' '.join(response['errors'])
-            raise SBOLError(SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT, msg)
-        if not response['result']:
-            msg = 'Validator returned no content'
+        if response['valid'] is not True:
+            # The validator would not translate this document
+            msg = 'Invalid Document'
+            if response['errors'][0]:
+                # Append the error messages to the message using
+                # newlines to separate the lines.
+                errors = '\n'.join(response['errors'])
+                msg = f'{msg}\n{errors}'
             raise SBOLError(SBOLErrorCode.SBOL_ERROR_INVALID_ARGUMENT, msg)
         # write the result to the desired output path
         with open(output_path, 'w') as fp:
