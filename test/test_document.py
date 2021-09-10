@@ -756,6 +756,16 @@ class TestDocumentExtensionObjects(unittest.TestCase):
         self.assertTrue(sequence.elements.startswith('atgagtctt'))
         self.assertEqual(982, len(sequence.elements))
 
+    def test_genbank_conversion(self):
+        # Make sure an empty document successfully converts to GenBank
+        # format.
+        # See https://github.com/SynBioDex/pySBOL2/issues/401
+        doc = sbol2.Document()
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            temp_file = os.path.join(tmpdirname, 'test.gb')
+            doc.exportToFormat('GenBank', temp_file)
+            self.assertTrue(os.path.exists(temp_file))
+
 
 if __name__ == '__main__':
     unittest.main()
