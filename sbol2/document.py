@@ -1035,10 +1035,6 @@ class Document(Identified):
             contents = infile.read()
         json_request['main_file'] = contents
 
-        import json
-        with open('genbank2sbol.json', 'w') as outjson:
-            json.dump(json_request, outjson, indent=4)
-
         headers = {
             'Accept': 'application/json',
             'Content-Type': 'application/json',

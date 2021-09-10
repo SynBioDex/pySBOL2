@@ -755,6 +755,9 @@ class TestDocumentExtensionObjects(unittest.TestCase):
         sequence: sbol2.Sequence = doc.getSequence(display_id)
         self.assertTrue(sequence.elements.startswith('atgagtctt'))
         self.assertEqual(982, len(sequence.elements))
+        # Ensure temp file does not exist after running Document.importFromFormat()
+        # See https://github.com/SynBioDex/pySBOL2/issues/402
+        self.assertFalse(os.path.exists('genbank2sbol.json'))
 
     def test_genbank_conversion(self):
         # Make sure an empty document successfully converts to GenBank
