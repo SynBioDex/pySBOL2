@@ -1,9 +1,9 @@
 from setuptools import setup
 
 setup(name='sbol2',
-      version='1.3',
+      version='1.4',
       description='Pure Python implementation of SBOL 2 standard',
-      python_requires='>=3.4',
+      python_requires='>=3.7',
       url='https://github.com/SynBioDex/pySBOL2',
       author='Bryan Bartley',
       author_email='editors@sbolstandard.org',
