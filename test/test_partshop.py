@@ -273,11 +273,6 @@ WHERE {{
         results = sbh.search("NAND")
         # The response is a list
         self.assertIsInstance(results, list)
-        # There are 18 items in the list as of 2021-Apr-14
-        # expected = 18
-        # There are 25 items in the list as of 2021-Sep-10
-        expected = 25
-        self.assertEqual(expected, len(results))
         # The response items are all of type Identified
         self.assertTrue(all([isinstance(x, sbol2.Identified)
                              for x in results]))
