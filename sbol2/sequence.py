@@ -128,7 +128,7 @@ class Sequence(TopLevel):
                 cdef = self.doc.getComponentDefinition(c.definition)
                 if not cdef.sequence:
                     if Config.getOption(ConfigOptions.SBOL_COMPLIANT_URIS):
-                        seq = self.doc.sequences.create(cdef.displayId)
+                        seq = self.doc.sequences.create(cdef.displayId + '_seq')
                         # cdef.sequence = seq
                         cdef.sequences = seq.identity
                     else:
