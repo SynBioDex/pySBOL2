@@ -21,6 +21,7 @@ class ConfigOptions(Enum):
     VALIDATE = 'validate'
     VALIDATE_ONLINE = 'validate_online'
     VALIDATOR_URL = 'validator_url'
+    JAVA_LOCATION = 'java_location'
     LANGUAGE = 'language'
     TEST_EQUALITY = 'test_equality'
     CHECK_URI_COMPLIANCE = 'check_uri_compliance'
@@ -46,6 +47,7 @@ options = {
     ConfigOptions.VALIDATE.value: True,
     ConfigOptions.VALIDATE_ONLINE.value: True,
     ConfigOptions.VALIDATOR_URL.value: 'https://validator.sbolstandard.org/validate/',
+    ConfigOptions.JAVA_LOCATION.value: '/usr/bin/java',
     ConfigOptions.LANGUAGE.value: 'SBOL2',
     ConfigOptions.TEST_EQUALITY.value: False,
     ConfigOptions.CHECK_URI_COMPLIANCE.value: False,
@@ -187,7 +189,8 @@ class Config:
         | output_format                | File format for serialization                                            | True or False   |
         | validate                     | Automatic validation                                                     | True or False   |
         | validate_online              | Use online (not local) validator for validation and conversion requests  | True or False, defaults to True   |
-        | validator_url                | The http request endpoint for validation                                 | A valid URL, set to<br>https://validator.sbolstandard.org/validate/ by default |
+        | validator_url                | The http request endpoint for online validation and conversion           | A valid URL, set to<br>https://validator.sbolstandard.org/validate/ by default |
+        | java_location                | Path to Java executable for offline validation and conversion            | A valid URL, set to<br>/usr/bin/java by default |
         | language                     | File format for conversion                                               | SBOL2, SBOL1, FASTA, GenBank |
         | test_equality                | Report differences between two files                                     | True or False |
         | check_uri_compliance         | If set to false, URIs in the file will not be checked for compliance<br>with the SBOL specification | True or False |

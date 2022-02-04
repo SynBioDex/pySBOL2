@@ -25,6 +25,19 @@ If you get a permission error, try using the `--user` flag:
 pip install --user sbol2
 ```
 
+### Java dependency for offline validation/conversion
+
+By default, pySBOL2 executes its validation and conversion with the online validator/converter. 
+These can also be done offline using the Java JAR file packaged with the library.
+
+Java requirements are: openjdk8 or later 
+
+Java location defaults to `/usr/bin/java`, and can be adjusted by setting the `JAVA_LOCATION` config option:
+
+```
+Config.setOption(ConfigOptions.JAVA_LOCATION, '/my/java/path')
+```
+
 ## CODE EXAMPLE
 
 This short example creates a Document, adds a ComponentDefinition

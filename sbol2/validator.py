@@ -9,6 +9,8 @@ import uuid
 import traceback
 import os
 
+from sbol2 import Config, ConfigOptions
+
 
 class ValidationResult:
     def __init__(self, output_file, equality):
@@ -106,7 +108,8 @@ class ValidationOptions:
             self.output_file = self.output_file + '.fasta'
 
     def command(self, jar_path, validation_file, diff_file=None):
-        command = ["/usr/bin/java", "-jar", jar_path, validation_file, "-o", self.output_file, "-l", self.language]
+        java_location = Config.getOption(ConfigOptions.JAVA_LOCATION)
+        command = [java_location, "-jar", jar_path, validation_file, "-o", self.output_file, "-l", self.language]
 
         if self.test_equality and diff_file:
             command += ["-e", diff_file, "-mf", self.main_file_name, "-cf", self.diff_file_name]
