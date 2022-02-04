@@ -343,19 +343,28 @@ class TestDocument(unittest.TestCase):
         self.assertTrue(doc.compare(doc2))
 
     def test_validate(self):
-        doc = sbol2.Document()
-        # Add a module definition
-        doc.moduleDefinitions.create('md')
-        result = doc.validate()
-        expected = 'Valid.'
-        self.assertEqual(result, expected)
+        validate_online = sbol2.Config.getOption(sbol2.ConfigOptions.VALIDATE_ONLINE)
+        try:
+            sbol2.Config.setOption(sbol2.ConfigOptions.VALIDATE_ONLINE, False)
+            doc = sbol2.Document()
+            # Add a module definition
+            doc.moduleDefinitions.create('md')
+            result = doc.validate()
+            expected = 'Valid.'
+            self.assertEqual(result, expected)
+        finally:
+            sbol2.Config.setOption(sbol2.ConfigOptions.VALIDATE_ONLINE, validate_online)
 
     def test_validate_bad_url(self):
-        sbol2.Config.setOption(sbol2.ConfigOptions.VALIDATOR_URL,
-                               self.validator_url + 'foo/bar')
-        doc = sbol2.Document()
-        with self.assertRaises(sbol2.SBOLError):
-            doc.validate()
+        validate_online = sbol2.Config.getOption(sbol2.ConfigOptions.VALIDATE_ONLINE)
+        try:
+            sbol2.Config.setOption(sbol2.ConfigOptions.VALIDATOR_URL, self.validator_url + 'foo/bar')
+            sbol2.Config.setOption(sbol2.ConfigOptions.VALIDATE_ONLINE, True)
+            doc = sbol2.Document()
+            with self.assertRaises(sbol2.SBOLError):
+                doc.validate()
+        finally:
+            sbol2.Config.setOption(sbol2.ConfigOptions.VALIDATE_ONLINE, validate_online)
 
     def test_read_annotations(self):
         # Test reading a file with annotations and make sure they end
@@ -666,49 +675,59 @@ class TestDocumentExtensionObjects(unittest.TestCase):
         self.assertEqual(1, len(cd.roles))
 
     def test_idempotent_read2(self):
-        doc = sbol2.Document()
-        doc.read(CRISPR_LOCATION)
-        old_doc_len = len(doc)
-        cd_uri = 'http://sbols.org/CRISPR_Example/gRNA_b/1.0.0'
-        cd = doc.componentDefinitions['http://sbols.org/CRISPR_Example/gRNA_b/1.0.0']
-        cd.components.create('c')
-        old_component_len = len(cd.components)
-        with tempfile.TemporaryDirectory() as tmpdirname:
-            temp_file = os.path.join(tmpdirname, 'test.xml')
-            doc.write(temp_file)
-            doc.append(temp_file, overwrite=True)
-        cd = doc.componentDefinitions[cd_uri]
-        self.assertEqual(old_component_len, len(cd.components))
-        self.assertEqual(old_doc_len, len(doc))
+        validate_online = sbol2.Config.getOption(sbol2.ConfigOptions.VALIDATE_ONLINE)
+        try:
+            sbol2.Config.setOption(sbol2.ConfigOptions.VALIDATE_ONLINE, False)
+            doc = sbol2.Document()
+            doc.read(CRISPR_LOCATION)
+            old_doc_len = len(doc)
+            cd_uri = 'http://sbols.org/CRISPR_Example/gRNA_b/1.0.0'
+            cd = doc.componentDefinitions['http://sbols.org/CRISPR_Example/gRNA_b/1.0.0']
+            cd.components.create('c')
+            old_component_len = len(cd.components)
+            with tempfile.TemporaryDirectory() as tmpdirname:
+                temp_file = os.path.join(tmpdirname, 'test.xml')
+                doc.write(temp_file)
+                doc.append(temp_file, overwrite=True)
+            cd = doc.componentDefinitions[cd_uri]
+            self.assertEqual(old_component_len, len(cd.components))
+            self.assertEqual(old_doc_len, len(doc))
+        finally:
+            sbol2.Config.setOption(sbol2.ConfigOptions.VALIDATE_ONLINE, validate_online)
 
     def test_write_validation(self):
         # Test that write performs validation if requested
         # and skips validation if requested.
-        doc = sbol2.Document()
-        doc.moduleDefinitions.create('md1')
+        validate_online = sbol2.Config.getOption(sbol2.ConfigOptions.VALIDATE_ONLINE)
         validate = sbol2.Config.getOption(sbol2.ConfigOptions.VALIDATE)
-        sbol2.Config.setOption(sbol2.ConfigOptions.VALIDATE, True)
         verbose = sbol2.Config.getOption(sbol2.ConfigOptions.VERBOSE)
-        sbol2.Config.setOption(sbol2.ConfigOptions.VERBOSE, True)
-        with tempfile.TemporaryDirectory() as tmpdirname:
-            test_file = os.path.join(tmpdirname, 'test.xml')
-            with unittest.mock.patch('sys.stdout', new=io.StringIO()) as fake_out:
+        try:
+            sbol2.Config.setOption(sbol2.ConfigOptions.VALIDATE_ONLINE, False)
+            doc = sbol2.Document()
+            doc.moduleDefinitions.create('md1')
+            sbol2.Config.setOption(sbol2.ConfigOptions.VALIDATE, True)
+            sbol2.Config.setOption(sbol2.ConfigOptions.VERBOSE, True)
+            with tempfile.TemporaryDirectory() as tmpdirname:
+                test_file = os.path.join(tmpdirname, 'test.xml')
+                with unittest.mock.patch('sys.stdout', new=io.StringIO()) as fake_out:
+                    # Write to disk
+                    result = doc.write(test_file)
+                    self.assertEqual('Valid.', result)
+                    # Expect timing output
+                    output = fake_out.getvalue().strip()
+                    self.assertTrue(output.startswith('Validation request took'))
+                    self.assertTrue(output.endswith('seconds'))
+            sbol2.Config.setOption(sbol2.ConfigOptions.VALIDATE, False)
+            with tempfile.TemporaryDirectory() as tmpdirname:
+                test_file = os.path.join(tmpdirname, 'test.xml')
                 # Write to disk
                 result = doc.write(test_file)
-                self.assertEqual('Valid.', result)
-                # Expect timing output
-                output = fake_out.getvalue().strip()
-                self.assertTrue(output.startswith('Validation request took'))
-                self.assertTrue(output.endswith('seconds'))
-        sbol2.Config.setOption(sbol2.ConfigOptions.VALIDATE, False)
-        with tempfile.TemporaryDirectory() as tmpdirname:
-            test_file = os.path.join(tmpdirname, 'test.xml')
-            # Write to disk
-            result = doc.write(test_file)
-            self.assertTrue(result.startswith('Validation disabled.'))
-        # Reset validate to its original value
-        sbol2.Config.setOption(sbol2.ConfigOptions.VALIDATE, validate)
-        sbol2.Config.setOption(sbol2.ConfigOptions.VERBOSE, verbose)
+                self.assertTrue(result.startswith('Validation disabled.'))
+        finally:
+            # Reset original config values
+            sbol2.Config.setOption(sbol2.ConfigOptions.VALIDATE, validate)
+            sbol2.Config.setOption(sbol2.ConfigOptions.VERBOSE, verbose)
+            sbol2.Config.setOption(sbol2.ConfigOptions.VALIDATE_ONLINE, validate_online)
 
     def test_append_string_no_overwrite(self):
         doc = sbol2.Document(CRISPR_LOCATION)
@@ -743,31 +762,41 @@ class TestDocumentExtensionObjects(unittest.TestCase):
         self.assertEqual(cd.roles, ['bar'])
 
     def test_import_from_format(self):
-        genbank_path = os.path.join(MODULE_LOCATION, 'resources', 'brevig-flu.gb')
-        doc = sbol2.Document()
-        self.assertEqual(0, len(doc))
-        doc.importFromFormat(genbank_path)
-        self.assertEqual(4, len(doc))
-        # Maybe get something out, like a sequence, and make sure
-        # it's there and starts with the right stuff.
-        self.assertEqual(1, len(doc.sequences))
-        display_id = 'AY130766_seq'
-        sequence: sbol2.Sequence = doc.getSequence(display_id)
-        self.assertTrue(sequence.elements.startswith('atgagtctt'))
-        self.assertEqual(982, len(sequence.elements))
-        # Ensure temp file does not exist after running Document.importFromFormat()
-        # See https://github.com/SynBioDex/pySBOL2/issues/402
-        self.assertFalse(os.path.exists('genbank2sbol.json'))
+        validate_online = sbol2.Config.getOption(sbol2.ConfigOptions.VALIDATE_ONLINE)
+        try:
+            sbol2.Config.setOption(sbol2.ConfigOptions.VALIDATE_ONLINE, False)
+            genbank_path = os.path.join(MODULE_LOCATION, 'resources', 'brevig-flu.gb')
+            doc = sbol2.Document()
+            self.assertEqual(0, len(doc))
+            doc.importFromFormat(genbank_path)
+            self.assertEqual(4, len(doc))
+            # Maybe get something out, like a sequence, and make sure
+            # it's there and starts with the right stuff.
+            self.assertEqual(1, len(doc.sequences))
+            display_id = 'AY130766_seq'
+            sequence: sbol2.Sequence = doc.getSequence(display_id)
+            self.assertTrue(sequence.elements.startswith('atgagtctt'))
+            self.assertEqual(982, len(sequence.elements))
+            # Ensure temp file does not exist after running Document.importFromFormat()
+            # See https://github.com/SynBioDex/pySBOL2/issues/402
+            self.assertFalse(os.path.exists('genbank2sbol.json'))
+        finally:
+            sbol2.Config.setOption(sbol2.ConfigOptions.VALIDATE_ONLINE, validate_online)
 
     def test_genbank_conversion(self):
         # Make sure an empty document successfully converts to GenBank
         # format.
         # See https://github.com/SynBioDex/pySBOL2/issues/401
-        doc = sbol2.Document()
-        with tempfile.TemporaryDirectory() as tmpdirname:
-            temp_file = os.path.join(tmpdirname, 'test.gb')
-            doc.exportToFormat('GenBank', temp_file)
-            self.assertTrue(os.path.exists(temp_file))
+        validate_online = sbol2.Config.getOption(sbol2.ConfigOptions.VALIDATE_ONLINE)
+        try:
+            sbol2.Config.setOption(sbol2.ConfigOptions.VALIDATE_ONLINE, False)
+            doc = sbol2.Document()
+            with tempfile.TemporaryDirectory() as tmpdirname:
+                temp_file = os.path.join(tmpdirname, 'test.gb')
+                doc.exportToFormat('GenBank', temp_file)
+                self.assertTrue(os.path.exists(temp_file))
+        finally:
+            sbol2.Config.setOption(sbol2.ConfigOptions.VALIDATE_ONLINE, validate_online)
 
 
 if __name__ == '__main__':
