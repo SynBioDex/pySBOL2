@@ -38,6 +38,7 @@ setup(name='sbol2',
             'urllib3',
             'packaging>=20.0'
       ],
+      package_data={'sbol2': ['libSBOLj.jar']},
       tests_require=[
             'pycodestyle>=2.6.0'
       ])

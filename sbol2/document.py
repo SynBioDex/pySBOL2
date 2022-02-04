@@ -44,6 +44,7 @@ from .sequenceannotation import SequenceAnnotation
 from .sequenceconstraint import SequenceConstraint
 from .toplevel import TopLevel
 from .uridict import URIDict
+from .validator import do_validation # local libSBOLj wrapper
 
 import requests
 
@@ -402,7 +403,7 @@ class Document(Identified):
         """
         self.doc_serialize_rdf2xml(filename)
         # Optionally validate
-        result = 'Validation disabled. To enable use of the online validation tool, use'
+        result = 'Validation disabled. To enable use of validation, use'
         result += ' Config.setOption(ConfigOptions.VALIDATE, True)'
         if Config.getOption(ConfigOptions.VALIDATE):
             t_start = time.time()
@@ -822,7 +823,7 @@ class Document(Identified):
 
     def validate(self):
         """
-        Run validation on this Document via the online validation tool.
+        Run validation on this Document via the validation tool (locally or online, depending on configuration)
 
         :return: A string containing a message with the validation results
         :rtype: str
@@ -1035,24 +1036,29 @@ class Document(Identified):
             contents = infile.read()
         json_request['main_file'] = contents
 
-        headers = {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'charsets': 'utf-8'
-        }
-
-        validator_url = options[ConfigOptions.VALIDATOR_URL.value]
-
-        # Send the request to the online validation tool
-        response = requests.post(validator_url,
-                                 json=json_request,
-                                 headers=headers)
-        if response:
-            response = response.json()
+        validate_online = Config.getOption(ConfigOptions.VALIDATE_ONLINE)
+        if not validate_online:
+            response = do_validation(json_request)
         else:
-            msg = 'Validation failure. HTTP post request failed with code {}: {}'
-            msg = msg.format(response.status_code, response.content)
-            raise SBOLError(SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST, msg)
+            headers = {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'charsets': 'utf-8'
+            }
+
+            validator_url = options[ConfigOptions.VALIDATOR_URL.value]
+
+            # Send the request to the online validation tool
+            response = requests.post(validator_url,
+                                     json=json_request,
+                                     headers=headers)
+            if response:
+                response = response.json()
+            else:
+                msg = 'Validation failure. HTTP post request failed with code {}: {}'
+                msg = msg.format(response.status_code, response.content)
+                raise SBOLError(SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST, msg)
+
         if response['valid']:
             self.appendString(response['result'], overwrite)
         else:
@@ -1112,29 +1118,34 @@ def validate(doc: Document, options: Mapping[str, Any]):
     """
     return_file_key = config.ConfigOptions.RETURN_FILE.value
     validator_key = config.ConfigOptions.VALIDATOR_URL.value
+    validate_online = Config.getOption(ConfigOptions.VALIDATE_ONLINE)
     json_request = _make_validation_request(options)
     # We always want the return file
     json_request[return_file_key] = options[return_file_key]
     json_request['main_file'] = doc.writeString()
 
-    headers = {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'charsets': 'utf-8'
-    }
-
-    validator_url = options[validator_key]
-
-    # Send the request to the online validation tool
-    response = requests.post(validator_url,
-                             json=json_request,
-                             headers=headers)
-    if response:
-        return response.json()
+    if not validate_online:
+        result = do_validation(json_request)
+        return result
     else:
-        msg = 'Validation failure. HTTP post request failed with code {}: {}'
-        msg = msg.format(response.status_code, response.content)
-        raise SBOLError(SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST, msg)
+        headers = {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'charsets': 'utf-8'
+        }
+
+        validator_url = options[validator_key]
+
+        # Send the request to the online validation tool
+        response = requests.post(validator_url,
+                                 json=json_request,
+                                 headers=headers)
+        if response:
+            return response.json()
+        else:
+            msg = 'Validation failure. HTTP post request failed with code {}: {}'
+            msg = msg.format(response.status_code, response.content)
+            raise SBOLError(SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST, msg)
 
 
 igem_assembly_scars = '''<?xml version="1.0" encoding="utf-8"?>

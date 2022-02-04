@@ -19,6 +19,7 @@ class ConfigOptions(Enum):
     SBOL_TYPED_URIS = 'sbol_typed_uris'
     SERIALIZATION_FORMAT = 'serialization_format'
     VALIDATE = 'validate'
+    VALIDATE_ONLINE = 'validate_online'
     VALIDATOR_URL = 'validator_url'
     LANGUAGE = 'language'
     TEST_EQUALITY = 'test_equality'
@@ -43,6 +44,7 @@ options = {
     ConfigOptions.SBOL_TYPED_URIS.value: True,
     ConfigOptions.SERIALIZATION_FORMAT.value: 'sbol',
     ConfigOptions.VALIDATE.value: True,
+    ConfigOptions.VALIDATE_ONLINE.value: True,
     ConfigOptions.VALIDATOR_URL.value: 'https://validator.sbolstandard.org/validate/',
     ConfigOptions.LANGUAGE.value: 'SBOL2',
     ConfigOptions.TEST_EQUALITY.value: False,
@@ -68,6 +70,7 @@ valid_options = {
     ConfigOptions.SERIALIZATION_FORMAT.value: {'sbol', 'rdfxml',
                                                'json', 'ntriples'},
     ConfigOptions.VALIDATE.value: {True, False},
+    ConfigOptions.VALIDATE_ONLINE.value: {True, False},
     ConfigOptions.LANGUAGE.value: {'SBOL2', 'FASTA', 'GenBank'},
     ConfigOptions.TEST_EQUALITY.value: {True, False},
     ConfigOptions.CHECK_URI_COMPLIANCE.value: {True, False},
@@ -182,7 +185,8 @@ class Config:
         | sbol_compliant_uris          | Enables autoconstruction of SBOL-compliant URIs from displayIds          | True or False   |
         | sbol_typed_uris              | Include the SBOL type in SBOL-compliant URIs                             | True or False   |
         | output_format                | File format for serialization                                            | True or False   |
-        | validate                     | Enable validation and conversion requests through the online validator   | True or False   |
+        | validate                     | Automatic validation                                                     | True or False   |
+        | validate_online              | Use online (not local) validator for validation and conversion requests  | True or False, defaults to True   |
         | validator_url                | The http request endpoint for validation                                 | A valid URL, set to<br>https://validator.sbolstandard.org/validate/ by default |
         | language                     | File format for conversion                                               | SBOL2, SBOL1, FASTA, GenBank |
         | test_equality                | Report differences between two files                                     | True or False |
