@@ -76,7 +76,7 @@ class TestStyle(unittest.TestCase):
         style.options.report.stop()
         result = style.options.report
         # Please try not to increase the expected number of errors. Please.
-        expected_errors = 24
+        expected_errors = 31
         msg = f'Found {result.total_errors} code style errors (and warnings).'
         self.assertLessEqual(result.total_errors, expected_errors, msg)
 

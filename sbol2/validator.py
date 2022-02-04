@@ -1,8 +1,8 @@
-## SBOL Validator worker class
-## Written by Zach Zundel
-## zach.zundel@utah.edu
-## 08/13/2016
-## Imported from https://github.com/SynBioDex/SBOL-Validator
+# SBOL Validator worker class
+# Written by Zach Zundel
+# zach.zundel@utah.edu
+# 08/13/2016
+# Imported from https://github.com/SynBioDex/SBOL-Validator
 import subprocess
 import tempfile
 import uuid
@@ -45,6 +45,7 @@ class ValidationResult:
     def json(self):
         return self.__dict__
 
+
 class ValidationRun:
     def __init__(self, options, validation_file, diff_file=None):
         self.options = options
@@ -55,13 +56,13 @@ class ValidationRun:
         result = ValidationResult(self.options.output_file, self.options.test_equality)
 
         # Attempt to run command
+        jar_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "libSBOLj.jar")
+        command = self.options.command(jar_path, self.validation_file, self.diff_file)
         try:
-            jar_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "libSBOLj.jar")
-            command = self.options.command(jar_path, self.validation_file, self.diff_file)
             output = subprocess.check_output(command, universal_newlines=True, stderr=subprocess.STDOUT)
             result.decipher(output, self.options)
         except subprocess.CalledProcessError as exception:
-            #If the command fails, the file is not valid.
+            # If the command fails, the file is not valid.
             result.valid = False
             result.errors += [exception.output, ]
         except ValueError as ve:

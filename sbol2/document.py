@@ -44,7 +44,7 @@ from .sequenceannotation import SequenceAnnotation
 from .sequenceconstraint import SequenceConstraint
 from .toplevel import TopLevel
 from .uridict import URIDict
-from .validator import do_validation # local libSBOLj wrapper
+from .validator import do_validation  # local libSBOLj wrapper
 
 import requests
 
