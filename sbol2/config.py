@@ -47,7 +47,7 @@ options = {
     ConfigOptions.VALIDATE.value: True,
     ConfigOptions.VALIDATE_ONLINE.value: True,
     ConfigOptions.VALIDATOR_URL.value: 'https://validator.sbolstandard.org/validate/',
-    ConfigOptions.JAVA_LOCATION.value: '/usr/bin/java',
+    ConfigOptions.JAVA_LOCATION.value: 'java',
     ConfigOptions.LANGUAGE.value: 'SBOL2',
     ConfigOptions.TEST_EQUALITY.value: False,
     ConfigOptions.CHECK_URI_COMPLIANCE.value: False,
