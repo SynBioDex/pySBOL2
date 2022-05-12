@@ -11,7 +11,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
 #      When set to true, GitHub cancels all in-progress jobs if any matrix job fails. Default: true
       fail-fast: false
@@ -37,7 +37,6 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         python -m pip install .
         python -m pip install 'pycodestyle>=2.6.0'
     - name: Test with unittest
