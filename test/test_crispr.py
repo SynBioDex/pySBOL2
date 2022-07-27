@@ -36,11 +36,11 @@ class TestCrisprExample(unittest.TestCase):
         self.assertTrue(os.path.exists(out_path))
         # Load the output
         actual_graph = rdflib.Graph()
-        actual_graph.load(out_path)
+        actual_graph.parse(out_path)
         actual_iso = rdflib.compare.to_isomorphic(actual_graph)
         # Load the expected output
         expected_graph = rdflib.Graph()
-        expected_graph.load(EXPECTED_SBOL)
+        expected_graph.parse(EXPECTED_SBOL)
         expected_iso = rdflib.compare.to_isomorphic(expected_graph)
         rdf_diff = rdflib.compare.graph_diff(expected_iso, actual_iso)
         if rdf_diff[1] or rdf_diff[2]:
