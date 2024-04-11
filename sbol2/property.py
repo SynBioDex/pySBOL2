@@ -935,7 +935,7 @@ class ReferencedObject(URIProperty):
         super().__init__(property_owner, type_uri, lower_bound, upper_bound,
                          validation_rules, initial_value)
         self.reference_type_uri = reference_type_uri
-        if self._sbol_owner is None:
+        if self._sbol_owner is not None:
             property_store = []
             self._sbol_owner.properties[type_uri] = property_store
 
