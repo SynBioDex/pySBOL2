@@ -17,7 +17,6 @@ class TestParticipation(unittest.TestCase):
         self.assertEqual([sbol2.SO_PROMOTER, sbol2.SO_CDS], p.roles)
 
     def test_init_with_participant(self):
-
         p = sbol2.Participation('p', participant='p1')
         self.assertEqual('p1', p.participant)
 

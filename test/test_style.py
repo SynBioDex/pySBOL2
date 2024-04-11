@@ -49,7 +49,7 @@ class TestStyle(unittest.TestCase):
                     if 'import' in line:
                         if '*' in line and 'constants' not in line:
                             msg = 'Wildcard import in {}: {}'
-                            msg = msg.format(f, line)
+                            _ = msg.format(f, line)
                             # self.fail(msg)
                             # print(msg)
                             wildcard_count += 1
