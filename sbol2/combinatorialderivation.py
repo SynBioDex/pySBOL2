@@ -30,7 +30,7 @@ class CombinatorialDerivation(TopLevel):
 
     def __init__(self, type_uri=SBOL_COMBINATORIAL_DERIVATION,
                  uri=URIRef("example"),
-                 strategy='http://sbols.org/v2#enumerate',
+                 _='http://sbols.org/v2#enumerate',
                  version=VERSION_STRING):
         super().__init__(type_uri, uri, version)
         # TODO in original source, it doesn't look like strategy is used
