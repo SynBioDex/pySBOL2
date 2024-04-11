@@ -34,6 +34,8 @@ You should now be able to run the unit tests in the `test` directory:
 python3 -m unittest
 ```
 
+> **NOTE:** files required to run the tests are in a git submodule `test/SBOLTestSuite`. These get downloaded if you clone the repo with `--recurse-submodules https://github.com/SynBioDex/pySBOL2.git`. If you have not, you can download them with `git submodule update --init` from the project root directory.
+
 ## CODE STYLE
 
 We use [pycodestyle](https://pypi.org/project/pycodestyle/) for our coding guidelines. `pycodestyle`
