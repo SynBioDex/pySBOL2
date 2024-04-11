@@ -250,7 +250,7 @@ class SBOLObject:
         :return: True if the objects are identical, False if they are different.
 
         """
-        if type(other) != type(self):
+        if type(other) is not type(self):
             return False
         if self.rdf_type != other.rdf_type:
             return False
