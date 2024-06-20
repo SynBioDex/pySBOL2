@@ -16,6 +16,10 @@ class TestParticipation(unittest.TestCase):
         p.removeRole(1)
         self.assertEqual([sbol2.SO_PROMOTER, sbol2.SO_CDS], p.roles)
 
+    def test_init_with_participant(self):
+        p = sbol2.Participation('p', participant='p1')
+        self.assertEqual('p1', p.participant)
+
 
 if __name__ == '__main__':
     unittest.main()
