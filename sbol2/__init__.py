@@ -43,6 +43,7 @@ from .provo import Usage
 from .sbolerror import SBOLError, SBOLErrorCode
 from .sequence import Sequence
 from .sequenceannotation import SequenceAnnotation
+from .sequenceconstraint import SequenceConstraint
 from .toplevel import TopLevel
 from .validation import is_alphanumeric_or_underscore
 from .validation import is_not_alphanumeric_or_underscore
