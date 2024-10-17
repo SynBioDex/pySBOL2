@@ -132,6 +132,8 @@ SBOL_RESTRICTION_PRECEDES = SBOL_URI + "#precedes"
 SBOL_RESTRICTION_SAME_ORIENTATION_AS = SBOL_URI + "#sameOrientationAs"
 # Option for SequenceConstraint::restriction property
 SBOL_RESTRICTION_OPPOSITE_ORIENTATION_AS = SBOL_URI + "#oppositeOrientationAs"
+# Option for SequenceConstraint::restriction property
+SBOL_RESTRICTION_DIFFERENT_FROM = SBOL_URI + "#differentFrom"
 # Option for Sequence::encoding property
 SBOL_ENCODING_IUPAC = "http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"
 # Option for Sequence::encoding property
