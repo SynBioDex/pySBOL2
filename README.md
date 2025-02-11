@@ -1,5 +1,5 @@
 # pySBOL2
-[![Build Status](https://travis-ci.org/SynBioDex/pySBOL2.svg?branch=master)](https://travis-ci.org/SynBioDex/pySBOL2)
+![gh-action badge](https://github.com/SynBioDex/pySBOL2/workflows/Python%20package/badge.svg)
 [![Documentation Status](https://readthedocs.org/projects/pysbol/badge/?version=latest)](https://pysbol.readthedocs.io/en/latest/?badge=latest)
 
 **pySBOL2** is a pure Python implementation of the
