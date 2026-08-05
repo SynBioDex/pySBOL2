@@ -36,7 +36,9 @@ setup(name='sbol2',
             'lxml',
             'requests',
             'urllib3',
-            'packaging>=20.0'
+            # As of August 2026 the code is incompatible with packaging >= 26.1
+            # https://github.com/SynBioDex/pySBOL2/issues/450
+            'packaging<26.1'
       ],
       package_data={'sbol2': ['libSBOLj.jar']},
       tests_require=[
