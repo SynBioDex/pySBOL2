@@ -63,13 +63,14 @@ class TestPartShop(unittest.TestCase):
         #     print(obj)
         self.assertEqual(1, len(doc))
 
+    @unittest.skip("SynBioHub no longer allows this kind of anonymous access")
     def test_login(self):
         # NOTE: Add /login because login pages may be different
         # depending on what site you're accessing
         igem = sbol.PartShop(TEST_RESOURCE_MAIN)
         response = igem.login('johndoe@example.org', 'test')
         # As of August 2026 we get Forbidden as a response.
-        self.assertIn(response.status_code, [HTTPStatus.OK, HTTPStatus.FORBIDDEN])
+        self.assertEqual(response.status_code, 200)
 
     def test_login_bad(self):
         igem = sbol.PartShop(TEST_RESOURCE_MAIN)
