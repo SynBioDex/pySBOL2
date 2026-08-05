@@ -119,6 +119,7 @@ class TestSbolTutorial(unittest.TestCase):
         my_device.compile()
         self.assertEqual(expected_sequence, my_device.sequence.elements)
 
+    @unittest.skip("SynBioHub no longer allows anonymous access")
     def test_tutorial(self):
         doc = self.init_tutorial()
         self.get_device_from_xml(doc)
