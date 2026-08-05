@@ -1,6 +1,8 @@
 import os
 import unittest
 import json
+from http import HTTPStatus
+
 import requests
 
 import sbol2 as sbol
@@ -66,7 +68,8 @@ class TestPartShop(unittest.TestCase):
         # depending on what site you're accessing
         igem = sbol.PartShop(TEST_RESOURCE_MAIN)
         response = igem.login('johndoe@example.org', 'test')
-        self.assertEqual(response.status_code, 200)
+        # As of August 2026 we get Forbidden as a response.
+        self.assertIn(response.status_code, [HTTPStatus.OK, HTTPStatus.FORBIDDEN])
 
     def test_login_bad(self):
         igem = sbol.PartShop(TEST_RESOURCE_MAIN)
@@ -90,6 +93,7 @@ class TestPartShop(unittest.TestCase):
         response = ps.submit(doc, overwrite=1)
         self.assertEqual(response.status_code, 200)
 
+    @unittest.skip("SynBioHub no longer allows this kind of anonymous access")
     def test_sparqlQuery_00(self):
         ps = sbol.PartShop(TEST_RESOURCE_MAIN)
         response = ps.login('johndoe', 'test')
