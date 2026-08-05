@@ -24,6 +24,7 @@ class TestSearchQuery(unittest.TestCase):
         self.assertIn(sbol2.SBOL_TYPES, query.properties)
         self.assertEqual(sbol2.BIOPAX_DNA, query[sbol2.SBOL_TYPES])
 
+    # https://github.com/SynBioDex/pySBOL2/issues/451
     @unittest.skipIf(password is None, "No SynBioHub password supplied")
     def test_gsoc_example_1_title(self):
         # See issue #240
@@ -45,6 +46,7 @@ class TestSearchQuery(unittest.TestCase):
         names = [r.name == title for r in response]
         self.assertTrue(all(names))
 
+    # https://github.com/SynBioDex/pySBOL2/issues/451
     @unittest.skipIf(password is None, "No SynBioHub password supplied")
     def test_gsoc_example_1_display_id(self):
         # See issue #240
@@ -88,6 +90,7 @@ class TestSearchQuery(unittest.TestCase):
         results.extend(self.gsoc_search_display_id(part_shop, collection, term))
         return results
 
+    # https://github.com/SynBioDex/pySBOL2/issues/451
     @unittest.skipIf(password is None, "No SynBioHub password supplied")
     def test_gsoc_example_2(self):
         # Looking for: https://synbiohub.org/public/igem/BBa_R0010/1
@@ -106,6 +109,7 @@ class TestSearchQuery(unittest.TestCase):
         self.assertNotIn('https://synbiohub.org/public/igem/BBa_S03334/1', identities)
         self.assertNotIn('https://synbiohub.org/public/igem/BBa_K1444015/1', identities)
 
+    # https://github.com/SynBioDex/pySBOL2/issues/451
     @unittest.skipIf(password is None, "No SynBioHub password supplied")
     def test_gsoc_example_3(self):
         # Looking for: https://synbiohub.org/public/igem/BBa_R0010/1
@@ -121,6 +125,7 @@ class TestSearchQuery(unittest.TestCase):
         self.assertNotIn('https://synbiohub.org/public/igem/BBa_S03334/1', identities)
         self.assertNotIn('https://synbiohub.org/public/igem/BBa_K1444015/1', identities)
 
+    # https://github.com/SynBioDex/pySBOL2/issues/451
     @unittest.skipIf(password is None, "No SynBioHub password supplied")
     def test_gsoc_example_4(self):
         # Looking for: https://synbiohub.org/public/igem/BBa_B0034/1
@@ -134,6 +139,7 @@ class TestSearchQuery(unittest.TestCase):
         self.assertIn('https://synbiohub.org/public/igem/BBa_B0034/1', identities)
         self.assertNotIn('https://synbiohub.org/public/igem/BBa_I13617/1', identities)
 
+    # https://github.com/SynBioDex/pySBOL2/issues/451
     @unittest.skipIf(password is None, "No SynBioHub password supplied")
     def test_gsoc_example_5(self):
         # Looking for: https://synbiohub.org/public/bsu/BO_28874/1
@@ -148,6 +154,7 @@ class TestSearchQuery(unittest.TestCase):
         self.assertIn('https://synbiohub.org/public/bsu/BO_28874/1', identities)
         self.assertNotIn('https://synbiohub.org/public/bsu/BO_26604/1', identities)
 
+    # https://github.com/SynBioDex/pySBOL2/issues/451
     @unittest.skipIf(password is None, "No SynBioHub password supplied")
     def test_gsoc_count_5(self):
         part_shop = sbol2.PartShop(GSOC_SBH_URL)

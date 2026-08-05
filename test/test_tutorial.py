@@ -119,6 +119,7 @@ class TestSbolTutorial(unittest.TestCase):
         my_device.compile()
         self.assertEqual(expected_sequence, my_device.sequence.elements)
 
+    # https://github.com/SynBioDex/pySBOL2/issues/451
     @unittest.skip("SynBioHub no longer allows anonymous access")
     def test_tutorial(self):
         doc = self.init_tutorial()
