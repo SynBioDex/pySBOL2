@@ -1,0 +1,56 @@
+[build-system]
+requires = ["setuptools>=80.1.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sbol2"
+dynamic = ["version"]
+description = "Pure Python implementation of SBOL 2 standard"
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.11"
+authors = [
+    { name = "Bryan Bartley", email = "editors@sbolstandard.org" },
+]
+keywords = [
+    "biology",
+    "synthetic biology",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
+dependencies = [
+    "deprecated",
+    "lxml",
+    # As of August 2026 the code is incompatible with packaging >= 26.1
+    # https://github.com/SynBioDex/pySBOL2/issues/450
+    "packaging<26.1",
+    "python-dateutil",
+    "rdflib>=5.0",
+    "requests",
+    "urllib3",
+]
+
+[project.urls]
+Homepage = "https://github.com/SynBioDex/pySBOL2"
+
+[dependency-groups]
+# Install with pip: "python3 -m pip install --group dev"
+# Install with uv: "uv sync --all-groups" or "uv sync --group dev"
+dev = [
+    "pycodestyle>=2.14.0",
+    "ruff>=0.16.1",
+]
+
+[tool.setuptools.dynamic]
+version = {attr = "sbol2.__version__"}
+
+[tool.setuptools.package-data]
+# Include libSBOLj.jar in the distribution
+"sbol2" = ["libSBOLj.jar"]
