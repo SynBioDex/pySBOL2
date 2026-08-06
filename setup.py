@@ -3,7 +3,7 @@ from setuptools import setup
 setup(name='sbol2',
       version='1.5',
       description='Pure Python implementation of SBOL 2 standard',
-      python_requires='>=3.7',
+      python_requires='>=3.11',
       url='https://github.com/SynBioDex/pySBOL2',
       author='Bryan Bartley',
       author_email='editors@sbolstandard.org',
@@ -36,7 +36,9 @@ setup(name='sbol2',
             'lxml',
             'requests',
             'urllib3',
-            'packaging>=20.0'
+            # As of August 2026 the code is incompatible with packaging >= 26.1
+            # https://github.com/SynBioDex/pySBOL2/issues/450
+            'packaging<26.1'
       ],
       package_data={'sbol2': ['libSBOLj.jar']},
       tests_require=[

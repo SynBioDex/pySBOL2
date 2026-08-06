@@ -1,6 +1,7 @@
 import os
 import unittest
 import json
+
 import requests
 
 import sbol2 as sbol
@@ -23,6 +24,9 @@ else:
 
 
 class TestPartShop(unittest.TestCase):
+
+    # https://github.com/SynBioDex/pySBOL2/issues/451
+    @unittest.skipIf(password is None, "No SynBioHub password supplied")
     def test_pull_00(self):
         # Based on tutorial: https://pysbol2.readthedocs.io/en/latest/repositories.html
         doc = sbol.Document()
@@ -33,6 +37,8 @@ class TestPartShop(unittest.TestCase):
         #     print(obj)
         self.assertEqual(3, len(doc))
 
+    # https://github.com/SynBioDex/pySBOL2/issues/451
+    @unittest.skipIf(password is None, "No SynBioHub password supplied")
     def test_pull_01(self):
         # Based on tutorial: https://pysbol2.readthedocs.io/en/latest/repositories.html
         doc = sbol.Document()
@@ -45,6 +51,8 @@ class TestPartShop(unittest.TestCase):
         #     print(obj)
         self.assertEqual(7, len(doc))
 
+    # https://github.com/SynBioDex/pySBOL2/issues/451
+    @unittest.skipIf(password is None, "No SynBioHub password supplied")
     def test_pull_02(self):
         # I don't know what this adds over test_pull_01
         # This is a replacement for a previous test whose part was no
@@ -57,6 +65,8 @@ class TestPartShop(unittest.TestCase):
         #     print(obj)
         self.assertEqual(1, len(doc))
 
+    # https://github.com/SynBioDex/pySBOL2/issues/451
+    @unittest.skip("SynBioHub no longer allows this kind of anonymous access")
     def test_login(self):
         # NOTE: Add /login because login pages may be different
         # depending on what site you're accessing
@@ -73,7 +83,7 @@ class TestPartShop(unittest.TestCase):
             self.assertEqual(sbol_error.error_code(),
                              sbol.SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST)
 
-    @unittest.skipIf(password is None, "No password supplied")
+    @unittest.skipIf(password is None, "No SynBioHub password supplied")
     def test_submit_00(self):
         RESOURCE = 'https://synbiohub.utah.edu'
         doc = sbol.Document()
@@ -86,6 +96,8 @@ class TestPartShop(unittest.TestCase):
         response = ps.submit(doc, overwrite=1)
         self.assertEqual(response.status_code, 200)
 
+    # https://github.com/SynBioDex/pySBOL2/issues/451
+    @unittest.skip("SynBioHub no longer allows this kind of anonymous access")
     def test_sparqlQuery_00(self):
         ps = sbol.PartShop(TEST_RESOURCE_MAIN)
         response = ps.login('johndoe', 'test')
@@ -148,7 +160,7 @@ WHERE {
         part_shop.spoof(spoofed_url)
         self.assertEqual(part_shop.getSpoofedURL(), spoofed_url)
 
-    @unittest.skipIf(password is None, "No password supplied")
+    @unittest.skipIf(password is None, "No SynBioHub password supplied")
     def test_submit(self):
         # This test is derived from an etl-to-synbiohub_pipeline test
         # case that was failing.
@@ -217,7 +229,7 @@ WHERE {
         else:
             self.fail('Expected SBOLError')
 
-    @unittest.skipIf(password is None, "No password supplied")
+    @unittest.skipIf(password is None, "No SynBioHub password supplied")
     def test_attach_file(self):
         sbol2.Config.setOption('sbol_typed_uris', False)
         doc = sbol2.Document()
@@ -267,6 +279,8 @@ WHERE {{
         e = cm.exception
         self.assertEqual(e.error_code(), sbol2.SBOLErrorCode.SBOL_ERROR_NOT_FOUND)
 
+    # https://github.com/SynBioDex/pySBOL2/issues/451
+    @unittest.skipIf(password is None, "No SynBioHub password supplied")
     def test_search_general(self):
         sbh = sbol2.PartShop(TEST_RESOURCE_MAIN)
         # sbh.login(username, password)
@@ -277,6 +291,8 @@ WHERE {{
         self.assertTrue(all([isinstance(x, sbol2.Identified)
                              for x in results]))
 
+    # https://github.com/SynBioDex/pySBOL2/issues/451
+    @unittest.skipIf(password is None, "No SynBioHub password supplied")
     def test_search_general_offset_limit(self):
         # Test a general search using offset and limit
         # This comes from a documentation example that was failing
@@ -294,6 +310,8 @@ WHERE {{
         self.assertTrue(all([isinstance(x, sbol2.Identified)
                              for x in results]))
 
+    # https://github.com/SynBioDex/pySBOL2/issues/451
+    @unittest.skipIf(password is None, "No SynBioHub password supplied")
     def test_search_exact(self):
         igem = sbol.PartShop(TEST_RESOURCE_MAIN)
         limit = 10
@@ -314,6 +332,8 @@ WHERE {{
         for cd in doc.componentDefinitions:
             self.assertIn(sbol2.SO_PROMOTER, cd.roles)
 
+    # https://github.com/SynBioDex/pySBOL2/issues/451
+    @unittest.skipIf(password is None, "No SynBioHub password supplied")
     def test_pull_doc_version(self):
         # After a pull the document version was erroneously set to None (#281)
         doc = sbol.Document()
@@ -325,6 +345,8 @@ WHERE {{
         self.assertIsNotNone(doc.version)
         self.assertEqual(old_version, doc.version)
 
+    # https://github.com/SynBioDex/pySBOL2/issues/451
+    @unittest.skipIf(password is None, "No SynBioHub password supplied")
     def test_search_count(self):
         part_shop = sbol2.PartShop('https://synbiohub.org/public/igem')
         # searchCount did not exist, see #322
