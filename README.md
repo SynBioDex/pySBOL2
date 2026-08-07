@@ -1,6 +1,6 @@
 # pySBOL2
-![gh-action badge](https://github.com/SynBioDex/pySBOL2/workflows/Python%20package/badge.svg)
-![readthedocs badge](https://readthedocs.org/projects/pysbol2/badge/)
+[![gh-action badge](https://github.com/SynBioDex/pySBOL2/workflows/Python%20package/badge.svg)](https://github.com/SynBioDex/pySBOL2/actions/workflows/python-package.yml)
+[![readthedocs badge](https://readthedocs.org/projects/pysbol2/badge/)](https://pysbol.readthedocs.io)
 
 **pySBOL2** is a pure Python implementation of the
 SBOL 2.3.0 standard [Synthetic Biology Open Language (SBOL)](https://sbolstandard.org/) - 
