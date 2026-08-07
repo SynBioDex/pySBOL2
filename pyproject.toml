@@ -1,56 +1,57 @@
 [build-system]
-requires = ["setuptools>=80.1.0"]
 build-backend = "setuptools.build_meta"
+requires = [ "setuptools>=80.1" ]
 
 [project]
 name = "sbol2"
-dynamic = ["version"]
 description = "Pure Python implementation of SBOL 2 standard"
 readme = "README.md"
-license = "Apache-2.0"
-requires-python = ">=3.11"
-authors = [
-    { name = "Bryan Bartley", email = "editors@sbolstandard.org" },
-]
 keywords = [
-    "biology",
-    "synthetic biology",
+  "biology",
+  "synthetic biology",
 ]
+license = "Apache-2.0"
+authors = [
+  { name = "Bryan Bartley", email = "editors@sbolstandard.org" },
+]
+requires-python = ">=3.11"
 classifiers = [
-    "Development Status :: 5 - Production/Stable",
-    "Intended Audience :: Developers",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13",
-    "Programming Language :: Python :: 3.14",
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
 ]
+dynamic = [ "version" ]
 dependencies = [
-    "deprecated",
-    "lxml",
-    # As of August 2026 the code is incompatible with packaging >= 26.1
-    # https://github.com/SynBioDex/pySBOL2/issues/450
-    "packaging<26.1",
-    "python-dateutil",
-    "rdflib>=5.0",
-    "requests",
-    "urllib3",
+  "deprecated",
+  "lxml",
+  # As of August 2026 the code is incompatible with packaging >= 26.1
+  # https://github.com/SynBioDex/pySBOL2/issues/450
+  "packaging<26.1",
+  "python-dateutil",
+  "rdflib>=5",
+  "requests",
+  "urllib3",
 ]
-
-[project.urls]
-Homepage = "https://github.com/SynBioDex/pySBOL2"
+urls.changelog = "https://github.com/SynBioDex/pySBOL2/blob/master/CHANGELOG.md"
+urls.documentation = "https://pysbol.readthedocs.io/"
+urls.homepage = "https://github.com/SynBioDex/pySBOL2"
+urls.issues = "https://github.com/SynBioDex/pySBOL2/issues"
+urls.source = "https://github.com/SynBioDex/pySBOL2.git"
 
 [dependency-groups]
 # Install with pip: "python3 -m pip install --group dev"
 # Install with uv: "uv sync --all-groups" or "uv sync --group dev"
 dev = [
-    "pycodestyle>=2.14.0",
-    "ruff>=0.16.1",
+  "pycodestyle>=2.14",
+  "ruff>=0.16.1",
 ]
 
-[tool.setuptools.dynamic]
-version = {attr = "sbol2.__version__"}
-
-[tool.setuptools.package-data]
+[tool.setuptools]
+packages = [ "sbol2" ]
 # Include libSBOLj.jar in the distribution
-"sbol2" = ["libSBOLj.jar"]
+package-data.sbol2 = [ "libSBOLj.jar" ]
+dynamic.version = { attr = "sbol2.__version__" }
