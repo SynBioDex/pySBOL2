@@ -16,6 +16,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   [449](https://github.com/SynBioDex/pySBOL2/issues/449),
   [450](https://github.com/SynBioDex/pySBOL2/issues/450)
 
+### Fixed
+
+- Pypy-3.11 automatic build failure with package lxml
+  [456](https://github.com/SynBioDex/pySBOL2/issues/456)
+
 ## [1.4.1] - 2022-04-14
 
 - Changes were not recorded.
