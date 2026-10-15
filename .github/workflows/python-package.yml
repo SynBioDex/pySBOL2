@@ -31,6 +31,13 @@ jobs:
       # https://github.com/actions/checkout
       with:
         submodules: 'recursive'
+    - name: Install lxml support for pypy-3.11
+      # The pypy-3.11 build is failing because it cannot build the lxml package without
+      # the development versions of the libxml2 and libxslt packages.
+      if: matrix.os == 'ubuntu-latest' && matrix.python-version == 'pypy-3.11'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libxml2-dev libxslt-dev
     - name: Set up Python ${{ matrix.python-version }}
       # https://github.com/actions/setup-python
       uses: actions/setup-python@v7
